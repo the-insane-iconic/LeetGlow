@@ -80,7 +80,7 @@
     var key = kind + ':' + name;
     if (warned[key]) return;
     warned[key] = true;
-    try { console.warn('[Theme Studio] sound "' + name + '" ' + msg); } catch (e) {}
+    try { console.warn('[LeetGlow] sound "' + name + '" ' + msg); } catch (e) {}
   }
 
   /* a single storage-backed mute, so audio can be silenced without a UI

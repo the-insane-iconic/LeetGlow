@@ -25,7 +25,7 @@
   if (globalThis.LCTSShare) return;
 
   /* where a viewer of the post can get the extension */
-  const SHARE_URL = 'https://extensions.vinaytz.com/theme-studio';
+  const SHARE_URL = 'https://github.com/AnshYadav/LeetGlow';
   const W = 1200, H = 630;
   const root = document.documentElement;
   const themeId = () => root.getAttribute('data-lc-theme');
@@ -193,7 +193,7 @@
     /* signature */
     c.textBaseline = 'alphabetic';
     c.font = '600 22px ' + SANS; c.fillStyle = 'rgba(255,255,255,.92)';
-    c.fillText('Theme Studio for LeetCode', X, H - 50);
+    c.fillText('LeetGlow - Custome Theme & Sound Effects and Background', X, H - 50);
     c.font = '20px ' + SANS; c.fillStyle = 'rgba(255,255,255,.62)';
     c.fillText(SHARE_URL.replace(/^https?:\/\//, ''), X, H - 22);
     c.textAlign = 'right';
@@ -209,7 +209,7 @@
       (d.difficulty ? ' (' + d.difficulty[0].toUpperCase() + d.difficulty.slice(1) + ')' : '') + ' on LeetCode' +
       (d.beats ? ', beats ' + d.beats + '%' : '') + (d.lang ? ' in ' + d.lang : '') + '.');
     if (d.streak >= 2) parts.push('Day ' + d.streak + ' of my streak.');
-    parts.push('\nCoding in style with Theme Studio for LeetCode → ' + SHARE_URL);
+    parts.push('\nCoding in style with LeetGlow - Custome Theme & Sound Effects and Background by AnshYadav → ' + SHARE_URL);
     parts.push('\n#LeetCode #100DaysOfCode #DSA');
     return parts.join(' ').replace(/ \n/g, '\n');
   }

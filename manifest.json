@@ -6,8 +6,9 @@
          "48": "icons/icon48.png"
       },
       "default_popup": "src/popup.html",
-      "default_title": "Theme Studio for LeetCode"
+      "default_title": "LeetGlow - Custome Theme & Sound Effects and Background"
    },
+   "author": "AnshYadav",
    "background": {
       "service_worker": "src/background.js"
    },
@@ -39,12 +40,10 @@
       "16": "icons/icon16.png",
       "48": "icons/icon48.png"
    },
-   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArRg70YHTnuoJOdO26VoYvJUApfvcC6Tye/Qz4zQtn5pFr2/zj9ziCWfe5BgN6rovb12IuZDCMvbkxmlE4kAnhV7xWMa6ImqIow5P2pnkvM9af/YKJd5LSLMhaF+yif75k5WVlWFeHnNKOWMMc7upOYsPSqhiRfgktqTTz7crWw6W7kAbalSBd1Zww6054+YiXf07ipJmyMtL9ugyltDb4nZrjZ6ELQo9eh+6qhNjr34m2EOelyoAr1dE99Z60njc8mBAklmn/B4v3qwySwYbmHIw9AkbjpyakbXaaFdF8ohDYED7fRGzi2V07sLPrnw1kEMz64Tbt78eDFFZBGT7dwIDAQAB",
    "manifest_version": 3,
-   "name": "Theme Studio for LeetCode – Custom Themes, Dark Mode & Anime Backgrounds",
+   "name": "LeetGlow - Custome Theme & Sound Effects and Background",
    "permissions": [ "storage", "offscreen" ],
-   "short_name": "Theme Studio",
-   "update_url": "https://clients2.google.com/service/update2/crx",
+   "short_name": "LeetGlow",
    "version": "3.6.3",
    "web_accessible_resources": [ {
       "matches": [ "https://leetcode.com/*", "https://leetcode.cn/*" ],
