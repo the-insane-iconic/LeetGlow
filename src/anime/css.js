@@ -18,8 +18,10 @@
   const over = (total, under) => Math.max(0, 1 - (1 - total) / (1 - under));
 
   /* theme: what LCTSAnimeSolver.analyze returned; urls: { wall, blur } */
-  function build(theme, urls) {
-    const r = theme.roles, a = theme.alpha, scrim = theme.scrim;
+  function build(theme, urls, customAlpha) {
+    const r = theme.roles;
+    const a = Object.assign({}, theme.alpha, customAlpha || {});
+    const scrim = theme.scrim;
     const veil = (x) => `linear-gradient(${rgba(scrim, x)},${rgba(scrim, x)})`;
     const wall = `url("${urls.wall}")`, blur = `url("${urls.blur}")`;
     const out = Object.keys(r).map((k) => `${k}:${r[k]};`);
@@ -34,8 +36,10 @@
          The layer is already veiled by a.desk, so the panel adds only what is
          left to reach the opacity the solver chose: 1-(1-panel)/(1-desk). */
       `--lc-anime-glass:${rgba(scrim, over(a.panel, a.desk))};`,
-      /* the editor: the pre-blurred copy under a deeper scrim -- frosted glass */
-      `--lc-anime-editor:${veil(a.editor)},${blur};`,
+      /* the editor glass: transparent scrim directly over the sharp wallpaper
+         so the wallpaper is clearly visible without any shiny or blurry haze */
+      `--lc-anime-editor-glass:${rgba(scrim, a.editor)};`,
+      `--lc-anime-editor:none;`,
       `--lc-nav-bg:${rgba(scrim, a.nav)};`
     );
     return `html[data-lc-theme="anime"]{${out.join('')}}`;

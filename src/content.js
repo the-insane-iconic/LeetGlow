@@ -101,6 +101,20 @@
 
   globalThis.__lctsReassertMode = () => { if (current && current !== 'off') setBaseMode(current); };
 
+  /* Sync container and editor transparency variables across all themes */
+  function syncTransparency(cTrans, eTrans) {
+    const ct = typeof cTrans === 'number' ? cTrans : 30;
+    const et = typeof eTrans === 'number' ? eTrans : 25;
+    const cOp = Math.max(5, 100 - ct);
+    const eOp = Math.max(5, 100 - et);
+    root.style.setProperty('--lc-container-opacity', `${cOp}%`);
+    root.style.setProperty('--lc-editor-opacity', `${eOp}%`);
+  }
+
+  chrome.storage.local.get(['lcContainerTrans', 'lcEditorTrans'], (res) => {
+    syncTransparency(res.lcContainerTrans, res.lcEditorTrans);
+  });
+
   apply(DEFAULT);
   chrome.storage.local.get(KEY, (res) => apply((res && res[KEY]) || DEFAULT));
 
@@ -108,6 +122,11 @@
     if (area === 'local' && changes[KEY]) apply(changes[KEY].newValue || DEFAULT);
     if (area === 'local' && changes.leetglowPremium) {
       chrome.storage.local.get(KEY, (res) => apply((res && res[KEY]) || DEFAULT));
+    }
+    if (area === 'local' && (changes.lcContainerTrans || changes.lcEditorTrans)) {
+      chrome.storage.local.get(['lcContainerTrans', 'lcEditorTrans'], (res) => {
+        syncTransparency(res.lcContainerTrans, res.lcEditorTrans);
+      });
     }
   });
 

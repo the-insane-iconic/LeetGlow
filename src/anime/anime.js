@@ -43,9 +43,9 @@
     return { wall: chrome.runtime.getURL(s.wall), blur: chrome.runtime.getURL(s.blur) };
   }
 
-  function publish(theme, urls) {
+  function publish(theme, urls, customAlpha) {
     globalThis.__lctsAnimeScene = { wall: urls.wall };     // read by src/share.js
-    const css = globalThis.LCTSAnimeCss.build(theme, urls);
+    const css = globalThis.LCTSAnimeCss.build(theme, urls, customAlpha);
     if (css !== published) { styleEl().textContent = css; published = css; }
     globalThis.__lctsAnimeInk = theme.ink;
     const modeChanged = globalThis.__lctsAnimeMode !== theme.mode;
@@ -54,9 +54,9 @@
     if (modeChanged && globalThis.__lctsReassertMode) globalThis.__lctsReassertMode();
   }
 
-  function publishPreset(id) {
+  function publishPreset(id, customAlpha) {
     if (!SCENES[id]) id = DEF;
-    publish(SCENES[id].theme, presetUrls(id));
+    publish(SCENES[id].theme, presetUrls(id), customAlpha);
   }
 
   /* a data URL becomes a short blob: URL, so the stylesheet carries a few
@@ -109,50 +109,63 @@
   const solvedFor = (cfg, id) =>
     (cfg.themes && cfg.themes[id]) || (cfg.theme && cfg.themeFor === id ? cfg.theme : null) || SCENES[id].theme;
 
-  let cfgNow = null, shownId = null;
-  function showPreset(cfg) {
+  let cfgNow = null, shownId = null, lastAlpha = null;
+
+  function customAlpha(res) {
+    const a = {};
+    const ct = typeof res.lcContainerTrans === 'number' ? res.lcContainerTrans
+      : (res.lcAnime && typeof res.lcAnime.containerTransparency === 'number' ? res.lcAnime.containerTransparency : null);
+    const et = typeof res.lcEditorTrans === 'number' ? res.lcEditorTrans
+      : (res.lcAnime && typeof res.lcAnime.editorTransparency === 'number' ? res.lcAnime.editorTransparency : null);
+    if (ct !== null) a.panel = Math.max(0, Math.min(1, 1 - ct / 100));
+    if (et !== null) a.editor = Math.max(0, Math.min(1, 1 - et / 100));
+    return Object.keys(a).length ? a : null;
+  }
+
+  function showPreset(cfg, alpha) {
     const P = globalThis.LCTSProblem;
     const id = sceneFor(cfg, P ? P.get().difficulty : null);
-    if (id === shownId) return;
     shownId = id;
+    lastAlpha = alpha;
     releaseObjectUrls();
-    publish(solvedFor(cfg, id), presetUrls(id));
+    publish(solvedFor(cfg, id), presetUrls(id), alpha);
   }
 
   let loading = 0;
   function load() {
     const ticket = ++loading;
-    chrome.storage.local.get([THEME_KEY, 'lcAnime', 'lcFocus'], async (res) => {
+    chrome.storage.local.get([THEME_KEY, 'lcAnime', 'lcFocus', 'lcContainerTrans', 'lcEditorTrans'], async (res) => {
       if (ticket !== loading) return;
       root.toggleAttribute('data-lc-focus', !!res.lcFocus);
       /* nothing saved = a fresh install, which content.js runs as anime (its DEFAULT) */
       if ((res[THEME_KEY] || 'anime') !== 'anime') { cfgNow = null; return; }   // nothing to load for other themes
 
+      const alpha = customAlpha(res);
       const cfg = res.lcAnime || {};
       if (cfg.scene !== 'custom') {
         /* a revisited problem's difficulty is cached, so wait for that cache
            (a few ms) and the right scene is up before the first paint */
         if (globalThis.LCTSProblem) await globalThis.LCTSProblem.ready();
         if (ticket !== loading) return;
-        cfgNow = cfg; shownId = null;
-        showPreset(cfg);
+        cfgNow = cfg;
+        showPreset(cfg, alpha);
         return;
       }
-      cfgNow = null; shownId = 'custom';
+      cfgNow = null; shownId = 'custom'; lastAlpha = alpha;
       const customTheme = (cfg.themes && cfg.themes.custom) || cfg.theme;
 
       chrome.storage.local.get('lcAnimeArt', async (r2) => {
         if (ticket !== loading) return;
         const art = r2.lcAnimeArt;
-        if (!art || !art.wall || !art.blur || !customTheme) { publishPreset(DEF); return; }
+        if (!art || !art.wall || !art.blur || !customTheme) { publishPreset(DEF, alpha); return; }
         try {
           const urls = { wall: toObjectUrl(art.wall), blur: toObjectUrl(art.blur) };
-          if (!(await loads(urls.wall))) { releaseObjectUrls(); publishPreset(DEF); return; }
+          if (!(await loads(urls.wall))) { releaseObjectUrls(); publishPreset(DEF, alpha); return; }
           if (ticket !== loading) return;
-          publish(customTheme, urls);
+          publish(customTheme, urls, alpha);
           releaseObjectUrls([urls.wall, urls.blur]);
         } catch (e) {
-          publishPreset(DEF);
+          publishPreset(DEF, alpha);
         }
       });
     });
@@ -161,14 +174,17 @@
   /* a problem's difficulty became known, or you moved to another problem */
   if (globalThis.LCTSProblem) {
     globalThis.LCTSProblem.onChange(() => {
-      if (cfgNow && root.getAttribute('data-lc-theme') === 'anime') showPreset(cfgNow);
+      if (cfgNow && root.getAttribute('data-lc-theme') === 'anime') showPreset(cfgNow, lastAlpha);
     });
   }
 
   load();
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area !== 'local') return;
-    if (changes[THEME_KEY] || changes.lcAnime || changes.lcAnimeArt) { load(); return; }
+    if (changes[THEME_KEY] || changes.lcAnime || changes.lcAnimeArt || changes.lcContainerTrans || changes.lcEditorTrans) {
+      load();
+      return;
+    }
     if (changes.lcFocus) root.toggleAttribute('data-lc-focus', !!changes.lcFocus.newValue);
   });
 })();

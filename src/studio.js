@@ -23,20 +23,11 @@
   let themes = {};              // scene id -> solve at the current glass settings
 
   /* which scene the preview shows (and a gallery click changes) */
-  const arcScene = (d) => {
-    if (!isPremium) return 'golden-hour';
-    return (SCENES[settings.arcScenes[d]] ? settings.arcScenes[d] : ARC[d]);
-  };
-  const viewId = () => {
-    if (!isPremium) return 'golden-hour';
-    return settings.scene === 'custom' ? 'custom' : (settings.arcs ? arcScene(slot) : settings.scene);
-  };
+  const arcScene = (d) => (SCENES[settings.arcScenes[d]] ? settings.arcScenes[d] : ARC[d]);
+  const viewId = () => settings.scene === 'custom' ? 'custom' : (settings.arcs ? arcScene(slot) : settings.scene);
   /* every scene LeetCode may show with the current settings */
-  const neededIds = () => {
-    if (!isPremium) return ['golden-hour'];
-    return settings.scene === 'custom' ? ['custom']
-      : settings.arcs ? [...new Set(SLOTS.map(([d]) => arcScene(d)))] : [settings.scene];
-  };
+  const neededIds = () => settings.scene === 'custom' ? ['custom']
+    : settings.arcs ? [...new Set(SLOTS.map(([d]) => arcScene(d)))] : [settings.scene];
   let prepared = null;          // samples + blobs for the current scene
   let theme = null;             // the current solve
   let previewUrls = null;       // object URLs the preview is showing
@@ -64,11 +55,16 @@
   }
   new ResizeObserver(fitFrame).observe($('frameBox'));
 
+  let currentPreviewScene = null;
   async function showPreview() {
     await frameReady;
     if (!theme || !prepared) return;
-    if (previewUrls) { URL.revokeObjectURL(previewUrls.wall); URL.revokeObjectURL(previewUrls.blur); }
-    previewUrls = { wall: URL.createObjectURL(prepared.wallBlob), blur: URL.createObjectURL(prepared.blurBlob) };
+    const sceneId = viewId();
+    if (!previewUrls || currentPreviewScene !== sceneId) {
+      if (previewUrls) { URL.revokeObjectURL(previewUrls.wall); URL.revokeObjectURL(previewUrls.blur); }
+      previewUrls = { wall: URL.createObjectURL(prepared.wallBlob), blur: URL.createObjectURL(prepared.blurBlob) };
+      currentPreviewScene = sceneId;
+    }
     frame.contentWindow.LCTSPreview.apply(theme, previewUrls);
   }
 
@@ -76,8 +72,15 @@
   function tintStudio() {
     if (!theme) return;
     const r = document.documentElement.style;
-    r.setProperty('--accent', theme.roles['--lc-accent']);
-    r.setProperty('--accent-ink', theme.mode === 'dark' ? theme.scrim : '#ffffff');
+    const acc = theme.roles['--lc-accent'];
+    r.setProperty('--accent', acc);
+    r.setProperty('--accent-ink', theme.roles['--lc-accent-contrast'] || (theme.mode === 'dark' ? theme.scrim : '#ffffff'));
+    if (theme.roles['--lc-hsl-accent']) {
+      const parts = theme.roles['--lc-hsl-accent'].match(/\d+/g);
+      if (parts && parts.length >= 3) {
+        r.setProperty('--accent-text', `hsl(${parts[0]}, 80%, 38%)`);
+      }
+    }
   }
 
   /* ---- solving ---------------------------------------------------------------- */
@@ -86,17 +89,7 @@
     theme = Solver.analyze(prepared.sharp, prepared.blurSamples, {
       glass: settings.glass, visibility: settings.visibility, cols: prepared.cols
     });
-    renderReport();
     tintStudio();
-  }
-
-  function renderReport() {
-    const r = theme.report;
-    const inks = Object.entries(r.ink).filter(([k]) => !['variable', 'regexp', 'comment'].includes(k)).map(([, v]) => v);
-    const chip = (label, v) => `<span class="chip">${label} <b>${v.toFixed(1)}:1</b></span>`;
-    $('report').innerHTML =
-      chip('Text', r.text) + chip('Code', r.editorText) + chip('Syntax colours ≥', Math.min(...inks)) +
-      chip('Accent', r.accent) + chip('Submit', r.submit);
   }
 
   async function blobFromExtension(path) {
@@ -157,23 +150,19 @@
       b.setAttribute('aria-checked', String(viewId() === id));
       b.style.backgroundImage = `url("${chrome.runtime.getURL(s.thumb || s.wall)}")`;
 
-      // When premium is inactive, ONLY Golden Hour is accessible; all others are locked
+      // When basic free tier, all scenes other than golden-hour are PRO
       const isLocked = !isPremium && id !== 'golden-hour';
       if (isLocked) {
         b.classList.add('is-locked');
       }
 
-      const lockBadgeHTML = isLocked
-        ? `<span class="scene-lock-badge" title="Premium Theme — Click to unlock">
-            <svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor" aria-hidden="true">
-              <path d="M8 1a3 3 0 0 0-3 3v3H4a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1h-1V4a3 3 0 0 0-3-3zm1.5 6h-3V4a1.5 1.5 0 0 1 3 0v3z"/>
-            </svg>
-          </span>`
+      const proBadgeHTML = isLocked
+        ? `<span class="scene-pro-badge" aria-label="PRO wallpaper">PRO</span>`
         : '';
 
-      b.innerHTML = `${lockBadgeHTML}<span class="name">${s.name}</span>`;
+      b.innerHTML = `${proBadgeHTML}<span class="name">${s.name}</span>`;
       b.title = isLocked
-        ? `${s.name} (Premium Theme — Click to unlock)`
+        ? `${s.name} (PRO Wallpaper — Click to unlock)`
         : s.desc + (s.credit ? ' · ' + s.credit : '');
 
       b.addEventListener('click', () => {
@@ -198,11 +187,7 @@
     if (hasArt && customThumb) up.style.backgroundImage = `url("${customThumb}")`;
 
     const upLockHTML = upLocked
-      ? `<span class="scene-lock-badge" title="Custom Picture Upload (Premium) — Click to unlock">
-          <svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor" aria-hidden="true">
-            <path d="M8 1a3 3 0 0 0-3 3v3H4a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1h-1V4a3 3 0 0 0-3-3zm1.5 6h-3V4a1.5 1.5 0 0 1 3 0v3z"/>
-          </svg>
-        </span>`
+      ? `<span class="scene-pro-badge" aria-label="PRO feature">PRO</span>`
       : '';
 
     up.innerHTML = `${upLockHTML}<span class="plus" aria-hidden="true">+</span><span class="name">${hasArt ? 'Your picture' : 'Add your picture'}</span>`;
@@ -256,7 +241,7 @@
   }
 
   async function pickScene(id) {
-    if (!isPremium && id !== 'golden-hour') {
+    if (id === 'custom' && !isPremium) {
       $('purchaseModal').showModal();
       return;
     }
@@ -332,7 +317,19 @@
     try {
       const p = await Proc.prepare(file);
       const [wall, blur] = await Promise.all([Proc.blobToDataURL(p.wallBlob), Proc.blobToDataURL(p.blurBlob)]);
-      await chrome.storage.local.set({ lcAnimeArt: { wall, blur, name: file.name } });
+      const existingGal = (await chrome.storage.local.get('lcCustomGallery')).lcCustomGallery || [];
+      const updatedGal = [{
+        id: 'cg_' + Date.now(),
+        name: file.name,
+        wall,
+        thumb: blur,
+        blur,
+        uploadedAt: Date.now()
+      }, ...existingGal.filter(g => g.name !== file.name)].slice(0, 10);
+      await chrome.storage.local.set({
+        lcAnimeArt: { wall, blur, name: file.name },
+        lcCustomGallery: updatedGal
+      });
       preparedCache.custom = p;
       hasArt = true;
       customThumb = blur;
@@ -364,8 +361,11 @@
     $('activate').hidden = on;
   }
   $('activate').addEventListener('click', activate);
-  if (globalThis.LCTSBugButton) globalThis.LCTSBugButton($('bug'));
-  if (globalThis.LCTSConnectButton) globalThis.LCTSConnectButton($('connect'));
+  const helpBtn = $('getHelpBtn') || $('bug');
+  if (helpBtn) {
+    if (globalThis.LCTSHelpButton) globalThis.LCTSHelpButton(helpBtn);
+    else if (globalThis.LCTSBugButton) globalThis.LCTSBugButton(helpBtn);
+  }
 
   /* ---- controls ---------------------------------------------------------------- */
   function renderGlass() {
@@ -409,7 +409,10 @@
     $('sound').checked = settings.sound;
     $('volume').value = Math.round(settings.volume * 100);
     $('volumeOut').textContent = Math.round(settings.volume * 100);
-    document.querySelector('.volume').classList.toggle('off', !settings.sound);
+    const soundBlock = $('soundControls');
+    if (soundBlock) soundBlock.classList.toggle('off', !settings.sound);
+    const vol = document.querySelector('.volume');
+    if (vol) vol.classList.toggle('off', !settings.sound);
   };
   $('sound').addEventListener('change', () => { settings.sound = $('sound').checked; renderSound(); save(); });
   $('volume').addEventListener('input', () => { settings.volume = $('volume').value / 100; renderSound(); });
@@ -420,6 +423,18 @@
   });
 
   document.querySelectorAll('[data-play]').forEach((b) => b.addEventListener('click', async () => {
+    const frameBox = document.getElementById('frameBox');
+    if (frameBox) {
+      const rect = frameBox.getBoundingClientRect();
+      const targetTop = 76;
+      if (rect.top < targetTop - 5 || rect.bottom < 200) {
+        window.scrollTo({
+          top: Math.max(0, window.scrollY + rect.top - targetTop),
+          behavior: 'smooth'
+        });
+      }
+    }
+
     await frameReady;
     const w = frame.contentWindow, name = b.dataset.play;
     w.LCTSMoments.setJapanese(settings.japanese);
@@ -895,6 +910,12 @@
           submitKeyBtn.innerHTML = '<span>Verify & Activate</span>';
         }
       });
+    }
+
+    if (window.location.hash === '#upgrade' || window.location.search.includes('upgrade')) {
+      if (!isPremium && purchaseModal) purchaseModal.showModal();
+    } else if (window.location.hash === '#activate' || window.location.search.includes('activate')) {
+      if (!isPremium && activationModal) activationModal.showModal();
     }
   }
 

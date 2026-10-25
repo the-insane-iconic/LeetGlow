@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="popup.css" />
-  <title>LeetGlow - Custome Theme & Sound Effects and Background</title>
+  <title>LeetGlow - Custom Themes, Sound Effects & Backgrounds</title>
 </head>
 <body>
   <header class="head">
@@ -15,29 +15,286 @@
     </div>
   </header>
 
-  <main id="grid" class="grid" role="radiogroup" aria-label="LeetCode themes"></main>
+  <!-- Navigation Segmented Tabs (Themes / Customize / My Space) -->
+  <nav class="nav-tabs" role="tablist" aria-label="Sidebar navigation">
+    <button id="tab-themes" class="nav-tab active" type="button" role="tab" aria-selected="true" aria-controls="view-themes">
+      <svg class="tab-icon" viewBox="0 0 16 16" width="14" height="14" fill="currentColor">
+        <rect x="2" y="2" width="5" height="5" rx="1.5"/>
+        <rect x="9" y="2" width="5" height="5" rx="1.5"/>
+        <rect x="2" y="9" width="5" height="5" rx="1.5"/>
+        <rect x="9" y="9" width="5" height="5" rx="1.5"/>
+      </svg>
+      <span>Themes</span>
+    </button>
+    <button id="tab-customize" class="nav-tab" type="button" role="tab" aria-selected="false" aria-controls="view-customize">
+      <svg class="tab-icon" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+        <line x1="2" y1="4" x2="6" y2="4"/><circle cx="8" cy="4" r="1.8" fill="currentColor"/><line x1="10" y1="4" x2="14" y2="4"/>
+        <line x1="2" y1="8" x2="4" y2="8"/><circle cx="6" cy="8" r="1.8" fill="currentColor"/><line x1="8" y1="8" x2="14" y2="8"/>
+        <line x1="2" y1="12" x2="9" y2="12"/><circle cx="11" cy="12" r="1.8" fill="currentColor"/><line x1="13" y1="12" x2="14" y2="12"/>
+      </svg>
+      <span>Customize</span>
+    </button>
+    <button id="tab-myspace" class="nav-tab" type="button" role="tab" aria-selected="false" aria-controls="view-myspace">
+      <svg class="tab-icon" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 2.5h8a1.5 1.5 0 0 1 1.5 1.5v10l-5.5-3.5L2.5 14V4A1.5 1.5 0 0 1 4 2.5z"/>
+      </svg>
+      <span>My Space</span>
+    </button>
+  </nav>
 
-  <button id="studio" class="studio" type="button">
-    <span class="studio-jp" aria-hidden="true"><i>ア</i><i>ニ</i><i>メ</i></span>
-    <span class="studio-text"><b>Open Anime Studio</b><span>Use your own picture, tune the glass, preview the moments</span></span>
-    <span class="studio-arrow" aria-hidden="true">→</span>
-  </button>
+  <!-- View 1: Themes (Default View) -->
+  <div id="view-themes" class="tab-view active" role="tabpanel" aria-labelledby="tab-themes">
+    <main id="grid" class="grid" role="radiogroup" aria-label="LeetCode themes"></main>
 
+    <button id="studio" class="studio" type="button">
+      <span class="studio-jp" aria-hidden="true"><i>ア</i><i>ニ</i><i>メ</i></span>
+      <span class="studio-text"><b>Open Anime Studio</b><span>Use your own picture, tune the glass, preview the moments</span></span>
+      <span class="studio-arrow" aria-hidden="true">→</span>
+    </button>
+  </div>
+
+  <!-- View 2: Customize View -->
+  <div id="view-customize" class="tab-view" role="tabpanel" aria-labelledby="tab-customize" hidden>
+    <!-- Containers Transparency Slider -->
+    <div class="panel-card">
+      <div class="panel-card-head">
+        <div class="card-icon-title">
+          <svg class="card-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="7.5" height="7.5" rx="1.5"/>
+            <rect x="6.5" y="6.5" width="7.5" height="7.5" rx="1.5" stroke-dasharray="2 1.5"/>
+          </svg>
+          <h3>Containers Transparency</h3>
+        </div>
+        <span id="containerTransVal" class="slider-val-badge">30%</span>
+      </div>
+      <div class="slider-group">
+        <input id="containerTransSlider" class="range-slider" type="range" min="0" max="95" step="1" value="30" aria-label="Containers transparency" />
+        <div class="slider-scale">
+          <span>Solid (0%)</span>
+          <span>Glass (95%)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Coding Container (Editor) Transparency Slider -->
+    <div class="panel-card">
+      <div class="panel-card-head">
+        <div class="card-icon-title">
+          <svg class="card-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="4.5 4.5 1.5 8 4.5 11.5"/>
+            <polyline points="11.5 4.5 14.5 8 11.5 11.5"/>
+            <line x1="9.5" y1="2.5" x2="6.5" y2="13.5"/>
+          </svg>
+          <h3>Coding Container Transparency</h3>
+        </div>
+        <span id="editorTransVal" class="slider-val-badge">25%</span>
+      </div>
+      <div class="slider-group">
+        <input id="editorTransSlider" class="range-slider" type="range" min="0" max="95" step="1" value="25" aria-label="Coding container transparency" />
+        <div class="slider-scale">
+          <span>Opaque (0%)</span>
+          <span>Sheer (95%)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sound Effects Volume Slider -->
+    <div class="panel-card">
+      <div class="panel-card-head">
+        <div class="card-icon-title">
+          <svg class="card-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="7 3 3 6 1 6 1 10 3 10 7 13 7 3" fill="currentColor"/>
+            <path d="M10.5 4.5a5 5 0 0 1 0 7M13 2a8.5 8.5 0 0 1 0 12"/>
+          </svg>
+          <h3>Sound Effects Volume</h3>
+        </div>
+        <span id="volumeVal" class="slider-val-badge">80%</span>
+      </div>
+      <div class="slider-group">
+        <input id="volumeSlider" class="range-slider" type="range" min="0" max="100" step="1" value="80" aria-label="Sound effects volume" />
+        <div class="slider-scale">
+          <span>Mute (0%)</span>
+          <button id="testSoundBtn" class="btn-micro" type="button" title="Test audio volume">▶ Test Sound</button>
+          <span>Max (100%)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Focus Mode -->
+    <div class="panel-card">
+      <div class="panel-card-head">
+        <div class="card-icon-title">
+          <h3>Focus Mode</h3>
+        </div>
+        <label class="switch-toggle" title="Toggle Focus Mode (⌘+Shift+.)">
+          <input id="focusSwitch" type="checkbox" />
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+      <div class="panel-card-meta">
+        <span class="key-pill">⌘ + Shift + .</span>
+        <span class="meta-hint">Toggles everywhere live</span>
+      </div>
+    </div>
+
+    <!-- Reset to Default Button -->
+    <div class="customize-actions">
+      <button id="resetCustomizeBtn" class="btn-reset-default" type="button" title="Reset transparency and volume settings to original config">
+        <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2.5 8a5.5 5.5 0 1 0 1.2-3.4L1.5 6"/>
+          <path d="M1.5 2v4h4"/>
+        </svg>
+        <span>Reset to Default</span>
+      </button>
+      <span id="resetStatusText" class="reset-status-pill" hidden>Reset to Defaults ✓</span>
+    </div>
+
+    <!-- Full Studio Link -->
+    <div class="panel-card">
+      <div class="panel-card-head">
+        <div>
+          <h3>Full Glass & Contrast Studio</h3>
+          <p>Tune opacity, frosted blur, and syntax contrast floors in full screen.</p>
+        </div>
+      </div>
+      <button id="openStudioTuner" class="btn-subtle-action" type="button">
+        <span>Open Glass Studio Controls</span>
+        <span aria-hidden="true">→</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- View 3: My Space View -->
+  <div id="view-myspace" class="tab-view" role="tabpanel" aria-labelledby="tab-myspace" hidden>
+    <!-- Custom Wallpapers Hero Card with Gated Dropzone -->
+    <div class="panel-card myspace-hero-card">
+      <div class="panel-card-head">
+        <div class="card-icon-title">
+          <svg class="card-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2.5" width="12" height="11" rx="2"/>
+            <circle cx="5.5" cy="5.8" r="1.2"/>
+            <path d="M14 10.2l-3.2-3.2L3.5 13"/>
+          </svg>
+          <h3>Custom Wallpapers</h3>
+        </div>
+        <span id="myspacePremBadge" class="prem-tier-badge free">Free Plan</span>
+      </div>
+
+      <!-- Upload Dropzone (Locked for free tier, active for premium) -->
+      <div id="customUploadDropzone" class="custom-dropzone locked">
+        <input type="file" id="customUploadInput" accept="image/png,image/jpeg,image/webp" hidden />
+        <div id="dropzoneContent" class="dropzone-content">
+          <!-- Dynamically populated based on Premium state -->
+        </div>
+      </div>
+      <div id="uploadStatusText" class="upload-status-text" hidden></div>
+    </div>
+
+    <!-- Uploaded Wallpapers Gallery Card -->
+    <div class="panel-card">
+      <div class="panel-card-head">
+        <div class="card-icon-title">
+          <svg class="card-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="2" y="2" width="12" height="12" rx="2"/>
+            <circle cx="5.5" cy="5.5" r="1.5"/>
+            <path d="M14 10l-3.5-3.5L3 14"/>
+          </svg>
+          <h3>Your Uploaded Wallpapers</h3>
+        </div>
+        <span id="customGalleryCount" class="slider-val-badge">0</span>
+      </div>
+      <div id="customGalleryList" class="custom-gallery-list">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- Multi-Difficulty Arcs Link -->
+    <div class="panel-card">
+      <div class="panel-card-head">
+        <div class="card-icon-title">
+          <svg class="card-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="8 2 14 5 8 8 2 5 8 2"/>
+            <polyline points="2 8.5 8 11.5 14 8.5"/>
+            <polyline points="2 12 8 15 14 12"/>
+          </svg>
+          <div>
+            <h3>Difficulty Scene Arcs</h3>
+            <p>Assign separate wallpapers for Easy, Medium, and Hard.</p>
+          </div>
+        </div>
+      </div>
+      <button id="openStudioArcs" class="btn-subtle-action" type="button">
+        <span>Configure Arc Scenes in Studio</span>
+        <span aria-hidden="true">→</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Premium Upgrade Modal for Side Panel -->
+  <dialog id="popupUpgradeModal" class="popup-modal">
+    <div class="popup-modal-content">
+      <button id="closePopupUpgradeModal" class="popup-modal-close" type="button" aria-label="Close dialog">✕</button>
+      <div class="popup-modal-badge">
+        <svg viewBox="0 0 20 20" width="15" height="15" fill="currentColor">
+          <path d="M10 2l2.5 5 5-2.5-2.5 7.5H5L2.5 4.5 7.5 7 10 2z"/>
+          <path d="M4 14h12v2H4v-2z"/>
+        </svg>
+        <span>LeetGlow Premium</span>
+      </div>
+      <h2 class="popup-modal-title">Unlock Custom Wallpapers</h2>
+      <p class="popup-modal-desc">
+        Upload any 4K illustration, anime artwork, or screenshot and automatically solve harmonious syntax inks for LeetCode.
+      </p>
+      <div class="popup-modal-price-box">
+        <div class="price-amount">₹29</div>
+        <div class="price-label">Lifetime Access · One-time Payment</div>
+      </div>
+      <ul class="popup-modal-perks">
+        <li><span>✓</span> Unlimited 4K Custom Wallpaper Uploads</li>
+        <li><span>✓</span> Automated Contrast & Syntax Ink Solving</li>
+        <li><span>✓</span> Easy / Medium / Hard Difficulty Scene Arcs</li>
+        <li><span>✓</span> Access to All Anime & Studio Scenes</li>
+      </ul>
+      <button id="modalUpgradeBtn" class="popup-modal-cta" type="button">
+        <span>Upgrade to Premium (₹29)</span>
+        <span aria-hidden="true">→</span>
+      </button>
+      <button id="modalActivateKeyBtn" class="popup-modal-secondary" type="button">
+        Have a license key? Activate here
+      </button>
+    </div>
+  </dialog>
+
+  <!-- Improvised Modern Footer -->
   <footer class="foot">
-    <span id="status">Covers the editor, panels, console and syntax.</span>
-    <button id="premiumStatus" class="support" type="button" title="Check LeetGlow Premium status">
-      <span id="popupBadgeDot" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#ef4444;margin-right:4px;"></span>Premium
-    </button>
-    <button id="bug" class="support bug" type="button" title="Found a bug? Email AnshYadav (opens Gmail with a short template).">
-      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5.8 4.6a2.2 2.2 0 0 1 4.4 0Z"/><path d="M4.8 7a3.2 3.2 0 0 1 6.4 0v2.8a3.2 3.2 0 0 1-6.4 0Z"/><path class="legs" d="M2.2 7.4h2.4M11.4 7.4h2.4M2.4 11.2l2.3-.9M13.6 11.2l-2.3-.9M3.2 3.6l1.8 1.6M12.8 3.6 11 5.2"/></svg>Report bug
-    </button>
-    <button id="connect" class="support connect" type="button" title="Connect with AnshYadav on LinkedIn">
-      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.2 5.6h2.5V14H2.2zM3.45 1.8a1.45 1.45 0 1 1 0 2.9 1.45 1.45 0 0 1 0-2.9zM6.3 5.6h2.4v1.15h.03c.34-.63 1.15-1.3 2.37-1.3 2.53 0 3 1.67 3 3.83V14h-2.5V9.8c0-1-.02-2.3-1.4-2.3-1.4 0-1.6 1.1-1.6 2.22V14H6.3z"/></svg>Connect
-    </button>
-    <span id="ver" class="ver"></span>
+    <div class="foot-status">
+      <span class="status-dot"></span>
+      <span id="status">Themes apply live across your LeetCode problem tabs.</span>
+    </div>
+    <div class="foot-pills">
+      <button id="bug" class="support bug" type="button" title="Found a bug? Email AnshYadav (opens Gmail with a short template).">
+        <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M5.8 4.6a2.2 2.2 0 0 1 4.4 0Z"/><path d="M4.8 7a3.2 3.2 0 0 1 6.4 0v2.8a3.2 3.2 0 0 1-6.4 0Z"/><path class="legs" d="M2.2 7.4h2.4M11.4 7.4h2.4M2.4 11.2l2.3-.9M13.6 11.2l-2.3-.9M3.2 3.6l1.8 1.6M12.8 3.6 11 5.2"/></svg>
+        <span>Report bug</span>
+      </button>
+      <button id="shortcutsBtn" class="support" type="button" title="Keyboard shortcut: ⌘+Shift+. toggles Focus Mode (click to manage Chrome shortcuts)">
+        <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><rect x="1.5" y="3.5" width="13" height="9" rx="2"/><path d="M4 6.5h.01M6.5 6.5h.01M9 6.5h.01M11.5 6.5h.01M4 9.5h8"/></svg>
+        <span>Shortcuts</span>
+      </button>
+      <button id="rateBtn" class="support" type="button" title="Star LeetGlow on GitHub or leave a review">
+        <svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25z"/></svg>
+        <span>Rate ★</span>
+      </button>
+      <button id="docsBtn" class="support" type="button" title="Open Anime Studio & documentation">
+        <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2.5 3.5A1.5 1.5 0 0 1 4 2h8a1.5 1.5 0 0 1 1.5 1.5v10.5l-2-1.5-2 1.5-2-1.5-2 1.5-1.5-1.125V3.5z"/><line x1="5.5" y1="5.5" x2="10.5" y2="5.5"/><line x1="5.5" y1="8.5" x2="9" y2="8.5"/></svg>
+        <span>Docs</span>
+      </button>
+      <span id="ver" class="ver"></span>
+    </div>
   </footer>
 
   <script src="anime/scenes.js"></script>
+  <script src="anime/solver.js"></script>
+  <script src="anime/process.js"></script>
   <script src="pixel/sprites.js"></script>
   <script src="support.js"></script>
   <script src="premium-config.js"></script>

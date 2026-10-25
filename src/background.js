@@ -18,7 +18,30 @@ chrome.commands.onCommand.addListener((command) => {
    list is cleared once when the extension installs or updates. */
 chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.local.remove('lcAnimeSeen');
+  if (chrome.sidePanel && chrome.sidePanel.setPanelBehavior) {
+    chrome.sidePanel
+      .setPanelBehavior({ openPanelOnActionClick: true })
+      .catch((error) => console.error('[LeetGlow] sidePanel.setPanelBehavior error:', error));
+  }
 });
+
+/* Side Panel: Open sidebar on extension icon click (Chrome Side Panel API) */
+if (chrome.sidePanel && chrome.sidePanel.setPanelBehavior) {
+  chrome.sidePanel
+    .setPanelBehavior({ openPanelOnActionClick: true })
+    .catch((error) => console.error('[LeetGlow] sidePanel.setPanelBehavior error:', error));
+}
+if (chrome.action && chrome.action.onClicked) {
+  chrome.action.onClicked.addListener(async (tab) => {
+    if (chrome.sidePanel && chrome.sidePanel.open) {
+      try {
+        await chrome.sidePanel.open({ windowId: tab.windowId });
+      } catch (err) {
+        console.error('[LeetGlow] Error opening side panel on action click:', err);
+      }
+    }
+  });
+}
 
 /* Sound for tabs that may not play it themselves. Chrome refuses audio on a
    page the user has not clicked yet (a problem opened from the address bar),

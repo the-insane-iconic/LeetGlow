@@ -75,7 +75,7 @@ const THEMES = {
     tex: 'none'
   }
 };
-const ORDER = ['paper', 'anime', 'sakura', 'grid', 'bloom', 'game', 'crawler', 'pixel', 'off'];
+const ORDER = ['anime', 'sakura', 'grid', 'bloom', 'game', 'crawler', 'pixel', 'paper', 'off'];
 /* the Open Anime Studio button lives directly under the Anime card, so it
    reads as belonging to that theme; render() re-seats it after each redraw */
 const studioButton = document.getElementById('studio');
@@ -138,6 +138,11 @@ function render(selected) {
     grid.appendChild(card);
     if (id === 'anime') {
       paintAnimeCard(card.querySelector('.preview'));
+      const ribbon = document.createElement('div');
+      ribbon.className = 'corner-ribbon-wrap';
+      ribbon.setAttribute('aria-hidden', 'true');
+      ribbon.innerHTML = '<span class="corner-ribbon">Premium</span>';
+      card.appendChild(ribbon);
       grid.appendChild(studioButton);
     }
     if (id === 'game') {
@@ -225,7 +230,7 @@ function choose(id) {
   chrome.storage.local.set({ [KEY]: id });
   /* content.js hears the storage change and applies it live in every open
      problem tab, so there is nothing to refresh */
-  document.getElementById('studio').classList.toggle('lit', id === 'anime');
+  if (studioButton) studioButton.classList.toggle('lit', id === 'anime');
   const status = document.getElementById('status');
   status.textContent = id === 'off'
     ? 'Theme off. LeetCode is back to its own look.'
@@ -245,13 +250,14 @@ try {
 chrome.storage.local.get(KEY, (res) => {
   const selected = (res && res[KEY]) || DEFAULT;
   render(selected);
-  document.getElementById('studio').classList.toggle('lit', selected === 'anime');
+  if (studioButton) studioButton.classList.toggle('lit', selected === 'anime');
 });
 
-document.getElementById('studio').addEventListener('click', () => {
-  chrome.tabs.create({ url: chrome.runtime.getURL('src/studio.html') });
-  window.close();
-});
+if (studioButton) {
+  studioButton.addEventListener('click', () => {
+    chrome.tabs.create({ url: chrome.runtime.getURL('src/studio.html') });
+  });
+}
 
 /* keyboard: arrow keys move between radio cards and select, as a radio group does */
 document.addEventListener('keydown', (e) => {
@@ -266,23 +272,619 @@ document.addEventListener('keydown', (e) => {
   choose(next.dataset.id);
 });
 
-/* Premium status & Links (src/support.js & src/premium.js) */
-const premBtn = document.getElementById('premiumStatus');
-if (premBtn) {
-  premBtn.addEventListener('click', () => {
-    chrome.tabs.create({ url: chrome.runtime.getURL('src/studio.html') });
-    window.close();
+/* Tab navigation: Themes / Customize / My Space */
+const tabButtons = [
+  { btn: document.getElementById('tab-themes'), view: document.getElementById('view-themes') },
+  { btn: document.getElementById('tab-customize'), view: document.getElementById('view-customize') },
+  { btn: document.getElementById('tab-myspace'), view: document.getElementById('view-myspace') }
+];
+
+function switchTab(targetId) {
+  tabButtons.forEach(({ btn, view }) => {
+    if (!btn || !view) return;
+    const isActive = btn.id === targetId;
+    btn.classList.toggle('active', isActive);
+    btn.setAttribute('aria-selected', String(isActive));
+    if (isActive) {
+      view.removeAttribute('hidden');
+      view.classList.add('active');
+    } else {
+      view.setAttribute('hidden', '');
+      view.classList.remove('active');
+    }
   });
-  if (globalThis.LeetGlowPremium) {
-    globalThis.LeetGlowPremium.checkServerEntitlement().then((res) => {
-      const dot = document.getElementById('popupBadgeDot');
-      if (dot) {
-        dot.style.background = res && res.active ? '#22c55e' : '#ef4444';
-        dot.style.boxShadow = res && res.active ? '0 0 8px #22c55e' : '0 0 6px #ef4444';
-      }
-      premBtn.title = res && res.active ? 'LeetGlow Premium Active (Click to manage)' : 'LeetGlow Premium Inactive (Click to upgrade)';
+}
+
+tabButtons.forEach(({ btn }) => {
+  if (!btn) return;
+  btn.addEventListener('click', () => switchTab(btn.id));
+});
+
+/* Customize sliders: Container Transparency, Editor Transparency, Volume */
+const containerTransSlider = document.getElementById('containerTransSlider');
+const containerTransVal = document.getElementById('containerTransVal');
+const editorTransSlider = document.getElementById('editorTransSlider');
+const editorTransVal = document.getElementById('editorTransVal');
+const volumeSlider = document.getElementById('volumeSlider');
+const volumeVal = document.getElementById('volumeVal');
+const testSoundBtn = document.getElementById('testSoundBtn');
+
+chrome.storage.local.get(['lcContainerTrans', 'lcEditorTrans', 'lcVolume', 'lcAnime', 'lcGameVolume'], (res) => {
+  const cfg = res.lcAnime || {};
+
+  // Container Transparency (default 30%)
+  const cVal = typeof res.lcContainerTrans === 'number' ? res.lcContainerTrans
+    : (typeof cfg.containerTransparency === 'number' ? cfg.containerTransparency : 30);
+  if (containerTransSlider && containerTransVal) {
+    containerTransSlider.value = cVal;
+    containerTransVal.textContent = cVal + '%';
+  }
+
+  // Editor Transparency (default 25%)
+  const eVal = typeof res.lcEditorTrans === 'number' ? res.lcEditorTrans
+    : (typeof cfg.editorTransparency === 'number' ? cfg.editorTransparency : 25);
+  if (editorTransSlider && editorTransVal) {
+    editorTransSlider.value = eVal;
+    editorTransVal.textContent = eVal + '%';
+  }
+
+  // Volume (default 80%)
+  const vVal = typeof res.lcVolume === 'number' ? res.lcVolume
+    : (typeof cfg.volume === 'number' ? Math.round(cfg.volume * 100)
+    : (typeof res.lcGameVolume === 'number' ? Math.round(res.lcGameVolume * 100) : 80));
+  if (volumeSlider && volumeVal) {
+    volumeSlider.value = vVal;
+    volumeVal.textContent = vVal + '%';
+  }
+});
+
+if (containerTransSlider) {
+  containerTransSlider.addEventListener('input', () => {
+    const val = Number(containerTransSlider.value);
+    if (containerTransVal) containerTransVal.textContent = val + '%';
+    chrome.storage.local.get(['lcAnime'], (r) => {
+      const cfg = r.lcAnime || {};
+      cfg.containerTransparency = val;
+      chrome.storage.local.set({ lcContainerTrans: val, lcAnime: cfg });
+    });
+  });
+}
+
+if (editorTransSlider) {
+  editorTransSlider.addEventListener('input', () => {
+    const val = Number(editorTransSlider.value);
+    if (editorTransVal) editorTransVal.textContent = val + '%';
+    chrome.storage.local.get(['lcAnime'], (r) => {
+      const cfg = r.lcAnime || {};
+      cfg.editorTransparency = val;
+      chrome.storage.local.set({ lcEditorTrans: val, lcAnime: cfg });
+    });
+  });
+}
+
+if (volumeSlider) {
+  volumeSlider.addEventListener('input', () => {
+    const val = Number(volumeSlider.value);
+    if (volumeVal) volumeVal.textContent = val + '%';
+    const norm = val / 100;
+    chrome.storage.local.get(['lcAnime', 'lcPixel'], (r) => {
+      const cfg = r.lcAnime || {};
+      cfg.volume = norm;
+      const pix = r.lcPixel || {};
+      pix.volume = norm;
+      chrome.storage.local.set({
+        lcVolume: val,
+        lcGameVolume: norm,
+        lcAnime: cfg,
+        lcPixel: pix
+      });
+    });
+  });
+}
+
+if (testSoundBtn) {
+  testSoundBtn.addEventListener('click', () => {
+    const vol = Number(volumeSlider ? volumeSlider.value : 80) / 100;
+    try {
+      const audio = new Audio(chrome.runtime.getURL('sounds/game/checkpoint.mp3'));
+      audio.volume = Math.max(0, Math.min(1, vol));
+      audio.play().catch(() => {});
+    } catch (e) {}
+  });
+}
+
+/* Focus mode toggle in Customize tab */
+const focusSwitch = document.getElementById('focusSwitch');
+if (focusSwitch) {
+  chrome.storage.local.get(['lcFocus'], (res) => {
+    focusSwitch.checked = !!res.lcFocus;
+  });
+  focusSwitch.addEventListener('change', () => {
+    chrome.storage.local.set({ lcFocus: focusSwitch.checked });
+  });
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === 'local' && changes.lcFocus) {
+      focusSwitch.checked = !!changes.lcFocus.newValue;
+    }
+  });
+}
+
+/* Reset Customize sliders to original configuration */
+const resetCustomizeBtn = document.getElementById('resetCustomizeBtn');
+const resetStatusText = document.getElementById('resetStatusText');
+
+if (resetCustomizeBtn) {
+  resetCustomizeBtn.addEventListener('click', () => {
+    const DEFAULT_CONTAINER = 30;
+    const DEFAULT_EDITOR = 25;
+    const DEFAULT_VOLUME = 80;
+    const DEFAULT_VOLUME_NORM = 0.8;
+
+    if (containerTransSlider) containerTransSlider.value = DEFAULT_CONTAINER;
+    if (containerTransVal) containerTransVal.textContent = DEFAULT_CONTAINER + '%';
+
+    if (editorTransSlider) editorTransSlider.value = DEFAULT_EDITOR;
+    if (editorTransVal) editorTransVal.textContent = DEFAULT_EDITOR + '%';
+
+    if (volumeSlider) volumeSlider.value = DEFAULT_VOLUME;
+    if (volumeVal) volumeVal.textContent = DEFAULT_VOLUME + '%';
+
+    if (focusSwitch) focusSwitch.checked = false;
+
+    chrome.storage.local.get(['lcAnime', 'lcPixel'], (r) => {
+      const cfg = r.lcAnime || {};
+      cfg.containerTransparency = DEFAULT_CONTAINER;
+      cfg.editorTransparency = DEFAULT_EDITOR;
+      cfg.volume = DEFAULT_VOLUME_NORM;
+
+      const pix = r.lcPixel || {};
+      pix.volume = DEFAULT_VOLUME_NORM;
+
+      chrome.storage.local.set({
+        lcContainerTrans: DEFAULT_CONTAINER,
+        lcEditorTrans: DEFAULT_EDITOR,
+        lcVolume: DEFAULT_VOLUME,
+        lcGameVolume: DEFAULT_VOLUME_NORM,
+        lcFocus: false,
+        lcAnime: cfg,
+        lcPixel: pix
+      }, () => {
+        if (resetStatusText) {
+          resetStatusText.hidden = false;
+          setTimeout(() => { resetStatusText.hidden = true; }, 2200);
+        }
+      });
+    });
+  });
+}
+
+/* Quick studio jump buttons in Customize and My Space */
+['openStudioTuner', 'openStudioArcs'].forEach((id) => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener('click', () => {
+      chrome.tabs.create({ url: chrome.runtime.getURL('src/studio.html') });
     });
   }
+});
+
+/* =============================================================================
+   My Space: Custom Wallpapers Gallery, Upload & Premium Gating
+   ============================================================================= */
+(function initMySpace() {
+  const badge = document.getElementById('myspacePremBadge');
+  const dropzone = document.getElementById('customUploadDropzone');
+  const fileInput = document.getElementById('customUploadInput');
+  const dropzoneContent = document.getElementById('dropzoneContent');
+  const statusText = document.getElementById('uploadStatusText');
+  const galleryList = document.getElementById('customGalleryList');
+  const galleryCount = document.getElementById('customGalleryCount');
+  const upgradeModal = document.getElementById('popupUpgradeModal');
+  const closeUpgradeModal = document.getElementById('closePopupUpgradeModal');
+  const modalUpgradeBtn = document.getElementById('modalUpgradeBtn');
+  const modalActivateKeyBtn = document.getElementById('modalActivateKeyBtn');
+
+  if (!dropzone || !galleryList) return;
+
+  let isPremium = false;
+
+  async function checkPremium() {
+    try {
+      const data = await chrome.storage.local.get('leetglowPremium');
+      isPremium = !!(data.leetglowPremium && data.leetglowPremium.active === true);
+    } catch (e) {
+      isPremium = false;
+    }
+    updatePremiumUI();
+  }
+
+  function updatePremiumUI() {
+    if (badge) {
+      if (isPremium) {
+        badge.innerHTML = '<span class="badge-dot"></span><span>Premium Active</span>';
+        badge.className = 'prem-tier-badge pro';
+      } else {
+        badge.innerHTML = '<span>Free Plan</span>';
+        badge.className = 'prem-tier-badge free';
+      }
+    }
+
+    if (dropzone) {
+      if (isPremium) {
+        dropzone.classList.remove('locked');
+        dropzoneContent.innerHTML = `
+          <div class="dropzone-active-body">
+            <div class="dropzone-icon-box active">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+            </div>
+            <div class="dropzone-text">
+              <span class="dropzone-title">Upload Custom Wallpaper</span>
+              <span class="dropzone-sub">Click or drop any 4K illustration (PNG, JPG, WebP)</span>
+            </div>
+          </div>
+        `;
+      } else {
+        dropzone.classList.add('locked');
+        dropzoneContent.innerHTML = `
+          <div class="dropzone-locked-body">
+            <div class="dropzone-icon-box locked">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </div>
+            <div class="dropzone-text">
+              <span class="dropzone-title">Custom Wallpaper Uploads</span>
+              <span class="dropzone-sub">Transform your problem workspace with your own artwork</span>
+            </div>
+            <button id="btnUnlockPremDropzone" class="btn-unlock-prem" type="button">
+              <svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor">
+                <path d="M8 1.5l1.8 3.6 4 .6-2.9 2.8.7 4L8 10.6l-3.6 1.9.7-4L2.2 5.7l4-.6L8 1.5z"/>
+              </svg>
+              <span>Unlock Custom Art · ₹29</span>
+            </button>
+          </div>
+        `;
+        const unlockBtn = document.getElementById('btnUnlockPremDropzone');
+        if (unlockBtn) {
+          unlockBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openUpgrade();
+          });
+        }
+      }
+    }
+  }
+
+  function openUpgrade() {
+    if (upgradeModal && typeof upgradeModal.showModal === 'function') {
+      upgradeModal.showModal();
+    } else {
+      chrome.tabs.create({ url: chrome.runtime.getURL('src/studio.html#upgrade') });
+    }
+  }
+
+  function showStatus(text, isError = false, isBusy = false) {
+    if (!statusText) return;
+    statusText.hidden = false;
+    statusText.textContent = text;
+    statusText.className = 'upload-status-text' + (isError ? ' error' : isBusy ? ' busy' : ' success');
+    if (!isBusy) {
+      setTimeout(() => { statusText.hidden = true; }, 4000);
+    }
+  }
+
+  /* Render Gallery */
+  function renderGallery() {
+    chrome.storage.local.get(['lcCustomGallery', 'lcAnimeArt', 'lcAnime'], (res) => {
+      let gallery = res.lcCustomGallery || [];
+      const currentArt = res.lcAnimeArt;
+      const cfg = res.lcAnime || {};
+      const isCustomActive = cfg.scene === 'custom';
+
+      // Backfill legacy custom image if gallery was never initialized
+      if (gallery.length === 0 && currentArt && currentArt.wall) {
+        gallery = [{
+          id: 'cg_' + Date.now(),
+          name: currentArt.name || 'Custom Wallpaper',
+          wall: currentArt.wall,
+          thumb: currentArt.blur || currentArt.wall,
+          blur: currentArt.blur || currentArt.wall,
+          uploadedAt: Date.now()
+        }];
+        chrome.storage.local.set({ lcCustomGallery: gallery });
+      }
+
+      if (galleryCount) galleryCount.textContent = gallery.length;
+
+      if (gallery.length === 0) {
+        galleryList.innerHTML = `
+          <div class="custom-gallery-empty">
+            <div class="empty-icon-wrap">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="3"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <path d="M21 15l-5-5L5 21"/>
+              </svg>
+            </div>
+            <div class="empty-title">No Custom Wallpapers</div>
+            <div class="empty-sub">Upload your favorite artwork to skin your LeetCode problem workspace.</div>
+          </div>
+        `;
+        return;
+      }
+
+      galleryList.innerHTML = gallery.map((item) => {
+        const isActive = isCustomActive && currentArt && (currentArt.name === item.name || currentArt.wall === item.wall);
+        return `
+          <div class="custom-wallpaper-card ${isActive ? 'active' : ''}" data-id="${item.id}">
+            <div class="custom-wallpaper-thumb" style="background-image: url('${item.thumb || item.wall}')">
+              ${isActive ? '<span class="active-indicator-tag">● Active</span>' : ''}
+            </div>
+            <div class="custom-wallpaper-info">
+              <span class="custom-wallpaper-name" title="${item.name || 'Wallpaper'}">${item.name || 'Custom Wallpaper'}</span>
+              <div class="custom-wallpaper-actions">
+                ${isActive
+                  ? '<span class="active-chip">Applied</span>'
+                  : `<button class="btn-micro-action btn-apply-wall" data-id="${item.id}" type="button">Apply</button>`
+                }
+                <button class="btn-micro-icon btn-delete-wall" data-id="${item.id}" type="button" title="Delete wallpaper">
+                  <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M2.5 4.5h11M5.5 4.5V3a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v1.5M6 7.5v4.5M10 7.5v4.5M3.5 4.5l.8 9.5a1 1 0 0 0 1 .9h5.4a1 1 0 0 0 1-.9l.8-9.5"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    });
+  }
+
+  /* Handle Apply & Delete */
+  galleryList.addEventListener('click', async (e) => {
+    const applyBtn = e.target.closest('.btn-apply-wall');
+    if (applyBtn) {
+      const id = applyBtn.dataset.id;
+      if (!isPremium) {
+        openUpgrade();
+        return;
+      }
+      chrome.storage.local.get(['lcCustomGallery', 'lcAnime'], (res) => {
+        const item = (res.lcCustomGallery || []).find((g) => g.id === id);
+        if (!item) return;
+        const cfg = res.lcAnime || {};
+        cfg.scene = 'custom';
+        cfg.themes = cfg.themes || {};
+        if (item.theme) {
+          cfg.themes.custom = item.theme;
+          cfg.theme = item.theme;
+          cfg.themeFor = 'custom';
+        }
+        chrome.storage.local.set({
+          lcAnimeArt: { wall: item.wall, blur: item.blur || item.thumb, name: item.name },
+          lcAnime: cfg,
+          lcThemeStudio: 'anime'
+        }, () => {
+          showStatus(`Applied "${item.name}"!`);
+          renderGallery();
+        });
+      });
+      return;
+    }
+
+    const deleteBtn = e.target.closest('.btn-delete-wall');
+    if (deleteBtn) {
+      const id = deleteBtn.dataset.id;
+      chrome.storage.local.get(['lcCustomGallery', 'lcAnimeArt', 'lcAnime'], (res) => {
+        const gallery = res.lcCustomGallery || [];
+        const toDelete = gallery.find((g) => g.id === id);
+        const filtered = gallery.filter((g) => g.id !== id);
+        const updates = { lcCustomGallery: filtered };
+
+        const currentArt = res.lcAnimeArt;
+        if (toDelete && currentArt && (currentArt.name === toDelete.name || currentArt.wall === toDelete.wall)) {
+          if (filtered.length > 0) {
+            const next = filtered[0];
+            updates.lcAnimeArt = { wall: next.wall, blur: next.blur || next.thumb, name: next.name };
+            if (next.theme) {
+              const cfg = res.lcAnime || {};
+              cfg.themes = cfg.themes || {};
+              cfg.themes.custom = next.theme;
+              cfg.theme = next.theme;
+              updates.lcAnime = cfg;
+            }
+          } else {
+            const cfg = res.lcAnime || {};
+            cfg.scene = 'moonlit-shrine';
+            updates.lcAnime = cfg;
+            chrome.storage.local.remove('lcAnimeArt');
+          }
+        }
+        chrome.storage.local.set(updates, () => {
+          showStatus('Wallpaper removed.');
+          renderGallery();
+        });
+      });
+    }
+  });
+
+  /* Dropzone and File Upload logic */
+  dropzone.addEventListener('click', () => {
+    if (!isPremium) {
+      openUpgrade();
+      return;
+    }
+    if (fileInput) fileInput.click();
+  });
+
+  dropzone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropzone.classList.add('dragover');
+  });
+
+  dropzone.addEventListener('dragleave', () => {
+    dropzone.classList.remove('dragover');
+  });
+
+  dropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropzone.classList.remove('dragover');
+    if (!isPremium) {
+      openUpgrade();
+      return;
+    }
+    const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (file) handleUpload(file);
+  });
+
+  if (fileInput) {
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files && fileInput.files[0];
+      if (file) handleUpload(file);
+      fileInput.value = '';
+    });
+  }
+
+  async function handleUpload(file) {
+    if (!isPremium) {
+      openUpgrade();
+      return;
+    }
+    if (!file.type.startsWith('image/')) {
+      showStatus('Please select an image file (PNG, JPEG, WebP).', true);
+      return;
+    }
+    if (file.size > 30 * 1024 * 1024) {
+      showStatus('Image exceeds 30 MB size limit.', true);
+      return;
+    }
+
+    dropzone.classList.add('busy');
+    showStatus('Preparing 4K wallpaper & solving color palette…', false, true);
+
+    try {
+      const Proc = globalThis.LCTSAnimeProcess;
+      const Solver = globalThis.LCTSAnimeSolver;
+      if (!Proc || !Solver) {
+        throw new Error('Process/Solver module not loaded');
+      }
+
+      const prepared = await Proc.prepare(file);
+      const [wall, blur] = await Promise.all([
+        Proc.blobToDataURL(prepared.wallBlob),
+        Proc.blobToDataURL(prepared.blurBlob)
+      ]);
+
+      const theme = Solver.analyze(prepared.sharp, prepared.blurSamples, {
+        visibility: 0.85,
+        glass: 'auto',
+        mode: 'dark'
+      });
+
+      chrome.storage.local.get(['lcAnime', 'lcCustomGallery'], (res) => {
+        const cfg = res.lcAnime || {};
+        cfg.scene = 'custom';
+        cfg.themes = cfg.themes || {};
+        cfg.themes.custom = theme;
+        cfg.theme = theme;
+        cfg.themeFor = 'custom';
+
+        const existingGal = res.lcCustomGallery || [];
+        const newItem = {
+          id: 'cg_' + Date.now(),
+          name: file.name,
+          wall,
+          thumb: blur,
+          blur,
+          theme,
+          uploadedAt: Date.now()
+        };
+        const updatedGal = [newItem, ...existingGal.filter((g) => g.name !== file.name)].slice(0, 10);
+
+        chrome.storage.local.set({
+          lcAnimeArt: { wall, blur, name: file.name },
+          lcAnime: cfg,
+          lcThemeStudio: 'anime',
+          lcCustomGallery: updatedGal
+        }, () => {
+          dropzone.classList.remove('busy');
+          showStatus(`Applied "${file.name}" to LeetCode!`);
+          renderGallery();
+        });
+      });
+    } catch (err) {
+      console.error('[LeetGlow MySpace] Upload error:', err);
+      dropzone.classList.remove('busy');
+      showStatus('Failed to process image. Try another PNG or JPEG.', true);
+    }
+  }
+
+  /* Modal Close Handlers */
+  if (closeUpgradeModal && upgradeModal) {
+    closeUpgradeModal.addEventListener('click', () => upgradeModal.close());
+    upgradeModal.addEventListener('click', (e) => {
+      if (e.target === upgradeModal) upgradeModal.close();
+    });
+  }
+
+  if (modalUpgradeBtn) {
+    modalUpgradeBtn.addEventListener('click', () => {
+      if (upgradeModal) upgradeModal.close();
+      chrome.tabs.create({ url: chrome.runtime.getURL('src/studio.html#upgrade') });
+    });
+  }
+
+  if (modalActivateKeyBtn) {
+    modalActivateKeyBtn.addEventListener('click', () => {
+      if (upgradeModal) upgradeModal.close();
+      chrome.tabs.create({ url: chrome.runtime.getURL('src/studio.html#activate') });
+    });
+  }
+
+  /* Listen for storage changes */
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area !== 'local') return;
+    if (changes.leetglowPremium) {
+      isPremium = !!changes.leetglowPremium.newValue?.active;
+      updatePremiumUI();
+      renderGallery();
+    }
+    if (changes.lcCustomGallery || changes.lcAnimeArt || changes.lcAnime) {
+      renderGallery();
+    }
+  });
+
+  checkPremium();
+  renderGallery();
+})();
+
+/* Footer pill actions */
+if (globalThis.LCTSBugButton) {
+  globalThis.LCTSBugButton(document.getElementById('bug'));
 }
-if (globalThis.LCTSBugButton) globalThis.LCTSBugButton(document.getElementById('bug'));
-if (globalThis.LCTSConnectButton) globalThis.LCTSConnectButton(document.getElementById('connect'));
+
+const shortcutsBtn = document.getElementById('shortcutsBtn');
+if (shortcutsBtn) {
+  shortcutsBtn.addEventListener('click', () => {
+    chrome.tabs.create({ url: 'chrome://extensions/shortcuts' });
+  });
+}
+
+const rateBtn = document.getElementById('rateBtn');
+if (rateBtn) {
+  rateBtn.addEventListener('click', () => {
+    chrome.tabs.create({ url: 'https://github.com/the-insane-iconic/LeetGlow' });
+  });
+}
+
+const docsBtn = document.getElementById('docsBtn');
+if (docsBtn) {
+  docsBtn.addEventListener('click', () => {
+    chrome.tabs.create({ url: chrome.runtime.getURL('src/studio.html') });
+  });
+}

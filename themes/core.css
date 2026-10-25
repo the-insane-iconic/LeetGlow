@@ -404,6 +404,20 @@ html[data-lc-theme] .flexlayout__tab {
   box-shadow: var(--lc-panel-shadow) !important;
 }
 
+html[data-lc-theme]:not([data-lc-theme="anime"]) .flexlayout__tabset {
+  background-color: color-mix(in srgb, var(--lc-bg2) var(--lc-container-opacity, 100%), transparent) !important;
+}
+html[data-lc-theme]:not([data-lc-theme="anime"]) .flexlayout__tabset:has(#editor),
+html[data-lc-theme]:not([data-lc-theme="anime"]) .pane-code.flexlayout__tabset {
+  background-color: color-mix(in srgb, var(--lc-editor-bg, var(--lc-bg2)) var(--lc-editor-opacity, 100%), transparent) !important;
+}
+html[data-lc-theme]:not([data-lc-theme="anime"]) .flexlayout__tab {
+  background-color: transparent !important;
+}
+html[data-lc-theme]:not([data-lc-theme="anime"]) #editor {
+  background-color: transparent !important;
+}
+
 html[data-lc-theme] .flexlayout__tabset_header,
 html[data-lc-theme] .flexlayout__tabset_tabbar_outer,
 html[data-lc-theme] .flexlayout__tabset_tabbar_inner {
@@ -482,7 +496,7 @@ html[data-lc-theme] .monaco-editor,
 html[data-lc-theme] .monaco-editor-background,
 html[data-lc-theme] .monaco-editor .margin,
 html[data-lc-theme] .monaco-editor .overflow-guard {
-  background-color: var(--lc-bg2) !important;
+  background-color: transparent !important;
 }
 
 html[data-lc-theme] .monaco-editor {
@@ -490,7 +504,7 @@ html[data-lc-theme] .monaco-editor {
 }
 
 /* #editor wraps the toolbar row, Monaco and the "Saved / Ln, Col" footer */
-html[data-lc-theme] #editor {
+html[data-lc-theme]:not(:has(.flexlayout__tabset #editor)) #editor {
   background-color: var(--lc-editor-bg, transparent) !important;
 }
 

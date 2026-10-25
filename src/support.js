@@ -25,11 +25,11 @@
     const ua = navigator.userAgent;
     const browser = (/Firefox\/(\d+)/.exec(ua) || [])[0] || (/Edg\/(\d+)/.exec(ua) || [])[0] || (/Chrome\/(\d+)/.exec(ua) || [])[0] || 'unknown browser';
     const v = chrome.runtime.getManifest().version;
-    const body = 'Hi AnshYadav,\n\nWhat happened:\n\n\nWhat I expected:\n\n\nProblem link (if any):\n\n\n---\n' +
+    const body = 'Hi Ansh,\n\nI need help / have a question regarding LeetGlow:\n\n\n[Describe your question or issue here]\n\n\n---\n' +
       `LeetGlow ${v} · ${browser.replace('/', ' ')} · theme: ${theme}`;
     return 'https://mail.google.com/mail/?view=cm&fs=1' +
       '&to=' + encodeURIComponent(root.LCTS_BUG_EMAIL) +
-      '&su=' + encodeURIComponent(`LeetGlow bug report (v${v})`) +
+      '&su=' + encodeURIComponent(`LeetGlow Support & Help (v${v})`) +
       '&body=' + encodeURIComponent(body);
   }
 
@@ -44,5 +44,6 @@
   }
   root.LCTSSupportButton = opens('LCTS_SUPPORT_URL');
   root.LCTSBugButton = opens(bugUrl);
+  root.LCTSHelpButton = opens(bugUrl);
   root.LCTSConnectButton = opens('LCTS_CONNECT_URL');
 })(globalThis);

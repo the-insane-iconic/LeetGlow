@@ -6,8 +6,7 @@
          "32": "icons/icon32.png",
          "48": "icons/icon48.png"
       },
-      "default_popup": "src/popup.html",
-      "default_title": "LeetGlow - Custome Theme & Sound Effects and Background"
+      "default_title": "LeetGlow - Custom Themes & Backgrounds"
    },
    "author": "AnshYadav",
    "background": {
@@ -47,9 +46,12 @@
       "https://*.razorpay.com/*"
    ],
    "manifest_version": 3,
-   "name": "LeetGlow - Custome Theme & Sound Effects and Background",
-   "permissions": [ "storage", "offscreen" ],
+   "name": "LeetGlow - Custom Themes, Sound Effects & Backgrounds",
+   "permissions": [ "storage", "offscreen", "sidePanel" ],
    "short_name": "LeetGlow",
+   "side_panel": {
+      "default_path": "src/popup.html"
+   },
    "version": "3.6.3",
    "web_accessible_resources": [ {
       "matches": [ "https://leetcode.com/*", "https://leetcode.cn/*" ],

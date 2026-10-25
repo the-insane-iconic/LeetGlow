@@ -41,11 +41,13 @@
         </svg>
         <span>Activate Key</span>
       </button>
-      <button id="bug" class="btn support bug" type="button" title="Found a bug? Email AnshYadav (opens Gmail with a short template).">
-        <svg viewBox="0 0 16 16" aria-hidden="true" width="13" height="13"><path d="M5.8 4.6a2.2 2.2 0 0 1 4.4 0Z"/><path d="M4.8 7a3.2 3.2 0 0 1 6.4 0v2.8a3.2 3.2 0 0 1-6.4 0Z"/><path class="legs" d="M2.2 7.4h2.4M11.4 7.4h2.4M2.4 11.2l2.3-.9M13.6 11.2l-2.3-.9M3.2 3.6l1.8 1.6M12.8 3.6 11 5.2"/></svg>Report bug
-      </button>
-      <button id="connect" class="btn support connect" type="button" title="Connect with AnshYadav on LinkedIn">
-        <svg viewBox="0 0 16 16" aria-hidden="true" width="13" height="13"><path d="M2.2 5.6h2.5V14H2.2zM3.45 1.8a1.45 1.45 0 1 1 0 2.9 1.45 1.45 0 0 1 0-2.9zM6.3 5.6h2.4v1.15h.03c.34-.63 1.15-1.3 2.37-1.3 2.53 0 3 1.67 3 3.83V14h-2.5V9.8c0-1-.02-2.3-1.4-2.3-1.4 0-1.6 1.1-1.6 2.22V14H6.3z"/></svg>Connect
+      <button id="getHelpBtn" class="btn support help" type="button" title="Need help or have questions? Contact support (opens email compose)">
+        <svg viewBox="0 0 16 16" aria-hidden="true" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="8" cy="8" r="6.25"/>
+          <path d="M6.5 6.2a1.8 1.8 0 0 1 3.4.6c0 1.2-1.9 1.5-1.9 2.5"/>
+          <circle cx="8" cy="11.8" r="0.6" fill="currentColor"/>
+        </svg>
+        <span>Get Help</span>
       </button>
       <button id="activate" class="btn primary" type="button" hidden>Use Anime Studio on LeetCode</button>
     </div>
@@ -66,45 +68,78 @@
       </div>
 
       <div class="group">
-        <h2>Glass</h2>
-        <div id="glass" class="segmented" role="radiogroup" aria-label="Glass">
-          <button type="button" role="radio" data-v="auto">Auto</button>
-          <button type="button" role="radio" data-v="dark">Dark</button>
-          <button type="button" role="radio" data-v="light">Light</button>
+        <h2>Appearance</h2>
+        <div class="setting-row">
+          <span class="setting-title">Glass Theme</span>
+          <div id="glass" class="segmented" role="radiogroup" aria-label="Glass">
+            <button type="button" role="radio" data-v="auto">Auto</button>
+            <button type="button" role="radio" data-v="dark">Dark</button>
+            <button type="button" role="radio" data-v="light">Light</button>
+          </div>
         </div>
-      </div>
-
-      <div class="group">
-        <div class="row-between">
-          <h2><label for="visibility">Scene visibility</label></h2>
-          <output id="visibilityOut" for="visibility"></output>
+        <div class="setting-slider-wrap">
+          <div class="row-between">
+            <label for="visibility" class="setting-title">Scene Visibility</label>
+            <output id="visibilityOut" for="visibility"></output>
+          </div>
+          <input id="visibility" type="range" min="0" max="100" step="1" />
         </div>
-        <input id="visibility" type="range" min="0" max="100" step="1" />
-        <p class="note">At 100 the glass sits exactly at its contrast floor, so no setting can make the text unreadable.</p>
-        <div id="report" class="report" aria-live="polite"></div>
       </div>
 
       <div class="group">
         <h2>Moments</h2>
         <label class="switch"><input id="titleCard" type="checkbox" /><span class="track"></span><span>Episode title card when you open a problem</span></label>
         <label class="switch"><input id="moments" type="checkbox" /><span class="track"></span><span>Verdict moments after Run and Submit</span></label>
-        <label class="switch"><input id="japanese" type="checkbox" /><span class="track"></span><span>Japanese text <span class="note">(第1話, 完了！ and the arc names; off shows English)</span></span></label>
-        <label class="switch"><input id="share" type="checkbox" /><span class="track"></span><span>Offer a share card after Accepted</span></label>
-        <label class="switch"><input id="sound" type="checkbox" /><span class="track"></span><span>Sound effects</span></label>
-        <div class="volume">
-          <label for="volume" class="note">Volume</label>
-          <input id="volume" type="range" min="0" max="100" step="1" />
-          <output id="volumeOut" for="volume"></output>
-        </div>
-        <div class="plays">
-          <span class="note">Play it:</span>
-          <button class="btn chip" type="button" data-play="title">Title card</button>
-          <button class="btn chip" type="button" data-play="ac">Accepted</button>
-          <button class="btn chip" type="button" data-play="run">Tests passed</button>
-          <button class="btn chip" type="button" data-play="wa">Wrong answer (Run)</button>
-          <button class="btn chip" type="button" data-play="wa-submit">Wrong answer (Submit)</button>
-          <button class="btn chip" type="button" data-play="tle">Time limit</button>
-          <button class="btn chip" type="button" data-play="err">Error</button>
+        <label class="switch"><input id="japanese" type="checkbox" /><span class="track"></span><span>Japanese typography <span class="note">(第1話, 完了！ and arc titles)</span></span></label>
+        <label class="switch"><input id="share" type="checkbox" /><span class="track"></span><span>Offer share card after Accepted</span></label>
+      </div>
+
+      <div class="group">
+        <h2>Sound Effects</h2>
+        <label class="switch"><input id="sound" type="checkbox" /><span class="track"></span><span>Verdict and celebration sound effects</span></label>
+        <div id="soundControls" class="sound-controls">
+          <div class="volume-slider-row">
+            <div class="row-between">
+              <label for="volume" class="setting-title">Volume</label>
+              <output id="volumeOut" for="volume"></output>
+            </div>
+            <input id="volume" type="range" min="0" max="100" step="1" />
+          </div>
+          <div class="sound-test-box">
+            <div class="sound-test-header">
+              <span class="setting-title">Preview Sounds</span>
+            </div>
+            <div class="sound-grid">
+              <button class="sound-pill" type="button" data-play="ac" title="Play Accepted sound">
+                <svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
+                <span>Accepted</span>
+              </button>
+              <button class="sound-pill" type="button" data-play="run" title="Play Tests passed sound">
+                <svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
+                <span>Tests Passed</span>
+              </button>
+              <button class="sound-pill" type="button" data-play="wa" title="Play Wrong answer (Run) sound">
+                <svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
+                <span>WA (Run)</span>
+              </button>
+              <button class="sound-pill" type="button" data-play="wa-submit" title="Play Wrong answer (Submit) sound">
+                <svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
+                <span>WA (Submit)</span>
+              </button>
+              <button class="sound-pill" type="button" data-play="tle" title="Play Time limit sound">
+                <svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
+                <span>Time Limit</span>
+              </button>
+              <button class="sound-pill" type="button" data-play="err" title="Play Error sound">
+                <svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
+                <span>Runtime Error</span>
+              </button>
+              <button class="sound-pill sound-pill-wide" type="button" data-play="title" title="Play Episode title card sound">
+                <svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
+                <span>Episode Title Card</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -122,133 +157,136 @@
       </div>
       <p class="caption">Live preview, rendered with the same stylesheets LeetCode gets.</p>
 
-      <!-- Comparison between Basic and Premium Features -->
-      <div class="tier-comparison-card" id="tierComparison">
-        <div class="comparison-card-header">
-          <div class="header-text-group">
-            <span class="comparison-badge">Plan Overview</span>
-            <h3 class="comparison-title">Basic vs. LeetGlow Premium</h3>
-            <p class="comparison-subtitle">Unlock the full LeetCode aesthetic with one-time ₹29 lifetime access.</p>
-          </div>
-          <div class="price-pill-tag">
-            <span class="price-strike">₹99</span>
-            <span class="price-val">₹29</span>
-            <span class="price-term">Lifetime</span>
-          </div>
-        </div>
-
-        <div class="comparison-table-wrapper">
-          <table class="comparison-table">
-            <thead>
-              <tr>
-                <th class="col-feature">Feature</th>
-                <th class="col-basic">Basic (Free)</th>
-                <th class="col-premium">
-                  <span>Premium (₹29)</span>
-                  <span class="best-value-tag">Best Value</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="feature-info">
-                  <strong>Anime Studio Themes</strong>
-                  <span>Default background and atmosphere</span>
-                </td>
-                <td class="basic-cell">Golden Hour only</td>
-                <td class="premium-cell highlight">
-                  <span class="check-icon">✓</span> All 18+ Anime Scenes
-                </td>
-              </tr>
-              <tr>
-                <td class="feature-info">
-                  <strong>Everyweek New Theme</strong>
-                  <span>Fresh community & seasonal drops</span>
-                </td>
-                <td class="basic-cell dash">—</td>
-                <td class="premium-cell highlight">
-                  <span class="check-icon">✓</span> Weekly Theme Releases
-                </td>
-              </tr>
-              <tr>
-                <td class="feature-info">
-                  <strong>Premium 4K Wallpaper Collection</strong>
-                  <span>Ultra-high definition anime art</span>
-                </td>
-                <td class="basic-cell dash">—</td>
-                <td class="premium-cell highlight">
-                  <span class="check-icon">✓</span> Full 4K Collection Access
-                </td>
-              </tr>
-              <tr>
-                <td class="feature-info">
-                  <strong>Animated Anime Themes</strong>
-                  <span>Dynamic live particles & glowing scenes</span>
-                </td>
-                <td class="basic-cell dash">—</td>
-                <td class="premium-cell highlight">
-                  <span class="check-icon">✓</span> Animated Themes Included
-                </td>
-              </tr>
-              <tr>
-                <td class="feature-info">
-                  <strong>Advance Glass Customisation</strong>
-                  <span>Contrast floor, opacity, blur & tint sliders</span>
-                </td>
-                <td class="basic-cell">Standard presets</td>
-                <td class="premium-cell highlight">
-                  <span class="check-icon">✓</span> Full Precision Tuning
-                </td>
-              </tr>
-              <tr>
-                <td class="feature-info">
-                  <strong>Custom Picture / Art Upload</strong>
-                  <span>Turn your favorite image or GIF into a theme</span>
-                </td>
-                <td class="basic-cell dash">Locked</td>
-                <td class="premium-cell highlight">
-                  <span class="check-icon">✓</span> Unlimited Custom Uploads
-                </td>
-              </tr>
-              <tr>
-                <td class="feature-info">
-                  <strong>Core Problem Page Themes</strong>
-                  <span>Cyber Crawler, RPG Quest, 8-Bit Retro</span>
-                </td>
-                <td class="basic-cell">Paper & Sakura</td>
-                <td class="premium-cell highlight">
-                  <span class="check-icon">✓</span> All Core & Arcade Themes
-                </td>
-              </tr>
-              <tr>
-                <td class="feature-info">
-                  <strong>Multi-Device License Key</strong>
-                  <span>Sync lifetime entitlement across setups</span>
-                </td>
-                <td class="basic-cell">1 browser</td>
-                <td class="premium-cell highlight">
-                  <span class="check-icon">✓</span> Up to 3 Personal Devices
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="comparison-card-footer">
-          <button type="button" id="comparisonUpgradeBtn" class="comparison-cta-btn">
-            <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden="true">
-              <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
-            </svg>
-            <span>Unlock All Premium Features for ₹29</span>
-          </button>
-          <div id="comparisonActivePill" class="comparison-active-banner" hidden>
-            <span class="dot-active"></span>
-            <span>All Premium Features Unlocked on this Device</span>
-          </div>
-        </div>
-      </div>
     </section>
   </main>
+
+  <!-- Comparison between Basic and Premium Features -->
+  <div class="studio-bottom">
+    <div class="tier-comparison-card" id="tierComparison">
+      <div class="comparison-card-header">
+        <div class="header-text-group">
+          <span class="comparison-badge">Plan Overview</span>
+          <h3 class="comparison-title">Basic vs. LeetGlow Premium</h3>
+          <p class="comparison-subtitle">Unlock the full LeetCode aesthetic with one-time ₹29 lifetime access.</p>
+        </div>
+        <div class="price-pill-tag">
+          <span class="price-strike">₹99</span>
+          <span class="price-val">₹29</span>
+          <span class="price-term">Lifetime</span>
+        </div>
+      </div>
+
+      <div class="comparison-table-wrapper">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th class="col-feature">Feature</th>
+              <th class="col-basic">Basic (Free)</th>
+              <th class="col-premium">
+                <span>Premium (₹29)</span>
+                <span class="best-value-tag">Best Value</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="feature-info">
+                <strong>Anime Studio Themes</strong>
+                <span>Default background and atmosphere</span>
+              </td>
+              <td class="basic-cell">Golden Hour only</td>
+              <td class="premium-cell highlight">
+                <span class="check-icon">✓</span> All 18+ Anime Scenes
+              </td>
+            </tr>
+            <tr>
+              <td class="feature-info">
+                <strong>Everyweek New Theme</strong>
+                <span>Fresh community & seasonal drops</span>
+              </td>
+              <td class="basic-cell dash">—</td>
+              <td class="premium-cell highlight">
+                <span class="check-icon">✓</span> Weekly Theme Releases
+              </td>
+            </tr>
+            <tr>
+              <td class="feature-info">
+                <strong>Premium 4K Wallpaper Collection</strong>
+                <span>Ultra-high definition anime art</span>
+              </td>
+              <td class="basic-cell dash">—</td>
+              <td class="premium-cell highlight">
+                <span class="check-icon">✓</span> Full 4K Collection Access
+              </td>
+            </tr>
+            <tr>
+              <td class="feature-info">
+                <strong>Animated Anime Themes</strong>
+                <span>Dynamic live particles & glowing scenes</span>
+              </td>
+              <td class="basic-cell dash">—</td>
+              <td class="premium-cell highlight">
+                <span class="check-icon">✓</span> Animated Themes Included
+              </td>
+            </tr>
+            <tr>
+              <td class="feature-info">
+                <strong>Advance Glass Customisation</strong>
+                <span>Contrast floor, opacity, blur & tint sliders</span>
+              </td>
+              <td class="basic-cell">Standard presets</td>
+              <td class="premium-cell highlight">
+                <span class="check-icon">✓</span> Full Precision Tuning
+              </td>
+            </tr>
+            <tr>
+              <td class="feature-info">
+                <strong>Custom Picture / Art Upload</strong>
+                <span>Turn your favorite image or GIF into a theme</span>
+              </td>
+              <td class="basic-cell dash">Locked</td>
+              <td class="premium-cell highlight">
+                <span class="check-icon">✓</span> Unlimited Custom Uploads
+              </td>
+            </tr>
+            <tr>
+              <td class="feature-info">
+                <strong>Core Problem Page Themes</strong>
+                <span>Cyber Crawler, RPG Quest, 8-Bit Retro</span>
+              </td>
+              <td class="basic-cell">Paper & Sakura</td>
+              <td class="premium-cell highlight">
+                <span class="check-icon">✓</span> All Core & Arcade Themes
+              </td>
+            </tr>
+            <tr>
+              <td class="feature-info">
+                <strong>Multi-Device License Key</strong>
+                <span>Sync lifetime entitlement across setups</span>
+              </td>
+              <td class="basic-cell">1 browser</td>
+              <td class="premium-cell highlight">
+                <span class="check-icon">✓</span> Up to 3 Personal Devices
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="comparison-card-footer">
+        <button type="button" id="comparisonUpgradeBtn" class="comparison-cta-btn">
+          <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden="true">
+            <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
+          </svg>
+          <span>Unlock All Premium Features for ₹29</span>
+        </button>
+        <div id="comparisonActivePill" class="comparison-active-banner" hidden>
+          <span class="dot-active"></span>
+          <span>All Premium Features Unlocked on this Device</span>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Purchase Modal: Professional White Multi-Step Checkout (1: Credentials, 2: Payment, 3: Confirmation) -->
   <dialog id="purchaseModal" class="leetglow-checkout-dialog">
