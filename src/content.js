@@ -71,8 +71,20 @@
     }
   }
 
-  function apply(theme) {
+  const PREMIUM_THEMES = new Set(['crawler', 'game', 'pixel']);
+
+  async function checkAllowed(theme) {
+    if (!PREMIUM_THEMES.has(theme)) return theme;
+    try {
+      const prem = (await chrome.storage.local.get('leetglowPremium'))?.leetglowPremium;
+      if (prem && prem.active) return theme;
+    } catch (e) {}
+    return 'sakura';
+  }
+
+  async function apply(theme) {
     if (!VALID.has(theme)) theme = DEFAULT;
+    theme = await checkAllowed(theme);
     if (theme === current) return;
     const was = current;
     current = theme;
@@ -94,6 +106,9 @@
 
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area === 'local' && changes[KEY]) apply(changes[KEY].newValue || DEFAULT);
+    if (area === 'local' && changes.leetglowPremium) {
+      chrome.storage.local.get(KEY, (res) => apply((res && res[KEY]) || DEFAULT));
+    }
   });
 
   // body may not exist at document_start; sync the base classes onto it once ready.

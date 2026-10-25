@@ -17,8 +17,27 @@
     </div>
     <div class="top-actions">
       <span id="activeState" class="state"></span>
-      <button id="support" class="btn support" type="button" title="LeetGlow is free. If it makes your grind nicer, you can chip in.">
-        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 14s-5.5-3.4-5.5-7.1A3 3 0 0 1 8 4.6a3 3 0 0 1 5.5 2.3C13.5 10.6 8 14 8 14Z"/></svg>Support
+
+      <!-- Server-Verified Premium Status Badge -->
+      <div id="premiumBadge" class="premium-badge inactive" title="Checking server entitlement...">
+        <span class="badge-dot inactive"></span>
+        <span class="badge-text">Premium Inactive</span>
+      </div>
+
+      <!-- Get Premium Access Button -->
+      <button id="getPremiumBtn" class="btn premium-action-btn" type="button" title="Unlock all premium themes and anime scenes for ₹29">
+        <svg viewBox="0 0 16 16" aria-hidden="true" width="14" height="14" fill="currentColor">
+          <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
+        </svg>
+        <span>Get Premium Access</span>
+      </button>
+
+      <!-- Activate Key Button -->
+      <button id="activatePremiumBtn" class="btn activate-key-btn" type="button" title="Activate using your 16-character license key">
+        <svg viewBox="0 0 16 16" aria-hidden="true" width="14" height="14" fill="currentColor">
+          <path d="M0 8a4 4 0 0 1 7.465-2H14a.5.5 0 0 1 .354.146l1.5 1.5a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708 0L13 9.207l-.646.647a.5.5 0 0 1-.708 0L11 9.207l-.646.647a.5.5 0 0 1-.708 0L9 9.207l-.646.647a.5.5 0 0 1-.708 0L7.465 10A4 4 0 0 1 0 8zm4-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
+        </svg>
+        <span>Activate Key</span>
       </button>
       <button id="bug" class="btn support bug" type="button" title="Found a bug? Email AnshYadav (opens Gmail with a short template).">
         <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5.8 4.6a2.2 2.2 0 0 1 4.4 0Z"/><path d="M4.8 7a3.2 3.2 0 0 1 6.4 0v2.8a3.2 3.2 0 0 1-6.4 0Z"/><path class="legs" d="M2.2 7.4h2.4M11.4 7.4h2.4M2.4 11.2l2.3-.9M13.6 11.2l-2.3-.9M3.2 3.6l1.8 1.6M12.8 3.6 11 5.2"/></svg>Report bug
@@ -100,14 +119,392 @@
         <div id="busy" class="busy" hidden><span></span>Preparing your picture…</div>
       </div>
       <p class="caption">Live preview, rendered with the same stylesheets LeetCode gets.</p>
+
+      <!-- Comparison between Basic and Premium Features -->
+      <div class="tier-comparison-card" id="tierComparison">
+        <div class="comparison-card-header">
+          <div class="header-text-group">
+            <span class="comparison-badge">Plan Overview</span>
+            <h3 class="comparison-title">Basic vs. LeetGlow Premium</h3>
+            <p class="comparison-subtitle">Unlock the full LeetCode aesthetic with one-time ₹29 lifetime access.</p>
+          </div>
+          <div class="price-pill-tag">
+            <span class="price-strike">₹99</span>
+            <span class="price-val">₹29</span>
+            <span class="price-term">Lifetime</span>
+          </div>
+        </div>
+
+        <div class="comparison-table-wrapper">
+          <table class="comparison-table">
+            <thead>
+              <tr>
+                <th class="col-feature">Feature</th>
+                <th class="col-basic">Basic (Free)</th>
+                <th class="col-premium">
+                  <span>Premium (₹29)</span>
+                  <span class="best-value-tag">Best Value</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="feature-info">
+                  <strong>Anime Studio Themes</strong>
+                  <span>Default background and atmosphere</span>
+                </td>
+                <td class="basic-cell">Golden Hour only</td>
+                <td class="premium-cell highlight">
+                  <span class="check-icon">✓</span> All 18+ Anime Scenes
+                </td>
+              </tr>
+              <tr>
+                <td class="feature-info">
+                  <strong>Everyweek New Theme</strong>
+                  <span>Fresh community & seasonal drops</span>
+                </td>
+                <td class="basic-cell dash">—</td>
+                <td class="premium-cell highlight">
+                  <span class="check-icon">✓</span> Weekly Theme Releases
+                </td>
+              </tr>
+              <tr>
+                <td class="feature-info">
+                  <strong>Premium 4K Wallpaper Collection</strong>
+                  <span>Ultra-high definition anime art</span>
+                </td>
+                <td class="basic-cell dash">—</td>
+                <td class="premium-cell highlight">
+                  <span class="check-icon">✓</span> Full 4K Collection Access
+                </td>
+              </tr>
+              <tr>
+                <td class="feature-info">
+                  <strong>Animated Anime Themes</strong>
+                  <span>Dynamic live particles & glowing scenes</span>
+                </td>
+                <td class="basic-cell dash">—</td>
+                <td class="premium-cell highlight">
+                  <span class="check-icon">✓</span> Animated Themes Included
+                </td>
+              </tr>
+              <tr>
+                <td class="feature-info">
+                  <strong>Advance Glass Customisation</strong>
+                  <span>Contrast floor, opacity, blur & tint sliders</span>
+                </td>
+                <td class="basic-cell">Standard presets</td>
+                <td class="premium-cell highlight">
+                  <span class="check-icon">✓</span> Full Precision Tuning
+                </td>
+              </tr>
+              <tr>
+                <td class="feature-info">
+                  <strong>Custom Picture / Art Upload</strong>
+                  <span>Turn your favorite image or GIF into a theme</span>
+                </td>
+                <td class="basic-cell dash">Locked</td>
+                <td class="premium-cell highlight">
+                  <span class="check-icon">✓</span> Unlimited Custom Uploads
+                </td>
+              </tr>
+              <tr>
+                <td class="feature-info">
+                  <strong>Core Problem Page Themes</strong>
+                  <span>Cyber Crawler, RPG Quest, 8-Bit Retro</span>
+                </td>
+                <td class="basic-cell">Paper & Sakura</td>
+                <td class="premium-cell highlight">
+                  <span class="check-icon">✓</span> All Core & Arcade Themes
+                </td>
+              </tr>
+              <tr>
+                <td class="feature-info">
+                  <strong>Multi-Device License Key</strong>
+                  <span>Sync lifetime entitlement across setups</span>
+                </td>
+                <td class="basic-cell">1 browser</td>
+                <td class="premium-cell highlight">
+                  <span class="check-icon">✓</span> Up to 3 Personal Devices
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="comparison-card-footer">
+          <button type="button" id="comparisonUpgradeBtn" class="comparison-cta-btn">
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden="true">
+              <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
+            </svg>
+            <span>Unlock All Premium Features for ₹29</span>
+          </button>
+          <div id="comparisonActivePill" class="comparison-active-banner" hidden>
+            <span class="dot-active"></span>
+            <span>All Premium Features Unlocked on this Device</span>
+          </div>
+        </div>
+      </div>
     </section>
   </main>
+
+  <!-- Purchase Modal: Professional White Multi-Step Checkout (1: Credentials, 2: Payment, 3: Confirmation) -->
+  <dialog id="purchaseModal" class="leetglow-checkout-dialog">
+    <div class="checkout-card">
+      <!-- Modal Header -->
+      <div class="checkout-header">
+        <div class="checkout-brand">
+          <div class="checkout-logo-wrap">
+            <img src="../icons/icon128.png" alt="LeetGlow Logo" width="28" height="28" />
+          </div>
+          <div>
+            <h3 class="checkout-title">LeetGlow Premium Checkout</h3>
+            <p class="checkout-subtitle">Secure 256-bit Encrypted Checkout · Lifetime Access (₹29)</p>
+          </div>
+        </div>
+        <button id="closePurchaseModal" class="checkout-close-btn" type="button" aria-label="Close dialog">✕</button>
+      </div>
+
+      <!-- Stepper: 1 Credentials -> 2 Payment -> 3 Confirmation -->
+      <div class="checkout-stepper" role="navigation" aria-label="Checkout Progress">
+        <div class="step-node active" id="stepIndicator1">
+          <span class="step-num">1</span>
+          <span class="step-label">Credentials</span>
+        </div>
+        <div class="step-divider" id="stepLine1"></div>
+        <div class="step-node" id="stepIndicator2">
+          <span class="step-num">2</span>
+          <span class="step-label">Payment</span>
+        </div>
+        <div class="step-divider" id="stepLine2"></div>
+        <div class="step-node" id="stepIndicator3">
+          <span class="step-num">3</span>
+          <span class="step-label">Confirmation</span>
+        </div>
+      </div>
+
+      <!-- STEP 1: CREDENTIALS -->
+      <div id="step1Credentials" class="checkout-step-pane">
+        <div class="step-intro">
+          <h4>Customer Credentials</h4>
+          <p>Please enter your contact information. Your permanent 16-character license key will be delivered to this email.</p>
+        </div>
+
+        <form id="credentialsForm" class="checkout-form">
+          <div class="form-grid">
+            <div class="form-field full-width">
+              <label for="custName">Full Name <span class="required">*</span></label>
+              <input type="text" id="custName" placeholder="e.g. Ansh Yadav" required autocomplete="name" />
+            </div>
+            <div class="form-field">
+              <label for="custEmail">Email Address <span class="required">*</span></label>
+              <input type="email" id="custEmail" placeholder="e.g. ansh@example.com" required autocomplete="email" />
+              <span class="field-subtext">License key is sent to this address</span>
+            </div>
+            <div class="form-field">
+              <label for="custPhone">Phone Number <span class="required">*</span></label>
+              <input type="tel" id="custPhone" placeholder="10-digit mobile number" pattern="[0-9]{10}" required autocomplete="tel" />
+              <span class="field-subtext">For Razorpay payment verification</span>
+            </div>
+          </div>
+
+          <div id="credentialsError" class="checkout-alert-error" hidden></div>
+
+          <div class="checkout-pane-actions">
+            <div class="trust-pill">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                <path d="M8 1a2 2 0 0 0-2 2v2H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2zm1 4H7V3a1 1 0 0 1 2 0v2z"/>
+              </svg>
+              <span>100% Confidential · No Spam</span>
+            </div>
+            <button type="submit" id="toPaymentBtn" class="btn-checkout-primary">
+              <span>Continue to Payment →</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- STEP 2: PAYMENT -->
+      <div id="step2Payment" class="checkout-step-pane" hidden>
+        <div class="payment-layout-grid">
+          <!-- Left: Order Summary -->
+          <div class="order-summary-card">
+            <span class="summary-tag">Order Summary</span>
+            <div class="product-info-row">
+              <div class="product-meta">
+                <h5>LeetGlow Premium</h5>
+                <span class="product-badge">Lifetime License</span>
+              </div>
+              <span class="product-amount">₹29.00</span>
+            </div>
+
+            <ul class="product-perks-list">
+              <li>
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="#10b981"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/></svg>
+                <span>All Anime Scenes & Themes unlocked</span>
+              </li>
+              <li>
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="#10b981"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/></svg>
+                <span>Custom picture themes & glass tuning</span>
+              </li>
+              <li>
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="#10b981"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/></svg>
+                <span>Sound effects & ambient audio packs</span>
+              </li>
+              <li>
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="#10b981"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/></svg>
+                <span>Activate on up to 3 personal devices</span>
+              </li>
+            </ul>
+
+            <div class="summary-line-divider"></div>
+
+            <div class="price-breakdown">
+              <div class="breakdown-row">
+                <span>Subtotal</span>
+                <span>₹29.00</span>
+              </div>
+              <div class="breakdown-row">
+                <span>GST / Taxes</span>
+                <span>Included</span>
+              </div>
+              <div class="breakdown-total">
+                <strong>Total Amount</strong>
+                <strong class="total-price">₹29.00</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Customer Confirmation & Razorpay Trigger -->
+          <div class="payment-action-card">
+            <div class="customer-preview-box">
+              <div class="preview-header-row">
+                <span class="preview-label">Customer Details</span>
+                <button type="button" id="editCredentialsBtn" class="btn-link-edit">Edit</button>
+              </div>
+              <div class="preview-details">
+                <div class="preview-item">
+                  <span class="preview-key">Name:</span>
+                  <strong id="previewName">—</strong>
+                </div>
+                <div class="preview-item">
+                  <span class="preview-key">Email:</span>
+                  <span id="previewEmail">—</span>
+                </div>
+                <div class="preview-item">
+                  <span class="preview-key">Phone:</span>
+                  <span id="previewPhone">—</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="payment-method-box">
+              <div class="rzp-header-row">
+                <span class="method-title">Payment Method</span>
+                <span class="rzp-trust-badge">Razorpay Verified</span>
+              </div>
+              <p class="method-sub">Click below to open Razorpay's secure checkout. Supports <strong>UPI (GPay, PhonePe, Paytm), Cards & NetBanking</strong>.</p>
+            </div>
+
+            <div id="paymentError" class="checkout-alert-error" hidden></div>
+
+            <div class="checkout-pane-actions split">
+              <button type="button" id="backToStep1Btn" class="btn-checkout-secondary">
+                <span>← Back</span>
+              </button>
+              <button type="button" id="payBtn" class="btn-checkout-primary pay-action-btn">
+                <span>Pay ₹29 via Razorpay</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3: CONFIRMATION -->
+      <div id="step3Confirmation" class="checkout-step-pane" hidden>
+        <div class="confirmation-content-box">
+          <div class="confirm-icon-circle">
+            <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+          <h3 class="confirm-heading">Payment Verified & Captured!</h3>
+          <p class="confirm-message">
+            Thank you! A confirmation receipt and license key have been emailed to <strong id="successEmail"></strong>.
+          </p>
+
+          <div class="license-key-box">
+            <span class="key-box-label">Your Lifetime License Key</span>
+            <div class="key-display-row">
+              <code id="issuedKey">LG-XXXX-XXXX-XXXX</code>
+              <button id="copyKeyBtn" class="btn-copy-key" type="button">Copy Key</button>
+            </div>
+            <p class="key-recovery-note">Save this key! You can use it to restore or activate LeetGlow on up to <strong>3 devices</strong>.</p>
+          </div>
+
+          <div class="confirm-entitlement-badge">
+            <span class="dot-active"></span>
+            <span>Server-Confirmed Premium Entitlement is now Active on this Browser</span>
+          </div>
+
+          <div class="confirm-action-footer">
+            <button id="donePurchaseBtn" class="btn-checkout-primary full-width" type="button">
+              <span>Start Using LeetGlow Premium</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Key Activation Modal: Professional White Design -->
+  <dialog id="activationModal" class="leetglow-checkout-dialog">
+    <div class="checkout-card activation-card-size">
+      <div class="checkout-header">
+        <div class="checkout-brand">
+          <div class="checkout-logo-wrap">
+            <img src="../icons/icon128.png" alt="LeetGlow Logo" width="28" height="28" />
+          </div>
+          <div>
+            <h3 class="checkout-title">Activate License Key</h3>
+            <p class="checkout-subtitle">Enter your 16-character license key sent to your email.</p>
+          </div>
+        </div>
+        <button id="closeActivationModal" class="checkout-close-btn" type="button" aria-label="Close dialog">✕</button>
+      </div>
+
+      <form id="activationForm" class="checkout-form">
+        <div class="step-intro">
+          <h4>License Key Verification</h4>
+          <p>Paste the 16-character key from your purchase confirmation email. This key will be securely validated against Supabase and bound to this device.</p>
+        </div>
+
+        <div class="form-field full-width">
+          <label for="licenseKeyInput">License Key <span class="required">*</span></label>
+          <input type="text" id="licenseKeyInput" placeholder="LG-XXXX-XXXX-XXXX" maxlength="19" required autocomplete="off" />
+          <span class="field-subtext">Format: LG-XXXX-XXXX-XXXX</span>
+        </div>
+
+        <div id="activationError" class="checkout-alert-error" hidden></div>
+        <div id="activationSuccess" class="checkout-alert-success" hidden></div>
+
+        <div class="checkout-pane-actions">
+          <button type="submit" id="submitKeyBtn" class="btn-checkout-primary full-width">
+            <span>Verify & Activate License</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </dialog>
 
   <script src="anime/scenes.js"></script>
   <script src="anime/solver.js"></script>
   <script src="anime/process.js"></script>
   <script src="anime/sounds.js"></script>
   <script src="support.js"></script>
+  <script src="razorpay-checkout.js"></script>
+  <script src="premium-config.js"></script>
+  <script src="premium.js"></script>
   <script src="studio.js"></script>
 </body>
 </html>

@@ -42,6 +42,10 @@
       "32": "icons/icon32.png",
       "48": "icons/icon48.png"
    },
+   "host_permissions": [
+      "https://*.supabase.co/*",
+      "https://*.razorpay.com/*"
+   ],
    "manifest_version": 3,
    "name": "LeetGlow - Custome Theme & Sound Effects and Background",
    "permissions": [ "storage", "offscreen" ],

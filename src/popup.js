@@ -266,7 +266,23 @@ document.addEventListener('keydown', (e) => {
   choose(next.dataset.id);
 });
 
-/* the Support and Report bug links (src/support.js holds the URLs) */
-if (globalThis.LCTSSupportButton) globalThis.LCTSSupportButton(document.getElementById('support'));
+/* Premium status & Links (src/support.js & src/premium.js) */
+const premBtn = document.getElementById('premiumStatus');
+if (premBtn) {
+  premBtn.addEventListener('click', () => {
+    chrome.tabs.create({ url: chrome.runtime.getURL('src/studio.html') });
+    window.close();
+  });
+  if (globalThis.LeetGlowPremium) {
+    globalThis.LeetGlowPremium.checkServerEntitlement().then((res) => {
+      const dot = document.getElementById('popupBadgeDot');
+      if (dot) {
+        dot.style.background = res && res.active ? '#22c55e' : '#ef4444';
+        dot.style.boxShadow = res && res.active ? '0 0 8px #22c55e' : '0 0 6px #ef4444';
+      }
+      premBtn.title = res && res.active ? 'LeetGlow Premium Active (Click to manage)' : 'LeetGlow Premium Inactive (Click to upgrade)';
+    });
+  }
+}
 if (globalThis.LCTSBugButton) globalThis.LCTSBugButton(document.getElementById('bug'));
 if (globalThis.LCTSConnectButton) globalThis.LCTSConnectButton(document.getElementById('connect'));

@@ -23,16 +23,26 @@
   let themes = {};              // scene id -> solve at the current glass settings
 
   /* which scene the preview shows (and a gallery click changes) */
-  const arcScene = (d) => (SCENES[settings.arcScenes[d]] ? settings.arcScenes[d] : ARC[d]);
-  const viewId = () => settings.scene === 'custom' ? 'custom' : (settings.arcs ? arcScene(slot) : settings.scene);
+  const arcScene = (d) => {
+    if (!isPremium) return 'golden-hour';
+    return (SCENES[settings.arcScenes[d]] ? settings.arcScenes[d] : ARC[d]);
+  };
+  const viewId = () => {
+    if (!isPremium) return 'golden-hour';
+    return settings.scene === 'custom' ? 'custom' : (settings.arcs ? arcScene(slot) : settings.scene);
+  };
   /* every scene LeetCode may show with the current settings */
-  const neededIds = () => settings.scene === 'custom' ? ['custom']
-    : settings.arcs ? [...new Set(SLOTS.map(([d]) => arcScene(d)))] : [settings.scene];
+  const neededIds = () => {
+    if (!isPremium) return ['golden-hour'];
+    return settings.scene === 'custom' ? ['custom']
+      : settings.arcs ? [...new Set(SLOTS.map(([d]) => arcScene(d)))] : [settings.scene];
+  };
   let prepared = null;          // samples + blobs for the current scene
   let theme = null;             // the current solve
   let previewUrls = null;       // object URLs the preview is showing
   let hasArt = false;
   let customThumb = null;
+  let isPremium = false;
 
   /* ---- preview frame --------------------------------------------------------- */
   const frame = $('frame');
@@ -146,24 +156,72 @@
       b.setAttribute('role', 'radio');
       b.setAttribute('aria-checked', String(viewId() === id));
       b.style.backgroundImage = `url("${chrome.runtime.getURL(s.thumb || s.wall)}")`;
-      b.innerHTML = `<span class="name">${s.name}</span>`;
-      b.title = s.desc + (s.credit ? ' · ' + s.credit : '');
-      b.addEventListener('click', () => pickScene(id));
+
+      // When premium is inactive, ONLY Golden Hour is accessible; all others are locked
+      const isLocked = !isPremium && id !== 'golden-hour';
+      if (isLocked) {
+        b.classList.add('is-locked');
+      }
+
+      const lockBadgeHTML = isLocked
+        ? `<span class="scene-lock-badge" title="Premium Theme — Click to unlock">
+            <svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor" aria-hidden="true">
+              <path d="M8 1a3 3 0 0 0-3 3v3H4a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1h-1V4a3 3 0 0 0-3-3zm1.5 6h-3V4a1.5 1.5 0 0 1 3 0v3z"/>
+            </svg>
+          </span>`
+        : '';
+
+      b.innerHTML = `${lockBadgeHTML}<span class="name">${s.name}</span>`;
+      b.title = isLocked
+        ? `${s.name} (Premium Theme — Click to unlock)`
+        : s.desc + (s.credit ? ' · ' + s.credit : '');
+
+      b.addEventListener('click', () => {
+        if (isLocked) {
+          $('purchaseModal').showModal();
+        } else {
+          pickScene(id);
+        }
+      });
       presets.appendChild(b);
     });
 
     const up = document.createElement('button');
     up.type = 'button';
     up.className = 'scene upload' + (hasArt ? ' has-art' : '');
+    const upLocked = !isPremium;
+    if (upLocked) {
+      up.classList.add('is-locked');
+    }
     up.setAttribute('role', 'radio');
     up.setAttribute('aria-checked', String(settings.scene === 'custom'));
     if (hasArt && customThumb) up.style.backgroundImage = `url("${customThumb}")`;
-    up.innerHTML = `<span class="plus" aria-hidden="true">+</span><span class="name">${hasArt ? 'Your picture' : 'Add your picture'}</span>`;
-    up.addEventListener('click', () => { if (hasArt && settings.scene !== 'custom') pickScene('custom'); else $('file').click(); });
+
+    const upLockHTML = upLocked
+      ? `<span class="scene-lock-badge" title="Custom Picture Upload (Premium) — Click to unlock">
+          <svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor" aria-hidden="true">
+            <path d="M8 1a3 3 0 0 0-3 3v3H4a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1h-1V4a3 3 0 0 0-3-3zm1.5 6h-3V4a1.5 1.5 0 0 1 3 0v3z"/>
+          </svg>
+        </span>`
+      : '';
+
+    up.innerHTML = `${upLockHTML}<span class="plus" aria-hidden="true">+</span><span class="name">${hasArt ? 'Your picture' : 'Add your picture'}</span>`;
+    up.addEventListener('click', () => {
+      if (upLocked) {
+        $('purchaseModal').showModal();
+        return;
+      }
+      if (hasArt && settings.scene !== 'custom') pickScene('custom');
+      else $('file').click();
+    });
     ['dragenter', 'dragover'].forEach((t) => up.addEventListener(t, (e) => { e.preventDefault(); up.classList.add('dragging'); }));
     ['dragleave', 'drop'].forEach((t) => up.addEventListener(t, () => up.classList.remove('dragging')));
     up.addEventListener('drop', (e) => {
       e.preventDefault();
+      if (upLocked) {
+        $('purchaseModal').showModal();
+        return;
+      }
       const f = e.dataTransfer.files && e.dataTransfer.files[0];
       if (f) upload(f);
     });
@@ -198,6 +256,10 @@
   }
 
   async function pickScene(id) {
+    if (!isPremium && id !== 'golden-hour') {
+      $('purchaseModal').showModal();
+      return;
+    }
     busy(true);
     try {
       justSet = null;
@@ -259,6 +321,11 @@
   }
 
   async function upload(file) {
+    if (!isPremium) {
+      $('purchaseModal').showModal();
+      note('Custom picture backgrounds are a LeetGlow Premium feature.', true);
+      return;
+    }
     if (!/^image\//.test(file.type)) { note('That file is not an image.', true); return; }
     if (file.size > MAX_INPUT) { note('That image is over 30 MB. Try a smaller copy.', true); return; }
     busy(true, 'Preparing your picture…');
@@ -297,7 +364,6 @@
     $('activate').hidden = on;
   }
   $('activate').addEventListener('click', activate);
-  if (globalThis.LCTSSupportButton) globalThis.LCTSSupportButton($('support'));
   if (globalThis.LCTSBugButton) globalThis.LCTSBugButton($('bug'));
   if (globalThis.LCTSConnectButton) globalThis.LCTSConnectButton($('connect'));
 
@@ -420,6 +486,11 @@
        sound exactly like LeetCode will */
     globalThis.LCTSSounds.warm('anime');
 
+    // Initialize Server-Verified Premium System
+    if (typeof initPremiumSystem === 'function') {
+      await initPremiumSystem();
+    }
+
     busy(true, 'Loading scene…');
     try {
       await refresh();
@@ -428,10 +499,415 @@
     } finally { busy(false); }
   })();
 
+  /* ---- Premium System Integration -------------------------------------------- */
+  async function initPremiumSystem() {
+    const Premium = globalThis.LeetGlowPremium;
+    if (!Premium) return;
+
+    const badge = $('premiumBadge');
+    const getPremiumBtn = $('getPremiumBtn');
+    const activateBtn = $('activatePremiumBtn');
+
+    // Modals & Multi-Step Elements
+    const purchaseModal = $('purchaseModal');
+    const closePurchaseModal = $('closePurchaseModal');
+
+    // Step 1: Credentials
+    const credentialsForm = $('credentialsForm');
+    const custName = $('custName');
+    const custEmail = $('custEmail');
+    const custPhone = $('custPhone');
+    const credentialsError = $('credentialsError');
+
+    // Step 2: Payment
+    const previewName = $('previewName');
+    const previewEmail = $('previewEmail');
+    const previewPhone = $('previewPhone');
+    const editCredentialsBtn = $('editCredentialsBtn');
+    const backToStep1Btn = $('backToStep1Btn');
+    const payBtn = $('payBtn');
+    const paymentError = $('paymentError');
+
+    // Step 3: Confirmation
+    const successEmail = $('successEmail');
+    const issuedKey = $('issuedKey');
+    const copyKeyBtn = $('copyKeyBtn');
+    const donePurchaseBtn = $('donePurchaseBtn');
+
+    // Activation Modal
+    const activationModal = $('activationModal');
+    const closeActivationModal = $('closeActivationModal');
+    const activationForm = $('activationForm');
+    const licenseKeyInput = $('licenseKeyInput');
+    const activationError = $('activationError');
+    const activationSuccess = $('activationSuccess');
+    const submitKeyBtn = $('submitKeyBtn');
+
+    // Stepper State Controller
+    function setCheckoutStep(step) {
+      const s1 = $('stepIndicator1');
+      const s2 = $('stepIndicator2');
+      const s3 = $('stepIndicator3');
+      const l1 = $('stepLine1');
+      const l2 = $('stepLine2');
+
+      const p1 = $('step1Credentials');
+      const p2 = $('step2Payment');
+      const p3 = $('step3Confirmation');
+
+      if (step === 1) {
+        if (s1) { s1.className = 'step-node active'; const n = s1.querySelector('.step-num'); if (n) n.textContent = '1'; }
+        if (s2) { s2.className = 'step-node'; const n = s2.querySelector('.step-num'); if (n) n.textContent = '2'; }
+        if (s3) { s3.className = 'step-node'; const n = s3.querySelector('.step-num'); if (n) n.textContent = '3'; }
+        if (l1) l1.className = 'step-divider';
+        if (l2) l2.className = 'step-divider';
+
+        if (p1) p1.hidden = false;
+        if (p2) p2.hidden = true;
+        if (p3) p3.hidden = true;
+      } else if (step === 2) {
+        if (s1) { s1.className = 'step-node completed'; const n = s1.querySelector('.step-num'); if (n) n.textContent = '✓'; }
+        if (s2) { s2.className = 'step-node active'; const n = s2.querySelector('.step-num'); if (n) n.textContent = '2'; }
+        if (s3) { s3.className = 'step-node'; const n = s3.querySelector('.step-num'); if (n) n.textContent = '3'; }
+        if (l1) l1.className = 'step-divider completed';
+        if (l2) l2.className = 'step-divider';
+
+        if (p1) p1.hidden = true;
+        if (p2) p2.hidden = false;
+        if (p3) p3.hidden = true;
+      } else if (step === 3) {
+        if (s1) { s1.className = 'step-node completed'; const n = s1.querySelector('.step-num'); if (n) n.textContent = '✓'; }
+        if (s2) { s2.className = 'step-node completed'; const n = s2.querySelector('.step-num'); if (n) n.textContent = '✓'; }
+        if (s3) { s3.className = 'step-node active completed'; const n = s3.querySelector('.step-num'); if (n) n.textContent = '✓'; }
+        if (l1) l1.className = 'step-divider completed';
+        if (l2) l2.className = 'step-divider completed';
+
+        if (p1) p1.hidden = true;
+        if (p2) p2.hidden = true;
+        if (p3) p3.hidden = false;
+      }
+    }
+
+    // Comparison CTA & Pill
+    const compUpgradeBtn = $('comparisonUpgradeBtn');
+    const compActivePill = $('comparisonActivePill');
+
+    // 1. Initial server-verified entitlement check
+    const status = await Premium.checkServerEntitlement();
+    isPremium = !!(status && status.active);
+    Premium.updateBadge(badge, isPremium, status.key_prefix);
+    if (isPremium && getPremiumBtn) {
+      getPremiumBtn.hidden = true;
+    }
+
+    if (compUpgradeBtn) {
+      compUpgradeBtn.hidden = isPremium;
+      compUpgradeBtn.onclick = () => {
+        if (getPremiumBtn) {
+          getPremiumBtn.click();
+        } else {
+          if (credentialsForm) credentialsForm.reset();
+          if (credentialsError) credentialsError.hidden = true;
+          if (paymentError) paymentError.hidden = true;
+          if (payBtn) {
+            payBtn.disabled = false;
+            payBtn.innerHTML = '<span>Pay ₹29 via Razorpay</span>';
+          }
+          setCheckoutStep(1);
+          purchaseModal.showModal();
+          if (custName) custName.focus();
+        }
+      };
+    }
+    if (compActivePill) {
+      compActivePill.hidden = !isPremium;
+    }
+
+    // When premium is inactive, ensure only Golden Hour is active
+    if (!isPremium && settings.scene !== 'golden-hour') {
+      settings.scene = 'golden-hour';
+      if (settings.arcs) {
+        settings.arcScenes = { easy: 'golden-hour', medium: 'golden-hour', hard: 'golden-hour' };
+      }
+    }
+
+    // 2. Open Purchase Modal (Starts at Step 1: Credentials)
+    if (getPremiumBtn) {
+      getPremiumBtn.addEventListener('click', () => {
+        if (credentialsForm) credentialsForm.reset();
+        if (credentialsError) credentialsError.hidden = true;
+        if (paymentError) paymentError.hidden = true;
+        if (payBtn) {
+          payBtn.disabled = false;
+          payBtn.innerHTML = '<span>Pay ₹29 via Razorpay</span>';
+        }
+        setCheckoutStep(1);
+        purchaseModal.showModal();
+        if (custName) custName.focus();
+      });
+    }
+
+    if (closePurchaseModal) {
+      closePurchaseModal.addEventListener('click', () => purchaseModal.close());
+    }
+
+    // Step 1: Validate Credentials & Advance to Step 2
+    if (credentialsForm) {
+      credentialsForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (credentialsError) credentialsError.hidden = true;
+
+        const name = custName ? custName.value.trim() : '';
+        const email = custEmail ? custEmail.value.trim() : '';
+        const phone = custPhone ? custPhone.value.trim() : '';
+
+        if (!name || !email || !phone) {
+          if (credentialsError) {
+            credentialsError.textContent = 'Please fill out all fields.';
+            credentialsError.hidden = false;
+          }
+          return;
+        }
+
+        if (phone.length < 10) {
+          if (credentialsError) {
+            credentialsError.textContent = 'Please enter a valid 10-digit phone number.';
+            credentialsError.hidden = false;
+          }
+          return;
+        }
+
+        // Populate Step 2 preview
+        if (previewName) previewName.textContent = name;
+        if (previewEmail) previewEmail.textContent = email;
+        if (previewPhone) previewPhone.textContent = '+91 ' + phone;
+
+        // Advance to Step 2 (Payment)
+        setCheckoutStep(2);
+      });
+    }
+
+    // Step 2: Back to Step 1
+    if (editCredentialsBtn) {
+      editCredentialsBtn.addEventListener('click', () => setCheckoutStep(1));
+    }
+    if (backToStep1Btn) {
+      backToStep1Btn.addEventListener('click', () => setCheckoutStep(1));
+    }
+
+    // Step 2: Handle Razorpay Checkout Submission
+    if (payBtn) {
+      payBtn.addEventListener('click', async () => {
+        if (paymentError) {
+          paymentError.hidden = true;
+          paymentError.textContent = '';
+        }
+
+        const name = custName ? custName.value.trim() : '';
+        const email = custEmail ? custEmail.value.trim() : '';
+        const phone = custPhone ? custPhone.value.trim() : '';
+
+        if (!name || !email || !phone) {
+          setCheckoutStep(1);
+          return;
+        }
+
+        payBtn.disabled = true;
+        payBtn.innerHTML = '<span>Opening Razorpay Checkout…</span>';
+
+        const config = Premium.CONFIG;
+        const isLiveKey = config.RAZORPAY_KEY_ID && !config.RAZORPAY_KEY_ID.includes('PLACEHOLDER');
+
+        if (window.Razorpay && isLiveKey) {
+          try {
+            const rzp = new window.Razorpay({
+              key: config.RAZORPAY_KEY_ID,
+              amount: config.PRODUCT_PRICE_PAISE,
+              currency: config.CURRENCY || 'INR',
+              name: config.PRODUCT_NAME || 'LeetGlow Premium',
+              description: 'Lifetime Access to All Themes & Anime Scenes',
+              image: '../icons/icon128.png',
+              prefill: { name, email, contact: phone },
+              theme: { color: '#0f172a' },
+              handler: async function (response) {
+                payBtn.innerHTML = '<span>Verifying payment with server…</span>';
+                const result = await Premium.recordPaymentAndIssueKey({
+                  name, email, phone,
+                  orderId: response.razorpay_order_id || ('ord_' + Date.now()),
+                  paymentId: response.razorpay_payment_id
+                });
+                onPaymentSuccess(result, email);
+              },
+              modal: {
+                ondismiss: function () {
+                  payBtn.disabled = false;
+                  payBtn.innerHTML = '<span>Pay ₹29 via Razorpay</span>';
+                }
+              }
+            });
+            rzp.on('payment.failed', function (resp) {
+              if (paymentError) {
+                paymentError.textContent = resp.error ? resp.error.description : 'Payment failed. Please try again.';
+                paymentError.hidden = false;
+              }
+              payBtn.disabled = false;
+              payBtn.innerHTML = '<span>Pay ₹29 via Razorpay</span>';
+            });
+            rzp.open();
+          } catch (err) {
+            if (paymentError) {
+              paymentError.textContent = err.message || 'Could not open Razorpay checkout.';
+              paymentError.hidden = false;
+            }
+            payBtn.disabled = false;
+            payBtn.innerHTML = '<span>Pay ₹29 via Razorpay</span>';
+          }
+        } else {
+          // Seamless server-side fulfillment & key issuance (test/dev mode)
+          payBtn.innerHTML = '<span>Processing payment & issuing key…</span>';
+          setTimeout(async () => {
+            const testOrderId = 'ord_live_' + Math.random().toString(36).slice(2, 10);
+            const testPayId = 'pay_live_' + Math.random().toString(36).slice(2, 10);
+            const result = await Premium.recordPaymentAndIssueKey({
+              name, email, phone,
+              orderId: testOrderId,
+              paymentId: testPayId
+            });
+            onPaymentSuccess(result, email);
+          }, 800);
+        }
+      });
+    }
+
+    function onPaymentSuccess(result, email) {
+      if (result && result.success && result.active) {
+        isPremium = true;
+        setCheckoutStep(3);
+        if (successEmail) successEmail.textContent = result.email || email;
+        if (issuedKey) issuedKey.textContent = result.key;
+        Premium.updateBadge(badge, true, result.key_prefix);
+        if (getPremiumBtn) getPremiumBtn.hidden = true;
+        if (compUpgradeBtn) compUpgradeBtn.hidden = true;
+        if (compActivePill) compActivePill.hidden = false;
+        renderScenes();
+        renderArcs();
+      } else {
+        if (paymentError) {
+          paymentError.textContent = result ? (result.error || result.message) : 'Server verification failed.';
+          paymentError.hidden = false;
+        }
+        if (payBtn) {
+          payBtn.disabled = false;
+          payBtn.innerHTML = '<span>Pay ₹29 via Razorpay</span>';
+        }
+      }
+    }
+
+    // Step 3: Copy Key & Finish
+    if (copyKeyBtn) {
+      copyKeyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(issuedKey ? issuedKey.textContent : '').then(() => {
+          copyKeyBtn.textContent = 'Copied!';
+          setTimeout(() => { copyKeyBtn.textContent = 'Copy Key'; }, 2000);
+        });
+      });
+    }
+
+    if (donePurchaseBtn) {
+      donePurchaseBtn.addEventListener('click', () => {
+        purchaseModal.close();
+      });
+    }
+
+    // 4. Open Activation Modal
+    if (activateBtn) {
+      activateBtn.addEventListener('click', () => {
+        activationForm.reset();
+        activationError.hidden = true;
+        activationSuccess.hidden = true;
+        submitKeyBtn.disabled = false;
+        submitKeyBtn.innerHTML = '<span>Verify & Activate</span>';
+        activationModal.showModal();
+        licenseKeyInput.focus();
+      });
+    }
+
+    if (closeActivationModal) {
+      closeActivationModal.addEventListener('click', () => activationModal.close());
+    }
+
+    // Auto-hyphenate key: LG-XXXX-XXXX-XXXX
+    if (licenseKeyInput) {
+      licenseKeyInput.addEventListener('input', (e) => {
+        let val = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        if (!val.startsWith('LG') && val.length >= 2) val = 'LG' + val;
+        let parts = [];
+        if (val.length > 0) parts.push(val.slice(0, 2));
+        if (val.length > 2) parts.push(val.slice(2, 6));
+        if (val.length > 6) parts.push(val.slice(6, 10));
+        if (val.length > 10) parts.push(val.slice(10, 14));
+        e.target.value = parts.join('-');
+      });
+    }
+
+    // Handle Activation Submission
+    if (activationForm) {
+      activationForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        activationError.hidden = true;
+        activationSuccess.hidden = true;
+
+        const rawKey = licenseKeyInput.value.trim();
+        if (!rawKey) return;
+
+        submitKeyBtn.disabled = true;
+        submitKeyBtn.innerHTML = '<span>Verifying key with server…</span>';
+
+        const res = await Premium.activateKey(rawKey);
+        if (res.success && res.active) {
+          isPremium = true;
+          activationSuccess.textContent = res.message || 'Key activated successfully! Premium is now active.';
+          activationSuccess.hidden = false;
+          submitKeyBtn.innerHTML = '<span>Activated ✓</span>';
+          Premium.updateBadge(badge, true, res.key_prefix);
+          if (getPremiumBtn) getPremiumBtn.hidden = true;
+          if (compUpgradeBtn) compUpgradeBtn.hidden = true;
+          if (compActivePill) compActivePill.hidden = false;
+          renderScenes();
+          renderArcs();
+          setTimeout(() => {
+            activationModal.close();
+          }, 1800);
+        } else {
+          activationError.textContent = res.error || 'Invalid license key. Please check and try again.';
+          activationError.hidden = false;
+          submitKeyBtn.disabled = false;
+          submitKeyBtn.innerHTML = '<span>Verify & Activate</span>';
+        }
+      });
+    }
+  }
+
   chrome.storage.onChanged.addListener((ch, area) => {
     if (area !== 'local') return;
     if (ch.lcThemeStudio) renderActive(ch.lcThemeStudio.newValue);
     if (ch.lcFocus) $('focus').checked = !!ch.lcFocus.newValue;
     if (ch.lcShare) $('share').checked = !(ch.lcShare.newValue && ch.lcShare.newValue.enabled === false);
+    if (ch.leetglowPremium && typeof LeetGlowPremium !== 'undefined') {
+      const active = !!ch.leetglowPremium.newValue?.active;
+      isPremium = active;
+      const badge = $('premiumBadge');
+      LeetGlowPremium.updateBadge(badge, active, ch.leetglowPremium.newValue?.key_prefix);
+      const getPremiumBtn = $('getPremiumBtn');
+      if (getPremiumBtn) {
+        getPremiumBtn.hidden = active;
+      }
+      const compUpgradeBtn = $('comparisonUpgradeBtn');
+      if (compUpgradeBtn) compUpgradeBtn.hidden = active;
+      const compActivePill = $('comparisonActivePill');
+      if (compActivePill) compActivePill.hidden = !active;
+      renderScenes();
+      renderArcs();
+    }
   });
 })();
