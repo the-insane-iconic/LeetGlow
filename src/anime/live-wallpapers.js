@@ -154,9 +154,12 @@
       const baseName = v.name.replace(/\.[^/.]+$/, '');
       const matchThumb = images.find(img => img.name.startsWith(baseName));
 
-      // Clean human-readable title
+      // Clean human-readable title (strip resolution tags and clean spacing)
       const cleanName = baseName
+        .replace(/\b(\d{3,4}x\d{3,4}|4k|2k|1080p|720p|uhd|hd)\b/gi, '')
         .replace(/[-_]+/g, ' ')
+        .trim()
+        .replace(/\s+/g, ' ')
         .replace(/\b\w/g, char => char.toUpperCase());
 
       // If filename has 'pro' in it, treat it as a PRO wallpaper for premium users only
@@ -164,7 +167,7 @@
 
       result.push({
         id: `supabase-${baseName}`,
-        name: cleanName,
+        name: cleanName || 'Live Wallpaper',
         desc: `Live Wallpaper (${bucket})`,
         thumbUrl: matchThumb ? `${publicBase}${matchThumb.name}` : null,
         thumb: null,
@@ -186,7 +189,10 @@
       const bucket = img.bucket_id || defaultBucket;
       const publicBase = `${SUPABASE_URL}/storage/v1/object/public/${bucket}/`;
       const cleanName = baseName
+        .replace(/\b(\d{3,4}x\d{3,4}|4k|2k|1080p|720p|uhd|hd)\b/gi, '')
         .replace(/[-_]+/g, ' ')
+        .trim()
+        .replace(/\s+/g, ' ')
         .replace(/\b\w/g, char => char.toUpperCase());
 
       // If filename has 'pro' in it, treat it as a PRO wallpaper for premium users only
