@@ -631,6 +631,16 @@
       }
     }
 
+    // Allow clicking on Basic Plan badge to open upgrade modal
+    if (badge) {
+      badge.addEventListener('click', () => {
+        if (!isPremium) {
+          if (getPremiumBtn) getPremiumBtn.click();
+          else purchaseModal.showModal();
+        }
+      });
+    }
+
     // 2. Open Purchase Modal (Starts at Step 1: Credentials)
     if (getPremiumBtn) {
       getPremiumBtn.addEventListener('click', () => {

@@ -185,8 +185,8 @@
 
   /**
    * Updates the UI badge element reflecting the true server entitlement.
-   * Red = Inactive
-   * Green = Active
+   * Sleek Slate Glass = Basic Plan
+   * Emerald Glow = Premium Active
    */
   function updateBadge(badgeEl, isActive, keyPrefix) {
     if (!badgeEl) return;
@@ -201,11 +201,11 @@
       if (text) text.textContent = 'Premium Active';
     } else {
       badgeEl.classList.add('inactive');
-      badgeEl.title = 'No active server entitlement found. Click "Get Premium Access" to upgrade.';
+      badgeEl.title = 'Basic Free Tier · Click to view Premium comparison & upgrade';
       const dot = badgeEl.querySelector('.badge-dot');
       const text = badgeEl.querySelector('.badge-text');
       if (dot) dot.className = 'badge-dot inactive';
-      if (text) text.textContent = 'Premium Inactive';
+      if (text) text.textContent = 'Basic Plan';
     }
   }
 
