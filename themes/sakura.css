@@ -1,0 +1,59 @@
+/* =============================================================================
+   Sakura Night — plum-indigo night, petal pink against cold cyan.
+   Static washes and a few faint stars; the active tab blooms. Nothing moves.
+============================================================================= */
+html[data-lc-theme="sakura"] {
+  color-scheme: dark;
+  --lc-desk:#12101f;
+  --lc-bg0:#12101f; --lc-bg1:#1a1730; --lc-bg2:#211d3c; --lc-bg3:#2d2752;
+  --lc-inset:#0e0c18; --lc-raised:#2d2752; --lc-editor-bg:transparent;
+
+  --lc-border:#332c5a; --lc-border-strong:#4a3f80;
+  --lc-hairline:rgba(236,233,255,.10); --lc-groove:#0c0a16; --lc-rule:#ff7eb6;
+  --lc-fill-1:rgba(236,233,255,.16); --lc-fill-2:rgba(236,233,255,.11);
+  --lc-fill-3:rgba(236,233,255,.07); --lc-fill-4:rgba(236,233,255,.04);
+
+  --lc-text:#ece9ff; --lc-text2:#b8b2dd; --lc-text3:#908ab8;
+  --lc-accent:#ff7eb6; --lc-accent-2:#6ee7f0; --lc-accent-contrast:#12101f;
+  --lc-green:#7ee8a5; --lc-yellow:#ffd479; --lc-red:#ff6b8b;
+  --lc-selection:rgba(255,126,182,.26); --lc-scroll:#3d3468;
+
+  --lc-hsl-bg:248 35% 17%; --lc-hsl-desk:248 32% 9%; --lc-hsl-raised:248 36% 24%;
+  --lc-hsl-text:248 100% 96%; --lc-hsl-text3:248 24% 63%; --lc-hsl-accent:334 100% 75%;
+  --lc-hsla-hairline:248,100%,96%,0.1; --lc-hsl-accent2:184 81% 69%;
+
+  --lc-radius:10px; --lc-radius-sm:7px;
+  --lc-font-ui:"Avenir Next","Segoe UI",system-ui,-apple-system,sans-serif;
+  --lc-font-prose:"Avenir Next","Segoe UI",system-ui,-apple-system,sans-serif;
+  --lc-prose-size:15px; --lc-prose-leading:1.72; --lc-prose-measure:70ch;
+
+  --lc-tex-body:
+    radial-gradient(920px 520px at 10% -12%, rgba(255,126,182,.17), transparent 62%),
+    radial-gradient(820px 500px at 90% 4%, rgba(110,231,240,.13), transparent 62%),
+    radial-gradient(700px 620px at 52% 118%, rgba(150,110,255,.16), transparent 62%),
+    radial-gradient(1.4px 1.4px at 17% 24%, rgba(255,255,255,.30), transparent 100%),
+    radial-gradient(1.2px 1.2px at 63% 13%, rgba(255,255,255,.24), transparent 100%),
+    radial-gradient(1.4px 1.4px at 82% 41%, rgba(255,255,255,.22), transparent 100%),
+    radial-gradient(1.2px 1.2px at 34% 62%, rgba(255,255,255,.18), transparent 100%),
+    radial-gradient(1.3px 1.3px at 74% 76%, rgba(255,255,255,.20), transparent 100%);
+  --lc-tex-panel:linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,0) 140px);
+  --lc-tex-body-size:auto; --lc-tex-panel-size:auto;
+
+  --lc-nav-bg:#1a1730; --lc-nav-rule:rgba(236,233,255,.08);
+  --lc-submit-bg:#ff7eb6; --lc-submit-bg-hover:#ff97c4; --lc-submit-text:#12101f;
+
+  --lc-panel-shadow:
+    inset 0 1px 0 rgba(255,255,255,.06),
+    0 10px 26px -14px rgba(0,0,0,.75);
+  --lc-inset-shadow: inset 0 1px 3px rgba(0,0,0,.42);
+}
+
+/* -- the one bright moment is the active tab -------------------------------- */
+html[data-lc-theme="sakura"] .flexlayout__tab_button--selected {
+  border-bottom: 2px solid transparent !important;
+  border-image: linear-gradient(90deg, var(--lc-accent), var(--lc-accent-2)) 1 !important;
+  box-shadow: 0 6px 18px -8px rgba(255,126,182,.55) !important;
+}
+html[data-lc-theme="sakura"] :not(pre) > code {
+  border-color: rgba(255,126,182,.28) !important;
+}

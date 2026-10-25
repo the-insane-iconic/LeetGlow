@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anime Studio</title>
+  <link rel="stylesheet" href="studio.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <span class="brand-jp" aria-hidden="true">アニメ</span>
+      <div>
+        <h1>Anime Studio</h1>
+        <p>Any picture becomes your LeetCode theme. The code stays readable, always.</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <span id="activeState" class="state"></span>
+      <button id="support" class="btn support" type="button" title="Theme Studio is free. If it makes your grind nicer, you can chip in.">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 14s-5.5-3.4-5.5-7.1A3 3 0 0 1 8 4.6a3 3 0 0 1 5.5 2.3C13.5 10.6 8 14 8 14Z"/></svg>Support
+      </button>
+      <button id="bug" class="btn support bug" type="button" title="Found a bug? Email report@vinaytz.com (opens Gmail with a short template).">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5.8 4.6a2.2 2.2 0 0 1 4.4 0Z"/><path d="M4.8 7a3.2 3.2 0 0 1 6.4 0v2.8a3.2 3.2 0 0 1-6.4 0Z"/><path class="legs" d="M2.2 7.4h2.4M11.4 7.4h2.4M2.4 11.2l2.3-.9M13.6 11.2l-2.3-.9M3.2 3.6l1.8 1.6M12.8 3.6 11 5.2"/></svg>Report bug
+      </button>
+      <button id="connect" class="btn support connect" type="button" title="Connect with the developer on LinkedIn">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.2 5.6h2.5V14H2.2zM3.45 1.8a1.45 1.45 0 1 1 0 2.9 1.45 1.45 0 0 1 0-2.9zM6.3 5.6h2.4v1.15h.03c.34-.63 1.15-1.3 2.37-1.3 2.53 0 3 1.67 3 3.83V14h-2.5V9.8c0-1-.02-2.3-1.4-2.3-1.4 0-1.6 1.1-1.6 2.22V14H6.3z"/></svg>Connect
+      </button>
+      <button id="activate" class="btn primary" type="button" hidden>Use Anime Studio on LeetCode</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="controls" aria-label="Settings">
+
+      <div class="group">
+        <h2>Scene</h2>
+        <label class="switch"><input id="arcs" type="checkbox" /><span class="track"></span><span>A scene for each difficulty</span></label>
+        <div id="arcSlots" class="arc-slots" role="radiogroup" aria-label="Difficulty"></div>
+        <p id="arcNote" class="note arc-note"></p>
+        <div id="scenes" class="scenes" role="radiogroup" aria-label="Scene"></div>
+        <input id="file" type="file" accept="image/png,image/jpeg,image/webp,image/avif,image/gif" hidden />
+        <p id="sceneCredit" class="note credit"></p>
+        <p id="uploadNote" class="note">Your picture is prepared once and stored only in this browser.</p>
+      </div>
+
+      <div class="group">
+        <h2>Glass</h2>
+        <div id="glass" class="segmented" role="radiogroup" aria-label="Glass">
+          <button type="button" role="radio" data-v="auto">Auto</button>
+          <button type="button" role="radio" data-v="dark">Dark</button>
+          <button type="button" role="radio" data-v="light">Light</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="row-between">
+          <h2><label for="visibility">Scene visibility</label></h2>
+          <output id="visibilityOut" for="visibility"></output>
+        </div>
+        <input id="visibility" type="range" min="0" max="100" step="1" />
+        <p class="note">At 100 the glass sits exactly at its contrast floor, so no setting can make the text unreadable.</p>
+        <div id="report" class="report" aria-live="polite"></div>
+      </div>
+
+      <div class="group">
+        <h2>Moments</h2>
+        <label class="switch"><input id="titleCard" type="checkbox" /><span class="track"></span><span>Episode title card when you open a problem</span></label>
+        <label class="switch"><input id="moments" type="checkbox" /><span class="track"></span><span>Verdict moments after Run and Submit</span></label>
+        <label class="switch"><input id="japanese" type="checkbox" /><span class="track"></span><span>Japanese text <span class="note">(第1話, 完了！ and the arc names; off shows English)</span></span></label>
+        <label class="switch"><input id="share" type="checkbox" /><span class="track"></span><span>Offer a share card after Accepted</span></label>
+        <label class="switch"><input id="sound" type="checkbox" /><span class="track"></span><span>Sound effects</span></label>
+        <div class="volume">
+          <label for="volume" class="note">Volume</label>
+          <input id="volume" type="range" min="0" max="100" step="1" />
+          <output id="volumeOut" for="volume"></output>
+        </div>
+        <div class="plays">
+          <span class="note">Play it:</span>
+          <button class="btn chip" type="button" data-play="title">Title card</button>
+          <button class="btn chip" type="button" data-play="ac">Accepted</button>
+          <button class="btn chip" type="button" data-play="run">Tests passed</button>
+          <button class="btn chip" type="button" data-play="wa">Wrong answer (Run)</button>
+          <button class="btn chip" type="button" data-play="wa-submit">Wrong answer (Submit)</button>
+          <button class="btn chip" type="button" data-play="tle">Time limit</button>
+          <button class="btn chip" type="button" data-play="err">Error</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <h2>Focus mode</h2>
+        <label class="switch"><input id="focus" type="checkbox" /><span class="track"></span><span>Hide the scene and moments, keep the colours</span></label>
+        <p class="note">Shortcut <kbd id="shortcut">not set</kbd> toggles it on every open problem tab. <button id="shortcuts" class="link" type="button">Change shortcut</button></p>
+      </div>
+    </section>
+
+    <section class="stage" aria-label="Preview">
+      <div id="frameBox" class="frame-box">
+        <iframe id="frame" src="anime/preview.html" title="Theme preview" tabindex="-1"></iframe>
+        <div id="busy" class="busy" hidden><span></span>Preparing your picture…</div>
+      </div>
+      <p class="caption">Live preview, rendered with the same stylesheets LeetCode gets.</p>
+    </section>
+  </main>
+
+  <script src="anime/scenes.js"></script>
+  <script src="anime/solver.js"></script>
+  <script src="anime/process.js"></script>
+  <script src="anime/sounds.js"></script>
+  <script src="support.js"></script>
+  <script src="studio.js"></script>
+</body>
+</html>

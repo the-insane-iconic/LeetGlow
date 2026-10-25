@@ -1,0 +1,1407 @@
+/* =============================================================================
+   Gaming Theme  (theme id "game") — see CLAUDE_ANKIT.md.
+
+   EVERY difficulty currently renders "The First Realm" -- the moonlit valley
+   material: one fixed background image (the same technique as Anime Studio's
+   body::before -- rasterised once, never repainted; see anime.css's header
+   comment), translucent glass panels over it, and an opaque editor surface so
+   code stays fully readable rather than textured.
+
+   There used to be a second, green/gold placeholder palette here for
+   Medium/Hard. It is gone -- it only ever appeared where it wasn't wanted,
+   including as a flash on every problem before the difficulty was known. Now
+   src/game/game.js sets [data-lc-game-level="easy"] unconditionally and
+   immediately, and the base role block carries the same crystal palette, so
+   there is no difficulty and no moment that renders as anything else. When
+   "The Fallen Forest" and "The Edge of the World" get art of their own
+   (CLAUDE_ANKIT.md), that becomes a per-level block here plus one line in
+   game.js -- not a fallback theme that ships in the meantime.
+
+   Palette is deep navy + crystal cyan + silver -- a moonlit fantasy look, not
+   a match for Anime Studio's pink/magenta. The sakura petals on the title
+   card keep their own natural tint (drawn from a sprite, not styled here);
+   everything this file controls -- kicker, realm name, title, roles, accents
+   -- stays out of pink.
+============================================================================= */
+
+/* THE GREEN FALLBACK IS GONE. This block used to be a forest-green/gold
+   placeholder for Medium and Hard, on the assumption they would get their own
+   art later. In practice it only ever showed up where it wasn't wanted: on
+   every Medium/Hard problem, and as a green flash on EVERY problem during the
+   window between the page loading and src/game/game.js reading the
+   difficulty -- because until that attribute lands, this base block is what
+   renders. Every difficulty now uses the valley material, so these values are
+   the crystal palette rather than a second theme waiting to be replaced.
+
+   Kept deliberately identical to the [data-lc-game-level="easy"] block below
+   rather than merged into it: that block still carries the level's own
+   material (the glass, the photo layers, the icon set), and collapsing the
+   two would mean rewriting several hundred level-scoped selectors. This just
+   makes the un-levelled state look right instead of green. */
+html[data-lc-theme="game"] {
+  color-scheme: dark;
+  --lc-desk:#1d3f72;
+  --lc-bg0:#101a2c; --lc-bg1:#1c3a68; --lc-bg2:rgba(24,42,74,.58); --lc-bg3:#1c2c47;
+  --lc-inset:rgba(22,42,78,.58); --lc-raised:#1c2c47; --lc-editor-bg:rgba(26,48,88,.42);
+
+  --lc-border:rgba(125,211,252,.35); --lc-border-strong:rgba(125,211,252,.5);
+  --lc-hairline:rgba(210,230,255,.14); --lc-groove:rgba(0,0,0,.35); --lc-rule:#7dd3fc;
+  --lc-fill-1:rgba(210,230,255,.16); --lc-fill-2:rgba(210,230,255,.11);
+  --lc-fill-3:rgba(210,230,255,.07); --lc-fill-4:rgba(210,230,255,.04);
+
+  --lc-text:#e6edf3; --lc-text2:#c9d6e2; --lc-text3:#94a3b8;
+  --lc-accent:#7dd3fc; --lc-accent-2:#2389d7; --lc-accent-contrast:#0b1220;
+  --lc-green:#00fa9a; --lc-yellow:#e0b45a; --lc-red:#ee204d;
+  --lc-selection:rgba(125,211,252,.25); --lc-scroll:rgba(210,230,255,.22);
+
+  --lc-hsl-bg:220 35% 12%; --lc-hsl-desk:222 40% 8%; --lc-hsl-raised:220 35% 20%;
+  --lc-hsl-text:210 100% 97%; --lc-hsl-text3:196 65% 70%; --lc-hsl-accent:42 60% 60%;
+  --lc-hsla-hairline:210,80%,90%,0.14; --lc-hsl-accent2:132 33% 60%;
+
+  --lc-radius:8px; --lc-radius-sm:6px;
+  --lc-font-ui:"Macondo","EB Garamond","Iowan Old Style",Palatino,Georgia,serif;
+  --lc-font-prose:"Macondo","EB Garamond","Iowan Old Style",Palatino,Georgia,serif;
+  --lc-font-display:"Macondo","IM Fell English","EB Garamond",Georgia,serif;
+  --lc-prose-size:15.5px; --lc-prose-leading:1.72; --lc-prose-measure:70ch;
+
+  /* the valley photo, same as the level block -- so there is no moment, and
+     no difficulty, where the page renders without it */
+  --lc-tex-body:
+    linear-gradient(180deg, rgba(6,10,18,.55), rgba(6,10,18,0) 22%, rgba(6,10,18,0) 68%, rgba(6,10,18,.58)),
+    url("chrome-extension://__MSG_@@extension_id__/textures/game/background-level1.png");
+  --lc-tex-body-size: 100% 100%, cover;
+  --lc-tex-body-repeat: no-repeat, no-repeat;
+  --lc-tex-panel:none; --lc-tex-panel-size:auto;
+
+  --lc-nav-bg:var(--lc-desk);
+  --lc-nav-tex:linear-gradient(180deg, rgba(190,215,255,.06), rgba(0,0,0,.20));
+  --lc-nav-rule:rgba(190,215,255,.22);
+  --lc-nav-shadow:inset 0 1px 0 rgba(190,215,255,.06), 0 6px 18px -6px rgba(0,0,0,.55);
+
+  --lc-submit-bg:#173349; --lc-submit-bg-hover:#1e4059; --lc-submit-text:#f8fafc;
+  --lc-submit-edge:
+    inset 0 1px 0 rgba(255,255,255,.20),
+    0 0 14px rgba(56,189,248,.22);
+
+  --lc-panel-shadow:
+    inset 0 1px 0 rgba(255,255,255,.05),
+    0 10px 26px -14px rgba(0,0,0,.75);
+  --lc-inset-shadow: inset 0 1px 3px rgba(0,0,0,.40);
+}
+
+/* -- the Easy tier: "The First Realm" valley material ------------------------
+   PHASE 1 (background + blue glass foundation; see CLAUDE_ANKIT.md).
+
+   One fixed body::before-style layer (painted via core.css's --lc-tex-body on
+   body itself, background-attachment:fixed -- same "rasterise once" rule as
+   Anime Studio). The photo is untouched; only a scrim sits over it.
+
+   GLASS WITHOUT BACKDROP-FILTER
+   Golden rule: no backdrop-filter (it re-blurs the page behind on every
+   frame something scrolls -- see anime.css's own header comment for the
+   full reasoning, and CLAUDE.md's Performance section). The "glass" here is
+   pure translucent colour + a layered box-shadow (inner highlight, thin
+   edge, soft outer shadow, restrained glow) -- see --lc-panel-shadow below.
+
+   THREE DEPTHS, ONE MATERIAL
+   Problem panel: lightest, world reads clearly through it.
+   Code editor + Testcase: darker/denser, for contrast and readability.
+   All three are the SAME blue glass at different densities, not different
+   materials. Colours are deliberately dim/desaturated navy, not a bright or
+   neon blue -- see the "not solid blue boxes" list in CLAUDE_ANKIT.md.
+
+   Base is now a dark theme (color-scheme + --lc-text flipped from the old
+   light-parchment values) because the glass itself is dark -- white/silver
+   text is what reads on it. That's a mechanical consequence of the material
+   change, not a Phase 3 (typography) decision; --lc-accent had to move off
+   its old light-background gold for the same reason (still gold, just the
+   brighter shade already used elsewhere, so focus rings/underlines stay
+   visible -- real accent polish is Phase 5). */
+html[data-lc-theme="game"][data-lc-game-level="easy"] {
+  color-scheme: dark;
+  /* the nav (--lc-nav-bg: var(--lc-desk)) was reading as near-black --
+     pushed to a genuinely vivid sky-blue navy, not just a dark tint */
+  --lc-desk:#1d3f72;
+  /* --lc-bg2 is the editor's OWN single glass layer (see the de-duplication
+     rule below -- core.css paints this same colour on three/four nested
+     Monaco elements, which is fine for an opaque hex but compounds a
+     translucent one to ~85-90% opaque, i.e. looks solid). --lc-inset is the
+     input/output "pre" boxes and the testcase field -- darkest glass in the
+     hierarchy (panel < editor/console < inset cards), but still glass, not
+     a solid rectangle. */
+  --lc-bg0:#101a2c; --lc-bg1:#1c3a68; --lc-bg2:rgba(24,42,74,.58); --lc-bg3:#1c2c47;
+  --lc-inset:rgba(22,42,78,.58); --lc-raised:#1c2c47; --lc-editor-bg:rgba(26,48,88,.42);
+
+  /* crystal edge -- a thin shard catching moonlight, not a thick neon
+     border. Exact hex from the "moonlit fantasy-adventure / crystal
+     interface" spec. */
+  --lc-border:rgba(125,211,252,.35); --lc-border-strong:rgba(125,211,252,.5);
+  --lc-hairline:rgba(210,230,255,.14); --lc-groove:rgba(0,0,0,.35); --lc-rule:#7dd3fc;
+  --lc-fill-1:rgba(210,230,255,.16); --lc-fill-2:rgba(210,230,255,.11);
+  --lc-fill-3:rgba(210,230,255,.07); --lc-fill-4:rgba(210,230,255,.04);
+
+  /* the crystal palette, as a central theme system (per the spec's own
+     "CREATE A CENTRAL THEME SYSTEM" instruction): --lc-accent/etc still
+     drive core.css's generic remap (nav, chips, focus rings, ...), and
+     these --lc-crystal-* aliases exist so every new crystal-specific rule
+     below reads from named variables instead of repeating hex literals.
+     Silver/white stays the primary information colour (text/text2/text3);
+     cyan is reserved for active/highlighted state only; violet is a
+     special/rare accent (Analysis button, magical accents) and must not
+     compete with cyan for the interface's main identity, per the spec's
+     60-70/20-25/5-10/2-5 hierarchy. --lc-yellow is untouched: that's
+     Medium's semantic difficulty colour, not a decorative accent. */
+  --lc-crystal-bright:#a6f4ff; --lc-crystal-violet:#a78bfa;
+  --lc-crystal-violet-glow:rgba(167,139,250,.18);
+  --lc-crystal-cyan-glow:rgba(125,211,252,.16);
+  --lc-crystal-surface:rgba(8,24,45,.62);
+  --lc-text:#e6edf3; --lc-text2:#c9d6e2; --lc-text3:#94a3b8;
+  --lc-accent:#7dd3fc; --lc-accent-2:#2389d7; --lc-accent-contrast:#0b1220;
+  --lc-green:#00fa9a; --lc-yellow:#e0b45a; --lc-red:#ee204d;
+  --lc-selection:rgba(125,211,252,.25); --lc-scroll:rgba(210,230,255,.22);
+  /* reverted: the reference's 20px radius looked forced on the real page --
+     several elements nested inside the panel (the tab bar strip, Monaco's
+     own edges, floating widgets like a video-call overlay) don't share that
+     same rounding, so the panel's big soft curve sat visibly on top of
+     sharp corners underneath instead of matching them. Back to the
+     fallback's own 8px/6px, which those elements were already tuned around. */
+
+  --lc-hsl-bg:220 35% 12%; --lc-hsl-desk:222 40% 8%; --lc-hsl-raised:220 35% 20%;
+  --lc-hsl-text:210 100% 97%; --lc-hsl-text3:196 65% 70%; --lc-hsl-accent:42 60% 60%;
+  --lc-hsla-hairline:210,80%,90%,0.14; --lc-hsl-accent2:132 33% 60%;
+
+  /* the valley photo, a soft top/bottom scrim (now blue-black, not
+     green-black) so the nav and page edges keep contrast, centred rather
+     than the default top-left crop */
+  --lc-tex-body:
+    linear-gradient(180deg, rgba(6,10,18,.55), rgba(6,10,18,0) 22%, rgba(6,10,18,0) 68%, rgba(6,10,18,.58)),
+    url("chrome-extension://__MSG_@@extension_id__/textures/game/background-level1.png");
+  --lc-tex-body-size: 100% 100%, cover;
+  --lc-tex-body-repeat: no-repeat, no-repeat;
+  --lc-tex-panel:none; --lc-tex-panel-size:auto;
+
+  --lc-nav-bg:var(--lc-desk);
+  --lc-nav-tex:linear-gradient(180deg, rgba(190,215,255,.06), rgba(0,0,0,.20));
+  --lc-nav-rule:rgba(190,215,255,.22);
+  --lc-nav-shadow:inset 0 1px 0 rgba(190,215,255,.06), 0 6px 18px -6px rgba(0,0,0,.55);
+
+  /* Submit: the brightest crystal control on the page -- a polished,
+     reflective cyan gradient rather than a flat fill, per the spec.
+     --lc-submit-bg stays a plain colour here (core.css's generic rule uses
+     it as background-color, which can't hold a gradient) -- the actual
+     gradient is applied by a dedicated rule in the BUTTONS section below,
+     which wins by loading after core.css's. */
+  --lc-submit-bg:#173349; --lc-submit-bg-hover:#1e4059;
+  --lc-submit-text:#f8fafc;
+  --lc-submit-edge:
+    inset 0 1px 0 rgba(255,255,255,.20),
+    0 0 14px rgba(56,189,248,.22);
+
+  /* the edge of a physical sheet of glass, not a CSS border: a thin bright
+     line + a soft secondary highlight on the top-left, a thin dark line +
+     soft secondary shade on the bottom-right, a plain soft outer depth
+     shadow, and one very thin all-round luminous crystal-cyan line -- much
+     fainter than the version that read as "glowing rectangle" before, its
+     job is just to catch the eye as an edge, not to glow. No
+     backdrop-filter (the pre-blurred photo layer below is the substitute). */
+  --lc-panel-shadow:
+    inset 1px 1px 0 rgba(255,255,255,.24),
+    inset 2px 2px 4px rgba(255,255,255,.06),
+    inset -1px -1px 0 rgba(4,10,20,.34),
+    inset -3px -3px 6px rgba(4,10,20,.12),
+    0 0 0 1px var(--lc-border),
+    0 0 12px rgba(125,211,252,.10),
+    inset 0 0 12px rgba(125,211,252,.04),
+    0 14px 34px -20px rgba(2,6,14,.50);
+  /* the inset cards (input/output boxes, testcase field) get the same
+     glass language at smaller scale: a soft top highlight, a darker
+     bottom edge, both restrained */
+  --lc-inset-shadow:
+    inset 0 1px 0 rgba(210,230,255,.09),
+    inset 0 -1px 3px rgba(0,0,0,.40);
+}
+
+/* #__next has to go transparent: core.css paints an OPAQUE --lc-desk on
+   html/body/#__next for every theme (the token-remap section), and #__next
+   sits on top of body covering the whole viewport, which would otherwise
+   hide the photo completely. body itself does NOT get this treatment --
+   unlike Anime Studio (whose scene is a body::before pseudo-element), our
+   photo is body's own background-image (core.css's generic structure
+   rule), so resetting body's shorthand background would wipe the image out
+   along with the colour. */
+html[data-lc-theme="game"][data-lc-game-level="easy"] #__next {
+  background: transparent !important;
+}
+html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__layout {
+  --color-background: transparent;
+}
+html[data-lc-theme="game"][data-lc-game-level="easy"] body {
+  /* multi-layer background-position core.css doesn't expose: centre the
+     mountains rather than the default top-left anchor */
+  background-position: 0 0, center 32% !important;
+}
+
+/* -- the glass hierarchy -----------------------------------------------------
+   PHASE 1 REDO: liquid glass, not a flat translucent rectangle.
+
+   .flexlayout__tabset carries the material for every pane -- five stacked
+   background layers (topmost first):
+     1. a soft diagonal tint          -- surface colour variation, not flat
+     2. a corner catch-light          -- glass is "thicker" at the corners
+     3-4. two soft light pockets      -- the "tiny cyan/white highlights in
+          the glass". These used to DRIFT, via an lctg-glass-drift animation
+          on background-position. Removed: background-position is not a
+          compositable property, so that repainted all six layers of all
+          three panels -- including the cover-scaled, fixed-attachment photo
+          -- on every frame, forever. It read as typing lag in the editor,
+          which is exactly the cost CLAUDE.md's Performance section and
+          anime.css's MOTION section both rule out. The layers are unchanged
+          and still sit where the animation rested at 0%; if the motion is
+          wanted back it has to be a transform on its own element, never a
+          background-position keyframe.
+     5. a PRE-BLURRED copy of the exact same background photo, aligned
+        (same size/position/fixed-attachment) with the sharp copy on body.
+        This is the actual "seeing the world through glass" trick -- since
+        backdrop-filter is off the table for performance, the optical
+        softness has to be a real asset, decoded once like Anime Studio's
+        blurred editor copy, not computed live.
+   .flexlayout__tab stays transparent by default (same split Anime Studio
+   uses, so no pane doubles the tabset's colour up); src/sheet-scroll.js
+   tags each tab with its pane, and code + console layer one EXTRA flat
+   wash on top for readability -- deeper, not a different material.
+
+   Code and console need DIFFERENT extra-wash strengths even though they
+   should read about equally dark: code also gets Monaco's own --lc-bg2
+   wash on top (core.css forces that on .monaco-editor already), so its own
+   wash here can be lighter; console has nothing else stacking on it, so it
+   needs the strength code reaches only after compounding with the editor.
+   Checked against the actual photo (its brightest stretch of sky/meadow,
+   not just the darker mountains), same reasoning core.css's other themes
+   use for ink contrast. */
+html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__tabset {
+  /* hue pulled to match /leet's --glass (8,45,88) exactly; alpha stays at
+     the level already tuned through several rounds of transparency
+     feedback rather than jumping to the reference's own .58 */
+  background-color: rgba(8,45,88,.16) !important;
+  background-image:
+    /* a soft diagonal caustic band, sliding slowly through the panel --
+       "sunlight moving through clear water", barely-there */
+    linear-gradient(100deg, transparent 38%, rgba(255,255,255,.06) 48%, rgba(170,225,255,.05) 53%, transparent 63%),
+    /* clear glass with a slight tint, not a solid dark-blue sheet */
+    linear-gradient(160deg, rgba(140,200,255,.07), rgba(200,240,255,.02) 45%, rgba(60,120,210,.09) 100%),
+    radial-gradient(220px 170px at 3% 0%, rgba(210,240,255,.11), transparent 70%),
+    radial-gradient(200px 150px at 20% 24%, rgba(150,220,255,.08), transparent 70%),
+    radial-gradient(240px 170px at 80% 72%, rgba(255,255,255,.06), transparent 72%),
+    /* DENSITY. The glass reads as "more opaque" from here, not from
+       background-color above: that colour is painted UNDER the photo, and
+       the photo is an opaque cover layer, so it never shows at all (it is
+       only a fallback for the image failing to load). This wash sits
+       directly on the photo and under the highlight gradients, so the panel
+       gets denser while the catch-lights stay crisp on top of it. One
+       number to tune. */
+    linear-gradient(rgba(6,18,38,.26), rgba(6,18,38,.26)),
+    url("chrome-extension://__MSG_@@extension_id__/textures/game/background-level1-glass.webp")
+    !important;
+  background-size: 220% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, cover !important;
+  background-repeat: no-repeat !important;
+  background-position: -60% 0, 0 0, 0 0, 20% 24%, 80% 72%, 0 0, center 32% !important;
+  background-attachment: scroll, scroll, scroll, scroll, scroll, scroll, fixed !important;
+  position: relative;
+  overflow: hidden;
+}
+/* a single soft glint, occasionally catching a short stretch of the edge --
+   restrained (low peak opacity, long loop) rather than a permanently lit
+   border. transform-only, so it stays compositor-cheap. */
+html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__tabset::before {
+  content: "";
+  position: absolute; top: 0; left: 0;
+  width: 46px; height: 46px; margin: -10px;
+  background: radial-gradient(circle, rgba(255,255,255,.55), transparent 68%);
+  filter: blur(3px);
+  opacity: 0;
+  pointer-events: none;
+  animation: lctg-edge-glint 30s ease-in-out infinite;
+  z-index: 0;
+}
+@keyframes lctg-edge-glint {
+  0%             { opacity: 0;   transform: translate(0, 0); }
+  4%, 18%        { opacity: .5; }
+  22%            { opacity: 0; }
+  22.01%         { transform: translate(calc(100% + 20px), 0); }
+  26%, 40%       { opacity: .4; }
+  44%            { opacity: 0; }
+  44.01%         { transform: translate(calc(100% + 20px), calc(100% + 20px)); }
+  48%, 62%       { opacity: .45; }
+  66%            { opacity: 0; }
+  66.01%         { transform: translate(0, calc(100% + 20px)); }
+  70%, 84%       { opacity: .35; }
+  88%, 100%      { opacity: 0; }
+}
+html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__tab {
+  background-color: transparent !important;
+  position: relative; z-index: 1;
+}
+html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__tab[data-lcts-pane="code"] {
+  background-color: rgba(10,17,32,.22) !important;
+}
+html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__tab[data-lcts-pane="console"] {
+  background-color: rgba(10,17,32,.40) !important;
+}
+
+/* -- the code editor: one glass layer, not four stacked on each other -----
+   core.css paints --lc-bg2 on .monaco-editor, .monaco-editor-background,
+   .margin AND .overflow-guard -- fine when that colour is an opaque hex
+   (every other theme), but these four overlap the same pixels, so a
+   translucent --lc-bg2 compounds 3-4x there and renders as a near-solid
+   black rectangle instead of glass. .monaco-editor (the outermost) is the
+   only one left painting the colour; the rest go transparent so its own
+   single layer is what shows -- same "one layer paints, the rest stay
+   transparent" rule as the .flexlayout__tabset/.flexlayout__tab split
+   above. A thin edge + soft top highlight makes it read as a floating
+   glass sheet rather than a flat colour change. */
+html[data-lc-theme="game"][data-lc-game-level="easy"] .monaco-editor-background,
+html[data-lc-theme="game"][data-lc-game-level="easy"] .monaco-editor .margin,
+html[data-lc-theme="game"][data-lc-game-level="easy"] .monaco-editor .overflow-guard {
+  background-color: transparent !important;
+}
+/* -- night-mode editor: "moonlit fantasy HUD", not LeetCode's own dark
+   theme, not a flat blue panel. Dark midnight-navy glass with the same
+   pre-blurred night photo faintly showing through (aligned the same way as
+   the tabset's own layer), so the editor still sits inside the world
+   rather than reading as an opaque rectangle dropped onto it -- but the
+   wash over that photo is dense (rgba(7,20,34,.74)) because readability
+   comes first: darker glass, not brighter text, per the brief. */
+html[data-lc-theme="game"][data-lc-game-level="easy"] .monaco-editor {
+  background-color: rgba(7,20,34,.9) !important;
+  background-image:
+    linear-gradient(rgba(7,20,34,.80), rgba(7,20,34,.80)),
+    url("chrome-extension://__MSG_@@extension_id__/textures/game/background-level1-glass.webp")
+    !important;
+  background-size: 100% 100%, cover !important;
+  background-position: 0 0, center 32% !important;
+  background-repeat: no-repeat !important;
+  background-attachment: scroll, fixed !important;
+  box-shadow:
+    inset 0 1px 0 rgba(140,205,255,.12),
+    inset 0 0 0 1px rgba(103,217,232,.16),
+    0 0 18px -10px rgba(103,217,232,.20) !important;
+}
+html[data-lc-theme="game"][data-lc-game-level="easy"] .monaco-editor .line-numbers {
+  color: #6f879d !important;
+}
+html[data-lc-theme="game"][data-lc-game-level="easy"] .monaco-editor .selected-text {
+  background-color: rgba(103,217,232,.16) !important;
+}
+html[data-lc-theme="game"][data-lc-game-level="easy"] .monaco-editor .cursor {
+  background-color: #8fe3ee !important;
+  border-color: #8fe3ee !important;
+}
+
+/* the Problem panel is the most transparent pane, so its text can sit over
+   a bright patch of sky rather than a dark mountain -- a soft text-shadow
+   keeps it legible without raising the glass's opacity (the readability
+   fix this material calls for is contrast, not more opaque glass) */
+html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__tab[data-lcts-pane="desc"] .text-title-large,
+html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__tab[data-lcts-pane="desc"] [data-track-load="description_content"] {
+  text-shadow: 0 1px 3px rgba(2,8,18,.85), 0 0 10px rgba(2,8,18,.55) !important;
+}
+/* comments/discussion below the description are a separate widget outside
+   [data-track-load="description_content"], so the fix above never reached
+   them -- LeetCode sets their body text via its own hardcoded grey utility
+   classes, which our generic token remap doesn't catch (same category of
+   bug the nav text had earlier). Same fix: force it bright and legible,
+   broadly, rather than chase the exact class. The title/tags/pre/code
+   already have their own higher-specificity rules (a class or attribute
+   selector beats a bare tag one), so this can't override those. */
+html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__tab[data-lcts-pane="desc"] {
+  color: var(--lc-text) !important;
+}
+html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__tab[data-lcts-pane="desc"] p,
+html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__tab[data-lcts-pane="desc"] span:not([class*="difficulty"]):not([class~="tag"]):not([class~="text-red-s"]):not([class~="text-green-s"]),
+html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__tab[data-lcts-pane="desc"] div:not([class*="text-title-large"]),
+html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__tab[data-lcts-pane="desc"] a,
+html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__tab[data-lcts-pane="desc"] li,
+html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__tab[data-lcts-pane="desc"] ol,
+html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__tab[data-lcts-pane="desc"] ul {
+  /* brightened from --lc-text2 to --lc-text -- the same bright white the
+     testcase values already read in, so ordinary body copy isn't a dimmer
+     silver than the pre boxes sitting right next to it. The title is
+     excluded here (:not([class*="text-title-large"])) because this
+     selector's specificity -- an extra element (div) beyond the title
+     rule's two classes -- was silently outranking the shiny gradient rule
+     below and overwriting its `color: transparent`, so the title never
+     actually looked shiny; same fix shape as the difficulty/tag exclusion
+     on span above. The Submissions status span (text-red-s/text-green-s)
+     hit the exact same bug -- this rule's specificity beat the
+     SUBMISSIONS VERDICTS rule further down and silently forced it back to
+     plain white, which is why that fix never visibly took on the real
+     page. Same exclusion shape, same fix. */
+  color: var(--lc-text) !important;
+  text-shadow: 0 1px 2px rgba(2,8,18,.6) !important;
+}
+/* "Input:"/"Output:"/"Explanation:" inside the pre boxes are <strong> tags,
+   which the rule above never covers (strong isn't p/span/div/a) -- they
+   fell back to LeetCode's own hardcoded label colour, unreadable on this
+   dark glass. Same accent used for every other highlighted/interactive
+   label in this theme, so they read as one system. */
+html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__tab[data-lcts-pane="desc"] pre strong {
+  color: var(--lc-accent) !important;
+  text-shadow: 0 1px 2px rgba(2,8,18,.7) !important;
+}
+
+/* =========================== CHIPS & CARDS ================================== */
+/* pulled from /leet/app/globals.css's own .chip/.chip.easy/.example/
+   .input-box rules, applied to the real selectors those correspond to
+   (verified ones: [class*="text-difficulty-"] for the pattern only, per
+   the same currentColor technique paper.css already uses -- never a
+   hardcoded colour via substring match, only shape). */
+html[data-lc-theme="game"][data-lc-game-level="easy"] [class*="text-difficulty-"] {
+  border-radius: 18px !important;
+  padding: 3px 12px !important;
+  border: 1px solid currentColor !important;
+  background: color-mix(in srgb, currentColor 22%, transparent) !important;
+  opacity: .95;
+}
+/* every "pre" box in this theme -- Description panel examples AND the
+   Submissions-detail Input/Output/Expected/Code boxes alike -- gets the
+   same dark crystal card treatment from the reference palette: a real
+   dark navy (not the lighter translucent blue tried before, which read as
+   "not dark enough" against light text), a full thin crystal-cyan border.
+   Deliberately NOT scoped to any particular .flexlayout__tab pane: that
+   scoping depended on sheet-scroll.js's tab-tagging heuristic actually
+   reaching this element before the CSS was expected to apply, which isn't
+   reliable for a page reached by clicking into a submission's own detail
+   view rather than a plain tab switch -- same reasoning Anime Studio
+   already follows (it never scopes its generic text/box rules to a pane,
+   only to the theme itself), so this now matches that same robustness. */
+html[data-lc-theme="game"][data-lc-game-level="easy"] pre {
+  border: 1px solid rgba(125,211,252,.35) !important;
+  border-radius: 10px !important;
+  background: rgba(15,23,42,.72) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08) !important;
+  font-family: "JetBrains Mono", Menlo, Consolas, monospace !important;
+}
+/* Solutions-article code blocks (LeetCode's markdown renderer) are a
+   different shape from the Description examples above: the pre itself has
+   zero padding/a transparent inline background and sits inset inside a
+   *wrapping* div (rounded-lg, bg-fill-3/dark:bg-dark-fill-3) that carries
+   the real padding and does its own unthemed rounded box. The generic pre
+   rule above still drew a themed border+radius on the pre, one padding-step
+   inset from that outer box's own untouched grey background/corners -- two
+   mismatched boxes nested inside each other. Move the themed card to the
+   actual outer box instead, and strip the pre back to plain content so
+   there's only one border now, and it lines up with the real edge.
+
+   Matched via [data-lctg-code-card], set by src/game/icons.js's
+   markCodeCards() -- see that function's comment for why this isn't a
+   :has() selector (it was, and CLAUDE.md's Performance section already
+   rules that out: it made the Submissions list and any Notes-modal churn
+   force a page-wide style recalc on every mutation, anywhere). */
+html[data-lc-theme="game"][data-lc-game-level="easy"] [data-lctg-code-card] {
+  border: 1px solid rgba(125,211,252,.35) !important;
+  border-radius: 10px !important;
+  background: rgba(15,23,42,.72) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08) !important;
+}
+html[data-lc-theme="game"][data-lc-game-level="easy"] div[class~="rounded-lg"][class~="bg-fill-3"] pre {
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+html[data-lc-theme="game"][data-lc-game-level="easy"] code {
+  font-family: "JetBrains Mono", Menlo, Consolas, monospace !important;
+}
+/* the testcase field: a slightly different glass than the pre boxes above
+   (reference keeps them visually distinct even though both are "input"
+   surfaces), so this gets its own explicit values rather than sharing
+   --lc-inset with pre */
+html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__tab [class~="cursor-text"][class~="rounded-lg"] {
+  border: 1px solid rgba(158,220,250,.25) !important;
+  border-radius: 10px !important;
+  background: rgba(83,151,191,.25) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.1) !important;
+}
+/* the code block's "View more/View less" expand toggle stayed a plain
+   white bar -- it's a hardcoded literal white background, not one of the
+   themed bg-layer or bg-fill classes core.css's generic remap already
+   catches, so nothing in the token system ever reached it. Same category
+   of gap as the invisible comment text fixed earlier: a hardcoded utility
+   class outside the semantic system. */
+html[data-lc-theme="game"][data-lc-game-level="easy"] [class~="bg-white"] {
+  background-color: var(--lc-raised) !important;
+  color: var(--lc-text2) !important;
+}
+
+/* =========================== AMBIENT (whole scene) =========================== */
+/* src/game/ambient.js mounts this once, behind the ENTIRE page: a scattering
+   of blurred, dim sakura petals drifting continuously plus a dozen tiny
+   points of light that fade in and out on their own independent cycles
+   ("blicker" -- like distant fireflies). Every animation here is
+   transform/opacity only (petals) or opacity only (blickers) -- compositor
+   work, no main-thread JS per frame -- see ambient.js's header comment for
+   why: an earlier canvas+rAF version of the petals, fine at panel size,
+   became a multi-megapixel full-viewport redraw 60x/sec and made typing lag.
+
+   STACKING: this layer goes ON TOP of the page, not behind it. Behind is a
+   dead zone -- nothing put there can ever be seen. The panes are not
+   windows onto the body background: every .flexlayout__tabset paints its
+   OWN cover-sized copy of background-level1-glass.webp, and .monaco-editor
+   paints another one under its own dark wash (see those rules above). So
+   the scene you see "through" a panel is that panel's own opaque paint, and
+   two earlier attempts at putting the ambient layer underneath it --
+   z-index:-1 hoisted to the root context, then z-index:-1 trapped in body
+   via isolation:isolate -- were both invisible for that reason, the second
+   one correctly placed and still hidden. Petals and sparkles therefore
+   drift in FRONT of the UI, which is what makes them visible at all; they
+   stay readable-over by being few, dim and blurred, and pointer-events:none
+   means they never intercept a click. Below the title card (2147483000) so
+   a level intro still covers them. */
+.lctg-ambient {
+  position: fixed; inset: 0; z-index: 2147482000;
+  overflow: hidden; pointer-events: none;
+  contain: strict;
+}
+.lctg-petal {
+  position: absolute;
+  top: -8%; left: var(--x);
+  width: var(--size); height: var(--size);
+  background-size: contain; background-repeat: no-repeat; background-position: center;
+  opacity: 0;
+  filter: blur(1.4px);
+  will-change: transform, opacity;
+  animation: lctg-petal-fall var(--dur, 18s) linear infinite;
+}
+@keyframes lctg-petal-fall {
+  0%   { transform: translate3d(0, 0, 0) rotate(0deg); opacity: 0; }
+  6%   { opacity: var(--peak, .18); }
+  50%  { transform: translate3d(var(--drift), 58vh, 0) rotate(calc(var(--rot) * .5)); }
+  94%  { opacity: var(--peak, .18); }
+  100% { transform: translate3d(calc(var(--drift) * 1.7), 118vh, 0) rotate(var(--rot)); opacity: 0; }
+}
+/* a soft patch of light that swells and fades, NOT a bright pinpoint. The
+   first version was a 3px dot with a tight box-shadow ring, which read as a
+   hard sparkle; the light now comes entirely from a wide, low-alpha radial
+   falloff blurred well past its own edge, so what swells is a diffuse bloom.
+   Size and peak are randomised per dot (ambient.js) so no two read alike.
+   The gentle scale is what makes it "glow" rather than just "blink", and
+   scale+opacity keep the whole thing on the compositor. */
+.lctg-blicker {
+  position: absolute;
+  width: var(--size, 30px); height: var(--size, 30px);
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    rgba(222,244,255,.80) 0%,
+    rgba(165,222,255,.32) 38%,
+    rgba(135,205,255,.10) 62%,
+    transparent 80%);
+  opacity: 0;
+  /* a light touch only. The gradient above already IS the soft edge, so a
+     heavy blur here just destroys the peak: blur(7px) on a 22px dot spread
+     it until the centre sat near 10% alpha over a bright photo, which read
+     as nothing at all. Soften, don't dilute. */
+  filter: blur(3px);
+  will-change: transform, opacity;
+  animation: lctg-blicker-fade ease-in-out infinite;
+}
+@keyframes lctg-blicker-fade {
+  0%, 100% { opacity: 0; transform: scale(.82); }
+  50%      { opacity: var(--peak, .52); transform: scale(1.1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lctg-blicker { animation: none !important; }
+  .lctg-petal { animation: none !important; }
+}
+
+/* while the Problem List drawer is open (src/game/ambient.js's
+   listDrawerOpen()): petals keep falling over it on purpose, only the
+   blickers pause. This is a rare, discrete state change (opening a drawer),
+   not a per-frame concern, so a plain display:none is fine -- cheapest, and
+   removes them from compositing entirely rather than leaving them ticking
+   at opacity:0 underneath. */
+.lctg-ambient--no-blicker .lctg-blicker {
+  display: none;
+}
+
+/* the top bar is the desk (deep HUD navy), not the glass -- re-scope roles
+   the way Vintage Paper's dark bar does, and show the dark-mode logo */
+html[data-lc-theme="game"][data-lc-game-level="easy"] #__next nav {
+  --lc-bg2:#20488a; --lc-raised:#2a58a2;
+  --lc-text:#e6edf3; --lc-text2:#c9d6e2; --lc-text3:#94a3b8;
+  --lc-accent:#7dd3fc; --lc-accent-2:#7dd3fc;
+  --lc-green:#00fa9a; --lc-yellow:#e0b45a; --lc-red:#ee204d;
+  --lc-hairline:rgba(210,230,255,.16); --lc-groove:rgba(0,0,0,.4);
+  --lc-fill-1:rgba(210,230,255,.18); --lc-fill-2:rgba(210,230,255,.13);
+  --lc-fill-3:rgba(210,230,255,.08); --lc-fill-4:rgba(210,230,255,.04);
+  --lc-hsl-bg:218 45% 16%; --lc-hsl-raised:216 45% 25%;
+  --lc-hsl-text:216 100% 97%; --lc-hsl-text3:212 40% 74%; --lc-hsl-accent:40 55% 65%;
+  --lc-hsla-hairline:210,80%,90%,0.16; --lc-hsl-accent2:40 55% 65%;
+}
+html[data-lc-theme="game"][data-lc-game-level="easy"] #__next nav a[href="/"] [class~="dark:flex"] { display: flex !important; }
+html[data-lc-theme="game"][data-lc-game-level="easy"] #__next nav a[href="/"] [class~="dark:hidden"] { display: none !important; }
+
+/* the profile dropdown (My Lists/Notebook/Progress/Points + the Try New
+   Features/Orders/My Playgrounds/Settings/Appearance/Sign Out list). It's
+   inside #__next nav, so it already inherits that block's own --lc-raised/
+   --lc-accent (#2a58a2 / #7dd3fc) above -- matched here by the two stable
+   ids LeetCode gives it (#web-user-menu the positioned box, #web-user-
+   dropdown-content its inner content), not a guessed utility class, since
+   none of its own classes are documented as stable.
+   Darkened past plain --lc-raised the same way the Problem List drawer was
+   (color-mix, not the variable itself, so nothing else sharing --lc-raised
+   moves). The menu-list text goes to --lc-accent -- the cyan family the
+   "Input:"/"Output:" labels in the Description panel already use -- so the
+   menu reads as one themed unit instead of plain white; the profile name
+   link is excluded so it keeps its own bright --lc-text. */
+html[data-lc-theme="game"][data-lc-game-level="easy"] #web-user-menu {
+  background-color: color-mix(in srgb, var(--lc-raised) 60%, black 40%) !important;
+}
+/* Appearance and Sign Out stayed white after the first pass: they're not
+   <a> tags like the rest of the list (no href to navigate to, one opens a
+   submenu, the other fires an action), so they never matched the a-only
+   selector -- button catches both. !important on the button itself is what
+   makes this reach them regardless of whatever un-mapped utility class
+   LeetCode already put on it, the same reason the rest of this file favours
+   forcing the exact match over relying on inheritance. */
+html[data-lc-theme="game"][data-lc-game-level="easy"] #web-user-dropdown-content a:not([href^="/u/"]),
+html[data-lc-theme="game"][data-lc-game-level="easy"] #web-user-dropdown-content button,
+html[data-lc-theme="game"][data-lc-game-level="easy"] #web-user-dropdown-content p {
+  color: var(--lc-accent) !important;
+}
+/* belt-and-suspenders: LeetCode's own nav-item spans/links carry hardcoded
+   utility classes that don't all resolve through the --lc-text remap, which
+   is what made nav labels read as low-contrast/invisible against the new
+   sapphire bar. Force them bright, with a hairline shadow for insurance
+   over the busy Auto/Run/Submit row. */
+html[data-lc-theme="game"][data-lc-game-level="easy"] #__next nav,
+html[data-lc-theme="game"][data-lc-game-level="easy"] #__next nav a,
+html[data-lc-theme="game"][data-lc-game-level="easy"] #__next nav span,
+html[data-lc-theme="game"][data-lc-game-level="easy"] #__next nav button {
+  color: #f4f8ff !important;
+  text-shadow: 0 1px 2px rgba(2,8,20,.45);
+}
+
+
+/* =========================== TYPOGRAPHY ==================================== */
+/* the problem title in Cinzel -- the same "engraved silver" display face as
+   the title card, so the persistent page and the cinematic moment read as
+   one identity. (The font-face above is subset to full ASCII precisely so
+   this mixed-case title doesn't fall back to EB Garamond mid-word.) */
+html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__tab .text-title-large,
+html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__tab .text-title-large a {
+  font-family: "Cinzel", "EB Garamond", Georgia, serif !important;
+  font-weight: 700 !important;
+  letter-spacing: .01em;
+  /* the "shiny" silver/sky-blue treatment from the title card, reused here
+     since this element is verified to hold its text directly (no nested
+     span that would make a background-clip gradient go invisible) --
+     everything else on the page gets its shine from the plain --lc-text/
+     text2/text3 colour roles below instead, since `color` still inherits
+     correctly through any DOM structure LeetCode actually uses */
+  /* brighter, more saturated blue -- the earlier gradient leaned too
+     heavily on white/pale-blue stops and read as dull/washed-out rather
+     than shiny; this keeps only a thin white catch-light top and bottom,
+     with the dominant body of the gradient a genuinely vivid blue. */
+  background-image: linear-gradient(180deg, #eafcff 0%, #a6f4ff 24%, #38bdf8 50%, #0ea5e9 68%, #7dd3fc 85%, #eafcff 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent !important;
+  text-shadow: 0 1px 3px rgba(2,8,18,.7), 0 0 26px rgba(56,189,248,.65);
+  filter: drop-shadow(0 1px 2px rgba(2,8,18,.55));
+}
+
+
+/* =========================== TAB ITEM-CARDS ================================ */
+/* Description/Editorial/Solutions/Submissions restyled as the reference's
+   item-card row: a luminous icon + a brighter glass surface + a highlighted
+   edge for the active one, a dimmer icon for the rest -- "selecting an item
+   in a game menu," in the row FlexLayout already gives us, not a new
+   injected sidebar (see CLAUDE_ANKIT.md for why). */
+html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__tab_button_content svg {
+  opacity: .68;
+  transition: opacity .16s ease, filter .16s ease;
+}
+html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__tab_button:hover .flexlayout__tab_button_content svg {
+  opacity: .9;
+}
+html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__tab_button--selected {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.10),
+    0 0 12px -4px rgba(120,205,255,.55) !important;
+}
+html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__tab_button--selected .flexlayout__tab_button_content svg {
+  opacity: 1;
+  filter: drop-shadow(0 0 4px rgba(125,211,252,.55));
+}
+
+
+/* =========================== SUBMISSIONS VERDICTS =========================== */
+/* the Submissions tab's status column needs no JS at all -- LeetCode already
+   marks it with its own plain classes (text-green-s / text-red-s, seen
+   directly in devtools: <span class="text-red-s dark:text-dark-red-s ...">),
+   and core.css already has a generic rule for those two classes that every
+   theme (including Anime Studio) rides for free: color: var(--lc-green) /
+   var(--lc-red). This theme already sets those variables (see the easy-level
+   role block above), so in principle nothing more was needed here -- but
+   --lc-green/--lc-red also drive the Easy/Hard difficulty badge colour
+   (core.css's --difficulty-easy/--difficulty-hard), and the user asked for
+   a specific reference green/red pair for verdicts only, not a difficulty
+   badge recolour. So this overrides the same two classes directly, with its
+   own exact hex pair, at the same specificity as core.css's rule -- it wins
+   purely by being declared later in the cascade (game.css loads after
+   core.css), same as every other "restyle over the generic rule" pattern in
+   this file. Not level-gated: the submissions list exists at every level. */
+html[data-lc-theme="game"] [class~="text-green-s"],
+html[data-lc-theme="game"] [class~="dark:text-dark-green-s"] {
+  color: #00fa9a !important;
+  text-shadow: 0 0 6px rgba(0,250,154,.5) !important;
+}
+html[data-lc-theme="game"] [class~="text-red-s"],
+html[data-lc-theme="game"] [class~="dark:text-dark-red-s"] {
+  color: #ee204d !important;
+  text-shadow: 0 0 6px rgba(238,32,77,.5) !important;
+}
+
+/* NOTE: an earlier version of this rule matched any [class~="rounded-lg"]
+   theme-wide, as a fallback in case Input/Output/Expected weren't <pre>.
+   They are (confirmed: the global "pre" rule above already reaches them),
+   so that fallback is gone -- it was also catching the Status/Language
+   filter dropdowns in the Submissions list, boxing them in a border they
+   were never meant to have. core.css already has the correctly narrow
+   version of this pattern for the one place rounded-lg really does need
+   it (the testcase field): [class~="cursor-text"][class~="rounded-lg"],
+   below. */
+/* the "Wrong Answer"/"Accepted" result-page heading is a real <h3> (seen
+   directly in devtools) -- a glow keyed off currentColor (the chips use
+   this same technique) so it shines with whatever colour it already has
+   (red/green from the text-red-s/text-green-s rules above, if it carries
+   that class) without needing to guess red vs green per element. */
+html[data-lc-theme="game"][data-lc-game-level="easy"] h3 {
+  text-shadow: 0 0 12px color-mix(in srgb, currentColor 55%, transparent) !important;
+}
+
+
+/* =========================== BUTTONS ======================================== */
+/* Submit: the brightest crystal control on the page -- core.css's generic
+   rule paints --lc-submit-bg as a plain background-color (which can't hold
+   a gradient), so this overrides with the full reflective gradient from the
+   crystal spec, plus a bright top-edge highlight so it reads as physically
+   glossy rather than a flat colour swap. Wins by loading after core.css's
+   rule at equal specificity. */
+/* was a flat, fully-saturated sky-blue (#38bdf8/#0ea5e9) -- read as a
+   pasted-on UI chip against the deep navy crystal-glass around it. Deepened
+   to sit in the same tonal family as --lc-desk/--lc-crystal-surface, with
+   the brightness now coming from the edge (border/box-shadow, already
+   crystal-cyan) and the submit.png glyph's own glow, not the fill. */
+html[data-lc-theme="game"][data-lc-game-level="easy"] [data-e2e-locator="console-submit-button"] {
+  background-image: linear-gradient(135deg, #1c4a66, #0d2438) !important;
+  border: 1px solid rgba(166,244,255,.55) !important;
+}
+html[data-lc-theme="game"][data-lc-game-level="easy"] [data-e2e-locator="console-submit-button"]:hover {
+  background-image: linear-gradient(135deg, #235a7a, #123049) !important;
+}
+/* Run: bare -- just its icon + sparkle, no background/box at any state. */
+/* Auto's pill: the same restrained crystal glass Run no longer has --
+   gold is only Medium's semantic difficulty colour, not a decorative
+   accent anywhere in this theme. */
+html[data-lc-theme="game"][data-lc-game-level="easy"] [data-lctg-icon="auto"] {
+  padding: 3px 9px !important;
+  border-radius: var(--lc-radius-sm) !important;
+  background: rgba(10,28,42,.32) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(205,240,255,.14),
+    inset 0 0 0 1px rgba(125,211,252,.35),
+    0 0 10px -4px rgba(125,211,252,.30) !important;
+}
+
+
+/* =========================== ICONS ========================================= */
+/* Run, the editor's Auto-lock, and three tab icons become the theme's own
+   gem/crystal set (textures/game/icon/*). Applies in both material states
+   (fallback and Easy) since these are small UI glyphs, not the level's own
+   art. Run/Submit have a documented data-e2e-locator, so that one is pure
+   CSS; the rest are marked by src/game/icons.js via data-lctg-icon (see that
+   file for why -- no other stable hook exists for a tab icon). */
+/* hide every descendant, not just the svg -- LeetCode wraps the icon and a
+   text label together, and hiding only the svg left the label's own box
+   (invisible, but still taking width) sitting between the icon and Submit
+   as a stray gap */
+html[data-lc-theme="game"] [data-e2e-locator="console-run-button"] * {
+  display: none !important;
+}
+html[data-lc-theme="game"] [data-e2e-locator="console-run-button"] {
+  position: relative;
+  padding: 0 6px !important;
+  gap: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+html[data-lc-theme="game"] [data-e2e-locator="console-run-button"]::before {
+  content: "";
+  display: inline-block; vertical-align: middle; flex: 0 0 auto;
+  /* the source art has a lot of built-in padding/glow around the glyph, so
+     the box has to run bigger than a normal 16px icon for the triangle
+     itself to read at the same size as LeetCode's own */
+  width: 34px; height: 34px; margin: -10px 2px -6px -6px;
+  background: url("chrome-extension://__MSG_@@extension_id__/textures/game/icon/run.png") center / contain no-repeat;
+  transition: transform 160ms ease-out;
+}
+html[data-lc-theme="game"] [data-e2e-locator="console-run-button"]:hover::before {
+  transform: scale(1.08);
+}
+/* the other four gems each have a little sparkle glint baked into the art;
+   run.png doesn't, so a matching-teal one is added here instead, drifting
+   between three facet spots and flashing at only one of them at a time --
+   an idle twinkle rather than a single fixed glint, same gemstone family as
+   the other icons. The jumps between spots happen while opacity is 0, so
+   nothing visibly slides across the triangle. */
+html[data-lc-theme="game"] [data-e2e-locator="console-run-button"]::after {
+  content: "";
+  /* anchored at the origin; the facet offsets live in the transform below,
+     so top/left must be pinned here rather than left to auto placement */
+  position: absolute; top: 0; left: 0;
+  will-change: transform, opacity;
+  width: 9px; height: 9px; pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M20 1 L23.5 20 L20 39 L16.5 20 Z' fill='%2345e6c6'/%3E%3Cpath d='M1 20 L20 16.5 L39 20 L20 23.5 Z' fill='%2345e6c6'/%3E%3C/svg%3E") center / contain no-repeat;
+  filter: drop-shadow(0 0 2.5px rgba(120, 245, 220, .95));
+  opacity: 0;
+  animation: lctg-run-sparkle 6.4s ease-in-out infinite;
+}
+/* The facet positions are in the TRANSFORM, not in top/left. They used to be
+   animated as top/left, which are layout properties -- so this 6.4s infinite
+   loop, which runs on every problem page for as long as the page is open,
+   kept the animation on the main thread and made the browser recompute style
+   for it every single frame, even across the long stretches where the values
+   do not change. Compositor-only now, and identical on screen: each facet's
+   offset is folded into the same transform that already carried the scale
+   (which is why the translate has to be restated on the bright frames -- one
+   property, so a bare scale() there would have snapped it back to origin). */
+@keyframes lctg-run-sparkle {
+  0%, 6%       { opacity: 0; transform: translate(8px, 3px)   scale(.55); }
+  3%           { opacity: 1; transform: translate(8px, 3px)   scale(1); }
+  6.01%, 39%   { opacity: 0; transform: translate(23px, 15px) scale(.55); }
+  36%          { opacity: 1; transform: translate(23px, 15px) scale(1); }
+  39.01%, 72%  { opacity: 0; transform: translate(12px, 25px) scale(.55); }
+  69%          { opacity: 1; transform: translate(12px, 25px) scale(1); }
+  72.01%, 100% { opacity: 0; transform: translate(8px, 3px)   scale(.55); }
+}
+html[data-lc-theme="game"] [data-e2e-locator="console-run-button"]:hover::after {
+  animation-play-state: running;
+  filter: drop-shadow(0 0 2.5px rgba(69, 230, 198, 1));
+}
+
+/* Submit: same swap as Run, but the "Submit" label stays -- only the FA
+   cloud-arrow-up glyph and its own icon-wrapper div (the "before:h-4
+   before:w-4" div documented in icons.js's header, same shape as the tab
+   icons' "before:h-3.5" wrapper) are hidden; the button itself gets the
+   crystal cloud (submit.png) as its own ::before, sized up like Run's for
+   the same reason -- the source art carries a lot of built-in glow/padding
+   around the glyph. */
+html[data-lc-theme="game"] [data-e2e-locator="console-submit-button"] [class*="before:h-4"] {
+  display: none !important;
+}
+html[data-lc-theme="game"] [data-e2e-locator="console-submit-button"]::before {
+  content: "";
+  display: inline-block; vertical-align: middle; flex: 0 0 auto;
+  /* 36px with negative margins overflowed the button's own edges and ran
+     into the "Submit" text at this navbar's actual (narrower) height --
+     back to a size that fits inside the button's own box, no negative
+     margins, a plain positive gap to the label instead. */
+  width: 20px; height: 20px; margin-right: 7px;
+  background: url("chrome-extension://__MSG_@@extension_id__/textures/game/icon/submit.png") center / contain no-repeat;
+  filter: drop-shadow(0 0 3px rgba(125,211,252,.35));
+}
+
+html[data-lc-theme="game"] [data-lctg-icon] svg { display: none !important; }
+/* the svg's own wrapper div (seen in devtools: class="... before:h-3.5
+   before:w-3.5 ...") still reserves its box even with the svg inside it
+   hidden -- that leftover invisible box was the gap between our icon and
+   the label. Collapse the wrapper itself, not just the svg. */
+html[data-lc-theme="game"] [data-lctg-icon] [class*="before:h-3.5"] {
+  display: none !important;
+}
+html[data-lc-theme="game"] [data-lctg-icon] {
+  display: inline-flex !important; align-items: center; gap: 0 !important;
+  position: relative;
+  font-family: "Metamorphous", "Cinzel", "EB Garamond", Georgia, serif;
+  font-size: 19px;
+}
+html[data-lc-theme="game"] [data-lctg-icon]::before {
+  content: "";
+  display: inline-block; flex: 0 0 auto;
+  width: 29px; height: 29px; margin-right: 8px;
+  background-size: contain; background-repeat: no-repeat; background-position: center;
+  /* item-card hierarchy: dim at rest, brighter on hover, fully lit + a
+     restrained gold glow when its tab is the active one -- same rule for
+     all five icons, raster gem art or inline SVG alike */
+  opacity: .7;
+  transition: opacity .16s ease, filter .16s ease;
+}
+html[data-lc-theme="game"] .flexlayout__tab_button:hover [data-lctg-icon]::before {
+  opacity: .92;
+}
+html[data-lc-theme="game"] .flexlayout__tab_button--selected [data-lctg-icon]::before {
+  opacity: 1;
+  filter: drop-shadow(0 0 4px rgba(125,211,252,.5));
+}
+/* a faint twinkle riding the top-right corner of each gem, same sparkle
+   art/motion as the Run button's (see ::after above) but a single spot,
+   dimmer and slower -- a passive row of icons shouldn't out-sparkle the
+   button people actually click. Each icon gets its own animation-delay
+   (set alongside its ::after position override below) so the four tabs
+   don't flash in lockstep. */
+html[data-lc-theme="game"] [data-lctg-icon]::after {
+  content: "";
+  position: absolute;
+  top: -1px; left: 19px;
+  width: 6px; height: 6px;
+  pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M20 1 L23.5 20 L20 39 L16.5 20 Z' fill='%23cfeaff'/%3E%3Cpath d='M1 20 L20 16.5 L39 20 L20 23.5 Z' fill='%23cfeaff'/%3E%3C/svg%3E") center / contain no-repeat;
+  filter: drop-shadow(0 0 2px rgba(207,234,255,.85));
+  opacity: 0;
+  animation: lctg-tab-sparkle 5.2s ease-in-out infinite;
+}
+@keyframes lctg-tab-sparkle {
+  0%, 90%  { opacity: 0; transform: scale(.4); }
+  94%      { opacity: .85; transform: scale(1); }
+  98%, 100% { opacity: 0; transform: scale(.4); }
+}
+html[data-lc-theme="game"] [data-lctg-icon="testcase"]::before {
+  background-image: url("chrome-extension://__MSG_@@extension_id__/textures/game/icon/console-testcase.png");
+}
+html[data-lc-theme="game"] [data-lctg-icon="solutions"]::before {
+  background-image: url("chrome-extension://__MSG_@@extension_id__/textures/game/icon/potion-solutions.png");
+}
+html[data-lc-theme="game"] [data-lctg-icon="solutions"]::after { animation-delay: 1.3s; }
+html[data-lc-theme="game"] [data-lctg-icon="description"]::before {
+  background-image: url("chrome-extension://__MSG_@@extension_id__/textures/game/icon/description.png");
+  /* this art is cropped much tighter to its glyph (~85% canvas fill,
+     checked directly against the file) than testcase/solutions (~65-70%
+     fill) -- at the standard 19px box it would read visibly larger than
+     the rest of the row, so the box shrinks to compensate instead. */
+  width: 24px; height: 24px; margin-right: 12px;
+}
+html[data-lc-theme="game"] [data-lctg-icon="description"]::after { left: 16px; animation-delay: 2.6s; }
+/* Editorial: real art now (was inline SVG line-art). Same tight-crop
+   compensation as description.png above (~92% canvas fill). */
+html[data-lc-theme="game"] [data-lctg-icon="editorial"]::before {
+  background-image: url("chrome-extension://__MSG_@@extension_id__/textures/game/icon/editorial.png");
+  width: 23px; height: 23px; margin-right: 13px;
+}
+html[data-lc-theme="game"] [data-lctg-icon="editorial"]::after { left: 15px; animation-delay: 3.9s; }
+/* Submissions: crystal hourglass (timework.png), same silhouette as the old
+   inline-SVG line-art it replaces. Glyph fill is looser than description/
+   editorial's tight crop, closer to testcase/solutions, so it uses the
+   standard 19px box with no size compensation. */
+html[data-lc-theme="game"] [data-lctg-icon="submissions"]::before {
+  background-image: url("chrome-extension://__MSG_@@extension_id__/textures/game/icon/timework.png");
+  filter: drop-shadow(0 0 2px rgba(140,205,255,.4));
+}
+html[data-lc-theme="game"] .flexlayout__tab_button--selected [data-lctg-icon="editorial"]::before,
+html[data-lc-theme="game"] .flexlayout__tab_button--selected [data-lctg-icon="submissions"]::before {
+  filter: drop-shadow(0 0 4px rgba(125,211,252,.5));
+}
+html[data-lc-theme="game"] [data-lctg-icon="auto"]::before {
+  width: 13px; height: 13px; margin-right: 4px;
+  background-image: url("chrome-extension://__MSG_@@extension_id__/textures/game/icon/lock-auto.png");
+}
+
+
+/* =========================== LABELLED CONTROLS ============================== */
+/* marked by src/game/icons.js's markLabels() -- Testcase/Test Result (the
+   small tab pair under the editor) get restrained crystal styling matched
+   to the rest of the tab system; Analysis gets the theme's one deliberately
+   prominent violet accent, per the "special/rare, never dominant" rule in
+   the crystal colour spec. */
+html[data-lc-theme="game"][data-lc-game-level="easy"] [data-lctg-label="testcase"],
+html[data-lc-theme="game"][data-lc-game-level="easy"] [data-lctg-label="test-result"] {
+  color: var(--lc-text3) !important;
+  border-bottom: 1px solid transparent;
+  transition: color .16s ease, border-color .16s ease;
+  /* Testcase inherited --lc-font-ui fine on its own, but Test Result sits in
+     a different LeetCode wrapper that sets its own font-family, so without
+     this the two tabs in the same row read in two different typefaces. */
+  font-family: var(--lc-font-ui) !important;
+}
+html[data-lc-theme="game"][data-lc-game-level="easy"] [data-lctg-label="testcase"]:hover,
+html[data-lc-theme="game"][data-lc-game-level="easy"] [data-lctg-label="test-result"]:hover {
+  color: var(--lc-text) !important;
+}
+/* only ONE of the two is ever the active tab, but this file can't tell
+   which without a confirmed selected-state selector (see the note in
+   icons.js) -- aria-selected is the one signal likely to exist on a real
+   tab control regardless of LeetCode's own class names, so this is a
+   reasonable, non-destructive bet: it does nothing if the attribute isn't
+   there. */
+html[data-lc-theme="game"][data-lc-game-level="easy"] [data-lctg-label="testcase"][aria-selected="true"],
+html[data-lc-theme="game"][data-lc-game-level="easy"] [data-lctg-label="test-result"][aria-selected="true"] {
+  color: var(--lc-text) !important;
+  border-bottom-color: #7dd3fc;
+  text-shadow: 0 0 8px rgba(125,211,252,.3);
+}
+html[data-lc-theme="game"][data-lc-game-level="easy"] [data-lctg-label="analysis"] {
+  background-image: linear-gradient(135deg, rgba(167,139,250,.22), rgba(125,211,252,.12)) !important;
+  border: 1px solid rgba(167,139,250,.55) !important;
+  border-radius: var(--lc-radius-sm) !important;
+  box-shadow: 0 0 14px rgba(167,139,250,.18) !important;
+  color: var(--lc-crystal-violet) !important;
+}
+html[data-lc-theme="game"][data-lc-game-level="easy"] [data-lctg-label="analysis"] svg {
+  filter: drop-shadow(0 0 3px rgba(167,139,250,.5));
+}
+/* the empty Test Result state ("You must run your code first") -- a
+   crystal chamber, not a blank rectangle: a soft centred glow behind the
+   icon+message, a silver-white message, a muted secondary line, and the
+   icon itself as a small illuminated rune rather than a flat glyph. */
+html[data-lc-theme="game"][data-lc-game-level="easy"] [data-lctg-label="empty-chamber"] {
+  position: relative;
+}
+html[data-lc-theme="game"][data-lc-game-level="easy"] [data-lctg-label="empty-chamber"]::before {
+  content: "";
+  position: absolute; inset: -40px;
+  background: radial-gradient(circle, rgba(125,211,252,.12) 0%, rgba(125,211,252,.04) 30%, transparent 70%);
+  pointer-events: none; z-index: -1;
+}
+html[data-lc-theme="game"][data-lc-game-level="easy"] [data-lctg-label="empty-msg"] {
+  color: var(--lc-text) !important;
+}
+html[data-lc-theme="game"][data-lc-game-level="easy"] [data-lctg-label="empty-icon"] {
+  color: #a6f4ff;
+  filter: drop-shadow(0 0 6px rgba(125,211,252,.35));
+}
+
+
+/* =========================== TITLE CARD ==================================== */
+/* Built by src/game/title-card.js. Its own fixed overlay, independent of the
+   theme's data-lc-theme scoping (so it also works in the standalone preview
+   at src/game/preview.html) -- deliberately not prefixed with
+   html[data-lc-theme="game"] the way the rest of this file is.
+
+   The real LeetCode page stays visible underneath: .lctg-card itself paints
+   nothing, .lctg-dim is a translucent scrim (not opaque), and there is no
+   background-image anywhere in this section -- only the later, separate
+   environment layer (not built yet) will paint a picture. [data-lctg-level]
+   is set by title-card.js so Level 2 / the final level can retune colour,
+   typography and intensity here later without touching the JS or the DOM
+   shape -- see CLAUDE_ANKIT.md.
+
+   Cinzel (OFL, /fonts/cinzel-*.woff2) is the sharp, high-contrast display
+   serif for LEVEL/the main title -- EB Garamond and IM Fell English are both
+   too soft/inky for the "engraved silver" look this card wants. Also used
+   for the persistent problem title (.text-title-large) below, which is why
+   the subset covers full printable ASCII rather than just the title card's
+   own uppercase text. */
+@font-face {
+  font-family: "Cinzel"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("chrome-extension://__MSG_@@extension_id__/fonts/cinzel-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Cinzel"; font-style: normal; font-weight: 700; font-display: swap;
+  src: url("chrome-extension://__MSG_@@extension_id__/fonts/cinzel-700.woff2") format("woff2");
+}
+/* JetBrains Mono (OFL, /fonts/jbmono-*.woff2), self-hosted the same way as
+   Cinzel -- for the code editor and the submission-detail code preview, in
+   place of LeetCode's own default monospace. Subset to printable ASCII plus
+   the smart-quote pair code can occasionally contain in a string literal. */
+@font-face {
+  font-family: "JetBrains Mono"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("chrome-extension://__MSG_@@extension_id__/fonts/jbmono-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono"; font-style: normal; font-weight: 700; font-display: swap;
+  src: url("chrome-extension://__MSG_@@extension_id__/fonts/jbmono-700.woff2") format("woff2");
+}
+/* Metamorphous (OFL, /fonts/metamorphous-400.woff2) -- the chunky carved-stone
+   display face for the Description/Editorial/Solutions/Submissions tab
+   labels. Only ships at weight 400: its letterforms are already heavy, and
+   the type it's drawn from has no separate bold cut. */
+@font-face {
+  font-family: "Metamorphous"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("chrome-extension://__MSG_@@extension_id__/fonts/metamorphous-400.woff2") format("woff2");
+}
+/* Macondo (OFL, /fonts/macondo-400.woff2) -- the storybook script face for
+   the description panel: problem title, prose body, and the sidebar labels
+   (Topics/Companies/Similar Questions/Discussion, etc.) that ride
+   --lc-font-ui/--lc-font-prose/--lc-font-display below. Weight 400 only,
+   same reason as Metamorphous -- no separate bold cut exists for it. */
+@font-face {
+  font-family: "Macondo"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("chrome-extension://__MSG_@@extension_id__/fonts/macondo-400.woff2") format("woff2");
+}
+/* NO editor font here. This used to set JetBrains Mono on .monaco-editor and
+   .view-lines, and it desynced the caret: Monaco measures glyph widths itself
+   and positions the cursor arithmetically from that cached width, so a face
+   applied in CSS alone is rendered by the browser but never measured by the
+   editor. The two advance widths differ by a few percent, the error compounds
+   with the column number, and by column ~25 the caret sits a full two
+   characters behind the text you just typed.
+
+   This is the exact failure src/inject.js's applyFont() exists to prevent
+   ("the face has to go through the API -- setting it in CSS alone would
+   desync the cursor"), and CLAUDE.md lists it under Monaco's hard-won
+   lessons. inject.js only acts on ids present in its PALETTES map, and the
+   game theme has no entry there (it colours syntax through monaco-ink.js and
+   __lctsGameInk instead), so nothing ever applied the face properly.
+
+   To put JetBrains Mono back, route it through inject.js -- never restore it
+   here. The editor keeps LeetCode's own monospace until then, which is the
+   one state where the caret is guaranteed correct. */
+
+.lctg-card {
+  position: fixed; inset: 0; z-index: 2147483000;
+  pointer-events: auto; cursor: pointer;
+  font-family: "EB Garamond", Georgia, serif;
+  contain: strict;
+}
+
+/* -- the darken + letterbox, cinematic-transition step ---------------------- */
+.lctg-card .lctg-dim {
+  position: absolute; inset: 0;
+  /* translucent, not opaque: the page underneath stays recognisable */
+  background: rgba(6, 11, 9, .74);
+  opacity: 0; animation: lctg-dim-in 420ms ease-out forwards;
+}
+/* the overlay doesn't snap to bright -- it eases down in stages while the
+   bars retract, so the page settles back rather than flashing on */
+.lctg-card.is-leaving .lctg-dim { animation: lctg-dim-out 480ms ease-in 300ms both; }
+
+.lctg-card .lctg-bar {
+  position: absolute; left: 0; right: 0; height: 11vh;
+  background: #000;
+  transform: scaleY(0);
+  animation: lctg-bar-in 420ms cubic-bezier(.3, .7, .2, 1) forwards;
+}
+.lctg-card .lctg-bar.top { top: 0; transform-origin: top; }
+.lctg-card .lctg-bar.bottom { bottom: 0; transform-origin: bottom; }
+.lctg-card.is-leaving .lctg-bar {
+  animation: lctg-bar-out 480ms cubic-bezier(.4, 0, .2, 1) 300ms both;
+}
+
+/* -- the stage --------------------------------------------------------------- */
+.lctg-card .lctg-stage {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  z-index: 1;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  width: min(80vw, 820px);
+}
+
+/* the sakura field (src/game/petals.js): sits above the stage so a petal
+   can occasionally drift in front of the text, but stays subtle/low-opacity
+   enough (see petals.js) that it never actually hurts legibility */
+.lctg-card .lctg-petals {
+  position: absolute; inset: 0; z-index: 2;
+  pointer-events: none;
+}
+
+/* a small original compass/sparkle mark -- two overlapping diamonds, not a
+   franchise logo -- flanked by short divider lines, rotating once into
+   place rather than spinning continuously */
+.lctg-card .lctg-emblem {
+  display: flex; align-items: center; justify-content: center; gap: 1.1vh;
+  opacity: 0; transform: scale(.45) rotate(-70deg);
+  animation: lctg-emblem-in 620ms cubic-bezier(.2, .9, .25, 1.05) 260ms forwards;
+}
+/* both emblems' lines share one visual language: a line's gradient and its
+   scale origin both point toward whatever mark (star or diamond) sits at
+   the centre, so retracting it (scaleX -> 0) reads as light drawing back
+   into that mark rather than just disappearing. */
+.lctg-card .lctg-emblem-line {
+  width: min(5.5vw, 64px); height: 1px;
+}
+.lctg-card .lctg-emblem-line.l {
+  background: linear-gradient(90deg, transparent, rgba(226, 233, 240, .55));
+  transform-origin: right center;
+}
+.lctg-card .lctg-emblem-line.r {
+  background: linear-gradient(90deg, rgba(226, 233, 240, .55), transparent);
+  transform-origin: left center;
+}
+.lctg-card.is-leaving .lctg-emblem .lctg-emblem-line {
+  animation: lctg-line-retract 320ms ease-in 120ms both;
+}
+.lctg-star { width: min(3.4vh, 26px); height: min(3.4vh, 26px); overflow: visible; }
+.lctg-star-v, .lctg-star-h {
+  fill: #eef3f7;
+  filter: drop-shadow(0 0 6px rgba(210, 226, 240, .55));
+}
+.lctg-star-h { opacity: .6; }
+/* the lines retract into it first, then it settles with a tiny reverse
+   turn before fading -- never a continuous spin */
+.lctg-card.is-leaving .lctg-star {
+  animation: lctg-star-out 300ms ease-in 260ms both;
+}
+
+.lctg-card .lctg-level {
+  margin-top: 2vh;
+  font-family: "Cinzel", "EB Garamond", Georgia, serif;
+  font-weight: 400; text-transform: uppercase;
+  font-size: min(2.4vh, 1.9vw); letter-spacing: .1em;
+  color: #cfd9df;
+  opacity: 0; letter-spacing: .5em;
+  animation: lctg-level-in 460ms cubic-bezier(.2, .8, .2, 1) 520ms forwards;
+}
+.lctg-card.is-leaving .lctg-level {
+  animation: lctg-level-out 220ms ease-in 40ms both;
+}
+
+/* -- the main title: two halves that slide in from opposite edges and meet - */
+.lctg-card .lctg-main {
+  position: relative;
+  margin-top: 1.4vh;
+  display: flex; align-items: baseline; justify-content: center;
+  gap: .5em;
+  font-family: "Cinzel", "EB Garamond", Georgia, serif;
+  font-weight: 700; text-transform: uppercase;
+  font-size: min(6.6vh, 5vw); letter-spacing: .05em; line-height: 1.05;
+  /* silver/metallic: a light gradient clipped to the glyphs, not plain white */
+  background-image: linear-gradient(180deg, #ffffff 0%, #dfe6ea 42%, #aeb9c2 60%, #f4f7f9 78%, #c7d1d8 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  text-shadow: 0 0 26px rgba(190, 210, 225, .30);
+}
+.lctg-card .lctg-half {
+  display: inline-block;
+  opacity: 0; filter: blur(6px);
+  /* filter IS one of the four properties Chrome can animate on the
+     compositor (with transform, opacity and backdrop-filter), but this
+     element is expensive to rasterise -- gradient-clipped text plus a
+     text-shadow -- so it needs the hint to be promoted up front rather than
+     risk the blur ramp falling back to the main thread mid-entrance. */
+  will-change: transform, opacity, filter;
+}
+.lctg-card .lctg-half.l {
+  transform: translateX(-3.2vw);
+  animation: lctg-half-in 620ms cubic-bezier(.16, .8, .2, 1) 780ms forwards;
+}
+.lctg-card .lctg-half.r {
+  transform: translateX(3.2vw);
+  animation: lctg-half-in 620ms cubic-bezier(.16, .8, .2, 1) 840ms forwards;
+}
+.lctg-card.is-leaving .lctg-main {
+  animation: lctg-main-out 320ms ease-in 90ms both;
+}
+
+/* "light catching a few edges of engraved silver lettering" -- two small,
+   fixed-position glints that fade in and out ONCE after the title settles.
+   Deliberately not a moving gradient and not the whole word: mix-blend-mode
+   means a glint only brightens the glyphs already under it. */
+.lctg-card .lctg-glint {
+  position: absolute; top: 15%; width: 7%; height: 70%;
+  background: radial-gradient(circle, rgba(255, 255, 255, .9), transparent 72%);
+  mix-blend-mode: overlay;
+  opacity: 0;
+  animation: lctg-glint-flash 620ms ease-in-out 1500ms forwards;
+}
+.lctg-card .lctg-glint.a { left: 16%; }
+.lctg-card .lctg-glint.b { left: 68%; animation-delay: 1620ms; }
+.lctg-card.is-leaving .lctg-glint { animation: none; opacity: 0; }
+
+/* -- the lower emblem: same line+mark language as the top one, but the
+   lines draw outward from the centre and the mark is a small hollow
+   lozenge rather than the star -- "matching parts of one visual system" */
+.lctg-card .lctg-lower {
+  margin-top: 2.4vh;
+  display: flex; align-items: center; justify-content: center; gap: 1.1vh;
+}
+.lctg-card .lctg-lower .lctg-emblem-line {
+  transform: scaleX(0);
+  animation: lctg-line-draw 480ms cubic-bezier(.3, .7, .2, 1) 1520ms forwards;
+}
+.lctg-card .lctg-lower .lctg-emblem-line.l { transform-origin: right center; }
+.lctg-card .lctg-lower .lctg-emblem-line.r { transform-origin: left center; }
+.lctg-card.is-leaving .lctg-lower .lctg-emblem-line {
+  animation: lctg-line-retract 300ms ease-in 120ms both;
+}
+.lctg-card .lctg-diamond {
+  width: min(1.4vh, 10px); height: min(1.4vh, 10px);
+  border: 1px solid rgba(226, 233, 240, .8);
+  filter: drop-shadow(0 0 5px rgba(210, 226, 240, .5));
+  transform: rotate(45deg) scale(.3);
+  opacity: 0;
+  animation: lctg-diamond-in 360ms cubic-bezier(.2, .9, .25, 1.05) 1820ms forwards;
+}
+.lctg-card.is-leaving .lctg-diamond {
+  animation: lctg-diamond-out 240ms ease-in 240ms both;
+}
+
+.lctg-card .lctg-problem {
+  margin-top: 2vh;
+  font-size: min(2.6vh, 2vw); letter-spacing: .01em;
+  color: rgba(238, 242, 245, .88);
+  opacity: 0; transform: translateY(1vh);
+  animation: lctg-rise-in 420ms ease-out 2020ms forwards;
+}
+.lctg-card.is-leaving .lctg-problem {
+  animation: lctg-problem-out 180ms ease-in forwards;
+}
+
+/* the shell itself is a cleanup hook, not a visual beat: by the time it
+   runs, the dim/bars/text above have already resolved to nothing, so
+   title-card.js's animationend listener has something to catch */
+.lctg-card.is-leaving {
+  animation: lctg-shell-out 150ms ease-in 780ms forwards;
+}
+
+@keyframes lctg-dim-in      { to { opacity: 1; } }
+@keyframes lctg-bar-in      { to { transform: scaleY(1); } }
+@keyframes lctg-bar-out     { 0% { transform: scaleY(1); } to { transform: scaleY(0); } }
+@keyframes lctg-emblem-in   { to { opacity: 1; transform: none; } }
+@keyframes lctg-level-in    { to { opacity: 1; letter-spacing: .1em; } }
+@keyframes lctg-half-in     { to { opacity: 1; filter: blur(0); transform: none; } }
+@keyframes lctg-rise-in     { to { opacity: 1; transform: none; } }
+@keyframes lctg-shell-out   { to { opacity: 0; } }
+@keyframes lctg-line-draw   { to { transform: scaleX(1); } }
+@keyframes lctg-diamond-in  { to { opacity: 1; transform: rotate(45deg) scale(1); } }
+@keyframes lctg-glint-flash {
+  0%   { opacity: 0; }
+  45%  { opacity: .85; }
+  100% { opacity: 0; }
+}
+
+/* -- exit: "the world returns, now play" -- quieter and more gradual than
+   the entrance. Everything moves a LITTLE, in the direction it came from,
+   rather than just fading in place; the overlay eases down in visible
+   stages rather than snapping bright. */
+/* each of these gets an explicit 0% matching its settled entrance state,
+   and the rules above use fill-mode "both" rather than "forwards": swapping
+   the whole animation shorthand on .is-leaving drops the entrance
+   animation's held state, so without "both" the element would flash back
+   to ITS OWN entrance starting value for the length of its exit's delay
+   (e.g. the diamond briefly vanishing) before the exit animation began. */
+@keyframes lctg-problem-out { to { opacity: 0; transform: translateY(.6vh); } }
+@keyframes lctg-level-out   { 0% { opacity: 1; } to { opacity: 0; transform: translateY(-.5vh); } }
+@keyframes lctg-main-out    { 0% { opacity: 1; transform: none; } to { opacity: 0; transform: scale(.96); } }
+@keyframes lctg-line-retract { 0% { transform: scaleX(1); } to { transform: scaleX(0); } }
+@keyframes lctg-star-out {
+  0%   { opacity: 1; transform: rotate(0deg) scale(1); }
+  55%  { opacity: 1; transform: rotate(-16deg) scale(.92); }
+  100% { opacity: 0; transform: rotate(-28deg) scale(.7); }
+}
+@keyframes lctg-diamond-out {
+  0%  { opacity: 1; transform: rotate(45deg) scale(1); }
+  to  { opacity: 0; transform: rotate(45deg) scale(.4); }
+}
+@keyframes lctg-dim-out {
+  0%   { opacity: 1; }
+  25%  { opacity: .70; }
+  55%  { opacity: .40; }
+  80%  { opacity: .15; }
+  100% { opacity: 0; }
+}
+
+/* reduced motion: the same words, no movement, no glints */
+@media (prefers-reduced-motion: reduce) {
+  .lctg-card, .lctg-card * { animation-duration: 1ms !important; animation-delay: 0ms !important; }
+  .lctg-card .lctg-glint { display: none !important; }
+  html[data-lc-theme="game"] [data-e2e-locator="console-run-button"]::after {
+    animation: none !important; opacity: .6 !important;
+    transform: translate(8px, 3px) scale(.8) !important;
+  }
+  /* the tabset needs nothing here any more: it used to run lctg-glass-drift,
+     so this pinned the animated background-position back to its rest values.
+     That animation is gone (see the glass hierarchy comment), and the pin
+     had become actively wrong -- it listed six positions for what is now a
+     seven-layer background, so the list cycled and the photo took the
+     caustic band's offset instead of `center 32%`. */
+  html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__tabset::before {
+    display: none !important;
+  }
+}

@@ -1,0 +1,86 @@
+/* =============================================================================
+   Pixel Art — an 8-bit night level. Sweetie-16 palette (navy, slate, coin
+   yellow, 1UP green), square corners, hard offset shadows, a pixel face for
+   the chrome and a readable one for the problem text. Pixel stars on the
+   desk and in the top bar; nothing moves at rest.
+
+   The Accepted moment (the squad smashing Submit) is src/pixel/pixel.js; it
+   draws on its own canvas and only needs .lcpx-broken from this file.
+============================================================================= */
+@font-face { font-family:"Pixelify Sans"; font-style:normal; font-weight:400 700; font-display:swap;
+  src:url("chrome-extension://__MSG_@@extension_id__/fonts/pixelify-sub.woff2") format("woff2"); }
+
+html[data-lc-theme="pixel"] {
+  color-scheme: dark;
+  --lc-desk:#141624;
+  --lc-bg0:#141624; --lc-bg1:#1f2338; --lc-bg2:#262b44; --lc-bg3:#333c57;
+  --lc-inset:#171a2b; --lc-raised:#333c57; --lc-editor-bg:transparent;
+
+  --lc-border:#333c57; --lc-border-strong:#566c86;
+  --lc-hairline:rgba(244,244,244,.10); --lc-groove:#0d0e17; --lc-rule:#ffcd75;
+  --lc-fill-1:rgba(244,244,244,.15); --lc-fill-2:rgba(244,244,244,.10);
+  --lc-fill-3:rgba(244,244,244,.065); --lc-fill-4:rgba(244,244,244,.04);
+
+  --lc-text:#f4f4f4; --lc-text2:#b8c9d6; --lc-text3:#94a7ba;
+  --lc-accent:#ffcd75; --lc-accent-2:#73eff7; --lc-accent-contrast:#1a1c2c;
+  --lc-green:#a7f070; --lc-yellow:#ffcd75; --lc-red:#ff6f86;
+  --lc-selection:rgba(255,205,117,.28); --lc-scroll:#566c86;
+
+  --lc-hsl-bg:230 28% 21%; --lc-hsl-desk:233 26% 11%; --lc-hsl-raised:223 26% 27%;
+  --lc-hsl-text:0 0% 96%; --lc-hsl-text3:210 20% 66%; --lc-hsl-accent:39 100% 73%;
+  --lc-hsla-hairline:0,0%,96%,0.1; --lc-hsl-accent2:184 89% 71%;
+
+  --lc-radius:0px; --lc-radius-sm:0px;
+  --lc-font-ui:"Pixelify Sans","Segoe UI",system-ui,sans-serif;
+  --lc-font-prose:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  --lc-prose-size:15px; --lc-prose-leading:1.72; --lc-prose-measure:70ch;
+
+  /* pixel stars: square dots on an SVG tile, crisp at any zoom */
+  --lc-tex-body:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' shape-rendering='crispEdges'%3E%3Cg fill='%23f4f4f4'%3E%3Crect x='14' y='22' width='2' height='2' opacity='.35'/%3E%3Crect x='96' y='12' width='2' height='2' opacity='.25'/%3E%3Crect x='130' y='70' width='2' height='2' opacity='.3'/%3E%3Crect x='52' y='94' width='2' height='2' opacity='.22'/%3E%3Crect x='110' y='136' width='2' height='2' opacity='.28'/%3E%3Crect x='24' y='140' width='2' height='2' opacity='.2'/%3E%3C/g%3E%3Cg fill='%2373eff7' opacity='.35'%3E%3Crect x='70' y='50' width='2' height='2'/%3E%3Crect x='68' y='52' width='6' height='2' opacity='.5'/%3E%3Crect x='70' y='48' width='2' height='6' opacity='.5'/%3E%3C/g%3E%3Cg fill='%23ffcd75' opacity='.3'%3E%3Crect x='146' y='108' width='2' height='2'/%3E%3C/g%3E%3C/svg%3E"),
+    linear-gradient(180deg, #1a1c2c 0%, #141624 60%, #29366f 140%);
+  --lc-tex-body-size: 160px 160px, auto;
+  --lc-tex-body-repeat: repeat, no-repeat;
+  /* panels: a faint 2x2 dither, the texture every 8-bit sky had */
+  --lc-tex-panel:
+    repeating-conic-gradient(rgba(244,244,244,.022) 0 25%, transparent 0 50%);
+  --lc-tex-panel-size: 4px 4px;
+
+  --lc-nav-bg:#1a1c2c;
+  --lc-nav-tex:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='48' shape-rendering='crispEdges'%3E%3Cg fill='%23f4f4f4'%3E%3Crect x='20' y='10' width='2' height='2' opacity='.3'/%3E%3Crect x='88' y='32' width='2' height='2' opacity='.22'/%3E%3Crect x='150' y='8' width='2' height='2' opacity='.26'/%3E%3Crect x='210' y='28' width='2' height='2' opacity='.2'/%3E%3C/g%3E%3C/svg%3E");
+  --lc-nav-rule:#333c57;
+  --lc-nav-shadow: 0 3px 0 #0d0e17;
+  --lc-submit-bg:#38b764; --lc-submit-bg-hover:#4fcf78; --lc-submit-text:#0d0e17;
+  --lc-submit-edge: inset 0 -3px 0 #257179, 0 0 0 2px #0d0e17;
+
+  --lc-panel-shadow: 0 0 0 2px #0d0e17, 4px 4px 0 0 #0d0e17;
+  --lc-inset-shadow: inset 2px 2px 0 rgba(0,0,0,.35);
+}
+
+/* -- the active tab: a coin-yellow underline, square ------------------------ */
+html[data-lc-theme="pixel"] .flexlayout__tab_button--selected {
+  border-bottom: 3px solid var(--lc-accent) !important;
+}
+html[data-lc-theme="pixel"] .flexlayout__tab_button,
+html[data-lc-theme="pixel"] [data-e2e-locator="console-run-button"],
+html[data-lc-theme="pixel"] [data-e2e-locator="console-submit-button"] {
+  letter-spacing: .02em;
+}
+/* Submit presses like a cartridge button */
+html[data-lc-theme="pixel"] [data-e2e-locator="console-submit-button"]:active {
+  transform: translateY(2px);
+  box-shadow: inset 0 -1px 0 #257179, 0 0 0 2px #0d0e17 !important;
+}
+/* the problem's title is a level name */
+html[data-lc-theme="pixel"] .flexlayout__tab .text-title-large {
+  font-family: "Pixelify Sans", system-ui, sans-serif !important;
+  letter-spacing: .01em;
+}
+html[data-lc-theme="pixel"] :not(pre) > code {
+  border-color: rgba(255,205,117,.3) !important;
+  border-radius: 0 !important;
+}
+
+/* -- the Accepted moment hides what it has broken, until the pixels land back */
+html[data-lc-theme="pixel"] .lcpx-broken { visibility: hidden !important; }

@@ -1,0 +1,584 @@
+/* =============================================================================
+   LeetCode Theme Studio — core.css
+   Scope: the problem-solving page only (leetcode.com/problems/*).
+
+   Shared machinery. Each theme file (paper / sakura / grid / orchid .css)
+   declares ROLE tokens (--lc-*) on html[data-lc-theme="id"]; everything here
+   reads those roles, so a theme never needs to know LeetCode's class names.
+
+   Coverage works in three layers, none of which depend on hashed class names:
+     1. token remap — LeetCode resolves nearly every surface from design
+                      tokens: --layer-01, --fill-tertiary, --text-primary, the
+                      shadcn-style --sd-* set, and FlexLayout's --color-*.
+                      Remapping them themes every component that reads them,
+                      including menus rendered in portals.
+     2. utilities   — the few Tailwind utilities LeetCode compiled to a fixed
+                      rgb (bg-fill-3, dark:bg-dark-layer-1 ...) are overridden
+                      by exact class token, never by substring.
+     3. structure   — FlexLayout (.flexlayout__*), Monaco (.monaco-editor*),
+                      #__next nav and #ide-top-btns are stable hooks.
+   Editor syntax colours live in src/inject.js and src/monaco-ink.js.
+
+   Assets are addressed as chrome-extension://__MSG_@@extension_id__/… : a
+   relative url() in a content-script stylesheet resolves against the PAGE,
+   not the extension, so "../fonts/x.woff2" would ask leetcode.com for it.
+============================================================================= */
+
+/* ---- bundled type (OFL, licences ship in /fonts) --------------------------
+   IM Fell English  — Fell types, cut c.1670; the inky, uneven press face.
+   EB Garamond      — book face for the problem prose.
+   Courier Prime    — typewriter mono for code and worked examples.        */
+@font-face { font-family:"IM Fell English"; font-style:normal; font-weight:400; font-display:swap;
+  src:url("chrome-extension://__MSG_@@extension_id__/fonts/imfell-400.woff2") format("woff2"); }
+@font-face { font-family:"IM Fell English"; font-style:italic; font-weight:400; font-display:swap;
+  src:url("chrome-extension://__MSG_@@extension_id__/fonts/imfell-400i.woff2") format("woff2"); }
+@font-face { font-family:"EB Garamond"; font-style:normal; font-weight:400; font-display:swap;
+  src:url("chrome-extension://__MSG_@@extension_id__/fonts/garamond-400.woff2") format("woff2"); }
+@font-face { font-family:"EB Garamond"; font-style:italic; font-weight:400; font-display:swap;
+  src:url("chrome-extension://__MSG_@@extension_id__/fonts/garamond-400i.woff2") format("woff2"); }
+@font-face { font-family:"EB Garamond"; font-style:normal; font-weight:700; font-display:swap;
+  src:url("chrome-extension://__MSG_@@extension_id__/fonts/garamond-700.woff2") format("woff2"); }
+@font-face { font-family:"Courier Prime"; font-style:normal; font-weight:400; font-display:swap;
+  src:url("chrome-extension://__MSG_@@extension_id__/fonts/courierprime-400.woff2") format("woff2"); }
+@font-face { font-family:"Courier Prime"; font-style:normal; font-weight:700; font-display:swap;
+  src:url("chrome-extension://__MSG_@@extension_id__/fonts/courierprime-700.woff2") format("woff2"); }
+
+/* ---- roles every theme must declare ---------------------------------------
+   surfaces  --lc-desk --lc-bg0..3 --lc-inset --lc-raised --lc-editor-bg
+   ink       --lc-text --lc-text2 --lc-text3
+   lines     --lc-border --lc-border-strong --lc-hairline --lc-groove --lc-rule
+   fills     --lc-fill-1..4   (translucent, strongest first)
+   colour    --lc-accent --lc-accent-2 --lc-accent-contrast
+             --lc-green --lc-yellow --lc-red --lc-selection --lc-scroll
+   hsl       --lc-hsl-bg --lc-hsl-desk --lc-hsl-raised --lc-hsl-text
+             --lc-hsl-text3 --lc-hsl-accent --lc-hsl-accent2 --lc-hsla-hairline
+   top bar   --lc-nav-bg --lc-nav-tex --lc-nav-rule --lc-nav-shadow
+   actions   --lc-submit-bg --lc-submit-bg-hover --lc-submit-text --lc-submit-edge
+   shape     --lc-radius --lc-radius-sm --lc-panel-shadow --lc-inset-shadow
+   type      --lc-font-ui --lc-font-prose --lc-prose-size/-leading/-measure
+   texture   --lc-tex-body(-size/-repeat/-position) --lc-tex-panel(-size/-repeat/-position/-attach) */
+
+
+/* ========================== 1. TOKEN REMAP ================================ */
+/* Declared on body as well as html: content.js puts .dark on body too, and
+   LeetCode's .dark{} redeclares every token there, which would shadow what
+   body inherits from html. #__next nav is listed so a theme can re-scope its
+   roles for the top bar (Vintage Paper's bar is dark on a light page) and have the
+   tokens recompute there. !important because LeetCode also declares tokens
+   under :root:not(.light), which outranks a plain attribute match. */
+html[data-lc-theme],
+html[data-lc-theme] body,
+html[data-lc-theme] #__next nav {
+  --layer-01: var(--lc-bg2) !important;
+  --layer-02: var(--lc-raised) !important;
+  --layer-03: var(--lc-raised) !important;
+  --layer-bg-gray: var(--lc-groove) !important;
+  --layer-bg-pure: var(--lc-bg2) !important;
+
+  --fill-primary: var(--lc-fill-1) !important;
+  --fill-secondary: var(--lc-fill-2) !important;
+  --fill-tertiary: var(--lc-fill-3) !important;
+  --fill-quaternary: var(--lc-fill-4) !important;
+  --fill-pure: var(--lc-bg2) !important;
+
+  --text-primary: var(--lc-text) !important;
+  --text-secondary: var(--lc-text2) !important;
+  --text-tertiary: var(--lc-text3) !important;
+  --text-quaternary: var(--lc-text3) !important;
+  --text-reverse: var(--lc-bg0) !important;
+
+  --border-primary: var(--lc-border-strong) !important;
+  --border-secondary: var(--lc-border) !important;
+  --border-tertiary: var(--lc-hairline) !important;
+  --border-quaternary: var(--lc-hairline) !important;
+
+  --gray-60: var(--lc-text3) !important;
+  --blue-60: var(--lc-accent-2) !important;
+  --green-60: var(--lc-green) !important;
+  --yellow-60: var(--lc-yellow) !important;
+  --red-60: var(--lc-red) !important;
+  --brand-orange: var(--lc-yellow) !important;
+  --difficulty-easy: var(--lc-green) !important;
+  --difficulty-medium: var(--lc-yellow) !important;
+  --difficulty-hard: var(--lc-red) !important;
+
+  /* --sd-* are bare HSL components read as hsl(var(--sd-x)); border and
+     input use the comma form with alpha. Themes supply matching strings. */
+  --sd-background: var(--lc-hsl-bg) !important;
+  --sd-background-gray: var(--lc-hsl-desk) !important;
+  --sd-card: var(--lc-hsl-raised) !important;
+  --sd-popover: var(--lc-hsl-raised) !important;
+  --sd-muted: var(--lc-hsl-raised) !important;
+  --sd-accent: var(--lc-hsl-raised) !important;
+  --sd-secondary: var(--lc-hsl-raised) !important;
+  --sd-foreground: var(--lc-hsl-text) !important;
+  --sd-card-foreground: var(--lc-hsl-text) !important;
+  --sd-popover-foreground: var(--lc-hsl-text) !important;
+  --sd-accent-foreground: var(--lc-hsl-text) !important;
+  --sd-secondary-foreground: var(--lc-hsl-text) !important;
+  --sd-muted-foreground: var(--lc-hsl-text3) !important;
+  --sd-primary: var(--lc-hsl-text) !important;
+  --sd-primary-foreground: var(--lc-hsl-bg) !important;
+  --sd-ring: var(--lc-hsl-accent) !important;
+  --sd-border: var(--lc-hsla-hairline) !important;
+  --sd-input: var(--lc-hsla-hairline) !important;
+  /* the stopwatch, timer and info tints read the system blue scale */
+  --sd-blue-400: var(--lc-hsl-accent2) !important;
+  --sd-blue-500: var(--lc-hsl-accent2) !important;
+  --sd-blue-600: var(--lc-hsl-accent2) !important;
+}
+
+/* Radix dialogs (Notes, and anything else built the same way) are portalled
+   outside the panels but still sit under html[data-lc-theme], so their card
+   chrome already follows --sd-card/--sd-card-foreground above. Typed text
+   inside them didn't: `color` does NOT inherit into <textarea>/<input> by
+   default (the browser's own UA stylesheet resets it), so unless LeetCode's
+   CSS separately restates a themed foreground on the control itself, it
+   falls back to plain black -- invisible against our (often dark)
+   --sd-card background. Scoped to role="dialog" only, so this can never
+   reach the real code editor or the page's other text. */
+html[data-lc-theme] [role="dialog"] textarea,
+html[data-lc-theme] [role="dialog"] input {
+  color: var(--lc-text) !important;
+  caret-color: var(--lc-text) !important;
+}
+
+/* FlexLayout reads its own set. One extra type selector outranks LeetCode's
+   `html.dark .flexlayout__layout`, so no !important is needed.
+   The splitter is FlexLayout's 2px ::after: a short grip at rest, full length
+   on hover and while dragging. --lc-rule, not --lc-accent, because on a light
+   theme the accent is an ink tuned for paper and vanishes on the desk. */
+html[data-lc-theme] body .flexlayout__layout {
+  --color-background: var(--lc-desk);
+  --color-icon: var(--lc-text3);
+  --color-tabset-background: transparent;
+  --color-tabset-tabbar-background: var(--lc-bg1);
+  --color-tabset-tabbar-background-fixed: var(--lc-bg1);
+  --color-tabset-border: var(--lc-hairline);
+  --color-tab-divider: var(--lc-hairline);
+  --color-tab-hover-background: var(--lc-fill-4);
+  --color-tab-hover-background-fixed: var(--lc-fill-3);
+  --color-tab-selected: var(--lc-text);
+  --color-tab-selected-background: transparent;
+  --color-tab-unselected: var(--lc-text3);
+  --color-tab-unselected-background: transparent;
+  --color-tab-close-background: var(--lc-fill-3);
+  --color-tab-close-icon: var(--lc-text3);
+  --color-tab-close-icon-hover: var(--lc-text);
+  --color-splitter: color-mix(in srgb, var(--lc-rule) 32%, transparent);
+  --color-splitter-hover: var(--lc-rule);
+  --color-splitter-drag: var(--lc-rule);
+  --color-drag: var(--lc-rule);
+  --color-drag-background: color-mix(in srgb, var(--lc-rule) 9%, transparent);
+  --color-drag-rect-border: var(--lc-border);
+  --color-drag-rect-background: var(--lc-raised);
+  --color-drag-rect: var(--lc-text);
+  --color-edge-marker: var(--lc-rule);
+}
+
+
+/* ========================== 2. FIXED UTILITIES ============================ */
+/* Utilities LeetCode compiled to a literal colour, so no token reaches them.
+   Matched by whole class token ([class~=]) — a substring match would also
+   catch hover:, group-hover: and /opacity variants it has no business with. */
+
+/* surfaces: panel base, and anything raised above it */
+html[data-lc-theme] [class~="bg-layer-1"],
+html[data-lc-theme] [class~="dark:bg-dark-layer-1"],
+html[data-lc-theme] [class~="bg-overlay-1"],
+html[data-lc-theme] [class~="dark:bg-dark-overlay-1"] { background-color: var(--lc-bg2) !important; }
+html[data-lc-theme] [class~="bg-layer-2"],
+html[data-lc-theme] [class~="bg-layer-3"],
+html[data-lc-theme] [class~="dark:bg-dark-layer-2"],
+html[data-lc-theme] [class~="bg-overlay-3"],
+html[data-lc-theme] [class~="bg-paper"] { background-color: var(--lc-raised) !important; }
+
+/* the Problem List drawer (and anything else built on this same "lc-*"
+   token family, distinct from the plain layer-N tokens above) -- a
+   different literal class name LeetCode compiles for its slide-in panels,
+   which none of the rules above happen to match, so it fell all the way
+   back to a plain black. A floating drawer over the page reads as raised
+   the same way a popover or widget does. */
+html[data-lc-theme] [class~="bg-lc-layer-01"],
+html[data-lc-theme] [class~="dark:bg-dark-lc-background-index"] {
+  /* darkened past plain --lc-raised on purpose: that token is shared with
+     every other elevated surface (widgets, popovers, ...), so tuning it
+     here uses color-mix instead of touching the variable itself, which
+     would also darken all of those */
+  background-color: color-mix(in srgb, var(--lc-raised) 80%, black 20%) !important;
+}
+html[data-lc-theme] [class~="border-lc-fill-01"],
+html[data-lc-theme] [class~="dark:border-dark-lc-fill-01"] { border-color: var(--lc-hairline) !important; }
+html[data-lc-theme] [class~="text-lc-text-primary"],
+html[data-lc-theme] [class~="dark:text-dark-lc-text-primary"] { color: var(--lc-text) !important; }
+html[data-lc-theme] [class~="text-lc-icon-primary"],
+html[data-lc-theme] [class~="dark:text-dark-lc-icon-primary"] { color: var(--lc-text3) !important; }
+
+/* Inside a panel the base layer IS the panel, so let its material through.
+   The app root paints --sd-background-gray over the whole body; clearing it
+   lets the desk texture on body reach the top bar and the gutters. */
+html[data-lc-theme] .flexlayout__tab [class~="bg-layer-01"],
+html[data-lc-theme] .flexlayout__tab [class~="bg-layer-1"],
+html[data-lc-theme] .flexlayout__tab [class~="dark:bg-dark-layer-1"],
+html[data-lc-theme] #__next [class~="bg-sd-background-gray"] { background-color: transparent !important; }
+
+/* fills are ink laid over the surface, never an opaque patch */
+html[data-lc-theme] [class~="bg-fill-3"],
+html[data-lc-theme] [class~="dark:bg-dark-fill-3"],
+html[data-lc-theme] [class~="bg-gray-2"],
+html[data-lc-theme] [class~="dark:bg-dark-gray-2"] { background-color: var(--lc-fill-3) !important; }
+html[data-lc-theme] [class~="bg-fill-4"],
+html[data-lc-theme] [class~="dark:bg-dark-fill-4"] { background-color: var(--lc-fill-4) !important; }
+html[data-lc-theme] [class~="bg-lc-fill-01"],
+html[data-lc-theme] [class~="dark:bg-dark-lc-fill-01"] { background-color: var(--lc-hairline) !important; }
+
+/* Hovers have to be restated at the same weight, or the resting fills above
+   would outrank LeetCode's own hover rules and hovering would do nothing. */
+html[data-lc-theme] [class~="hover:bg-fill-primary"]:hover { background-color: var(--lc-fill-1) !important; }
+html[data-lc-theme] [class~="hover:bg-fill-2"]:hover,
+html[data-lc-theme] [class~="dark:hover:bg-dark-fill-2"]:hover,
+html[data-lc-theme] [class~="hover:bg-fill-secondary"]:hover,
+html[data-lc-theme] [class~="enabled:hover:bg-fill-secondary"]:enabled:hover { background-color: var(--lc-fill-2) !important; }
+html[data-lc-theme] [class~="hover:bg-fill-tertiary"]:hover { background-color: var(--lc-fill-3) !important; }
+html[data-lc-theme] [class~="hover:bg-fill-4"]:hover,
+html[data-lc-theme] [class~="dark:hover:bg-dark-fill-4"]:hover,
+html[data-lc-theme] [class~="hover:bg-fill-quaternary"]:hover { background-color: var(--lc-fill-4) !important; }
+
+/* lines and labels */
+html[data-lc-theme] [class~="border-divider-3"],
+html[data-lc-theme] [class~="dark:border-dark-divider-3"],
+html[data-lc-theme] [class~="border-divider-4"],
+html[data-lc-theme] [class~="dark:border-dark-divider-4"] { border-color: var(--lc-hairline) !important; }
+html[data-lc-theme] [class~="text-label-1"],
+html[data-lc-theme] [class~="dark:text-dark-label-1"] { color: var(--lc-text) !important; }
+html[data-lc-theme] [class~="text-label-2"],
+html[data-lc-theme] [class~="dark:text-dark-label-2"] { color: var(--lc-text2) !important; }
+html[data-lc-theme] [class~="text-label-3"],
+html[data-lc-theme] [class~="dark:text-dark-label-3"],
+html[data-lc-theme] [class~="text-label-4"],
+html[data-lc-theme] [class~="dark:text-dark-label-4"] { color: var(--lc-text3) !important; }
+
+/* LeetCode's system blue and green were picked for white and #282828 */
+html[data-lc-theme] [class~="text-blue-s"],
+html[data-lc-theme] [class~="dark:text-dark-blue-s"] { color: var(--lc-accent-2) !important; }
+html[data-lc-theme] [class~="bg-blue-0"],
+html[data-lc-theme] [class~="dark:bg-dark-blue-0"] {
+  background-color: color-mix(in srgb, var(--lc-accent-2) 12%, transparent) !important;
+}
+html[data-lc-theme] [class~="bg-green-s"],
+html[data-lc-theme] [class~="dark:bg-dark-green-s"] { background-color: var(--lc-green) !important; }
+html[data-lc-theme] [class~="text-green-s"],
+html[data-lc-theme] [class~="dark:text-dark-green-s"] { color: var(--lc-green) !important; }
+html[data-lc-theme] [class~="text-red-s"],
+html[data-lc-theme] [class~="dark:text-dark-red-s"] { color: var(--lc-red) !important; }
+
+
+/* ========================== 3. STRUCTURE ================================== */
+
+html[data-lc-theme],
+html[data-lc-theme] body,
+html[data-lc-theme] #__next {
+  background-color: var(--lc-desk) !important;
+  color: var(--lc-text) !important;
+  font-family: var(--lc-font-ui) !important;
+}
+/* the desk: texture lives on the page backdrop, fixed so it never scrolls */
+html[data-lc-theme] body {
+  background-image: var(--lc-tex-body) !important;
+  background-size: var(--lc-tex-body-size, auto) !important;
+  background-repeat: var(--lc-tex-body-repeat, repeat) !important;
+  background-position: var(--lc-tex-body-position, 0 0) !important;
+  background-attachment: fixed !important;
+}
+
+/* -- panels: the sheets on the desk ---------------------------------------- */
+html[data-lc-theme] .flexlayout__tabset,
+html[data-lc-theme] .flexlayout__tab {
+  background-color: var(--lc-bg2) !important;
+  background-image: var(--lc-tex-panel) !important;
+  background-size: var(--lc-tex-panel-size, auto) !important;
+  background-repeat: var(--lc-tex-panel-repeat, repeat) !important;
+  background-position: var(--lc-tex-panel-position, 0 0) !important;
+  background-attachment: var(--lc-tex-panel-attach, scroll) !important;
+  border-radius: var(--lc-radius) !important;
+  box-shadow: var(--lc-panel-shadow) !important;
+}
+html[data-lc-theme] .flexlayout__tabset_header,
+html[data-lc-theme] .flexlayout__tabset_tabbar_outer,
+html[data-lc-theme] .flexlayout__tabset_tabbar_inner {
+  background-color: var(--lc-bg1) !important;
+  border-color: var(--lc-hairline) !important;
+}
+html[data-lc-theme] .flexlayout__tab_button,
+html[data-lc-theme] .flexlayout__tab_button--unselected {
+  color: var(--lc-text3) !important;
+  background-color: transparent !important;
+  border-radius: var(--lc-radius-sm) !important;
+  font-family: var(--lc-font-ui) !important;
+}
+html[data-lc-theme] .flexlayout__tab_button--selected {
+  color: var(--lc-text) !important;
+  background-color: var(--lc-bg2) !important;
+  border-bottom: 2px solid var(--lc-accent) !important;
+}
+html[data-lc-theme] .flexlayout__tab_button:hover { color: var(--lc-text) !important; }
+/* LeetCode gives every tab icon its own system colour (green, blue, orange),
+   which lands arbitrarily on each palette. Icons follow the tab's state. */
+html[data-lc-theme] .flexlayout__tab_button_content svg { color: var(--lc-text3) !important; }
+html[data-lc-theme] .flexlayout__tab_button--selected .flexlayout__tab_button_content svg { color: var(--lc-accent) !important; }
+html[data-lc-theme] .flexlayout__border,
+html[data-lc-theme] .flexlayout__border_inner {
+  background-color: var(--lc-bg1) !important;
+  border-color: var(--lc-hairline) !important;
+}
+
+/* -- splitters --------------------------------------------------------------
+   Only FlexLayout's ::after line is drawn (coloured in section 1). The hit
+   area stays transparent so a gutter reads as desk, and nothing here paints a
+   fill, border or gradient — stacking those on top of the line is what made
+   a drag look like four bands. */
+html[data-lc-theme] .flexlayout__splitter,
+html[data-lc-theme] .flexlayout__splitter_drag,
+html[data-lc-theme] .flexlayout__splitter_extra {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  outline: 0 !important;
+}
+html[data-lc-theme] .flexlayout__splitter::after { transition: background-color .12s ease; }
+/* FlexLayout frames the active panel with a fixed 8px-radius ::after; give it
+   the theme's corner and a hairline so it never reads as a second border */
+html[data-lc-theme] .flexlayout__tabset-active::after {
+  border-color: var(--lc-hairline) !important;
+  border-radius: var(--lc-radius) !important;
+}
+html[data-lc-theme] .flexlayout__outline_rect,
+html[data-lc-theme] .flexlayout__outline_rect_edge {
+  border-color: color-mix(in srgb, var(--lc-rule) 60%, transparent) !important;
+  border-radius: var(--lc-radius) !important;
+  box-shadow: none !important;
+}
+
+/* -- editor chrome (syntax comes from inject.js / monaco-ink.js) ----------- */
+html[data-lc-theme] .monaco-editor,
+html[data-lc-theme] .monaco-editor-background,
+html[data-lc-theme] .monaco-editor .margin,
+html[data-lc-theme] .monaco-editor .overflow-guard { background-color: var(--lc-bg2) !important; }
+html[data-lc-theme] .monaco-editor { --vscode-focusBorder: transparent !important; }
+/* #editor wraps the toolbar row, Monaco and the "Saved / Ln, Col" footer */
+html[data-lc-theme] #editor { background-color: var(--lc-editor-bg, transparent) !important; }
+
+/* -- problem prose: measure, leading and face are part of the theme -------- */
+html[data-lc-theme] [data-track-load="description_content"] {
+  color: var(--lc-text) !important;
+  font-family: var(--lc-font-prose) !important;
+}
+html[data-lc-theme] [data-track-load="description_content"] :is(p, li) {
+  color: var(--lc-text2) !important;
+  font-size: var(--lc-prose-size) !important;
+  line-height: var(--lc-prose-leading) !important;
+  max-width: var(--lc-prose-measure);
+}
+html[data-lc-theme] [data-track-load="description_content"] a { color: var(--lc-accent) !important; }
+
+/* worked examples + inline code */
+html[data-lc-theme] pre {
+  background-color: var(--lc-inset) !important;
+  color: var(--lc-text) !important;
+  border: 1px solid var(--lc-hairline) !important;
+  border-radius: var(--lc-radius-sm) !important;
+  box-shadow: var(--lc-inset-shadow) !important;
+}
+html[data-lc-theme] :not(pre) > code {
+  background-color: var(--lc-inset) !important;
+  color: var(--lc-accent) !important;
+  border: 1px solid var(--lc-hairline) !important;
+  border-radius: var(--lc-radius-sm) !important;
+}
+html[data-lc-theme] pre code { background: transparent !important; border: 0 !important; color: var(--lc-text) !important; }
+
+/* -- the Note tab ------------------------------------------------------------
+   Note is EasyMDE (CodeMirror 5), which draws every line as its own
+   <pre class="CodeMirror-line">. The pre rules above (and grid/orchid/paper's)
+   boxed each line separately, so an empty note was one black bar. Lines sit
+   bare on the panel; this out-specifies every theme's pre rule. */
+html[data-lc-theme] .CodeMirror pre:is(.CodeMirror-line, .CodeMirror-line-like) {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: var(--lc-text) !important;
+}
+html[data-lc-theme] .CodeMirror .cm-quote { color: var(--lc-text3) !important; }
+html[data-lc-theme] .CodeMirror .CodeMirror-cursor { border-left-color: var(--lc-accent) !important; }
+html[data-lc-theme] .CodeMirror .CodeMirror-selected { background: var(--lc-selection) !important; }
+
+/* -- fields ------------------------------------------------------------------
+   The testcase field is a wrapper div with a contenteditable inside. Styling
+   both is what drew a box inside a box, so the wrapper is the field and the
+   editable is bare. LeetCode adds border-blue-s to the wrapper on hover AND on
+   focus; hover gets a quiet border, focus a muted accent, an error stays red. */
+html[data-lc-theme] :is(input, textarea:not(.inputarea)) {
+  color: var(--lc-text) !important;
+  caret-color: var(--lc-accent);
+}
+html[data-lc-theme] :is(input, textarea)::placeholder { color: var(--lc-text3) !important; }
+
+html[data-lc-theme] .flexlayout__tab [class~="cursor-text"][class~="rounded-lg"] {
+  background-color: var(--lc-inset) !important;
+  border: 1px solid var(--lc-hairline) !important;
+  border-radius: var(--lc-radius-sm) !important;
+  box-shadow: var(--lc-inset-shadow) !important;
+  transition: border-color .14s ease;
+}
+html[data-lc-theme] .flexlayout__tab [class~="cursor-text"][class~="rounded-lg"][class~="border-blue-s"] {
+  border-color: var(--lc-border) !important;
+}
+html[data-lc-theme] .flexlayout__tab [class~="cursor-text"][class~="rounded-lg"]:focus-within {
+  border-color: color-mix(in srgb, var(--lc-accent) 55%, transparent) !important;
+}
+html[data-lc-theme] .flexlayout__tab [class~="cursor-text"][class~="rounded-lg"][class~="border-red-s"] {
+  border-color: var(--lc-red) !important;
+}
+html[data-lc-theme] [data-e2e-locator="console-testcase-input"] {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  color: var(--lc-text) !important;
+  caret-color: var(--lc-accent);
+}
+
+/* -- the testcase Source view ------------------------------------------------
+   Pressing "Source" in the console swaps the fields for a CodeMirror editor
+   that ships a dark theme of its own: #d4d4d4 type, unreadable on a light
+   sheet. It sits on the panel like everything else. */
+html[data-lc-theme] .cm-editor {
+  background-color: transparent !important;
+  color: var(--lc-text) !important;
+}
+html[data-lc-theme] .cm-editor.cm-focused { outline: none !important; }
+html[data-lc-theme] .cm-editor .cm-content { color: var(--lc-text) !important; caret-color: var(--lc-accent) !important; }
+html[data-lc-theme] .cm-editor .cm-cursor { border-left-color: var(--lc-accent) !important; }
+html[data-lc-theme] .cm-editor .cm-gutters {
+  background-color: transparent !important;
+  color: var(--lc-text3) !important;
+  border-color: var(--lc-hairline) !important;
+}
+html[data-lc-theme] .cm-editor :is(.cm-activeLine, .cm-activeLineGutter) { background-color: var(--lc-fill-4) !important; }
+html[data-lc-theme] .cm-editor .cm-activeLineGutter { color: var(--lc-text) !important; }
+html[data-lc-theme] .cm-editor .cm-selectionBackground,
+html[data-lc-theme] .cm-editor.cm-focused .cm-selectionBackground { background-color: var(--lc-selection) !important; }
+
+/* Selection is scoped to where people select text: the problem, the testcase
+   fields and the testcase source view. A page-wide `html ::selection` makes
+   Chrome compute a selection style for EVERY element it restyles, which
+   doubled the style work on each splitter-drag frame (1,200 -> 2,300
+   elements). Monaco draws its own selection (.selected-text), and anywhere
+   else LeetCode's own selection colour still applies. */
+html[data-lc-theme] :is([data-track-load="description_content"], [data-e2e-locator="console-testcase-input"], .cm-editor) ::selection { background-color: var(--lc-selection) !important; }
+
+html[data-lc-theme] ::-webkit-scrollbar { width: 11px; height: 11px; }
+html[data-lc-theme] ::-webkit-scrollbar-track { background: transparent !important; }
+html[data-lc-theme] ::-webkit-scrollbar-thumb {
+  background: var(--lc-scroll) !important;
+  border: 3px solid transparent !important;
+  background-clip: padding-box !important;
+  border-radius: 7px;
+}
+html[data-lc-theme] ::-webkit-scrollbar-thumb:hover {
+  background: var(--lc-border-strong) !important;
+  background-clip: padding-box !important;
+}
+/* No universal `* { scrollbar-color }` here. LeetCode puts transition-all on
+   its accordion rows, and a scrollbar-color declared on every element turned
+   each drag frame into a fresh 500ms scrollbar-color transition on each of
+   them -- double the style recalc work on every splitter drag, for a property
+   the ::-webkit-scrollbar rules above already cover (setting scrollbar-color
+   would also switch those rules off in Chrome 121+). */
+
+/* only colour transitions, so a theme switch cross-fades — never layout */
+html[data-lc-theme] body,
+html[data-lc-theme] #__next nav,
+html[data-lc-theme] .flexlayout__tabset,
+html[data-lc-theme] .flexlayout__tab,
+html[data-lc-theme] .flexlayout__tabset_header,
+html[data-lc-theme] pre {
+  transition: background-color .18s ease, color .18s ease, border-color .18s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-lc-theme] * { transition: none !important; }
+}
+
+
+/* ========================== 4. FOCUS ====================================== */
+/* Quiet: a pointer click never leaves a ring; keyboard focus gets a thin one
+   in the theme's colour.
+   :focus-visible alone is not enough. Browsers match it on text inputs and
+   contenteditable even after a mouse click, because typing is expected there,
+   which is how the testcase field kept its ring. Text entry therefore opts out
+   entirely and shows focus through its field border (section 3). LeetCode
+   draws rings with Tailwind's --tw-ring-* variables, so those are zeroed
+   rather than box-shadow:none, which would also strip the shadows beneath. */
+html[data-lc-theme] :focus:not(:focus-visible) {
+  outline: none !important;
+  --tw-ring-shadow: 0 0 #0000 !important;
+  --tw-ring-offset-shadow: 0 0 #0000 !important;
+}
+/* Controls only. FlexLayout focuses a layout-sized container from script while
+   a splitter is dragged, and Chrome counts scripted focus as :focus-visible,
+   so a bare [tabindex] here drew a ring around the whole layout. */
+html[data-lc-theme] :is(button, a, summary, [role="button"], [role="tab"], [role="menuitem"],
+                        [role="checkbox"], [role="switch"], [role="radio"]):focus-visible {
+  outline: 1.5px solid color-mix(in srgb, var(--lc-rule) 75%, transparent) !important;
+  outline-offset: 2px !important;
+  --tw-ring-shadow: 0 0 #0000 !important;
+  --tw-ring-offset-shadow: 0 0 #0000 !important;
+}
+html[data-lc-theme] :is(input, textarea, select, [contenteditable="true"], [contenteditable=""]):focus,
+html[data-lc-theme] .flexlayout__tab_button:focus,
+html[data-lc-theme] .flexlayout__tab:focus,
+html[data-lc-theme] .flexlayout__tabset:focus,
+html[data-lc-theme] .monaco-editor :focus {
+  outline: none !important;
+  --tw-ring-shadow: 0 0 #0000 !important;
+  --tw-ring-offset-shadow: 0 0 #0000 !important;
+}
+
+
+/* ========================== 5. TOP BAR ==================================== */
+/* The problem page has exactly one <nav>. The tokens inside it come from the
+   remap in section 1, so LeetCode's own hover utilities resolve to the theme
+   and nothing needs a resting border to be visible. */
+html[data-lc-theme] #__next nav {
+  background-color: var(--lc-nav-bg) !important;
+  background-image: var(--lc-nav-tex, none) !important;
+  border-bottom: 1px solid var(--lc-nav-rule) !important;
+  box-shadow: var(--lc-nav-shadow, none) !important;
+  color: var(--lc-text) !important;
+}
+
+/* Run and Submit share one pill; it reads as a single segmented control */
+html[data-lc-theme] #ide-top-btns [class~="bg-fill-tertiary"] {
+  background-color: var(--lc-fill-4) !important;
+  box-shadow: inset 0 0 0 1px var(--lc-hairline) !important;
+  border-radius: var(--lc-radius-sm) !important;
+}
+html[data-lc-theme] [data-e2e-locator="console-run-button"] {
+  color: var(--lc-text) !important;
+  font-family: var(--lc-font-ui) !important;
+}
+html[data-lc-theme] [data-e2e-locator="console-submit-button"] {
+  background-color: var(--lc-submit-bg) !important;
+  color: var(--lc-submit-text) !important;
+  box-shadow: var(--lc-submit-edge, none) !important;
+  font-family: var(--lc-font-ui) !important;
+  font-weight: 600 !important;
+  transition: background-color .12s ease;
+}
+html[data-lc-theme] [data-e2e-locator="console-submit-button"] * {
+  color: inherit !important;
+  fill: currentColor !important;
+}
+html[data-lc-theme] [data-e2e-locator="console-submit-button"]:hover {
+  background-color: var(--lc-submit-bg-hover) !important;
+}

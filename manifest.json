@@ -1,0 +1,53 @@
+{
+   "action": {
+      "default_icon": {
+         "128": "icons/icon128.png",
+         "16": "icons/icon16.png",
+         "48": "icons/icon48.png"
+      },
+      "default_popup": "src/popup.html",
+      "default_title": "Theme Studio for LeetCode"
+   },
+   "background": {
+      "service_worker": "src/background.js"
+   },
+   "commands": {
+      "toggle-focus": {
+         "description": "Anime Studio: toggle focus mode (hide the scene and moments)",
+         "suggested_key": {
+            "default": "Ctrl+Shift+Period",
+            "mac": "Command+Shift+Period"
+         }
+      }
+   },
+   "content_scripts": [ {
+      "all_frames": false,
+      "css": [ "themes/core.css", "themes/paper.css", "themes/sakura.css", "themes/grid.css", "themes/orchid.css", "themes/anime.css", "themes/crawler.css", "themes/game.css", "themes/pixel.css" ],
+      "js": [ "src/content.js", "src/problem.js", "src/anime/scenes.js", "src/anime/css.js", "src/anime/anime.js", "src/monaco-ink.js", "src/sheet-scroll.js", "src/verdict.js", "src/share.js", "src/anime/moments-ui.js", "src/anime/sounds.js", "src/anime/moments.js", "src/game/petals.js", "src/game/sounds.js", "src/game/title-card.js", "src/game/game.js", "src/game/icons.js", "src/game/ambient.js", "src/game/result.js", "src/pixel/sprites.js", "src/pixel/pixel.js" ],
+      "matches": [ "https://leetcode.com/problems/*", "https://leetcode.cn/problems/*" ],
+      "run_at": "document_start"
+   }, {
+      "all_frames": false,
+      "js": [ "src/net-verdict.js", "src/inject.js" ],
+      "matches": [ "https://leetcode.com/problems/*", "https://leetcode.cn/problems/*" ],
+      "run_at": "document_start",
+      "world": "MAIN"
+   } ],
+   "description": "Custom LeetCode themes and dark mode for the code editor and problem page. Set any picture or anime scene as your background.",
+   "icons": {
+      "128": "icons/icon128.png",
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArRg70YHTnuoJOdO26VoYvJUApfvcC6Tye/Qz4zQtn5pFr2/zj9ziCWfe5BgN6rovb12IuZDCMvbkxmlE4kAnhV7xWMa6ImqIow5P2pnkvM9af/YKJd5LSLMhaF+yif75k5WVlWFeHnNKOWMMc7upOYsPSqhiRfgktqTTz7crWw6W7kAbalSBd1Zww6054+YiXf07ipJmyMtL9ugyltDb4nZrjZ6ELQo9eh+6qhNjr34m2EOelyoAr1dE99Z60njc8mBAklmn/B4v3qwySwYbmHIw9AkbjpyakbXaaFdF8ohDYED7fRGzi2V07sLPrnw1kEMz64Tbt78eDFFZBGT7dwIDAQAB",
+   "manifest_version": 3,
+   "name": "Theme Studio for LeetCode – Custom Themes, Dark Mode & Anime Backgrounds",
+   "permissions": [ "storage", "offscreen" ],
+   "short_name": "Theme Studio",
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "3.6.3",
+   "web_accessible_resources": [ {
+      "matches": [ "https://leetcode.com/*", "https://leetcode.cn/*" ],
+      "resources": [ "fonts/*.woff2", "audio/anime/*", "audio/crawler/*", "textures/*", "textures/anime/*", "textures/game/*", "textures/game/icon/*", "sounds/game/*" ]
+   } ]
+}

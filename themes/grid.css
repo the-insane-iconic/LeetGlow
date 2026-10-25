@@ -1,0 +1,66 @@
+/* =============================================================================
+   Grid — a drafting table. 24px hairlines with 96px majors, zero radius, hard
+   unblurred shadows, monospace throughout. The grid is the identity.
+============================================================================= */
+html[data-lc-theme="grid"] {
+  color-scheme: dark;
+  --lc-desk:#0b1017;
+  --lc-bg0:#0b1017; --lc-bg1:#111823; --lc-bg2:#141c28; --lc-bg3:#1e2937;
+  --lc-inset:#080c12; --lc-raised:#1e2937; --lc-editor-bg:transparent;
+
+  --lc-border:#25303f; --lc-border-strong:#3a4a5f;
+  --lc-hairline:rgba(130,175,215,.16); --lc-groove:#080c12; --lc-rule:#35e0a1;
+  --lc-fill-1:rgba(130,175,215,.16); --lc-fill-2:rgba(130,175,215,.11);
+  --lc-fill-3:rgba(130,175,215,.07); --lc-fill-4:rgba(130,175,215,.04);
+
+  --lc-text:#d7e0ec; --lc-text2:#9db0c6; --lc-text3:#7d8ea4;
+  --lc-accent:#35e0a1; --lc-accent-2:#58a6ff; --lc-accent-contrast:#0b1017;
+  --lc-green:#35e0a1; --lc-yellow:#e3b341; --lc-red:#ff7b72;
+  --lc-selection:rgba(53,224,161,.22); --lc-scroll:#2c3a4c;
+
+  --lc-hsl-bg:216 33% 12%; --lc-hsl-desk:215 35% 7%; --lc-hsl-raised:214 29% 17%;
+  --lc-hsl-text:214 36% 88%; --lc-hsl-text3:214 18% 57%; --lc-hsl-accent:158 73% 54%;
+  --lc-hsla-hairline:208,52%,68%,0.16; --lc-hsl-accent2:212 100% 67%;
+
+  --lc-radius:0px; --lc-radius-sm:0px;
+  --lc-font-ui:ui-monospace,"SF Mono","Cascadia Mono","Roboto Mono",Menlo,Consolas,monospace;
+  --lc-font-prose:ui-monospace,"SF Mono","Cascadia Mono","Roboto Mono",Menlo,Consolas,monospace;
+  --lc-prose-size:13.5px; --lc-prose-leading:1.78; --lc-prose-measure:76ch;
+
+  --lc-tex-body:
+    linear-gradient(to right, rgba(130,175,215,.14) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(130,175,215,.14) 1px, transparent 1px),
+    linear-gradient(to right, rgba(130,175,215,.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(130,175,215,.06) 1px, transparent 1px);
+  --lc-tex-body-size: 96px 96px, 96px 96px, 24px 24px, 24px 24px;
+  /* faint enough to read as surface, never as content */
+  --lc-tex-panel:
+    linear-gradient(to right, rgba(130,175,215,.055) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(130,175,215,.055) 1px, transparent 1px),
+    linear-gradient(to right, rgba(130,175,215,.022) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(130,175,215,.022) 1px, transparent 1px);
+  --lc-tex-panel-size: 96px 96px, 96px 96px, 24px 24px, 24px 24px;
+
+  --lc-nav-bg:#111823; --lc-nav-rule:#25303f;
+  /* an outlined stamp: mint line, mint type, a tint on hover */
+  --lc-submit-bg:rgba(53,224,161,.08); --lc-submit-bg-hover:rgba(53,224,161,.18);
+  --lc-submit-text:#35e0a1; --lc-submit-edge: inset 0 0 0 1px rgba(53,224,161,.55);
+
+  --lc-panel-shadow: 3px 3px 0 rgba(0,0,0,.5);
+  --lc-inset-shadow: inset 2px 2px 0 rgba(0,0,0,.35);
+}
+
+/* -- hard edges, hard shadows, ruled sheets --------------------------------- */
+html[data-lc-theme="grid"] .flexlayout__tabset,
+html[data-lc-theme="grid"] .flexlayout__tab {
+  border: 1px solid var(--lc-border) !important;
+}
+html[data-lc-theme="grid"] .flexlayout__tab_button--selected {
+  background-color: var(--lc-bg3) !important;
+  border-bottom: 2px solid var(--lc-accent) !important;
+  color: var(--lc-accent) !important;
+}
+html[data-lc-theme="grid"] pre {
+  border-left: 2px solid var(--lc-accent) !important;
+}
+html[data-lc-theme="grid"] ::-webkit-scrollbar-thumb { border-radius: 0 !important; }

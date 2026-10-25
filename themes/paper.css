@@ -1,0 +1,331 @@
+/* =============================================================================
+   Vintage Paper  (theme id "paper") — crumpled kraft stock on a near-black walnut desk.
+
+   MATERIAL. Two baked raster tiles and one gradient, all in /textures:
+     SHEET  640x760 WebP. Crumple relief (turbulence as a height field under a
+            distant light) plus pulp mottle, seamless on both axes, so it tiles
+            at its natural size with plain repeat.
+     GRAIN  160x160 PNG. Fine tooth and sparse soot specks, from an alpha
+            transfer that keeps only the top slice of the noise range, so it
+            reads as dust rather than an even grey fog.
+     EDGE   a radial gradient, panel-only. That is lighting on the desk, not a
+            mark on the paper, so it does not travel when the sheet does.
+
+   PERFORMANCE. Nothing is computed at runtime: images decode once and blit.
+   Every tile is drawn at its natural size and every background-size is stated
+   in pixels, so no layer can stretch with content height and there is no
+   scaled-raster cache to miss on resize. No blend modes, no text-shadow on a
+   scrolling surface, no :has(), no subtree MutationObserver.
+
+   INK. Solved against the rendered sheet rather than a flat swatch: body ink
+   clears 4.5:1 on the brightest 10% of the stock. The editor sits one shade
+   deeper, so its syntax inks were re-solved there (src/monaco-ink.js) — each
+   one the LIGHTEST value at its hue that still clears 4.5:1, since on a
+   mid-tone kraft the contrast budget is also the chroma budget and anything
+   left unspent shows up as eight roles that all look like the same brown.
+============================================================================= */
+html[data-lc-theme="paper"] {
+  color-scheme: light;
+  --lc-desk:#140f0a;
+
+  --lc-bg0:#c2a56e; --lc-bg1:#b99a62; --lc-bg2:#cbad76; --lc-bg3:#ac8d55;
+  --lc-inset:#d3b681; --lc-raised:#d3b681;
+  /* the editor is the same sheet one shade deeper: a translucent wash over the
+     panel's own texture, so no second image is decoded */
+  --lc-editor-bg:rgba(58,38,12,.12);
+
+  --lc-border:#8a7145; --lc-border-strong:#6d5832;
+  --lc-hairline:rgba(58,38,12,.22); --lc-groove:rgba(58,38,12,.30);
+  /* brass is the one colour that reads on both the sheet and the desk */
+  --lc-rule:#d9a441;
+  --lc-fill-1:rgba(58,38,12,.20); --lc-fill-2:rgba(58,38,12,.14);
+  --lc-fill-3:rgba(58,38,12,.09); --lc-fill-4:rgba(58,38,12,.05);
+
+  --lc-text:#1c1610; --lc-text2:#332818; --lc-text3:#3b3120;
+  --lc-ink:rgba(28,22,16,.94); --lc-ink2:rgba(51,40,24,.93);
+
+  /* text3 and ink blue also have to hold on the tab strip and the editor,
+     both a shade deeper than the sheet: 4.6:1 there */
+  --lc-accent:#6d190e; --lc-accent-2:#083170; --lc-accent-contrast:#e0c68f;
+  --lc-green:#204113; --lc-yellow:#523307; --lc-red:#6d190e;
+  --lc-selection:rgba(252,240,203,.62); --lc-scroll:rgba(40,28,12,.42);
+
+  --lc-hsl-bg:39 45% 63%; --lc-hsl-desk:30 33% 6%; --lc-hsl-raised:39 48% 67%;
+  --lc-hsl-text:30 27% 9%; --lc-hsl-text3:39 30% 18%; --lc-hsl-accent:7 77% 24%;
+  --lc-hsla-hairline:34,66%,14%,0.22; --lc-hsl-accent2:216 87% 24%;
+
+  --lc-radius:2px; --lc-radius-sm:2px;
+  --lc-font-ui:"EB Garamond","Iowan Old Style",Palatino,Georgia,serif;
+  --lc-font-prose:"EB Garamond","Iowan Old Style",Palatino,Georgia,serif;
+  --lc-font-display:"IM Fell English","EB Garamond",Georgia,serif;
+  --lc-font-code:"Courier Prime","Courier New",ui-monospace,monospace;
+  --lc-prose-size:16.5px; --lc-prose-leading:1.72; --lc-prose-measure:68ch;
+
+  --lc-tex-grain: url("chrome-extension://__MSG_@@extension_id__/textures/paper-grain.png");
+  --lc-tex-sheet: url("chrome-extension://__MSG_@@extension_id__/textures/paper-sheet.webp");
+  --lc-tex-body:
+    radial-gradient(150% 130% at 50% 30%, rgba(0,0,0,0) 40%, rgba(0,0,0,.60) 100%),
+    radial-gradient(1300px 780px at 50% -16%, rgba(255,208,138,.065), transparent 72%),
+    url("chrome-extension://__MSG_@@extension_id__/textures/paper-desk.webp");
+  --lc-tex-body-size: 100% 100%, 100% 100%, 420px 420px;
+  --lc-tex-panel:
+    radial-gradient(128% 108% at 50% 46%,
+      rgba(0,0,0,0) 54%, rgba(42,26,4,.20) 84%, rgba(29,17,2,.42) 100%),
+    var(--lc-tex-grain), var(--lc-tex-sheet);
+  --lc-tex-panel-size: 100% 100%, 160px 160px, 640px 760px;
+  --lc-tex-panel-repeat: no-repeat, repeat, repeat;
+  --lc-tex-panel-attach: scroll, scroll, scroll;
+
+  --lc-nav-bg: var(--lc-desk);
+  --lc-nav-tex: linear-gradient(180deg, rgba(255,232,190,.05), rgba(0,0,0,.18));
+  --lc-nav-rule: #0c0906;
+  --lc-nav-shadow: inset 0 1px 0 rgba(255,232,190,.06), 0 6px 18px -6px rgba(0,0,0,.55);
+
+  /* Submit is the panels' own stock set on the desk, typed in ink */
+  --lc-submit-bg:#cbad76; --lc-submit-bg-hover:#d9bd88; --lc-submit-text:#1c1610;
+  --lc-submit-edge: inset 0 1px 0 rgba(255,240,205,.50), inset 0 -1px 0 rgba(58,38,12,.28);
+
+  --lc-panel-shadow:
+    inset 0 0 0 1px rgba(52,36,12,.13),
+    0 2px 4px rgba(0,0,0,.46),
+    0 18px 38px -16px rgba(0,0,0,.72);
+  --lc-inset-shadow:
+    inset 0 1px 0 rgba(255,238,198,.28),
+    0 2px 5px -1px rgba(30,18,4,.34);
+}
+
+/* -- the top bar is the desk, not a fifth sheet ------------------------------
+   The page is light but the bar is walnut, so the bar re-scopes its roles and
+   core.css recomputes LeetCode's tokens inside it: bone type, fills as
+   lamplight on wood, and brass for anything LeetCode tints. The palette's
+   oxblood is an ink tuned for paper; at 4% luminance it vanishes on walnut. */
+html[data-lc-theme="paper"] #__next nav {
+  color-scheme: dark;
+  --lc-bg2:#1d1610; --lc-raised:#2a2117;
+  --lc-text:#d2bd93; --lc-text2:#b9a37c; --lc-text3:#94815e;
+  --lc-accent:#d9a441; --lc-accent-2:#d9a441;
+  --lc-green:#93c072; --lc-yellow:#e0b45a; --lc-red:#d98a72;
+  --lc-hairline:rgba(224,206,166,.14); --lc-groove:rgba(0,0,0,.55);
+  --lc-fill-1:rgba(255,236,198,.20); --lc-fill-2:rgba(255,236,198,.14);
+  --lc-fill-3:rgba(255,236,198,.09); --lc-fill-4:rgba(255,236,198,.05);
+  --lc-hsl-bg:28 29% 9%; --lc-hsl-raised:32 29% 13%;
+  --lc-hsl-text:40 41% 70%; --lc-hsl-text3:39 22% 47%; --lc-hsl-accent:39 67% 55%;
+  --lc-hsla-hairline:41,48%,76%,0.14; --lc-hsl-accent2:39 67% 55%;
+}
+/* the bar is dark while the page is light, so show LeetCode's dark-mode logo */
+html[data-lc-theme="paper"] #__next nav a[href="/"] [class~="dark:flex"] { display: flex !important; }
+html[data-lc-theme="paper"] #__next nav a[href="/"] [class~="dark:hidden"] { display: none !important; }
+
+/* a blue tint on kraft reads as dirt; notices are pencilled in instead */
+html[data-lc-theme="paper"] [class~="bg-blue-0"],
+html[data-lc-theme="paper"] [class~="dark:bg-dark-blue-0"] { background-color: var(--lc-fill-3) !important; }
+
+/* the Submit pill carries the sheet's tooth, so it reads as the same stock */
+html[data-lc-theme="paper"] [data-e2e-locator="console-submit-button"] {
+  background-image: var(--lc-tex-grain) !important;
+  background-size: 160px 160px !important;
+}
+html[data-lc-theme="paper"] [data-e2e-locator="console-run-button"],
+html[data-lc-theme="paper"] [data-e2e-locator="console-submit-button"] {
+  font-size: 14.5px !important;
+  letter-spacing: .015em;
+}
+
+/* -- sheets sit flat on the desk: no frame ---------------------------------- */
+html[data-lc-theme="paper"] .flexlayout__tabset,
+html[data-lc-theme="paper"] .flexlayout__tab,
+html[data-lc-theme="paper"] .flexlayout__tabset_tabbar_outer {
+  border: 0 !important;
+  outline: 0 !important;
+}
+
+/* -- the tab bar reads as index tabs cut into the top of the sheet ---------- */
+/* same stock, scored and folded: same grain, half a shade darker */
+html[data-lc-theme="paper"] .flexlayout__tabset_tabbar_outer,
+html[data-lc-theme="paper"] .flexlayout__tabset_header {
+  background-image: var(--lc-tex-grain) !important;
+  background-size: 160px 160px !important;
+  border-bottom: 1px solid var(--lc-hairline) !important;
+}
+html[data-lc-theme="paper"] .flexlayout__tab_button,
+html[data-lc-theme="paper"] .flexlayout__tab_button--unselected {
+  font-family: var(--lc-font-display) !important;
+  font-size: 15px !important;
+  letter-spacing: .012em;
+  color: var(--lc-text3) !important;
+  border-radius: 3px 3px 0 0 !important;
+  border-bottom: 0 !important;
+}
+html[data-lc-theme="paper"] .flexlayout__tab_button--selected {
+  color: var(--lc-text) !important;
+  background-color: var(--lc-bg2) !important;
+  border-bottom: 0 !important;
+  /* the oxblood rule sits on TOP of the tab, the way a tab divider is
+     printed, and the tab's bottom edge merges into the sheet below */
+  box-shadow:
+    inset 0 2px 0 var(--lc-accent),
+    inset 0 1px 0 1px rgba(255,232,180,.22),
+    0 -1px 3px rgba(40,26,8,.20) !important;
+}
+html[data-lc-theme="paper"] .flexlayout__tab_button:hover { color: var(--lc-text2) !important; }
+
+/* -- the headline is set in the press face ---------------------------------- */
+html[data-lc-theme="paper"] .flexlayout__tab .text-title-large,
+html[data-lc-theme="paper"] .flexlayout__tab .text-title-large a {
+  font-family: var(--lc-font-display) !important;
+  font-size: 26px !important;
+  font-weight: 400 !important;
+  line-height: 1.24 !important;
+  letter-spacing: .004em;
+  color: var(--lc-ink) !important;    /* a headline is set in black, not in red */
+}
+
+html[data-lc-theme="paper"] [data-track-load="description_content"] { -webkit-font-smoothing: antialiased; }
+html[data-lc-theme="paper"] [data-track-load="description_content"] :is(p, li) { color: var(--lc-ink2) !important; }
+html[data-lc-theme="paper"] [data-track-load="description_content"] :is(strong, b) {
+  color: var(--lc-ink) !important;
+  font-weight: 700 !important;
+}
+
+/* `Example 1:` / `Constraints:` are captions. Small caps and a hairline rule
+   carry the hierarchy — a tan box would be doing the typography's job. */
+html[data-lc-theme="paper"] [data-track-load="description_content"] strong.example {
+  display: block;
+  background: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 0 3px 0 !important;
+  margin: 26px 0 9px !important;
+  font-family: var(--lc-font-display) !important;
+  font-weight: 400 !important;
+  font-size: 1.02em !important;
+  font-variant: small-caps;
+  letter-spacing: .075em;
+  color: var(--lc-text) !important;
+  border-bottom: 1px solid rgba(40,26,6,.42) !important;
+}
+
+/* -- worked examples: a typed slip laid on the sheet ------------------------ */
+html[data-lc-theme="paper"] pre,
+html[data-lc-theme="paper"] pre code,
+html[data-lc-theme="paper"] :not(pre) > code,
+html[data-lc-theme="paper"] [data-e2e-locator="console-testcase-input"],
+html[data-lc-theme="paper"] .cm-editor .cm-content {
+  font-family: var(--lc-font-code) !important;
+}
+html[data-lc-theme="paper"] pre {
+  background-color: var(--lc-inset) !important;
+  color: var(--lc-text) !important;
+  border: 1px solid rgba(40,26,6,.30) !important;
+  /* the typewriter's red margin stop */
+  border-left: 2px solid rgba(109,25,14,.78) !important;
+  border-radius: 2px !important;
+  padding: 13px 15px !important;
+  font-size: 13.6px !important;
+  line-height: 1.62 !important;
+}
+html[data-lc-theme="paper"] :not(pre) > code {
+  background-color: rgba(226,205,158,.44) !important;
+  border: 1px solid rgba(40,26,6,.32) !important;
+  color: var(--lc-text) !important;
+  padding: .05em .34em !important;
+  font-size: .88em !important;
+}
+html[data-lc-theme="paper"] [data-e2e-locator="console-testcase-input"] { font-size: 13.6px !important; }
+
+/* -- difficulty reads as a rubber stamp, not a filled pill ------------------ */
+html[data-lc-theme="paper"] [class*="text-difficulty-"] {
+  background-color: transparent !important;
+  border: 1px solid currentColor !important;
+  border-radius: 2px !important;
+  font-family: var(--lc-font-display) !important;
+  font-variant: small-caps;
+  letter-spacing: .09em;
+  padding: 1px 9px !important;
+  opacity: .92;
+}
+
+/* -- the editor is typed straight onto the sheet ---------------------------- */
+/* Monaco is fully transparent so the crumple and grain run continuously
+   behind the code; #editor's wash (--lc-editor-bg) deepens it a shade. */
+html[data-lc-theme="paper"] .monaco-editor,
+html[data-lc-theme="paper"] .monaco-editor-background,
+html[data-lc-theme="paper"] .monaco-editor .overflow-guard,
+html[data-lc-theme="paper"] .monaco-editor .monaco-scrollable-element,
+html[data-lc-theme="paper"] .monaco-editor .lines-content { background: transparent !important; }
+/* sticky scroll would otherwise be see-through over the code it pins */
+html[data-lc-theme="paper"] .monaco-editor .sticky-widget { background-color: var(--lc-bg1) !important; }
+/* the gutter carries the ruled margin, exactly like a legal pad */
+html[data-lc-theme="paper"] .monaco-editor .margin {
+  background: transparent !important;
+  box-shadow: inset -1px 0 0 rgba(109,25,14,.42) !important;
+}
+html[data-lc-theme="paper"] .monaco-editor .line-numbers {
+  font-family: var(--lc-font-code) !important;
+  color: #483c25 !important;
+}
+html[data-lc-theme="paper"] .monaco-editor .line-numbers.active-line-number {
+  color: #650500 !important;
+}
+/* a ruler laid across the line, not a filled band */
+html[data-lc-theme="paper"] .monaco-editor .view-overlays .current-line,
+html[data-lc-theme="paper"] .monaco-editor .margin-view-overlays .current-line-margin {
+  background-color: rgba(60,38,10,.06) !important;
+  border: 0 !important;
+}
+html[data-lc-theme="paper"] .monaco-editor .selected-text { background-color: var(--lc-selection) !important; }
+html[data-lc-theme="paper"] .monaco-editor .cursor {
+  background-color: var(--lc-accent) !important;
+  border-color: var(--lc-accent) !important;
+  color: var(--lc-bg2) !important;
+}
+html[data-lc-theme="paper"] .monaco-editor .core-guide,
+html[data-lc-theme="paper"] .monaco-editor .indent-guide {
+  box-shadow: inset 1px 0 0 0 rgba(48,32,8,.20) !important;
+}
+html[data-lc-theme="paper"] .monaco-editor .core-guide-indent-active {
+  box-shadow: inset 1px 0 0 0 rgba(48,32,8,.42) !important;
+}
+html[data-lc-theme="paper"] .monaco-editor .bracket-match {
+  border-color: rgba(109,25,14,.60) !important;
+  background-color: rgba(109,25,14,.10) !important;
+}
+html[data-lc-theme="paper"] .monaco-editor .scrollbar .slider { background: rgba(32,20,6,.28) !important; }
+html[data-lc-theme="paper"] .monaco-editor .scrollbar .slider:hover { background: rgba(32,20,6,.48) !important; }
+html[data-lc-theme="paper"] .monaco-editor .suggest-widget,
+html[data-lc-theme="paper"] .monaco-editor .monaco-hover,
+html[data-lc-theme="paper"] .monaco-editor .parameter-hints-widget {
+  background-color: var(--lc-inset) !important;
+  border-color: var(--lc-border) !important;
+  color: var(--lc-text) !important;
+}
+
+/* -- a highlighter drawn across the line ------------------------------------ */
+html[data-lc-theme="paper"] :is([data-track-load="description_content"], [data-e2e-locator="console-testcase-input"], .cm-editor) ::selection {
+  background-color: var(--lc-selection) !important;
+  color: var(--lc-text) !important;
+}
+
+/* -- the sheet travels with the text -----------------------------------------
+   The panel's texture is painted on .flexlayout__tab, which never moves, so
+   words slid over a stationary surface. src/sheet-scroll.js tags the element
+   that actually scrolls, and background-attachment:local makes the sheet
+   travel with the content. Opaque, so it covers the panel's stationary copy.
+   Grain and sheet only: a gradient sized against a scroll container tracks
+   the content height and would stretch; pixel-sized tiles cannot. */
+html[data-lc-theme="paper"] [data-lcts-scroll] {
+  background-color: var(--lc-bg2) !important;
+  background-image: var(--lc-tex-grain), var(--lc-tex-sheet) !important;
+  background-size: 160px 160px, 640px 760px !important;
+  background-repeat: repeat, repeat !important;
+  background-position: 0 0, 0 0 !important;
+  background-attachment: local, local !important;
+}
+
+/* -- the console panel needs air ---------------------------------------------
+   sheet-scroll.js labels each panel, so this is a plain attribute match rather
+   than a :has() Chrome would re-evaluate on every change inside the panel. */
+html[data-lc-theme="paper"] .flexlayout__tab[data-lcts-pane="console"] {
+  box-sizing: border-box !important;
+  padding: 14px 16px 16px !important;
+}

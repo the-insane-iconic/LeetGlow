@@ -1,0 +1,421 @@
+/* =============================================================================
+   Anime Studio  (theme id "anime")
+
+   The colours are not in this file. src/anime/solver.js solves them from the
+   scene's own pixels and src/anime/anime.js injects them as a role block, so
+   any picture becomes a theme. This file holds only what never changes: the
+   glass structure, the editor, focus mode, and the moments.
+
+   GLASS WITHOUT BACKDROP-FILTER, AND WITHOUT REPAINTING THE ART
+   The scene is ONE fixed layer behind the whole app (body::before), promoted
+   to its own compositor layer, so it is rasterised once and never repainted.
+   Panels are the solved scrim as a flat translucent colour over it: resizing a
+   panel repaints a colour, not a viewport-sized scaled image. (Painting the
+   art on each panel with background-attachment:fixed made every splitter drag
+   repaint the picture once per panel per frame.)
+   The editor paints a copy that was blurred ONCE when the scene was chosen.
+   backdrop-filter would re-blur the page behind the editor on every frame the
+   code scrolls; a pre-blurred image is decoded once and blitted.
+
+   MOTION
+   Nothing moves while you code. The moments below run only on an event -- a
+   verdict, opening a problem -- animate transform and opacity only, and remove
+   themselves when they finish.
+============================================================================= */
+
+@font-face {
+  font-family: "Dela Gothic One"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("chrome-extension://__MSG_@@extension_id__/fonts/delagothic-sub.woff2") format("woff2");
+}
+
+html[data-lc-theme="anime"] {
+  --lc-radius: 12px; --lc-radius-sm: 8px;
+  --lc-font-ui: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --lc-font-prose: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --lc-font-display: "Dela Gothic One", "Inter", system-ui, sans-serif;
+  --lc-prose-size: 15px; --lc-prose-leading: 1.72; --lc-prose-measure: 72ch;
+  --lc-panel-shadow:
+    inset 0 0 0 1px var(--lc-hairline),
+    inset 0 1px 0 rgba(255,255,255,.06),
+    0 18px 40px -22px rgba(0,0,0,.7);
+  --lc-inset-shadow: inset 0 1px 2px rgba(0,0,0,.28);
+  --lc-submit-edge: 0 6px 18px -8px var(--lc-glow), inset 0 1px 0 rgba(255,255,255,.28);
+}
+
+/* the scene layer */
+html[data-lc-theme="anime"] body::before {
+  content: "";
+  position: fixed; inset: 0; z-index: -1;
+  pointer-events: none;
+  background-image: var(--lc-anime-desk);
+  background-size: auto, cover;
+  background-position: 0 0, center;
+  background-repeat: no-repeat;
+  will-change: transform;
+}
+/* everything between the canvas and the panels lets the layer through */
+html[data-lc-theme="anime"] body,
+html[data-lc-theme="anime"] #__next { background: transparent !important; }
+html[data-lc-theme="anime"] .flexlayout__layout { --color-background: transparent; }
+
+/* panels: flat glass. The tabset is the pane; the tab inside it adds nothing,
+   so no pixel is covered by two translucent layers of the same colour. */
+html[data-lc-theme="anime"] .flexlayout__tabset { background: var(--lc-anime-glass) !important; }
+html[data-lc-theme="anime"] .flexlayout__tab { background: transparent !important; }
+
+html[data-lc-theme="anime"] .flexlayout__tabset_tabbar_outer {
+  border-bottom: 1px solid var(--lc-hairline) !important;
+}
+html[data-lc-theme="anime"] .flexlayout__tab_button--selected {
+  background-color: transparent !important;
+  border-bottom: 0 !important;
+  box-shadow: inset 0 -2px 0 var(--lc-accent), 0 10px 20px -14px var(--lc-glow) !important;
+}
+
+/* the headline is set like a series logo */
+html[data-lc-theme="anime"] .flexlayout__tab .text-title-large,
+html[data-lc-theme="anime"] .flexlayout__tab .text-title-large a {
+  font-family: var(--lc-font-display) !important;
+  font-weight: 400 !important;
+  letter-spacing: .01em;
+  line-height: 1.25 !important;
+  color: var(--lc-text) !important;
+}
+
+html[data-lc-theme="anime"] [data-e2e-locator="console-submit-button"] {
+  font-weight: 700 !important;
+}
+
+/* -- the editor: frosted glass ------------------------------------------------ */
+html[data-lc-theme="anime"] #editor {
+  background-color: transparent !important;
+  background-image: var(--lc-anime-editor) !important;
+  background-size: auto, cover !important;
+  background-repeat: no-repeat !important;
+  background-position: 0 0, center !important;
+  background-attachment: fixed !important;
+}
+html[data-lc-theme="anime"] .monaco-editor,
+html[data-lc-theme="anime"] .monaco-editor-background,
+html[data-lc-theme="anime"] .monaco-editor .overflow-guard,
+html[data-lc-theme="anime"] .monaco-editor .monaco-scrollable-element,
+html[data-lc-theme="anime"] .monaco-editor .lines-content,
+html[data-lc-theme="anime"] .monaco-editor .margin { background: transparent !important; }
+html[data-lc-theme="anime"] .monaco-editor .sticky-widget { background-color: var(--lc-raised) !important; }
+html[data-lc-theme="anime"] .monaco-editor .line-numbers { color: var(--lc-text3) !important; }
+html[data-lc-theme="anime"] .monaco-editor .line-numbers.active-line-number { color: var(--lc-accent) !important; }
+html[data-lc-theme="anime"] .monaco-editor .view-overlays .current-line,
+html[data-lc-theme="anime"] .monaco-editor .margin-view-overlays .current-line-margin {
+  background-color: var(--lc-fill-4) !important; border: 0 !important;
+}
+html[data-lc-theme="anime"] .monaco-editor .selected-text { background-color: var(--lc-selection) !important; }
+html[data-lc-theme="anime"] .monaco-editor .cursor {
+  background-color: var(--lc-accent) !important;
+  border-color: var(--lc-accent) !important;
+}
+html[data-lc-theme="anime"] .monaco-editor .core-guide,
+html[data-lc-theme="anime"] .monaco-editor .indent-guide { box-shadow: inset 1px 0 0 0 var(--lc-hairline) !important; }
+html[data-lc-theme="anime"] .monaco-editor .bracket-match {
+  border-color: var(--lc-accent) !important;
+  background-color: var(--lc-fill-3) !important;
+}
+
+/* -- focus mode: the world fades, the solved colours stay ------------------
+   Two attribute matches outrank the injected role block, so this wins
+   wherever it lands in the document. */
+html[data-lc-theme="anime"][data-lc-focus] {
+  --lc-anime-glass: var(--lc-bg2);
+  --lc-anime-editor: none;
+  --lc-nav-bg: var(--lc-bg2);
+}
+html[data-lc-theme="anime"][data-lc-focus] body::before { display: none; }
+html[data-lc-theme="anime"][data-lc-focus] .lcts-moment,
+html[data-lc-theme="anime"][data-lc-focus] .lcts-card { display: none !important; }
+
+
+/* =========================== MOMENTS ======================================= */
+/* Shared pieces. Every overlay is pointer-events:none except the title card,
+   which a click dismisses. */
+html[data-lc-theme="anime"] .lcts-moment,
+html[data-lc-theme="anime"] .lcts-card {
+  position: fixed; inset: 0; z-index: 2147483000;
+  pointer-events: none;
+  font-family: var(--lc-font-display);
+  color: var(--lc-text);
+  contain: strict;
+}
+html[data-lc-theme="anime"] .lcts-jp { font-family: var(--lc-font-display); font-weight: 400; }
+
+/* -- Accepted: the finisher ------------------------------------------------- */
+.lcts-moment[data-kind="ac"] { animation: lcts-out 1700ms linear forwards; }
+.lcts-moment[data-kind="ac"] .lcts-flash {
+  position: absolute; inset: 0; background: #fff;
+  opacity: 0; animation: lcts-flash 260ms ease-out forwards;
+}
+.lcts-moment[data-kind="ac"] .lcts-lines {
+  position: absolute; inset: -20%;
+  background: repeating-conic-gradient(from 0deg at 50% 50%,
+              transparent 0deg 2.6deg, color-mix(in srgb, var(--lc-text) 32%, transparent) 2.6deg 3.1deg);
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent 0 22%, #000 58%);
+          mask-image: radial-gradient(circle at 50% 50%, transparent 0 22%, #000 58%);
+  opacity: 0;
+  animation: lcts-lines 1250ms cubic-bezier(.2,.7,.3,1) 40ms forwards;
+}
+.lcts-moment[data-kind="ac"] .lcts-band {
+  position: absolute; left: -10%; right: -10%; top: 50%; height: 30vh; margin-top: -15vh;
+  background: linear-gradient(90deg, var(--lc-accent), var(--lc-accent-2));
+  box-shadow: 0 0 60px -10px var(--lc-glow);
+  transform: skewY(-7deg) translateX(-110%);
+  animation: lcts-band 1250ms cubic-bezier(.7,0,.2,1) 60ms forwards;
+}
+.lcts-moment[data-kind="ac"] .lcts-stack {
+  position: absolute; left: 0; right: 0; top: 50%;
+  display: flex; flex-direction: column; align-items: center; gap: 1.2vh;
+  transform: translateY(-50%) rotate(-7deg);
+}
+.lcts-moment[data-kind="ac"] .lcts-big {
+  font-size: min(19vh, 15vw); line-height: .95;
+  color: var(--lc-text);
+  -webkit-text-stroke: .025em var(--lc-anime-scrim);
+  paint-order: stroke fill;
+  text-shadow: .05em .05em 0 var(--lc-anime-scrim);
+  opacity: 0; transform: scale(2.2);
+  animation: lcts-stamp 520ms cubic-bezier(.2,1.5,.35,1) 190ms forwards;
+}
+.lcts-moment[data-kind="ac"] .lcts-sub {
+  font-size: min(3.4vh, 3vw); letter-spacing: .32em;
+  color: var(--lc-submit-text);
+  opacity: 0; animation: lcts-rise 380ms ease-out 420ms forwards;
+}
+
+/* -- tests passed (Run): a quiet corner stamp ------------------------------ */
+.lcts-moment[data-kind="run"] { animation: lcts-out 1150ms linear forwards; }
+.lcts-moment[data-kind="run"] .lcts-stack {
+  position: absolute; right: 4vw; bottom: 9vh;
+  display: flex; flex-direction: column; align-items: flex-end; gap: .4vh;
+  transform: rotate(-5deg);
+}
+.lcts-moment[data-kind="run"] .lcts-big {
+  font-size: 58px; line-height: 1;
+  color: var(--lc-accent);
+  text-shadow: 3px 3px 0 var(--lc-anime-scrim);
+  opacity: 0; transform: scale(1.8);
+  animation: lcts-stamp 420ms cubic-bezier(.2,1.5,.35,1) forwards;
+}
+.lcts-moment[data-kind="run"] .lcts-sub {
+  font-size: 12px; letter-spacing: .28em; color: var(--lc-text);
+  text-shadow: 0 1px 6px var(--lc-anime-scrim);
+  opacity: 0; animation: lcts-rise 300ms ease-out 180ms forwards;
+}
+
+/* -- misses: Wrong Answer, TLE, MLE, errors -------------------------------- */
+.lcts-moment.is-miss { animation: lcts-out 1350ms linear forwards; }
+.lcts-moment.is-miss .lcts-edge {
+  position: absolute; inset: 0;
+  box-shadow: inset 0 0 18vh -4vh var(--lcts-tone);
+  opacity: 0; animation: lcts-pulse 700ms ease-out forwards;
+}
+.lcts-moment.is-miss .lcts-stack {
+  position: absolute; left: 0; right: 0; bottom: 14vh;
+  display: flex; flex-direction: column; align-items: center; gap: .6vh;
+}
+.lcts-moment.is-miss .lcts-big {
+  font-size: min(11vh, 9vw); line-height: 1;
+  color: var(--lcts-tone);
+  text-shadow: .05em .05em 0 var(--lc-anime-scrim);
+  opacity: 0; animation: lcts-thud 560ms cubic-bezier(.3,1.4,.5,1) forwards;
+}
+.lcts-moment.is-miss .lcts-sub {
+  font-size: min(2.6vh, 2.2vw); letter-spacing: .3em; color: var(--lc-text);
+  text-shadow: 0 1px 8px var(--lc-anime-scrim);
+  opacity: 0; animation: lcts-rise 320ms ease-out 200ms forwards;
+}
+.lcts-moment[data-kind="wa"] { --lcts-tone: var(--lc-red); }
+.lcts-moment[data-kind="tle"],
+.lcts-moment[data-kind="mle"] { --lcts-tone: var(--lc-yellow); }
+.lcts-moment[data-kind="err"] { --lcts-tone: var(--lc-red); }
+/* the time-out drains a bar, like a round timer */
+.lcts-moment[data-kind="tle"] .lcts-timer {
+  width: min(42vw, 520px); height: 4px; margin-top: .8vh;
+  background: var(--lcts-tone); transform-origin: left center;
+  animation: lcts-drain 900ms cubic-bezier(.5,0,.8,.6) 250ms forwards;
+}
+/* an error glitches: two tinted copies jitter behind the stamp */
+.lcts-moment[data-kind="err"] .lcts-big { position: relative; }
+.lcts-moment[data-kind="err"] .lcts-ghost {
+  position: absolute; inset: 0; opacity: .55;
+  animation: lcts-glitch 420ms steps(6) 120ms 2;
+}
+.lcts-moment[data-kind="err"] .lcts-ghost.a { color: var(--lc-accent-2); }
+.lcts-moment[data-kind="err"] .lcts-ghost.b { color: var(--lc-accent); animation-direction: reverse; }
+
+/* -- Wrong Answer, dizzy (anime only; Web Crawler keeps its own) --------------
+   Timed to audio/anime/wrong_answer.mp3 (1.25s, sounding from 0.1s): the spiral
+   spins up at once, the stamp thuds in by 0.5s and then sways like a woozy
+   head while stars circle it, and everything is gone by 1.75s
+   (MOMENT_SECONDS_ANIME.wa in sounds.js). Transform and opacity only.
+   The stars ride an ellipse: .lcts-orbit squashes a spinning ring to 30%
+   height, and each star undoes both the spin and the squash, so it stays an
+   upright star while it travels round.
+   Keyframe names are global across every theme's stylesheet (crawler.css has
+   its own lcts-spin), so these all carry the lcts-dz- prefix. */
+html[data-lc-theme="anime"] .lcts-moment.is-dizzy { animation: lcts-out 1750ms linear forwards; }
+html[data-lc-theme="anime"] .lcts-moment.is-dizzy .lcts-stack {
+  top: 50%; bottom: auto; transform: translateY(-50%);
+}
+html[data-lc-theme="anime"] .lcts-moment.is-dizzy .lcts-dz-swirl {
+  position: absolute; left: 50%; top: 50%;
+  width: min(78vh, 62vw); aspect-ratio: 1;
+  opacity: 0;
+  animation: lcts-dz-swirl 1650ms cubic-bezier(.25,.6,.4,1) forwards;
+}
+html[data-lc-theme="anime"] .lcts-moment.is-dizzy .lcts-dz-swirl svg { width: 100%; height: 100%; display: block; }
+html[data-lc-theme="anime"] .lcts-moment.is-dizzy .lcts-dz-swirl path {
+  fill: none; stroke: var(--lcts-tone); stroke-width: 2.6; stroke-linecap: round; opacity: .55;
+}
+html[data-lc-theme="anime"] .lcts-moment.is-dizzy .lcts-big {
+  position: relative;
+  transform-origin: 50% 90%;
+  animation:
+    lcts-thud 520ms cubic-bezier(.3,1.4,.5,1) forwards,
+    lcts-dz-woozy 1150ms ease-in-out 520ms forwards;
+}
+html[data-lc-theme="anime"] .lcts-moment.is-dizzy .lcts-sub {
+  animation:
+    lcts-rise 320ms ease-out 200ms forwards,
+    lcts-dz-woozy-soft 1100ms ease-in-out 560ms forwards;
+}
+/* the stars: an ellipse over the stamp, sized from its font */
+html[data-lc-theme="anime"] .lcts-moment.is-dizzy .lcts-orbit {
+  position: absolute; left: 50%; top: -.12em;
+  width: 3.6em; height: 3.6em; margin: -1.8em 0 0 -1.8em;
+  transform: scaleY(.3);
+  pointer-events: none;
+  opacity: 0;
+  animation: lcts-dz-stars 1750ms linear forwards;
+}
+html[data-lc-theme="anime"] .lcts-moment.is-dizzy .lcts-ring {
+  position: absolute; inset: 0;
+  animation: lcts-dz-spin 620ms linear infinite;
+}
+html[data-lc-theme="anime"] .lcts-moment.is-dizzy .lcts-star-at {
+  position: absolute; left: 50%; top: 50%; width: 0; height: 0;
+  transform: rotate(var(--a)) translateX(1.8em) rotate(calc(-1 * var(--a)));
+}
+html[data-lc-theme="anime"] .lcts-moment.is-dizzy .lcts-star {
+  position: absolute; left: -.21em; top: -.21em; width: .42em; height: .42em;
+  animation: lcts-dz-unspin 620ms linear infinite;
+}
+html[data-lc-theme="anime"] .lcts-moment.is-dizzy .lcts-star svg { width: 100%; height: 100%; display: block; overflow: visible; }
+html[data-lc-theme="anime"] .lcts-moment.is-dizzy .lcts-star path {
+  fill: var(--lc-yellow); stroke: var(--lc-anime-scrim); stroke-width: 1.6; paint-order: stroke;
+}
+html[data-lc-theme="anime"] .lcts-moment.is-dizzy .lcts-star.is-alt path { fill: var(--lc-accent); }
+
+@keyframes lcts-dz-swirl {
+  0%   { opacity: 0;   transform: translate(-50%, -50%) scale(.35) rotate(0deg); }
+  18%  { opacity: .9; }
+  75%  { opacity: .7; }
+  100% { opacity: 0;   transform: translate(-50%, -50%) scale(1.12) rotate(1080deg); }
+}
+@keyframes lcts-dz-woozy {
+  0%   { transform: none; }
+  14%  { transform: rotate(-8deg) translateX(-1.4vw) skewX(5deg); }
+  32%  { transform: rotate(7deg)  translateX(1.2vw)  skewX(-5deg); }
+  50%  { transform: rotate(-5deg) translateX(-.8vw)  skewX(3deg); }
+  68%  { transform: rotate(3.5deg) translateX(.5vw)  skewX(-2deg); }
+  84%  { transform: rotate(-1.5deg); }
+  100% { transform: none; }
+}
+@keyframes lcts-dz-woozy-soft {
+  0%, 100% { transform: none; }
+  25% { transform: translateX(-.8vw) rotate(-2deg); }
+  55% { transform: translateX(.7vw) rotate(2deg); }
+  80% { transform: translateX(-.3vw); }
+}
+@keyframes lcts-dz-stars { 0%, 16% { opacity: 0; } 26%, 80% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes lcts-dz-spin   { to { transform: rotate(360deg); } }
+@keyframes lcts-dz-unspin { from { transform: rotate(0deg) scaleY(3.333); } to { transform: rotate(-360deg) scaleY(3.333); } }
+
+/* -- the episode title card ------------------------------------------------- */
+html[data-lc-theme="anime"] .lcts-card { pointer-events: auto; cursor: pointer; }
+.lcts-card { animation: lcts-out 2300ms linear forwards; }
+.lcts-card.is-leaving { animation: lcts-leave 220ms ease-in forwards; }
+.lcts-card .lcts-shade {
+  position: absolute; inset: 0;
+  background: color-mix(in srgb, var(--lc-anime-scrim) 82%, transparent);
+  opacity: 0; animation: lcts-fade 260ms ease-out forwards;
+}
+.lcts-card .lcts-bar {
+  position: absolute; left: 0; right: 0; height: 11vh; background: #000;
+  animation: lcts-bar 360ms cubic-bezier(.3,.7,.2,1) forwards;
+}
+.lcts-card .lcts-bar.top { top: 0; transform-origin: top; transform: scaleY(0); }
+.lcts-card .lcts-bar.bottom { bottom: 0; transform-origin: bottom; transform: scaleY(0); }
+.lcts-card .lcts-stage {
+  position: absolute; left: 9vw; right: 9vw; top: 50%; transform: translateY(-50%);
+  display: flex; flex-direction: column; align-items: flex-start;
+}
+.lcts-card .lcts-ep {
+  font-size: min(15vh, 11vw); line-height: 1;
+  color: var(--lc-text);
+  text-shadow: .05em .05em 0 var(--lc-accent);
+  opacity: 0; transform: translateX(-6vw);
+  animation: lcts-slide 520ms cubic-bezier(.2,.8,.2,1) 140ms forwards;
+}
+.lcts-card .lcts-kicker {
+  margin-top: 1.4vh;
+  font-size: min(2.2vh, 1.8vw); letter-spacing: .5em; color: var(--lc-accent);
+  opacity: 0; animation: lcts-rise 360ms ease-out 340ms forwards;
+}
+.lcts-card .lcts-rule {
+  width: 100%; height: 3px; margin: 2.4vh 0 2.2vh;
+  background: linear-gradient(90deg, var(--lc-accent), var(--lc-accent-2) 60%, transparent);
+  transform-origin: left center; transform: scaleX(0);
+  animation: lcts-draw 520ms cubic-bezier(.6,0,.2,1) 300ms forwards;
+}
+.lcts-card .lcts-title {
+  font-size: min(6.2vh, 4.4vw); line-height: 1.12; max-width: 30ch;
+  text-wrap: balance;
+  opacity: 0; transform: translateY(2.4vh);
+  animation: lcts-up 480ms cubic-bezier(.2,.8,.2,1) 440ms forwards;
+}
+.lcts-card .lcts-arc {
+  margin-top: 2vh;
+  font-size: min(2.4vh, 1.9vw); letter-spacing: .24em; color: var(--lc-text2);
+  opacity: 0; animation: lcts-rise 380ms ease-out 640ms forwards;
+}
+.lcts-card .lcts-arc .lcts-jp { color: var(--lc-accent); letter-spacing: .08em; margin-right: .6em; }
+.lcts-card .lcts-skip {
+  position: absolute; right: 3vw; bottom: 3.4vh;
+  font-family: var(--lc-font-ui); font-size: 11px; letter-spacing: .2em;
+  color: rgba(255,255,255,.55); opacity: 0;
+  animation: lcts-fade 300ms ease-out 900ms forwards;
+}
+
+@keyframes lcts-fade   { to { opacity: 1; } }
+@keyframes lcts-out    { 0%, 82% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes lcts-leave  { to { opacity: 0; } }
+@keyframes lcts-flash  { 0% { opacity: .55; } 100% { opacity: 0; } }
+@keyframes lcts-lines  { 0% { opacity: 0; transform: scale(1.35) rotate(0deg); } 25% { opacity: 1; } 100% { opacity: .85; transform: scale(1) rotate(6deg); } }
+@keyframes lcts-band   { 0% { transform: skewY(-7deg) translateX(-110%); } 30%, 72% { transform: skewY(-7deg) translateX(0); } 100% { transform: skewY(-7deg) translateX(110%); } }
+@keyframes lcts-stamp  { to { opacity: 1; transform: scale(1); } }
+@keyframes lcts-rise   { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes lcts-pulse  { 0% { opacity: 0; } 30% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes lcts-thud   { 0% { opacity: 0; transform: translateY(-3vh) scale(1.25); } 60% { opacity: 1; transform: translateY(0) scale(1); }
+                         70% { transform: translateX(-6px); } 80% { transform: translateX(5px); } 90% { transform: translateX(-3px); } 100% { opacity: 1; transform: none; } }
+@keyframes lcts-drain  { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+@keyframes lcts-glitch { 0% { transform: translate(0,0); } 20% { transform: translate(-4px,1px); } 40% { transform: translate(3px,-2px); }
+                         60% { transform: translate(-2px,2px); } 80% { transform: translate(4px,0); } 100% { transform: translate(0,0); } }
+@keyframes lcts-bar    { to { transform: scaleY(1); } }
+@keyframes lcts-slide  { to { opacity: 1; transform: none; } }
+@keyframes lcts-draw   { to { transform: scaleX(1); } }
+@keyframes lcts-up     { to { opacity: 1; transform: none; } }
+
+/* reduced motion: the same words, no movement */
+@media (prefers-reduced-motion: reduce) {
+  .lcts-moment *, .lcts-card * { animation-duration: 1ms !important; animation-delay: 0ms !important; }
+  .lcts-moment .lcts-lines, .lcts-moment .lcts-band, .lcts-moment .lcts-flash,
+  .lcts-moment .lcts-ghost, .lcts-card .lcts-bar,
+  .lcts-moment .lcts-dz-swirl, .lcts-moment .lcts-orbit { display: none !important; }
+}
