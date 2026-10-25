@@ -4,14 +4,14 @@
 (function (root) {
   'use strict';
 
-  const CONFIG = root.LEETGLOW_CONFIG || {
-    SUPABASE_URL: 'https://kxtdvzyftfhryvbpbohb.supabase.co',
-    SUPABASE_ANON_KEY: 'sb_publishable_h76RupEa47M3tZw-CVS4qg_4PrFaM7v',
-    RAZORPAY_KEY_ID: 'rzp_test_PLACEHOLDER_KEY',
-    PRODUCT_NAME: 'LeetGlow Premium',
-    PRODUCT_PRICE_INR: 29,
-    PRODUCT_PRICE_PAISE: 2900
-  };
+  function _d(arr, s = 0x5c) {
+    return arr.map(function (c) { return String.fromCharCode(c ^ s); }).join('');
+  }
+  const _EP1 = _d([63, 52, 57, 63, 55, 3, 57, 50, 40, 53, 40, 48, 57, 49, 57, 50, 40]);
+  const _EP2 = _d([61, 63, 40, 53, 42, 61, 40, 57, 3, 44, 46, 57, 49, 53, 41, 49, 3, 55, 57, 37]);
+  const _EP3 = _d([44, 46, 51, 63, 57, 47, 47, 3, 47, 41, 63, 63, 57, 47, 47, 58, 41, 48, 3, 44, 61, 37, 49, 57, 50, 40]);
+
+  const CONFIG = root.LEETGLOW_CONFIG || {};
 
   /**
    * Retrieves or initializes a persistent, anonymous device identifier.
@@ -43,7 +43,7 @@
   async function checkServerEntitlement() {
     const deviceId = await getDeviceId();
     try {
-      const res = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/rpc/check_entitlement`, {
+      const res = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/rpc/${_EP1}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -100,7 +100,7 @@
     const deviceId = await getDeviceId();
 
     try {
-      const res = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/rpc/activate_premium_key`, {
+      const res = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/rpc/${_EP2}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -144,7 +144,7 @@
     const deviceId = await getDeviceId();
 
     try {
-      const res = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/rpc/process_successful_payment`, {
+      const res = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/rpc/${_EP3}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

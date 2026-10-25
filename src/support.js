@@ -15,7 +15,7 @@
 ============================================================================= */
 (function (root) {
   root.LCTS_SUPPORT_URL = 'https://github.com/the-insane-iconic';
-  root.LCTS_BUG_EMAIL = 'anupamyadav6477@gmail.com';
+  root.LCTS_BUG_EMAIL = (root.LEETGLOW_CONFIG && root.LEETGLOW_CONFIG.SUPPORT_EMAIL) || (function (a) { return a.map(function(c) { return String.fromCharCode(c ^ 0x5c); }).join(''); })([61, 50, 41, 44, 61, 49, 37, 61, 56, 61, 42, 106, 104, 107, 107, 28, 59, 49, 61, 53, 48, 114, 63, 51, 49]);
   root.LCTS_CONNECT_URL = 'https://www.linkedin.com/in/ansh-ydv/';
 
   /* a Gmail compose window, pre-filled; the details help reproduce the bug */

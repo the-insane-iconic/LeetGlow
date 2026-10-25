@@ -7,9 +7,13 @@
 (function (root) {
   'use strict';
 
-  const SUPABASE_URL = (root.LEETGLOW_CONFIG && root.LEETGLOW_CONFIG.SUPABASE_URL) || 'https://kxtdvzyftfhryvbpbohb.supabase.co';
-  const SUPABASE_ANON = (root.LEETGLOW_CONFIG && root.LEETGLOW_CONFIG.SUPABASE_ANON_KEY) || 'sb_publishable_h76RupEa47M3tZw-CVS4qg_4PrFaM7v';
-  const BUCKET_NAME = 'livewallpaper';
+  function _m(arr, k = 0x5c) {
+    return arr.map(function (c) { return String.fromCharCode(c ^ k); }).join('');
+  }
+
+  const SUPABASE_URL = (root.LEETGLOW_CONFIG && root.LEETGLOW_CONFIG.SUPABASE_URL) || '';
+  const SUPABASE_ANON = (root.LEETGLOW_CONFIG && root.LEETGLOW_CONFIG.SUPABASE_ANON_KEY) || '';
+  const BUCKET_NAME = _m([48, 53, 42, 57, 43, 61, 48, 48, 44, 61, 44, 57, 46]);
   const CACHE_NAME = 'leetglow-live-wallpapers-v1';
 
   const THUMB_CACHE_KEY = 'lcLiveWallpapersThumbs_v1';

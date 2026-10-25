@@ -670,7 +670,10 @@
         settings.liveWallpaper.videoUrl = settings.liveWallpaper.originalUrl;
       } else if (settings.liveWallpaper.id && settings.liveWallpaper.id.startsWith('supabase-')) {
         const baseName = settings.liveWallpaper.id.replace('supabase-', '');
-        settings.liveWallpaper.videoUrl = `https://kxtdvzyftfhryvbpbohb.supabase.co/storage/v1/object/public/live_wallpaper/${baseName}.mov`;
+        const sbBase = (globalThis.LEETGLOW_CONFIG && globalThis.LEETGLOW_CONFIG.SUPABASE_URL) || '';
+        if (sbBase) {
+          settings.liveWallpaper.videoUrl = `${sbBase}/storage/v1/object/public/livewallpaper/${baseName}.mov`;
+        }
       }
       save();
     }

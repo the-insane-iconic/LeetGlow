@@ -326,7 +326,10 @@ html[data-lc-focus] .lc-anime-live-video {
             videoUrl = cfg.liveWallpaper.originalUrl;
           } else if (cfg.liveWallpaper.id && cfg.liveWallpaper.id.startsWith('supabase-')) {
             const baseName = cfg.liveWallpaper.id.replace('supabase-', '');
-            videoUrl = `https://kxtdvzyftfhryvbpbohb.supabase.co/storage/v1/object/public/live_wallpaper/${baseName}.mov`;
+            const sbBase = (globalThis.LEETGLOW_CONFIG && globalThis.LEETGLOW_CONFIG.SUPABASE_URL) || '';
+            if (sbBase) {
+              videoUrl = `${sbBase}/storage/v1/object/public/livewallpaper/${baseName}.mov`;
+            }
           }
         }
         updateLiveVideo(videoUrl, cfg.liveWallpaper.thumbUrl);
