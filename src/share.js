@@ -25,7 +25,7 @@
   if (globalThis.LCTSShare) return;
 
   /* where a viewer of the post can get the extension */
-  const SHARE_URL = 'https://github.com/AnshYadav/LeetGlow';
+  const SHARE_URL = 'https://github.com/the-insane-iconic/LeetGlow';
   const W = 1200, H = 630;
   const root = document.documentElement;
   const themeId = () => root.getAttribute('data-lc-theme');

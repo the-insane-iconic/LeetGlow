@@ -8,15 +8,15 @@
    rather than a payment provider directly, so the provider can change
    (UPI, GitHub Sponsors, Ko-fi, Razorpay) without an extension update or a
    new store review. Until that page is live, point this at the provider link
-   itself, e.g. https://github.com/AnshYadav.
+   itself, e.g. https://github.com/the-insane-iconic.
 
    Chrome Web Store: optional donation links are fine; nothing in the
    extension is locked behind them.
 ============================================================================= */
 (function (root) {
-  root.LCTS_SUPPORT_URL = 'https://github.com/AnshYadav';
+  root.LCTS_SUPPORT_URL = 'https://github.com/the-insane-iconic';
   root.LCTS_BUG_EMAIL = 'anupamyadav6477@gmail.com';
-  root.LCTS_CONNECT_URL = 'https://www.linkedin.com/in/AnshYadav/';
+  root.LCTS_CONNECT_URL = 'https://www.linkedin.com/in/ansh-ydv/';
 
   /* a Gmail compose window, pre-filled; the details help reproduce the bug */
   async function bugUrl() {

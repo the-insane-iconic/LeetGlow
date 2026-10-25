@@ -30,18 +30,11 @@ body { padding: 16px 14px 12px; }
 
 .mark {
   flex: 0 0 auto;
-  width: 30px; height: 30px;
-  display: grid; grid-template-columns: 1fr 1fr; gap: 3px;
-  padding: 4px;
+  width: 32px; height: 32px;
   border-radius: 8px;
-  background: var(--pop-panel-2);
-  border: 1px solid var(--pop-border);
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
 }
-.mark-dot { border-radius: 3px; }
-.mark .d1 { background: #7aa2f7; }
-.mark .d2 { background: #bd93f9; }
-.mark .d3 { background: #88c0d0; }
-.mark .d4 { background: #1e66f5; }
 
 .head-text h1 {
   font-size: 15px; font-weight: 650; letter-spacing: -0.01em; line-height: 1.1;
