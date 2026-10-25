@@ -45,15 +45,16 @@ html[data-lc-theme="anime"] {
 /* the scene layer */
 html[data-lc-theme="anime"] body::before {
   content: "";
-  position: fixed; inset: 0; z-index: -1;
+  position: fixed; inset: 0; z-index: -2;
   pointer-events: none;
   background-image: var(--lc-anime-desk);
   background-size: auto, cover;
   background-position: 0 0, center;
   background-repeat: no-repeat;
-  will-change: transform;
+  will-change: transform, opacity;
+  transition: opacity 0.45s ease-in-out;
 }
-/* live video wallpaper layer */
+/* live video wallpaper layer: starts at opacity 0 so static wallpaper stays 100% visible during download */
 html[data-lc-theme="anime"] .lc-anime-live-video,
 html.has-live-wallpaper .lc-anime-live-video,
 body.has-live-wallpaper .lc-anime-live-video {
@@ -64,19 +65,24 @@ body.has-live-wallpaper .lc-anime-live-video {
   object-fit: cover !important;
   z-index: -1 !important;
   pointer-events: none !important;
+  opacity: 0;
+  transition: opacity 0.45s ease-in-out;
+  background: transparent !important;
+}
+html[data-lc-theme="anime"] .lc-anime-live-video.is-ready,
+html.has-live-wallpaper .lc-anime-live-video.is-ready,
+body.has-live-wallpaper .lc-anime-live-video.is-ready {
+  opacity: 1 !important;
 }
 html[data-lc-theme="anime"][data-lc-focus] .lc-anime-live-video,
 html[data-lc-focus] .lc-anime-live-video {
   display: none !important;
 }
-html[data-lc-theme="anime"].has-live-wallpaper body::before,
-html.has-live-wallpaper body::before,
-body.has-live-wallpaper::before {
-  display: none !important;
+/* Only hide previous static wallpaper once the live video has downloaded its first frames and is playing */
+html[data-lc-theme="anime"].live-ready body::before,
+html.live-ready body::before,
+body.live-ready::before {
   opacity: 0 !important;
-  visibility: hidden !important;
-  background-image: none !important;
-  background-color: transparent !important;
 }
 /* everything between the canvas and the panels lets the layer through */
 html[data-lc-theme="anime"] body,

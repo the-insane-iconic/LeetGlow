@@ -133,40 +133,80 @@
   }
 
   /**
-   * Maps raw storage objects to structured live wallpaper cards
+   * Maps raw storage objects to structured wallpaper cards (both live videos & static images)
+   * If a file name contains 'pro' (case-insensitive), it is marked as a PRO feature.
    */
   function mapObjectsToWallpapers(files, defaultBucket = BUCKET_NAME) {
     if (!Array.isArray(files) || !files.length) return [];
 
     const videoExts = ['.mp4', '.webm', '.mov', '.m4v'];
-    const imageExts = ['.webp', '.jpg', '.jpeg', '.png'];
+    const imageExts = ['.webp', '.jpg', '.jpeg', '.png', '.avif'];
 
     const videos = files.filter(f => videoExts.some(ext => (f.name || '').toLowerCase().endsWith(ext)));
     const images = files.filter(f => imageExts.some(ext => (f.name || '').toLowerCase().endsWith(ext)));
 
-    return videos.map(v => {
+    const result = [];
+
+    // 1. Process Video Wallpapers (Live Wallpapers)
+    videos.forEach(v => {
       const bucket = v.bucket_id || defaultBucket;
       const publicBase = `${SUPABASE_URL}/storage/v1/object/public/${bucket}/`;
       const baseName = v.name.replace(/\.[^/.]+$/, '');
       const matchThumb = images.find(img => img.name.startsWith(baseName));
 
-      // Clean human-readable title (e.g. 'anime_tokyo_night.mp4' -> 'Anime Tokyo Night')
+      // Clean human-readable title
       const cleanName = baseName
         .replace(/[-_]+/g, ' ')
         .replace(/\b\w/g, char => char.toUpperCase());
 
-      return {
+      // If filename has 'pro' in it, treat it as a PRO wallpaper for premium users only
+      const isPro = (v.name || '').toLowerCase().includes('pro');
+
+      result.push({
         id: `supabase-${baseName}`,
         name: cleanName,
-        desc: `Video from Supabase (${bucket})`,
+        desc: `Live Wallpaper (${bucket})`,
         thumbUrl: matchThumb ? `${publicBase}${matchThumb.name}` : null,
         thumb: null,
         videoUrl: `${publicBase}${v.name}`,
+        isLive: true,
         isSupabase: true,
-        isPro: false, // User's own uploaded videos are always unlocked
+        isPro: isPro,
         themeId: 'neon-rain'
-      };
+      });
     });
+
+    // 2. Process Static Images (Static Wallpapers from Bucket)
+    // Any image that is NOT merely a companion thumbnail for one of the videos is a static wallpaper
+    images.forEach(img => {
+      const baseName = img.name.replace(/\.[^/.]+$/, '');
+      const isCompanionOfVideo = videos.some(v => v.name.replace(/\.[^/.]+$/, '') === baseName);
+      if (isCompanionOfVideo) return; // Dedicated thumbnail for video
+
+      const bucket = img.bucket_id || defaultBucket;
+      const publicBase = `${SUPABASE_URL}/storage/v1/object/public/${bucket}/`;
+      const cleanName = baseName
+        .replace(/[-_]+/g, ' ')
+        .replace(/\b\w/g, char => char.toUpperCase());
+
+      // If filename has 'pro' in it, treat it as a PRO wallpaper for premium users only
+      const isPro = (img.name || '').toLowerCase().includes('pro');
+
+      result.push({
+        id: `supabase-img-${baseName}`,
+        name: cleanName,
+        desc: `Static Wallpaper (${bucket})`,
+        thumbUrl: `${publicBase}${img.name}`,
+        imageUrl: `${publicBase}${img.name}`,
+        thumb: null,
+        isLive: false,
+        isSupabase: true,
+        isPro: isPro,
+        themeId: 'neon-rain'
+      });
+    });
+
+    return result;
   }
 
   /**

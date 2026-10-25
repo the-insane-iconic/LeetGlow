@@ -138,12 +138,28 @@ wallpaperDrawer.innerHTML = '<div id="wallpaperGrid" class="wallpaper-grid"></di
 
 let wallpapersDrawerOpen = false;
 
+function renderWallpaperSkeletons() {
+  const box = document.getElementById('wallpaperGrid');
+  if (!box) return;
+  box.innerHTML = Array.from({ length: 6 }).map(() => `
+    <div class="wp-card wp-card-skeleton" aria-hidden="true">
+      <div class="wp-skeleton-shimmer"></div>
+      <div class="wp-skeleton-badge"></div>
+      <div class="wp-skeleton-name"></div>
+    </div>
+  `).join('');
+}
+
 function toggleWallpaperDrawer(force) {
   const grid = document.getElementById('grid');
   if (!grid) return;
   wallpapersDrawerOpen = typeof force === 'boolean' ? force : !wallpapersDrawerOpen;
   grid.classList.toggle('wallpapers-expanded', wallpapersDrawerOpen);
   if (wallpapersDrawerOpen) {
+    const box = document.getElementById('wallpaperGrid');
+    if (box && !box.children.length) {
+      renderWallpaperSkeletons();
+    }
     renderWallpaperGrid();
   }
 }
@@ -151,6 +167,10 @@ function toggleWallpaperDrawer(force) {
 async function renderWallpaperGrid() {
   const box = document.getElementById('wallpaperGrid');
   if (!box) return;
+
+  if (!box.children.length) {
+    renderWallpaperSkeletons();
+  }
 
   let isPrem = false;
   try {
@@ -161,10 +181,11 @@ async function renderWallpaperGrid() {
   const res = await chrome.storage.local.get(['lcAnime', 'lcAnimeArt']);
   const cfg = res.lcAnime || {};
   const isLive = cfg.sceneMode === 'live' && cfg.liveWallpaper;
-  const activeId = isLive ? cfg.liveWallpaper.id : (cfg.scene || globalThis.LCTS_SCENE_DEFAULT);
+  const activeId = isLive
+    ? (cfg.liveWallpaper && cfg.liveWallpaper.id)
+    : ((cfg.staticWallpaper && cfg.staticWallpaper.id) || cfg.scene || globalThis.LCTS_SCENE_DEFAULT);
 
-  box.innerHTML = '';
-  const items = [];
+  let items = [];
 
   // 1. User's uploaded custom picture (if exists)
   if (res.lcAnimeArt && (res.lcAnimeArt.wall || res.lcAnimeArt.blur)) {
@@ -177,26 +198,40 @@ async function renderWallpaperGrid() {
     });
   }
 
-  // 2. User's uploaded live wallpapers from Supabase
+  // 2. Wallpapers from Supabase storage bucket (videos -> live, images -> static)
   if (globalThis.LCTSLiveWallpapers && globalThis.LCTSLiveWallpapers.getAll) {
     try {
-      const liveList = await globalThis.LCTSLiveWallpapers.getAll();
-      liveList.forEach(w => {
-        items.push({
-          id: w.id,
-          name: w.name,
-          thumb: w.thumbUrl || (w.thumb ? chrome.runtime.getURL(w.thumb) : ''),
-          isLive: true,
-          liveData: w,
-          isPro: false
-        });
+      const bucketList = await globalThis.LCTSLiveWallpapers.getAll();
+      bucketList.forEach(w => {
+        if (w.isLive) {
+          items.push({
+            id: w.id,
+            name: w.name,
+            thumb: w.thumbUrl || (w.thumb ? chrome.runtime.getURL(w.thumb) : ''),
+            isLive: true,
+            liveData: w,
+            isPro: !!w.isPro
+          });
+        } else {
+          // Static wallpaper uploaded to bucket
+          items.push({
+            id: w.id,
+            name: w.name,
+            thumb: w.thumbUrl || w.imageUrl,
+            imageUrl: w.imageUrl,
+            isLive: false,
+            isSupabase: true,
+            bucketData: w,
+            isPro: !!w.isPro
+          });
+        }
       });
     } catch (e) {
-      console.warn('[LeetGlow] Could not fetch live wallpapers for drawer:', e);
+      console.warn('[LeetGlow] Could not fetch bucket wallpapers for drawer:', e);
     }
   }
 
-  // 3. Preset scenes from globalThis.LCTS_SCENES
+  // 3. Preset scenes from globalThis.LCTS_SCENES (local to extension)
   const scenes = globalThis.LCTS_SCENES || {};
   Object.entries(scenes).forEach(([sceneId, s]) => {
     items.push({
@@ -206,6 +241,28 @@ async function renderWallpaperGrid() {
       isPro: sceneId !== 'golden-hour'
     });
   });
+
+  // Requirement: If premium is NOT active, Golden Hour must be 1st, and Live Wallpaper 2nd
+  if (!isPrem) {
+    const ghIndex = items.findIndex(it => it.id === 'golden-hour');
+    let ghItem = null;
+    if (ghIndex > -1) {
+      ghItem = items.splice(ghIndex, 1)[0];
+    }
+
+    const liveIndex = items.findIndex(it => it.isLive);
+    let liveItem = null;
+    if (liveIndex > -1) {
+      liveItem = items.splice(liveIndex, 1)[0];
+    }
+
+    const ordered = [];
+    if (ghItem) ordered.push(ghItem);
+    if (liveItem) ordered.push(liveItem);
+    items = ordered.concat(items);
+  }
+
+  box.innerHTML = '';
 
   items.forEach(item => {
     const isLocked = !isPrem && item.isPro;
@@ -230,6 +287,9 @@ async function renderWallpaperGrid() {
     let badgeHTML = '';
     if (item.isLive) {
       badgeHTML = '<span class="wp-live-badge"><span class="wp-live-dot"></span> LIVE</span><span class="wp-spinner" aria-hidden="true"></span>';
+      if (isLocked) {
+        badgeHTML += '<span class="wp-pro-badge">PRO</span>';
+      }
     } else if (isLocked) {
       badgeHTML = '<span class="wp-pro-badge">PRO</span>';
     }
@@ -242,12 +302,22 @@ async function renderWallpaperGrid() {
 
     b.addEventListener('click', async (e) => {
       e.stopPropagation();
+      if (isLocked) {
+        const purchaseModal = document.getElementById('purchaseModal');
+        if (purchaseModal) purchaseModal.showModal();
+        return;
+      }
+
       if (item.isLive) b.classList.add('is-loading');
       try {
-        await selectWallpaper(item, isLocked);
         if (item.isLive && item.liveData && item.liveData.videoUrl && globalThis.LCTSLiveWallpapers && globalThis.LCTSLiveWallpapers.downloadAndCache) {
-          globalThis.LCTSLiveWallpapers.downloadAndCache(item.liveData.videoUrl).catch(() => { });
+          try {
+            await globalThis.LCTSLiveWallpapers.downloadAndCache(item.liveData.videoUrl);
+          } catch (cacheErr) {
+            console.warn('[LeetGlow] Pre-cache warning (falling back to direct):', cacheErr);
+          }
         }
+        await selectWallpaper(item, false);
       } finally {
         b.classList.remove('is-loading');
       }
@@ -270,6 +340,7 @@ async function selectWallpaper(item, isLocked) {
   if (item.isLive) {
     cfg.sceneMode = 'live';
     cfg.liveWallpaper = item.liveData;
+    delete cfg.staticWallpaper;
     const themeId = (item.liveData && item.liveData.themeId) || 'neon-rain';
     cfg.scene = themeId;
     if (cfg.arcs) {
@@ -282,9 +353,25 @@ async function selectWallpaper(item, isLocked) {
   } else if (item.isCustom) {
     cfg.sceneMode = 'static';
     cfg.scene = 'custom';
+    delete cfg.staticWallpaper;
+    delete cfg.liveWallpaper;
+  } else if (item.isSupabase && !item.isLive && item.bucketData) {
+    cfg.sceneMode = 'static';
+    cfg.scene = item.id;
+    cfg.staticWallpaper = item.bucketData;
+    delete cfg.liveWallpaper;
+    if (cfg.arcs) {
+      cfg.arcScenes = Object.assign({}, cfg.arcScenes || {}, {
+        easy: item.id,
+        medium: item.id,
+        hard: item.id
+      });
+    }
   } else {
     cfg.sceneMode = 'static';
     cfg.scene = item.id;
+    delete cfg.staticWallpaper;
+    delete cfg.liveWallpaper;
     if (cfg.arcs) {
       cfg.arcScenes = Object.assign({}, cfg.arcScenes || {}, {
         easy: item.id,
@@ -417,6 +504,9 @@ function paintAnimeCard(preview) {
       const liveThumb = cfg.liveWallpaper.thumbUrl || (cfg.liveWallpaper.thumb ? chrome.runtime.getURL(cfg.liveWallpaper.thumb) : thumb(cfg.scene));
       urls = [liveThumb];
       inkFrom = cfg.liveWallpaper.themeId || cfg.scene || DEF;
+    } else if (cfg.staticWallpaper && cfg.staticWallpaper.imageUrl) {
+      urls = [cfg.staticWallpaper.thumbUrl || cfg.staticWallpaper.imageUrl];
+      inkFrom = cfg.staticWallpaper.themeId || DEF;
     } else if (custom) { urls = [res.lcAnimeArt.blur]; inkFrom = 'custom'; }
     else if (arcs) {
       const pick = (d) => (scenes[(cfg.arcScenes || {})[d]] ? cfg.arcScenes[d] : ARC[d]);

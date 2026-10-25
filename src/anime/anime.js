@@ -40,18 +40,24 @@
 
   function presetUrls(id) {
     const s = SCENES[id];
-    return { wall: chrome.runtime.getURL(s.wall), blur: chrome.runtime.getURL(s.blur) };
+    if (s) {
+      return { wall: chrome.runtime.getURL(s.wall), blur: chrome.runtime.getURL(s.blur) };
+    }
+    if (cfgNow && cfgNow.staticWallpaper && cfgNow.staticWallpaper.imageUrl) {
+      return { wall: cfgNow.staticWallpaper.imageUrl, blur: cfgNow.staticWallpaper.imageUrl };
+    }
+    const def = SCENES[DEF];
+    return { wall: chrome.runtime.getURL(def.wall), blur: chrome.runtime.getURL(def.blur) };
   }
 
   const LIVE_OVERRIDE_CSS = `
-html[data-lc-theme="anime"].has-live-wallpaper body::before,
-html.has-live-wallpaper body::before,
-body.has-live-wallpaper::before {
-  display: none !important;
+html[data-lc-theme="anime"] body::before {
+  z-index: -2 !important;
+  transition: opacity 0.45s ease-in-out;
+}
+html.live-ready body::before,
+body.live-ready::before {
   opacity: 0 !important;
-  visibility: hidden !important;
-  background-image: none !important;
-  background: transparent !important;
 }
 .lc-anime-live-video {
   position: fixed !important;
@@ -63,6 +69,12 @@ body.has-live-wallpaper::before {
   z-index: -1 !important;
   pointer-events: none !important;
   display: block !important;
+  opacity: 0;
+  transition: opacity 0.45s ease-in-out;
+  background: transparent !important;
+}
+.lc-anime-live-video.is-ready {
+  opacity: 1 !important;
 }
 html[data-lc-theme="anime"][data-lc-focus] .lc-anime-live-video,
 html[data-lc-focus] .lc-anime-live-video {
@@ -73,9 +85,6 @@ html[data-lc-focus] .lc-anime-live-video {
   function publish(theme, urls, customAlpha) {
     globalThis.__lctsAnimeScene = { wall: urls.wall };     // read by src/share.js
     let css = globalThis.LCTSAnimeCss.build(theme, urls, customAlpha) + LIVE_OVERRIDE_CSS;
-    if (cfgNow && cfgNow.sceneMode === 'live') {
-      css += '\nhtml[data-lc-theme="anime"] body::before{display:none !important;opacity:0 !important;background-image:none !important;}';
-    }
     if (css !== published) { styleEl().textContent = css; published = css; }
     globalThis.__lctsAnimeInk = theme.ink;
     const modeChanged = globalThis.__lctsAnimeMode !== theme.mode;
@@ -134,6 +143,9 @@ html[data-lc-focus] .lc-anime-live-video {
       const liveTheme = (cfg.liveWallpaper && cfg.liveWallpaper.themeId) || cfg.scene || 'neon-rain';
       return SCENES[liveTheme] ? liveTheme : DEF;
     }
+    if (cfg && cfg.staticWallpaper && cfg.scene === cfg.staticWallpaper.id) {
+      return cfg.scene;
+    }
     if (!arcsOn(cfg)) return SCENES[cfg.scene] ? cfg.scene : DEF;
     const arcs = Object.assign({}, ARC, cfg.arcScenes || {});
     const id = arcs[difficulty || 'medium'] || arcs.medium;
@@ -141,7 +153,7 @@ html[data-lc-focus] .lc-anime-live-video {
   }
   /* the Studio saves a solve per scene for the user's glass settings */
   const solvedFor = (cfg, id) =>
-    (cfg.themes && cfg.themes[id]) || (cfg.theme && cfg.themeFor === id ? cfg.theme : null) || SCENES[id].theme;
+    (cfg.themes && cfg.themes[id]) || (cfg.theme && cfg.themeFor === id ? cfg.theme : null) || (SCENES[id] ? SCENES[id].theme : SCENES[DEF].theme);
 
   let cfgNow = null, shownId = null, lastAlpha = null;
 
@@ -184,8 +196,8 @@ html[data-lc-focus] .lc-anime-live-video {
         liveVideoEl.remove();
         liveVideoEl = null;
       }
-      root.classList.remove('has-live-wallpaper');
-      if (document.body) document.body.classList.remove('has-live-wallpaper');
+      root.classList.remove('has-live-wallpaper', 'live-ready');
+      if (document.body) document.body.classList.remove('has-live-wallpaper', 'live-ready');
       return;
     }
     if (!liveVideoEl) {
@@ -201,13 +213,41 @@ html[data-lc-focus] .lc-anime-live-video {
       liveVideoEl.muted = true;
       liveVideoEl.playsInline = true;
       liveVideoEl.defaultMuted = true;
-      liveVideoEl.style.cssText = 'position:fixed !important;top:0 !important;left:0 !important;width:100vw !important;height:100vh !important;object-fit:cover !important;z-index:-1 !important;pointer-events:none !important;display:block !important;';
+      liveVideoEl.style.cssText = 'position:fixed !important;top:0 !important;left:0 !important;width:100vw !important;height:100vh !important;object-fit:cover !important;z-index:-1 !important;pointer-events:none !important;display:block !important;opacity:0;transition:opacity 0.45s ease-in-out;background:transparent !important;';
+
+      const markReady = () => {
+        if (liveVideoEl && liveVideoEl.dataset.currentUrl) {
+          liveVideoEl.classList.add('is-ready');
+          liveVideoEl.style.opacity = '1';
+          root.classList.add('live-ready');
+          if (document.body) document.body.classList.add('live-ready');
+        }
+      };
+
+      liveVideoEl.addEventListener('playing', markReady);
+      liveVideoEl.addEventListener('loadeddata', () => {
+        if (liveVideoEl && liveVideoEl.readyState >= 2) markReady();
+      });
+      liveVideoEl.addEventListener('canplaythrough', markReady);
+      liveVideoEl.addEventListener('error', (err) => {
+        console.warn('[LeetGlow Live] Video playback error, keeping static wallpaper visible:', err);
+        liveVideoEl.classList.remove('is-ready');
+        liveVideoEl.style.opacity = '0';
+        root.classList.remove('live-ready');
+        if (document.body) document.body.classList.remove('live-ready');
+      });
     }
     if (thumbUrl && !liveVideoEl.poster) {
       liveVideoEl.poster = thumbUrl;
     }
     ensureVideoAttached();
     if (liveVideoEl.dataset.currentUrl !== url) {
+      // Transitioning to a new URL: keep static wallpaper visible while buffering
+      liveVideoEl.classList.remove('is-ready');
+      liveVideoEl.style.opacity = '0';
+      root.classList.remove('live-ready');
+      if (document.body) document.body.classList.remove('live-ready');
+
       liveVideoEl.dataset.currentUrl = url;
       liveVideoEl.innerHTML = `
         <source src="${url}" type="video/mp4">
@@ -241,8 +281,13 @@ html[data-lc-focus] .lc-anime-live-video {
   const spaObserver = new MutationObserver(() => {
     if (root.classList.contains('has-live-wallpaper') && liveVideoEl) {
       ensureVideoAttached();
-      if (document.body && !document.body.classList.contains('has-live-wallpaper')) {
-        document.body.classList.add('has-live-wallpaper');
+      if (document.body) {
+        if (!document.body.classList.contains('has-live-wallpaper')) {
+          document.body.classList.add('has-live-wallpaper');
+        }
+        if (root.classList.contains('live-ready') && !document.body.classList.contains('live-ready')) {
+          document.body.classList.add('live-ready');
+        }
       }
     }
   });

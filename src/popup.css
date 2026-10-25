@@ -661,6 +661,107 @@ body {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
 }
 
+/* Loading state for wallpaper card (circular spinner & frosted backdrop) */
+.wp-card.is-loading::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 11, 16, 0.58);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  z-index: 4;
+  pointer-events: none;
+  animation: wp-fade-in 0.15s ease;
+}
+
+.wp-card .wp-spinner {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 22px;
+  height: 22px;
+  border: 2.5px solid rgba(255, 255, 255, 0.28);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: wp-spinner-rotate 0.65s linear infinite;
+  z-index: 5;
+  pointer-events: none;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.wp-card.is-loading .wp-spinner {
+  display: block;
+}
+
+@keyframes wp-spinner-rotate {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes wp-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Skeleton loader for wallpaper drawer */
+.wp-card-skeleton {
+  cursor: default !important;
+  pointer-events: none;
+  background-color: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(255, 255, 255, 0.07) !important;
+  box-shadow: none !important;
+  transform: none !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.wp-card-skeleton::before,
+.wp-card-skeleton::after {
+  display: none !important;
+}
+
+.wp-skeleton-shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.07) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: translateX(-100%);
+  animation: wp-skeleton-wave 1.4s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.wp-skeleton-badge {
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  width: 42px;
+  height: 15px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  z-index: 1;
+}
+
+.wp-skeleton-name {
+  width: 68%;
+  height: 11px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.12);
+  margin-bottom: 2px;
+  z-index: 1;
+}
+
+@keyframes wp-skeleton-wave {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
 /* 45° green corner ribbon for premium themes (Anime Studio) */
 .corner-ribbon-wrap {
   position: absolute;

@@ -274,16 +274,18 @@
     liveWallpapersList.forEach(w => {
       const b = document.createElement('button');
       b.type = 'button';
-      b.className = 'scene live-item';
+      b.className = 'scene' + (w.isLive ? ' live-item' : ' bucket-static');
       b.setAttribute('role', 'radio');
-      const isSelected = settings.sceneMode === 'live' && activeLiveId === w.id;
+      const isSelected = w.isLive
+        ? (settings.sceneMode === 'live' && activeLiveId === w.id)
+        : (settings.scene === w.id);
       b.setAttribute('aria-checked', String(isSelected));
 
       // Fast thumbnail: direct thumbUrl, cached snapshot, or dynamic snapshot from video
-      const thumbUrl = w.thumbUrl || (w.thumb ? chrome.runtime.getURL(w.thumb) : '');
+      const thumbUrl = w.thumbUrl || w.imageUrl || (w.thumb ? chrome.runtime.getURL(w.thumb) : '');
       if (thumbUrl) {
         b.style.backgroundImage = `url("${thumbUrl}")`;
-      } else {
+      } else if (w.isLive) {
         b.classList.add('loading-thumb');
         if (globalThis.LCTSLiveWallpapers && globalThis.LCTSLiveWallpapers.getThumbnail) {
           globalThis.LCTSLiveWallpapers.getThumbnail(w).then(tUrl => {
@@ -297,7 +299,7 @@
         }
       }
 
-      // Lock status
+      // Lock status (pro in filename = PRO for premium users only)
       const isLocked = !isPremium && w.isPro;
       if (isLocked) {
         b.classList.add('is-locked');
@@ -306,15 +308,21 @@
       const proBadgeHTML = isLocked
         ? `<span class="scene-pro-badge" aria-label="PRO wallpaper">PRO</span>`
         : '';
+      const liveBadgeHTML = w.isLive
+        ? `<span class="live-badge"><span class="live-pulse-dot"></span> LIVE</span>`
+        : '';
+      const spinnerHTML = w.isLive
+        ? `<span class="scene-spinner" title="Loading video..."></span>`
+        : '';
 
       b.innerHTML = `
-        <span class="live-badge"><span class="live-pulse-dot"></span> LIVE</span>
+        ${liveBadgeHTML}
         ${proBadgeHTML}
-        <span class="scene-spinner" title="Loading video..."></span>
+        ${spinnerHTML}
         <span class="name">${w.name}</span>
       `;
       b.title = isLocked
-        ? `${w.name} (PRO Live Wallpaper — Click to unlock)`
+        ? `${w.name} (PRO Wallpaper — Click to unlock)`
         : `${w.name}: ${w.desc}`;
 
       b.addEventListener('click', async () => {
@@ -322,11 +330,36 @@
           $('purchaseModal').showModal();
           return;
         }
-        await pickLiveWallpaper(w, b);
+        if (w.isLive) {
+          await pickLiveWallpaper(w, b);
+        } else {
+          await pickBucketStaticWallpaper(w, b);
+        }
       });
 
       box.appendChild(b);
     });
+  }
+
+  async function pickBucketStaticWallpaper(wallpaper, buttonEl) {
+    settings.sceneMode = 'static';
+    settings.scene = wallpaper.id;
+    settings.staticWallpaper = wallpaper;
+    delete settings.liveWallpaper;
+
+    if (frame && frame.contentWindow && frame.contentWindow.LCTSPreview) {
+      frame.contentWindow.LCTSPreview.setLiveVideo(null);
+      const urls = { wall: wallpaper.imageUrl, blur: wallpaper.imageUrl };
+      frame.contentWindow.LCTSPreview.apply(settings.theme || SCENES[DEF].theme, urls);
+    }
+
+    await solveAndSave();
+    activate();
+
+    const allButtons = document.querySelectorAll('#liveScenes .scene, #scenes .scene');
+    allButtons.forEach(btn => btn.setAttribute('aria-checked', 'false'));
+    if (buttonEl) buttonEl.setAttribute('aria-checked', 'true');
+    renderCredit();
   }
 
   async function pickLiveWallpaper(wallpaper, buttonEl) {
@@ -393,6 +426,8 @@
     try {
       justSet = null;
       settings.sceneMode = 'static';
+      delete settings.staticWallpaper;
+      delete settings.liveWallpaper;
       if (frame && frame.contentWindow && frame.contentWindow.LCTSPreview) {
         frame.contentWindow.LCTSPreview.setLiveVideo(null);
       }

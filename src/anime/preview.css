@@ -69,12 +69,19 @@ pre { padding: 12px 14px; margin: 0; font-size: 13px; white-space: pre-wrap; }
   object-fit: cover;
   z-index: -1;
   pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.45s ease-in-out;
+  background: transparent;
 }
-html.has-live-wallpaper body::before,
-body.has-live-wallpaper::before,
-html[data-lc-theme="anime"].has-live-wallpaper body::before {
-  background-image: none !important;
-  background-color: transparent !important;
+.lc-anime-live-video.is-ready {
+  opacity: 1 !important;
+}
+html body::before {
+  z-index: -2 !important;
+  transition: opacity 0.45s ease-in-out;
+}
+html.live-ready body::before,
+body.live-ready::before {
   opacity: 0 !important;
 }
 html[data-lc-focus] .lc-anime-live-video {

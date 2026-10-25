@@ -57,13 +57,38 @@
     const v = document.getElementById('previewLiveVideo');
     if (!v) return;
     if (!url) {
+      v.style.opacity = '0';
+      v.classList.remove('is-ready');
       v.style.display = 'none';
       v.pause();
       v.src = '';
-      document.documentElement.classList.remove('has-live-wallpaper');
-      document.body.classList.remove('has-live-wallpaper');
+      document.documentElement.classList.remove('has-live-wallpaper', 'live-ready');
+      document.body.classList.remove('has-live-wallpaper', 'live-ready');
       return;
     }
+
+    const markReady = () => {
+      v.classList.add('is-ready');
+      v.style.opacity = '1';
+      document.documentElement.classList.add('live-ready');
+      document.body.classList.add('live-ready');
+    };
+
+    if (v._markReady) {
+      v.removeEventListener('playing', v._markReady);
+      v.removeEventListener('loadeddata', v._markReady);
+    }
+    v._markReady = markReady;
+    v.addEventListener('playing', markReady, { once: true });
+    v.addEventListener('loadeddata', () => {
+      if (v.readyState >= 2) markReady();
+    }, { once: true });
+
+    v.classList.remove('is-ready');
+    v.style.opacity = '0';
+    document.documentElement.classList.remove('live-ready');
+    document.body.classList.remove('live-ready');
+
     v.src = url;
     v.style.display = 'block';
     v.play().catch(() => {});
