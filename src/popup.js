@@ -8,32 +8,42 @@ const DEFAULT = 'anime';
 const THEMES = {
   paper: {
     name: 'Vintage Paper', desc: 'kraft paper, iron-gall ink', accent: '#6d190e',
-    pv: { bg:'#ad9362', text:'#241d14', line:'#483c25', kw:'#650500',
-          fn:'#00208a', num:'#00343f', var:'#1a2d5a', com:'#332e25', pn:'#3a2d1d' },
+    pv: {
+      bg: '#ad9362', text: '#241d14', line: '#483c25', kw: '#650500',
+      fn: '#00208a', num: '#00343f', var: '#1a2d5a', com: '#332e25', pn: '#3a2d1d'
+    },
     tex: 'grain'
   },
   sakura: {
     name: 'Sakura Night', desc: 'petal pink on plum indigo', accent: '#ff7eb6',
-    pv: { bg:'#211d3c', text:'#ece9ff', line:'#4a3f80', kw:'#ff7eb6',
-          fn:'#6ee7f0', num:'#b98cff', var:'#ece9ff', com:'#6b6395', pn:'#ff9ec8' },
+    pv: {
+      bg: '#211d3c', text: '#ece9ff', line: '#4a3f80', kw: '#ff7eb6',
+      fn: '#6ee7f0', num: '#b98cff', var: '#ece9ff', com: '#6b6395', pn: '#ff9ec8'
+    },
     tex: 'stars'
   },
   grid: {
     name: 'Grid', desc: 'drafting table, hard edges', accent: '#35e0a1',
-    pv: { bg:'#141c28', text:'#d7e0ec', line:'#3a4a5f', kw:'#58a6ff',
-          fn:'#35e0a1', num:'#ffa657', var:'#d7e0ec', com:'#56687f', pn:'#79c0ff' },
+    pv: {
+      bg: '#141c28', text: '#d7e0ec', line: '#3a4a5f', kw: '#58a6ff',
+      fn: '#35e0a1', num: '#ffa657', var: '#d7e0ec', com: '#56687f', pn: '#79c0ff'
+    },
     tex: 'grid'
   },
   bloom: {
     name: 'Orchid', desc: 'silk velvet, rose-gold trim', accent: '#e3a88f',
-    pv: { bg:'#221730', text:'#f4ecf7', line:'#5b4272', kw:'#ff9ec9',
-          fn:'#7fe3c0', num:'#d89bff', var:'#f4ecf7', com:'#9b86a9', pn:'#e3a88f' },
+    pv: {
+      bg: '#221730', text: '#f4ecf7', line: '#5b4272', kw: '#ff9ec9',
+      fn: '#7fe3c0', num: '#d89bff', var: '#f4ecf7', com: '#9b86a9', pn: '#e3a88f'
+    },
     tex: 'nap'
   },
   crawler: {
     name: 'Web Crawler', desc: 'charcoal web, crimson thread', accent: '#e0223f',
-    pv: { bg:'#17171c', text:'#eceaf2', line:'#38384a', kw:'#4db2ff',
-          fn:'#4ce0b3', num:'#c792ea', var:'#eceaf2', com:'#6e6e7a', pn:'#ff8aa8' },
+    pv: {
+      bg: '#17171c', text: '#eceaf2', line: '#38384a', kw: '#4db2ff',
+      fn: '#4ce0b3', num: '#c792ea', var: '#eceaf2', com: '#6e6e7a', pn: '#ff8aa8'
+    },
     tex: 'crawler'
   },
   /* Anime Studio's card takes its colours from the default scene's solve
@@ -45,9 +55,11 @@ const THEMES = {
     return {
       name: 'Anime Studio', desc: 'your scene, episode moments',
       accent: t ? t.roles['--lc-accent'] : '#f98dc1',
-      pv: t ? { bg: t.scrim, text: ink.variable, line: t.roles['--lc-text3'], kw: ink.keyword,
-                fn: ink.func, num: ink.number, var: ink.param, com: ink.comment, pn: ink.operator }
-            : { bg:'#150b21', text:'#f3f0f7', line:'#9b8dad', kw:'#f98dc1', fn:'#cb9cfa', num:'#f5993d', var:'#d7c6e9', com:'#9b8dad', pn:'#dab9c9' },
+      pv: t ? {
+        bg: t.scrim, text: ink.variable, line: t.roles['--lc-text3'], kw: ink.keyword,
+        fn: ink.func, num: ink.number, var: ink.param, com: ink.comment, pn: ink.operator
+      }
+        : { bg: '#150b21', text: '#f3f0f7', line: '#9b8dad', kw: '#f98dc1', fn: '#cb9cfa', num: '#f5993d', var: '#d7c6e9', com: '#9b8dad', pn: '#dab9c9' },
       tex: 'anime'
     };
   })(),
@@ -57,21 +69,27 @@ const THEMES = {
   game: {
     name: 'Adventure', desc: 'RPG night realm, quests and loot', accent: '#7dd3fc',
     /* the theme's own dark inks (INK.game in monaco-ink.js) */
-    pv: { bg:'#0b1a2e', text:'#eef2ea', line:'#6b86a6', kw:'#d4af6a',
-          fn:'#8fb8e0', num:'#7fc9c0', var:'#eef2ea', com:'#8aa0b8', pn:'#d7c9a0' },
+    pv: {
+      bg: '#0b1a2e', text: '#eef2ea', line: '#6b86a6', kw: '#d4af6a',
+      fn: '#8fb8e0', num: '#7fc9c0', var: '#eef2ea', com: '#8aa0b8', pn: '#d7c9a0'
+    },
     tex: 'game'
   },
   /* Pixel Art: its own inks (INK.pixel), and the squad stands in the corner */
   pixel: {
     name: 'Pixel Art', desc: '8-bit, Accepted = boom', accent: '#ffcd75',
-    pv: { bg:'#262b44', text:'#f4f4f4', line:'#566c86', kw:'#ffcd75',
-          fn:'#73eff7', num:'#c9a0ff', var:'#c5d3e0', com:'#8b9bb4', pn:'#ffa36b' },
+    pv: {
+      bg: '#262b44', text: '#f4f4f4', line: '#566c86', kw: '#ffcd75',
+      fn: '#73eff7', num: '#c9a0ff', var: '#c5d3e0', com: '#8b9bb4', pn: '#ffa36b'
+    },
     tex: 'pixel'
   },
   off: {
     name: 'Off', desc: 'hand the page back to LeetCode', accent: '#8a8f98',
-    pv: { bg:'#1a1a1a', text:'#eff1f6', line:'#5c6370', kw:'#c678dd',
-          fn:'#61afef', num:'#d19a66', var:'#eff1f6', com:'#7f848e', pn:'#abb2bf' },
+    pv: {
+      bg: '#1a1a1a', text: '#eff1f6', line: '#5c6370', kw: '#c678dd',
+      fn: '#61afef', num: '#d19a66', var: '#eff1f6', com: '#7f848e', pn: '#abb2bf'
+    },
     tex: 'none'
   }
 };
@@ -88,11 +106,11 @@ const SNIPPET = [
   [3, ['        ', k('return'), ' ', n('0')]],
   [4, ['    ', k('return'), ' ', n('1'), ' + ', f('dfs'), pn('('), v('node'), pn('.'), v('next'), pn(')')]]
 ];
-function k(s){return {t:'kw',s};}  function f(s){return {t:'fn',s};}
-function n(s){return {t:'num',s};} function v(s){return {t:'var',s};}
-function c(s){return {t:'com',s};} function pn(s){return {t:'pn',s};}
+function k(s) { return { t: 'kw', s }; } function f(s) { return { t: 'fn', s }; }
+function n(s) { return { t: 'num', s }; } function v(s) { return { t: 'var', s }; }
+function c(s) { return { t: 'com', s }; } function pn(s) { return { t: 'pn', s }; }
 
-function esc(str){ return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function esc(str) { return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
 function previewHTML() {
   return SNIPPET.map(([no, parts]) => {
@@ -108,8 +126,195 @@ const CHECK = '<svg viewBox="0 0 12 12" fill="none"><path d="M2.5 6.2 5 8.7 9.6 
 
 function pvVars(pv) {
   return `--pv-bg:${pv.bg};--pv-text:${pv.text};--pv-line:${pv.line};`
-       + `--pv-kw:${pv.kw};--pv-fn:${pv.fn};--pv-num:${pv.num};`
-       + `--pv-var:${pv.var};--pv-com:${pv.com};--pv-pn:${pv.pn};`;
+    + `--pv-kw:${pv.kw};--pv-fn:${pv.fn};--pv-num:${pv.num};`
+    + `--pv-var:${pv.var};--pv-com:${pv.com};--pv-pn:${pv.pn};`;
+}
+
+/* Wallpaper Drawer in Sidepanel (2*n Grid) */
+const wallpaperDrawer = document.createElement('div');
+wallpaperDrawer.id = 'wallpaperDrawer';
+wallpaperDrawer.className = 'wallpaper-drawer';
+wallpaperDrawer.innerHTML = '<div id="wallpaperGrid" class="wallpaper-grid"></div>';
+
+let wallpapersDrawerOpen = false;
+
+function toggleWallpaperDrawer(force) {
+  const grid = document.getElementById('grid');
+  if (!grid) return;
+  wallpapersDrawerOpen = typeof force === 'boolean' ? force : !wallpapersDrawerOpen;
+  grid.classList.toggle('wallpapers-expanded', wallpapersDrawerOpen);
+  if (wallpapersDrawerOpen) {
+    renderWallpaperGrid();
+  }
+}
+
+async function renderWallpaperGrid() {
+  const box = document.getElementById('wallpaperGrid');
+  if (!box) return;
+
+  let isPrem = false;
+  try {
+    const pData = await chrome.storage.local.get('leetglowPremium');
+    isPrem = !!(pData.leetglowPremium && pData.leetglowPremium.active === true);
+  } catch (e) { }
+
+  const res = await chrome.storage.local.get(['lcAnime', 'lcAnimeArt']);
+  const cfg = res.lcAnime || {};
+  const isLive = cfg.sceneMode === 'live' && cfg.liveWallpaper;
+  const activeId = isLive ? cfg.liveWallpaper.id : (cfg.scene || globalThis.LCTS_SCENE_DEFAULT);
+
+  box.innerHTML = '';
+  const items = [];
+
+  // 1. User's uploaded custom picture (if exists)
+  if (res.lcAnimeArt && (res.lcAnimeArt.wall || res.lcAnimeArt.blur)) {
+    items.push({
+      id: 'custom',
+      name: res.lcAnimeArt.name || 'Your picture',
+      thumb: res.lcAnimeArt.blur || res.lcAnimeArt.wall,
+      isCustom: true,
+      isPro: true
+    });
+  }
+
+  // 2. User's uploaded live wallpapers from Supabase
+  if (globalThis.LCTSLiveWallpapers && globalThis.LCTSLiveWallpapers.getAll) {
+    try {
+      const liveList = await globalThis.LCTSLiveWallpapers.getAll();
+      liveList.forEach(w => {
+        items.push({
+          id: w.id,
+          name: w.name,
+          thumb: w.thumbUrl || (w.thumb ? chrome.runtime.getURL(w.thumb) : ''),
+          isLive: true,
+          liveData: w,
+          isPro: false
+        });
+      });
+    } catch (e) {
+      console.warn('[LeetGlow] Could not fetch live wallpapers for drawer:', e);
+    }
+  }
+
+  // 3. Preset scenes from globalThis.LCTS_SCENES
+  const scenes = globalThis.LCTS_SCENES || {};
+  Object.entries(scenes).forEach(([sceneId, s]) => {
+    items.push({
+      id: sceneId,
+      name: s.name,
+      thumb: chrome.runtime.getURL(s.thumb || s.wall),
+      isPro: sceneId !== 'golden-hour'
+    });
+  });
+
+  items.forEach(item => {
+    const isLocked = !isPrem && item.isPro;
+    const isActive = (item.id === activeId);
+
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'wp-card' + (isLocked ? ' is-locked' : '');
+    b.setAttribute('role', 'radio');
+    b.setAttribute('aria-checked', String(isActive));
+    b.dataset.wpId = item.id;
+    if (item.thumb) {
+      b.style.backgroundImage = `url("${item.thumb}")`;
+    }
+
+    if (!item.thumb && item.isLive && globalThis.LCTSLiveWallpapers && globalThis.LCTSLiveWallpapers.getThumbnail) {
+      globalThis.LCTSLiveWallpapers.getThumbnail(item.liveData).then(tUrl => {
+        if (tUrl) b.style.backgroundImage = `url("${tUrl}")`;
+      }).catch(() => { });
+    }
+
+    let badgeHTML = '';
+    if (item.isLive) {
+      badgeHTML = '<span class="wp-live-badge"><span class="wp-live-dot"></span> LIVE</span><span class="wp-spinner" aria-hidden="true"></span>';
+    } else if (isLocked) {
+      badgeHTML = '<span class="wp-pro-badge">PRO</span>';
+    }
+
+    b.innerHTML = `
+      ${badgeHTML}
+      <span class="wp-check">${CHECK}</span>
+      <span class="wp-name">${item.name}</span>
+    `;
+
+    b.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      if (item.isLive) b.classList.add('is-loading');
+      try {
+        await selectWallpaper(item, isLocked);
+        if (item.isLive && item.liveData && item.liveData.videoUrl && globalThis.LCTSLiveWallpapers && globalThis.LCTSLiveWallpapers.downloadAndCache) {
+          globalThis.LCTSLiveWallpapers.downloadAndCache(item.liveData.videoUrl).catch(() => { });
+        }
+      } finally {
+        b.classList.remove('is-loading');
+      }
+    });
+
+    box.appendChild(b);
+  });
+}
+
+async function selectWallpaper(item, isLocked) {
+  if (isLocked) {
+    const purchaseModal = document.getElementById('purchaseModal');
+    if (purchaseModal) purchaseModal.showModal();
+    return;
+  }
+
+  const res = await chrome.storage.local.get(['lcAnime']);
+  const cfg = res.lcAnime || {};
+
+  if (item.isLive) {
+    cfg.sceneMode = 'live';
+    cfg.liveWallpaper = item.liveData;
+    const themeId = (item.liveData && item.liveData.themeId) || 'neon-rain';
+    cfg.scene = themeId;
+    if (cfg.arcs) {
+      cfg.arcScenes = Object.assign({}, cfg.arcScenes || {}, {
+        easy: themeId,
+        medium: themeId,
+        hard: themeId
+      });
+    }
+  } else if (item.isCustom) {
+    cfg.sceneMode = 'static';
+    cfg.scene = 'custom';
+  } else {
+    cfg.sceneMode = 'static';
+    cfg.scene = item.id;
+    if (cfg.arcs) {
+      cfg.arcScenes = Object.assign({}, cfg.arcScenes || {}, {
+        easy: item.id,
+        medium: item.id,
+        hard: item.id
+      });
+    }
+  }
+
+  await chrome.storage.local.set({
+    lcAnime: cfg,
+    [KEY]: 'anime'
+  });
+
+  markSelected('anime');
+  if (studioButton) studioButton.classList.add('lit');
+
+  const animeCard = document.querySelector('.card[data-id="anime"]');
+  if (animeCard) {
+    paintAnimeCard(animeCard.querySelector('.preview'));
+  }
+
+  document.querySelectorAll('.wp-card').forEach(c => {
+    c.setAttribute('aria-checked', String(c.dataset.wpId === item.id));
+  });
+
+  const status = document.getElementById('status');
+  if (status) {
+    status.textContent = `Applied "${item.name}" wallpaper to your open problem tabs.`;
+  }
 }
 
 function render(selected) {
@@ -129,12 +334,20 @@ function render(selected) {
     card.innerHTML =
       `<div class="preview tex-${t.tex}" style="${pvVars(t.pv)}">${preview}</div>` +
       `<div class="meta">` +
-        `<span class="name">${t.name}</span>` +
-        `<span class="desc">${t.desc}</span>` +
-        `<span class="spacer"></span>` +
-        `<span class="check">${CHECK}</span>` +
+      `<span class="name">${t.name}</span>` +
+      `<span class="desc">${t.desc}</span>` +
+      `<span class="spacer"></span>` +
+      `<span class="check">${CHECK}</span>` +
       `</div>`;
-    card.addEventListener('click', () => choose(id));
+    card.addEventListener('click', () => {
+      if (id === 'anime') {
+        choose(id);
+        toggleWallpaperDrawer();
+      } else {
+        toggleWallpaperDrawer(false);
+        choose(id);
+      }
+    });
     grid.appendChild(card);
     if (id === 'anime') {
       paintAnimeCard(card.querySelector('.preview'));
@@ -143,7 +356,20 @@ function render(selected) {
       ribbon.setAttribute('aria-hidden', 'true');
       ribbon.innerHTML = '<span class="corner-ribbon">Premium</span>';
       card.appendChild(ribbon);
+
+      const meta = card.querySelector('.meta');
+      if (meta) {
+        const toggleBadge = document.createElement('span');
+        toggleBadge.className = 'drawer-toggle-badge';
+        toggleBadge.setAttribute('aria-label', 'Toggle wallpapers');
+        toggleBadge.innerHTML = `<svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l4 4 4-4"/></svg>`;
+        const check = meta.querySelector('.check');
+        if (check) meta.insertBefore(toggleBadge, check);
+        else meta.appendChild(toggleBadge);
+      }
+
       grid.appendChild(studioButton);
+      grid.appendChild(wallpaperDrawer);
     }
     if (id === 'game') {
       /* a baked card: the night realm with an RPG HUD (scripts/build-game-card.py) */
@@ -186,7 +412,12 @@ function paintAnimeCard(preview) {
     const arcs = !custom && (cfg.arcs !== undefined ? !!cfg.arcs : !cfg.scene);
 
     let urls, inkFrom;
-    if (custom) { urls = [res.lcAnimeArt.blur]; inkFrom = 'custom'; }
+    const isLive = cfg.sceneMode === 'live' && cfg.liveWallpaper;
+    if (isLive) {
+      const liveThumb = cfg.liveWallpaper.thumbUrl || (cfg.liveWallpaper.thumb ? chrome.runtime.getURL(cfg.liveWallpaper.thumb) : thumb(cfg.scene));
+      urls = [liveThumb];
+      inkFrom = cfg.liveWallpaper.themeId || cfg.scene || DEF;
+    } else if (custom) { urls = [res.lcAnimeArt.blur]; inkFrom = 'custom'; }
     else if (arcs) {
       const pick = (d) => (scenes[(cfg.arcScenes || {})[d]] ? cfg.arcScenes[d] : ARC[d]);
       const ids = ['easy', 'medium', 'hard'].map(pick);
@@ -209,8 +440,23 @@ function paintAnimeCard(preview) {
       preview.style.backgroundSize = 'auto, auto, 33.4% 100%, 33.4% 100%, 33.4% 100%';
       preview.style.backgroundPosition = '0 0, 0 0, 0 0, 50% 0, 100% 0';
       preview.style.backgroundRepeat = 'no-repeat';
-    } else if (urls[0]) {
-      preview.style.setProperty('--pv-scene', `url("${urls[0]}")`);
+    } else {
+      preview.style.backgroundImage = '';
+      preview.style.backgroundSize = '';
+      preview.style.backgroundPosition = '';
+      preview.style.backgroundRepeat = '';
+      if (urls[0]) {
+        preview.style.setProperty('--pv-scene', `url("${urls[0]}")`);
+      }
+    }
+
+    if (isLive && (!cfg.liveWallpaper.thumbUrl && !urls[0]) && globalThis.LCTSLiveWallpapers && globalThis.LCTSLiveWallpapers.getThumbnail) {
+      globalThis.LCTSLiveWallpapers.getThumbnail(cfg.liveWallpaper).then(tUrl => {
+        if (tUrl) {
+          preview.style.backgroundImage = '';
+          preview.style.setProperty('--pv-scene', `url("${tUrl}")`);
+        }
+      }).catch(() => { });
     }
   });
 }
@@ -244,7 +490,7 @@ try {
   const v = chrome.runtime.getManifest().version;
   const el = document.getElementById('ver');
   if (el) el.textContent = 'v' + v;
-} catch (e) {}
+} catch (e) { }
 
 /* boot */
 chrome.storage.local.get(KEY, (res) => {
@@ -261,7 +507,7 @@ if (studioButton) {
 
 /* keyboard: arrow keys move between radio cards and select, as a radio group does */
 document.addEventListener('keydown', (e) => {
-  if (!['ArrowDown','ArrowUp','ArrowRight','ArrowLeft'].includes(e.key)) return;
+  if (!['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft'].includes(e.key)) return;
   const cards = [...document.querySelectorAll('.card')];
   const idx = cards.findIndex((c) => c === document.activeElement);
   if (idx === -1) return;
@@ -331,7 +577,7 @@ chrome.storage.local.get(['lcContainerTrans', 'lcEditorTrans', 'lcVolume', 'lcAn
   // Volume (default 80%)
   const vVal = typeof res.lcVolume === 'number' ? res.lcVolume
     : (typeof cfg.volume === 'number' ? Math.round(cfg.volume * 100)
-    : (typeof res.lcGameVolume === 'number' ? Math.round(res.lcGameVolume * 100) : 80));
+      : (typeof res.lcGameVolume === 'number' ? Math.round(res.lcGameVolume * 100) : 80));
   if (volumeSlider && volumeVal) {
     volumeSlider.value = vVal;
     volumeVal.textContent = vVal + '%';
@@ -388,8 +634,8 @@ if (testSoundBtn) {
     try {
       const audio = new Audio(chrome.runtime.getURL('sounds/game/checkpoint.mp3'));
       audio.volume = Math.max(0, Math.min(1, vol));
-      audio.play().catch(() => {});
-    } catch (e) {}
+      audio.play().catch(() => { });
+    } catch (e) { }
   });
 }
 
@@ -629,9 +875,9 @@ if (resetCustomizeBtn) {
               <span class="custom-wallpaper-name" title="${item.name || 'Wallpaper'}">${item.name || 'Custom Wallpaper'}</span>
               <div class="custom-wallpaper-actions">
                 ${isActive
-                  ? '<span class="active-chip">Applied</span>'
-                  : `<button class="btn-micro-action btn-apply-wall" data-id="${item.id}" type="button">Apply</button>`
-                }
+            ? '<span class="active-chip">Applied</span>'
+            : `<button class="btn-micro-action btn-apply-wall" data-id="${item.id}" type="button">Apply</button>`
+          }
                 <button class="btn-micro-icon btn-delete-wall" data-id="${item.id}" type="button" title="Delete wallpaper">
                   <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5">
                     <path d="M2.5 4.5h11M5.5 4.5V3a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v1.5M6 7.5v4.5M10 7.5v4.5M3.5 4.5l.8 9.5a1 1 0 0 0 1 .9h5.4a1 1 0 0 0 1-.9l.8-9.5"/>

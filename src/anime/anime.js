@@ -43,9 +43,39 @@
     return { wall: chrome.runtime.getURL(s.wall), blur: chrome.runtime.getURL(s.blur) };
   }
 
+  const LIVE_OVERRIDE_CSS = `
+html[data-lc-theme="anime"].has-live-wallpaper body::before,
+html.has-live-wallpaper body::before,
+body.has-live-wallpaper::before {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  background-image: none !important;
+  background: transparent !important;
+}
+.lc-anime-live-video {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  object-fit: cover !important;
+  z-index: -1 !important;
+  pointer-events: none !important;
+  display: block !important;
+}
+html[data-lc-theme="anime"][data-lc-focus] .lc-anime-live-video,
+html[data-lc-focus] .lc-anime-live-video {
+  display: none !important;
+}
+`;
+
   function publish(theme, urls, customAlpha) {
     globalThis.__lctsAnimeScene = { wall: urls.wall };     // read by src/share.js
-    const css = globalThis.LCTSAnimeCss.build(theme, urls, customAlpha);
+    let css = globalThis.LCTSAnimeCss.build(theme, urls, customAlpha) + LIVE_OVERRIDE_CSS;
+    if (cfgNow && cfgNow.sceneMode === 'live') {
+      css += '\nhtml[data-lc-theme="anime"] body::before{display:none !important;opacity:0 !important;background-image:none !important;}';
+    }
     if (css !== published) { styleEl().textContent = css; published = css; }
     globalThis.__lctsAnimeInk = theme.ink;
     const modeChanged = globalThis.__lctsAnimeMode !== theme.mode;
@@ -100,6 +130,10 @@
   const ARC = globalThis.LCTS_ARC_DEFAULT || {};
   const arcsOn = (cfg) => cfg.scene !== 'custom' && (cfg.arcs !== undefined ? !!cfg.arcs : !cfg.scene);
   function sceneFor(cfg, difficulty) {
+    if (cfg && cfg.sceneMode === 'live') {
+      const liveTheme = (cfg.liveWallpaper && cfg.liveWallpaper.themeId) || cfg.scene || 'neon-rain';
+      return SCENES[liveTheme] ? liveTheme : DEF;
+    }
     if (!arcsOn(cfg)) return SCENES[cfg.scene] ? cfg.scene : DEF;
     const arcs = Object.assign({}, ARC, cfg.arcScenes || {});
     const id = arcs[difficulty || 'medium'] || arcs.medium;
@@ -131,6 +165,97 @@
     publish(solvedFor(cfg, id), presetUrls(id), alpha);
   }
 
+  let liveVideoEl = null;
+
+  function ensureVideoAttached() {
+    if (!liveVideoEl) return;
+    const target = document.body || root;
+    if (liveVideoEl.parentNode !== target) {
+      target.prepend(liveVideoEl);
+    }
+  }
+
+  function updateLiveVideo(url, thumbUrl) {
+    if (!url) {
+      if (liveVideoEl) {
+        liveVideoEl.pause();
+        liveVideoEl.removeAttribute('src');
+        liveVideoEl.load();
+        liveVideoEl.remove();
+        liveVideoEl = null;
+      }
+      root.classList.remove('has-live-wallpaper');
+      if (document.body) document.body.classList.remove('has-live-wallpaper');
+      return;
+    }
+    if (!liveVideoEl) {
+      liveVideoEl = document.createElement('video');
+      liveVideoEl.className = 'lc-anime-live-video';
+      liveVideoEl.setAttribute('autoplay', '');
+      liveVideoEl.setAttribute('loop', '');
+      liveVideoEl.setAttribute('muted', '');
+      liveVideoEl.setAttribute('playsinline', '');
+      liveVideoEl.setAttribute('webkit-playsinline', '');
+      liveVideoEl.autoplay = true;
+      liveVideoEl.loop = true;
+      liveVideoEl.muted = true;
+      liveVideoEl.playsInline = true;
+      liveVideoEl.defaultMuted = true;
+      liveVideoEl.style.cssText = 'position:fixed !important;top:0 !important;left:0 !important;width:100vw !important;height:100vh !important;object-fit:cover !important;z-index:-1 !important;pointer-events:none !important;display:block !important;';
+    }
+    if (thumbUrl && !liveVideoEl.poster) {
+      liveVideoEl.poster = thumbUrl;
+    }
+    ensureVideoAttached();
+    if (liveVideoEl.dataset.currentUrl !== url) {
+      liveVideoEl.dataset.currentUrl = url;
+      liveVideoEl.innerHTML = `
+        <source src="${url}" type="video/mp4">
+        <source src="${url}" type="video/quicktime">
+        <source src="${url}" type="video/webm">
+      `;
+      liveVideoEl.src = url;
+      liveVideoEl.load();
+
+      const playPromise = liveVideoEl.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => {
+          console.warn('[LeetGlow Live] Autoplay delayed or restricted, listening for first interaction:', err);
+          const resume = () => {
+            if (liveVideoEl && liveVideoEl.paused) {
+              liveVideoEl.play().catch(() => { });
+            }
+            window.removeEventListener('click', resume);
+            window.removeEventListener('keydown', resume);
+          };
+          window.addEventListener('click', resume, { once: true });
+          window.addEventListener('keydown', resume, { once: true });
+        });
+      }
+    }
+    root.classList.add('has-live-wallpaper');
+    if (document.body) document.body.classList.add('has-live-wallpaper');
+  }
+
+  // Ensure live video stays properly prepended inside document.body as the DOM constructs and during SPA transitions
+  const spaObserver = new MutationObserver(() => {
+    if (root.classList.contains('has-live-wallpaper') && liveVideoEl) {
+      ensureVideoAttached();
+      if (document.body && !document.body.classList.contains('has-live-wallpaper')) {
+        document.body.classList.add('has-live-wallpaper');
+      }
+    }
+  });
+  spaObserver.observe(root, { childList: true });
+  if (document.body) {
+    spaObserver.observe(document.body, { childList: true });
+  } else {
+    document.addEventListener('DOMContentLoaded', () => {
+      ensureVideoAttached();
+      if (document.body) spaObserver.observe(document.body, { childList: true });
+    });
+  }
+
   let loading = 0;
   function load() {
     const ticket = ++loading;
@@ -138,10 +263,32 @@
       if (ticket !== loading) return;
       root.toggleAttribute('data-lc-focus', !!res.lcFocus);
       /* nothing saved = a fresh install, which content.js runs as anime (its DEFAULT) */
-      if ((res[THEME_KEY] || 'anime') !== 'anime') { cfgNow = null; return; }   // nothing to load for other themes
+      if ((res[THEME_KEY] || 'anime') !== 'anime') {
+        cfgNow = null;
+        updateLiveVideo(null);
+        return;
+      }
 
       const alpha = customAlpha(res);
       const cfg = res.lcAnime || {};
+
+      // Check if user has active live wallpaper
+      if (cfg.sceneMode === 'live' && cfg.liveWallpaper && cfg.liveWallpaper.videoUrl) {
+        let videoUrl = cfg.liveWallpaper.videoUrl;
+        // Auto-repair any stale blob: URLs that may have been saved by legacy code
+        if (videoUrl.startsWith('blob:')) {
+          if (cfg.liveWallpaper.originalUrl) {
+            videoUrl = cfg.liveWallpaper.originalUrl;
+          } else if (cfg.liveWallpaper.id && cfg.liveWallpaper.id.startsWith('supabase-')) {
+            const baseName = cfg.liveWallpaper.id.replace('supabase-', '');
+            videoUrl = `https://kxtdvzyftfhryvbpbohb.supabase.co/storage/v1/object/public/live_wallpaper/${baseName}.mov`;
+          }
+        }
+        updateLiveVideo(videoUrl, cfg.liveWallpaper.thumbUrl);
+      } else {
+        updateLiveVideo(null);
+      }
+
       if (cfg.scene !== 'custom') {
         /* a revisited problem's difficulty is cached, so wait for that cache
            (a few ms) and the right scene is up before the first paint */

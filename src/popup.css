@@ -461,6 +461,206 @@ body {
   box-shadow: 0 0 0 1px var(--card-accent), 0 6px 20px -10px var(--card-accent);
 }
 
+/* ---- Wallpaper Drawer (2*n grid in sidepanel) ---------------------------- */
+.wallpaper-drawer {
+  display: none;
+  width: 100%;
+  animation: wp-drawer-expand 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes wp-drawer-expand {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* When expanded: show the drawer and hide all other theme cards */
+.grid.wallpapers-expanded .wallpaper-drawer {
+  display: block;
+}
+
+.grid.wallpapers-expanded .card:not([data-id="anime"]) {
+  display: none !important;
+}
+
+/* Anime card indicator when expanded */
+.card[data-id="anime"] .drawer-toggle-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--pop-muted);
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.15s ease, color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.card[data-id="anime"]:hover .drawer-toggle-badge {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+.grid.wallpapers-expanded .card[data-id="anime"] .drawer-toggle-badge {
+  transform: rotate(180deg);
+  background: var(--pop-accent);
+  color: #0e0f13;
+}
+
+.grid.wallpapers-expanded .card[data-id="anime"] {
+  border-color: var(--card-accent);
+  box-shadow: 0 0 0 1.5px var(--card-accent), 0 8px 24px -8px var(--card-accent);
+}
+
+/* 2*n Grid */
+.wallpaper-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 3px;
+  padding-bottom: 6px;
+}
+
+/* Individual wallpaper tile */
+.wp-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 86px;
+  border-radius: 10px;
+  border: 1px solid var(--pop-border);
+  background-color: var(--pop-panel);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  padding: 8px 9px;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  font: inherit;
+  color: inherit;
+  user-select: none;
+  transition: transform 0.14s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.wp-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 25%, rgba(10, 11, 16, 0.88) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.wp-card:hover {
+  transform: translateY(-1.5px);
+  border-color: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
+}
+
+.wp-card:active {
+  transform: translateY(0);
+}
+
+.wp-card[aria-checked="true"] {
+  border-color: var(--pop-accent);
+  box-shadow: 0 0 0 1.5px var(--pop-accent), 0 6px 18px -4px rgba(122, 162, 247, 0.5);
+}
+
+.wp-card .wp-name {
+  position: relative;
+  z-index: 2;
+  font-size: 11.5px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+  line-height: 1.25;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wp-card .wp-check {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: var(--pop-accent);
+  display: none;
+  place-items: center;
+  z-index: 3;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+.wp-card[aria-checked="true"] .wp-check {
+  display: grid;
+}
+
+.wp-card .wp-check svg {
+  width: 10px;
+  height: 10px;
+}
+
+.wp-card .wp-check svg path {
+  stroke: #0e0f13;
+}
+
+.wp-card .wp-live-badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  font-size: 8.5px;
+  font-weight: 750;
+  padding: 1.5px 5px;
+  border-radius: 4px;
+  background: rgba(14, 15, 22, 0.85);
+  backdrop-filter: blur(4px);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  gap: 3.5px;
+  z-index: 3;
+  letter-spacing: 0.04em;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.wp-card .wp-live-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #ff2a6d;
+  box-shadow: 0 0 6px #ff2a6d;
+}
+
+.wp-card.is-locked {
+  cursor: pointer;
+}
+
+.wp-card .wp-pro-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: 8px;
+  font-weight: 800;
+  padding: 1.5px 4.5px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #ffffff;
+  z-index: 3;
+  letter-spacing: 0.05em;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+}
+
 /* 45° green corner ribbon for premium themes (Anime Studio) */
 .corner-ribbon-wrap {
   position: absolute;

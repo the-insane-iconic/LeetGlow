@@ -66,6 +66,11 @@
       currentPreviewScene = sceneId;
     }
     frame.contentWindow.LCTSPreview.apply(theme, previewUrls);
+    if (settings.sceneMode === 'live' && settings.liveWallpaper && settings.liveWallpaper.videoUrl) {
+      frame.contentWindow.LCTSPreview.setLiveVideo(settings.liveWallpaper.videoUrl);
+    } else {
+      frame.contentWindow.LCTSPreview.setLiveVideo(null);
+    }
   }
 
   /* the studio's own accent follows the scene */
@@ -231,13 +236,152 @@
   /* the picked scene's credit; the free Freepik/Magnific licence requires
      "designed by Freepik - Magnific.com" wherever its pictures are shown */
   function renderCredit() {
-    const s = SCENES[settings.scene];
     const n = $('sceneCredit');
     if (!n) return;
+    if (settings.sceneMode === 'live' && settings.liveWallpaper) {
+      n.textContent = settings.liveWallpaper.isSupabase
+        ? `${settings.liveWallpaper.name}: Video from Supabase livewallpaper bucket`
+        : `${settings.liveWallpaper.name}: High Definition Looping Live Wallpaper`;
+      return;
+    }
+    const s = SCENES[settings.scene];
     if (!s || !s.credit || s.credit === 'Original') { n.textContent = ''; return; }
     n.textContent = s.credit.indexOf('Freepik') === 0
       ? `${s.name}: designed by Freepik – Magnific.com`
       : `${s.name}: ${s.credit}`;
+  }
+
+  /* ---- Live Wallpapers (Supabase Storage + Built-in) ----------------------------- */
+  let liveWallpapersList = [];
+
+  async function renderLiveWallpapers() {
+    const box = $('liveScenes');
+    if (!box) return;
+    box.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 24px; font-size: 13px; color: var(--muted);"><span class="scene-spinner" style="display:inline-block; position:relative; top:3px; margin-right:8px;"></span>Syncing live wallpapers from Supabase…</div>';
+
+    if (!liveWallpapersList.length && globalThis.LCTSLiveWallpapers) {
+      liveWallpapersList = await globalThis.LCTSLiveWallpapers.getAll();
+    }
+
+    box.innerHTML = '';
+    const activeLiveId = settings.liveWallpaper ? settings.liveWallpaper.id : null;
+
+    if (!liveWallpapersList.length) {
+      box.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 24px; font-size: 13px; color: var(--muted);">No live wallpapers found in bucket. Upload MP4/WebM videos to Supabase bucket <code>livewallpaper</code> to see them here!</div>';
+      return;
+    }
+
+    liveWallpapersList.forEach(w => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'scene live-item';
+      b.setAttribute('role', 'radio');
+      const isSelected = settings.sceneMode === 'live' && activeLiveId === w.id;
+      b.setAttribute('aria-checked', String(isSelected));
+
+      // Fast thumbnail: direct thumbUrl, cached snapshot, or dynamic snapshot from video
+      const thumbUrl = w.thumbUrl || (w.thumb ? chrome.runtime.getURL(w.thumb) : '');
+      if (thumbUrl) {
+        b.style.backgroundImage = `url("${thumbUrl}")`;
+      } else {
+        b.classList.add('loading-thumb');
+        if (globalThis.LCTSLiveWallpapers && globalThis.LCTSLiveWallpapers.getThumbnail) {
+          globalThis.LCTSLiveWallpapers.getThumbnail(w).then(tUrl => {
+            if (tUrl) {
+              b.style.backgroundImage = `url("${tUrl}")`;
+              b.classList.remove('loading-thumb');
+            }
+          }).catch(() => {
+            b.classList.remove('loading-thumb');
+          });
+        }
+      }
+
+      // Lock status
+      const isLocked = !isPremium && w.isPro;
+      if (isLocked) {
+        b.classList.add('is-locked');
+      }
+
+      const proBadgeHTML = isLocked
+        ? `<span class="scene-pro-badge" aria-label="PRO wallpaper">PRO</span>`
+        : '';
+
+      b.innerHTML = `
+        <span class="live-badge"><span class="live-pulse-dot"></span> LIVE</span>
+        ${proBadgeHTML}
+        <span class="scene-spinner" title="Loading video..."></span>
+        <span class="name">${w.name}</span>
+      `;
+      b.title = isLocked
+        ? `${w.name} (PRO Live Wallpaper — Click to unlock)`
+        : `${w.name}: ${w.desc}`;
+
+      b.addEventListener('click', async () => {
+        if (isLocked) {
+          $('purchaseModal').showModal();
+          return;
+        }
+        await pickLiveWallpaper(w, b);
+      });
+
+      box.appendChild(b);
+    });
+  }
+
+  async function pickLiveWallpaper(wallpaper, buttonEl) {
+    if (buttonEl) {
+      buttonEl.classList.add('is-loading');
+    }
+
+    try {
+      const directVideoUrl = wallpaper.videoUrl;
+
+      // 1. Download / retrieve cached video for local preview frame
+      let playableUrl = directVideoUrl;
+      try {
+        if (globalThis.LCTSLiveWallpapers && globalThis.LCTSLiveWallpapers.downloadAndCache) {
+          playableUrl = await globalThis.LCTSLiveWallpapers.downloadAndCache(directVideoUrl);
+        }
+      } catch (cacheErr) {
+        console.warn('[LeetGlow Live] Cache download error, using direct URL:', cacheErr);
+      }
+
+      // 2. Play in preview
+      if (frame && frame.contentWindow && frame.contentWindow.LCTSPreview) {
+        frame.contentWindow.LCTSPreview.setLiveVideo(playableUrl || directVideoUrl);
+      }
+
+      // 3. Save mode and live wallpaper with permanent HTTPS URL (never store blob URL in storage!)
+      settings.sceneMode = 'live';
+      settings.liveWallpaper = Object.assign({}, wallpaper, {
+        videoUrl: directVideoUrl,
+        originalUrl: directVideoUrl
+      });
+      
+      // Update theme accent to match if scene exists
+      if (wallpaper.themeId && SCENES[wallpaper.themeId]) {
+        settings.scene = wallpaper.themeId;
+      }
+
+      await solveAndSave();
+      activate();
+
+      // Update UI active states
+      const allLiveButtons = document.querySelectorAll('#liveScenes .scene');
+      allLiveButtons.forEach(btn => btn.setAttribute('aria-checked', 'false'));
+      if (buttonEl) {
+        buttonEl.setAttribute('aria-checked', 'true');
+      }
+      renderCredit();
+    } catch (err) {
+      console.warn('[LeetGlow Live] Failed to load live wallpaper:', err);
+      note('Could not load live video. Please check your internet connection.', true);
+    } finally {
+      if (buttonEl) {
+        buttonEl.classList.remove('is-loading');
+      }
+    }
   }
 
   async function pickScene(id) {
@@ -248,6 +392,10 @@
     busy(true);
     try {
       justSet = null;
+      settings.sceneMode = 'static';
+      if (frame && frame.contentWindow && frame.contentWindow.LCTSPreview) {
+        frame.contentWindow.LCTSPreview.setLiveVideo(null);
+      }
       if (id === 'custom') settings.scene = 'custom';
       else {
         settings.scene = id;                        // remembered for "one scene" mode
@@ -275,11 +423,13 @@
     box.hidden = !settings.arcs || custom;
     const label = (SLOTS.find(([d]) => d === slot) || [])[1] || '';
     const n = $('arcNote');
-    n.classList.toggle('done', !!justSet);
-    if (custom) n.textContent = 'Your picture is used for every difficulty.';
-    else if (!settings.arcs) n.textContent = '';
-    else if (justSet) n.textContent = `✓ ${label} problems now use ${SCENES[justSet].name}. Pick another slot to change it too.`;
-    else n.innerHTML = `Choosing the scene for <b>${label}</b> problems. Pick a slot above to change another difficulty.`;
+    if (n) {
+      n.classList.toggle('done', !!justSet);
+      if (custom) n.textContent = 'Your picture is used for every difficulty.';
+      else if (!settings.arcs) n.textContent = '';
+      else if (justSet) n.textContent = `✓ ${label} problems now use ${SCENES[justSet].name}. Pick another slot to change it too.`;
+      else n.innerHTML = `Choosing the scene for <b>${label}</b> problems. Pick a slot above to change another difficulty.`;
+    }
     box.innerHTML = '';
     SLOTS.forEach(([d, label, jp]) => {
       const s = SCENES[arcScene(d)];
@@ -463,6 +613,8 @@
     const A = res.lcAnime;
     Object.assign(settings, A ? {
       scene: A.scene || DEF,
+      sceneMode: A.sceneMode || 'static',
+      liveWallpaper: A.liveWallpaper || null,
       /* someone who picked one scene before arcs existed keeps it */
       arcs: A.arcs !== undefined ? !!A.arcs : !A.scene,
       arcScenes: A.arcScenes || {},
@@ -472,10 +624,21 @@
       japanese: res.lcAnime.japanese !== false,
       sound: res.lcAnime.sound !== false,
       volume: typeof res.lcAnime.volume === 'number' ? res.lcAnime.volume : 1
-    } : {});
+    } : { sceneMode: 'static' });
     hasArt = !!res.lcAnimeArt;
     customThumb = hasArt ? res.lcAnimeArt.blur : null;
     if (settings.scene === 'custom' && !hasArt) settings.scene = DEF;
+
+    // Auto-repair any stale blob: URLs that may have been saved by legacy code
+    if (settings.liveWallpaper && settings.liveWallpaper.videoUrl && settings.liveWallpaper.videoUrl.startsWith('blob:')) {
+      if (settings.liveWallpaper.originalUrl) {
+        settings.liveWallpaper.videoUrl = settings.liveWallpaper.originalUrl;
+      } else if (settings.liveWallpaper.id && settings.liveWallpaper.id.startsWith('supabase-')) {
+        const baseName = settings.liveWallpaper.id.replace('supabase-', '');
+        settings.liveWallpaper.videoUrl = `https://kxtdvzyftfhryvbpbohb.supabase.co/storage/v1/object/public/live_wallpaper/${baseName}.mov`;
+      }
+      save();
+    }
 
     vis.value = Math.round(settings.visibility * 100); showVis();
     renderGlass();
@@ -505,6 +668,62 @@
     if (typeof initPremiumSystem === 'function') {
       await initPremiumSystem();
     }
+
+    // Static vs Live wallpaper mode toggles
+    function updateSceneModeUI(mode) {
+      const isLive = mode === 'live';
+      if ($('tabStatic')) {
+        $('tabStatic').classList.toggle('active', !isLive);
+        $('tabStatic').setAttribute('aria-checked', String(!isLive));
+      }
+      if ($('tabLive')) {
+        $('tabLive').classList.toggle('active', isLive);
+        $('tabLive').setAttribute('aria-checked', String(isLive));
+      }
+      if ($('staticScenesWrap')) $('staticScenesWrap').hidden = isLive;
+      if ($('liveScenesWrap')) $('liveScenesWrap').hidden = !isLive;
+      if (isLive) {
+        renderLiveWallpapers();
+      }
+    }
+
+    if ($('tabStatic')) {
+      $('tabStatic').addEventListener('click', () => {
+        settings.sceneMode = 'static';
+        updateSceneModeUI('static');
+        if (frame && frame.contentWindow && frame.contentWindow.LCTSPreview) {
+          frame.contentWindow.LCTSPreview.setLiveVideo(null);
+        }
+        renderCredit();
+        save();
+      });
+    }
+
+    if ($('tabLive')) {
+      $('tabLive').addEventListener('click', () => {
+        settings.sceneMode = 'live';
+        updateSceneModeUI('live');
+        if (settings.liveWallpaper && settings.liveWallpaper.videoUrl) {
+          if (frame && frame.contentWindow && frame.contentWindow.LCTSPreview) {
+            frame.contentWindow.LCTSPreview.setLiveVideo(settings.liveWallpaper.videoUrl);
+          }
+        }
+        renderCredit();
+        save();
+      });
+    }
+
+    const refreshLiveBtn = $('refreshLiveWallpapersBtn');
+    if (refreshLiveBtn) {
+      refreshLiveBtn.addEventListener('click', async () => {
+        refreshLiveBtn.classList.add('spinning');
+        liveWallpapersList = [];
+        await renderLiveWallpapers();
+        setTimeout(() => refreshLiveBtn.classList.remove('spinning'), 600);
+      });
+    }
+
+    updateSceneModeUI(settings.sceneMode || 'static');
 
     busy(true, 'Loading scene…');
     try {

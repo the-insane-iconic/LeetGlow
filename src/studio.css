@@ -209,6 +209,167 @@ kbd { font-family: ui-monospace, Menlo, monospace; font-size: 11.5px; padding: 1
 .segmented button:hover:not([aria-checked="true"]) { color: var(--text); }
 .segmented button[aria-checked="true"] { background: #ffffff; color: var(--text); font-weight: 700; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06); }
 
+/* ---- scene group header & live wallpaper mode toggle ------------------------- */
+.scene-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.scene-group-header h2 {
+  margin: 0;
+}
+.wallpaper-mode-segmented {
+  padding: 2px;
+}
+.wallpaper-mode-segmented button {
+  padding: 5px 12px;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.live-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.7);
+  animation: live-pulse 1.4s ease-in-out infinite;
+}
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+.live-pro-tag {
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: #f6c451;
+  color: #1a1608;
+  letter-spacing: 0.04em;
+}
+
+/* ---- live wallpapers container ------------------------------------------------ */
+.live-header-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding: 6px 10px;
+  background: var(--panel-2);
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+}
+.live-status-badge {
+  font-size: 11.5px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.live-status-badge code {
+  color: var(--accent);
+  font-weight: 600;
+}
+.live-dot-glow {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+}
+.refresh-live-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  background: transparent;
+  border: 1px solid var(--line-2);
+  border-radius: 6px;
+  color: var(--text);
+  cursor: pointer;
+  transition: all .15s ease;
+}
+.refresh-live-btn:hover {
+  background: #ffffff;
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.live-badge {
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  padding: 2px 6px;
+  font-size: 10px;
+  font-weight: 750;
+  border-radius: 4px;
+  background: rgba(14, 15, 22, 0.85);
+  backdrop-filter: blur(4px);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  z-index: 4;
+  letter-spacing: 0.04em;
+}
+.scene.is-loading::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 11, 16, 0.45);
+  backdrop-filter: blur(1.5px);
+  z-index: 5;
+  pointer-events: none;
+}
+.scene-spinner {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 22px;
+  height: 22px;
+  border: 2.5px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: scene-spinner-rotate 0.65s linear infinite;
+  z-index: 6;
+  pointer-events: none;
+}
+.scene.is-loading .scene-spinner {
+  display: block;
+}
+@keyframes scene-spinner-rotate {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+.scene.loading-thumb {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.02) 100%) !important;
+  background-size: 200% 200%;
+  animation: live-thumb-shimmer 1.4s ease infinite;
+}
+.scene.loading-thumb .scene-spinner {
+  display: block;
+  width: 18px;
+  height: 18px;
+  opacity: 0.6;
+}
+@keyframes live-thumb-shimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.live-note {
+  margin-top: 8px;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
 /* ---- range ---------------------------------------------------------------------- */
 input[type="range"] { width: 100%; accent-color: var(--accent); margin: 4px 0 0; }
 output { font-variant-numeric: tabular-nums; color: var(--text); font-size: 13px; font-weight: 600; }

@@ -53,6 +53,31 @@ html[data-lc-theme="anime"] body::before {
   background-repeat: no-repeat;
   will-change: transform;
 }
+/* live video wallpaper layer */
+html[data-lc-theme="anime"] .lc-anime-live-video,
+html.has-live-wallpaper .lc-anime-live-video,
+body.has-live-wallpaper .lc-anime-live-video {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  object-fit: cover !important;
+  z-index: -1 !important;
+  pointer-events: none !important;
+}
+html[data-lc-theme="anime"][data-lc-focus] .lc-anime-live-video,
+html[data-lc-focus] .lc-anime-live-video {
+  display: none !important;
+}
+html[data-lc-theme="anime"].has-live-wallpaper body::before,
+html.has-live-wallpaper body::before,
+body.has-live-wallpaper::before {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  background-image: none !important;
+  background-color: transparent !important;
+}
 /* everything between the canvas and the panels lets the layer through */
 html[data-lc-theme="anime"] body,
 html[data-lc-theme="anime"] #__next { background: transparent !important; }
