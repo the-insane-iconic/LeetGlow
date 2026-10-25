@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — LeetGlow</title>
+  <link rel="icon" type="image/png" href="assets/icon128.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="navbar">
+    <div class="container">
+      <a href="index.html" class="nav-brand">
+        <img src="assets/icon128.png" alt="LeetGlow Logo" class="nav-logo">
+        <span class="nav-title">LeetGlow</span>
+      </a>
+      <a href="index.html" class="btn btn-secondary" style="padding: 8px 16px; font-size: 13px;">← Back to Home</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="legal-container">
+      <a href="index.html" class="back-link">← Return to Home</a>
+      <div class="legal-header">
+        <h1 class="legal-title">Privacy Policy</h1>
+        <p class="legal-meta">Effective Date: October 25, 2026 · Last Updated: October 25, 2026</p>
+      </div>
+
+      <div class="legal-content">
+        <h2>1. Overview & Data Minimization</h2>
+        <p>LeetGlow ("we", "us", or "our") is committed to protecting your privacy. This Privacy Policy explains how information is collected, used, and protected when you install and use the LeetGlow Chrome Extension.</p>
+        <p><strong>We do not collect, read, store, or transmit your code solutions, LeetCode passwords, keystrokes, or general browsing history.</strong></p>
+
+        <h2>2. Locally Stored Preferences</h2>
+        <p>Your chosen visual theme, background opacity, blur settings, sound volume, and any custom uploaded wallpapers are saved locally on your device via Chrome's native <code>chrome.storage</code> API. This data stays on your machine and is never transmitted to our servers.</p>
+
+        <h2>3. Information Collected During Premium Purchases</h2>
+        <p>When you purchase LeetGlow Premium (₹29 lifetime access), transactions are processed through Razorpay. We collect:</p>
+        <ul>
+          <li><strong>Contact Details:</strong> Customer name, email address, and phone number to issue and deliver your license key.</li>
+          <li><strong>Transaction Record:</strong> Razorpay Order ID, Payment ID, amount paid (₹29.00), and transaction status.</li>
+          <li><strong>License Identifiers:</strong> A randomly generated anonymous device identifier (UUID) and your 16-character license key (e.g. <code>LG-XXXX-XXXX-XXXX</code>) to allow recovery across up to 3 authorized devices.</li>
+        </ul>
+        <p><em>We never see or store your credit/debit card numbers, UPI PINs, or banking credentials. All sensitive payments are processed directly within Razorpay's PCI-DSS compliant environment.</em></p>
+
+        <h2>4. Permissions & Justifications</h2>
+        <ul>
+          <li><code>storage</code>: Saves theme preferences, custom wallpapers, and local activation state.</li>
+          <li><code>sidePanel</code>: Renders the LeetGlow studio control panel alongside LeetCode problems.</li>
+          <li><code>offscreen</code>: Enables ambient lofi soundtrack and celebration audio playback under Chrome Manifest V3 regulations.</li>
+          <li><code>host_permissions</code> (<code>*.supabase.co</code>, <code>*.razorpay.com</code>): Authorizes secure Razorpay checkout modals and verifies license key entitlements.</li>
+        </ul>
+
+        <h2>5. Third-Party Service Providers</h2>
+        <p>We work exclusively with enterprise infrastructure providers:</p>
+        <ul>
+          <li><strong>Razorpay:</strong> Payment processing for Indian UPI, cards, and netbanking.</li>
+          <li><strong>Supabase:</strong> Cloud database and secure serverless verification functions.</li>
+          <li><strong>Resend:</strong> Transactional email service used solely to email you your purchased license key.</li>
+        </ul>
+
+        <h2>6. Contact Us</h2>
+        <p>If you have questions about this policy or wish to request data deletion, contact us at:</p>
+        <p><strong>Email:</strong> <a href="mailto:anupamyadav6477@gmail.com" style="color: #6366f1;">anupamyadav6477@gmail.com</a><br>
+        <strong>Developer:</strong> Anupam Yadav (LeetGlow)<br>
+        <strong>Location:</strong> Prayagraj, Uttar Pradesh, India - 211001</p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer" style="margin-top: 40px; padding: 30px 0;">
+    <div class="container" style="text-align: center; font-size: 13px; color: #64748b;">
+      © 2026 LeetGlow by Anupam Yadav. All rights reserved.
+    </div>
+  </footer>
+</body>
+</html>

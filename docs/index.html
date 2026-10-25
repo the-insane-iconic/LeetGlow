@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetGlow — Custom Themes, Sound Effects & Backgrounds for LeetCode</title>
+  <meta name="description" content="Transform your LeetCode problem solving with Studio Ghibli-inspired anime scenes, custom wallpapers, ambient lofi soundtracks, and victory celebration sound effects.">
+  <meta name="keywords" content="LeetCode themes, LeetCode dark mode, LeetCode wallpapers, anime coding themes, LeetGlow">
+  <link rel="icon" type="image/png" href="assets/icon128.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="container">
+      <a href="index.html" class="nav-brand">
+        <img src="assets/icon128.png" alt="LeetGlow Logo" class="nav-logo">
+        <span class="nav-title">LeetGlow</span>
+        <span class="nav-badge">v3.6.3</span>
+      </a>
+
+      <nav class="nav-links">
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#themes" class="nav-link">Themes</a>
+        <a href="#pricing" class="nav-link">Pricing</a>
+        <a href="#faq" class="nav-link">FAQs</a>
+        <a href="contact.html" class="nav-link">Contact</a>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="#pricing" class="btn btn-outline" style="padding: 9px 18px; font-size: 13px;">Pricing (₹29)</a>
+        <a href="https://chrome.google.com/webstore" target="_blank" class="btn btn-primary" style="padding: 9px 20px; font-size: 13px;">Add to Chrome</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-pill">
+        <span class="hero-pill-badge">NEW</span>
+        <span>Anime Studio & Custom Uploads are live in v3.6.3</span>
+      </div>
+
+      <h1 class="hero-title">
+        Make your LeetCode grind feel <span class="gradient-text">truly iconic.</span>
+      </h1>
+
+      <p class="hero-desc">
+        Say goodbye to dull problem pages. Immerse your coding sessions in Studio Ghibli vibes, cyber grids, custom uploaded backgrounds, and victory celebration sound effects.
+      </p>
+
+      <div class="hero-cta">
+        <a href="https://chrome.google.com/webstore" target="_blank" class="btn btn-primary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="21.17" y1="8" x2="12" y2="8"/><line x1="3.95" y1="6.06" x2="8.54" y2="14"/><line x1="10.88" y1="21.94" x2="15.46" y2="14"/></svg>
+          Add to Chrome — It's Free
+        </a>
+        <a href="#pricing" class="btn btn-secondary">
+          Get Lifetime Premium (₹29)
+        </a>
+      </div>
+
+      <div class="hero-guarantee">
+        <span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Guaranteed 7.0:1 WCAG Text Contrast
+        </span>
+        <span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Zero Lag &lt; 2MB Memory
+        </span>
+        <span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          100% Privacy Focused
+        </span>
+      </div>
+
+      <!-- Interactive Mockup Preview -->
+      <div class="preview-showcase" id="themes">
+        <div class="preview-switcher">
+          <button class="theme-pill-btn active" data-theme="sakura">🌸 Sakura Night</button>
+          <button class="theme-pill-btn" data-theme="blue-dragon">🐉 Blue Dragon</button>
+          <button class="theme-pill-btn" data-theme="harvest">🌾 Harvest Moon</button>
+          <button class="theme-pill-btn" data-theme="torii">⛩️ Torii Forest</button>
+        </div>
+
+        <div class="preview-window">
+          <div class="window-header">
+            <div class="window-dots">
+              <span class="window-dot dot-red"></span>
+              <span class="window-dot dot-yellow"></span>
+              <span class="window-dot dot-green"></span>
+            </div>
+            <div class="window-title">
+              <span>leetcode.com/problems/two-sum</span>
+            </div>
+            <div class="window-badge">
+              ⚡ Beats 98.4%
+            </div>
+          </div>
+
+          <div class="window-stage" id="previewStage">
+            <div class="window-glass-editor">
+              <pre><code><span class="code-comment">// 1. Two Sum (LeetCode) — Monaco Glass Theme</span>
+<span class="code-keyword">function</span> <span class="code-func">twoSum</span>(<span class="code-var">nums</span>: <span class="code-type">number[]</span>, <span class="code-var">target</span>: <span class="code-type">number</span>): <span class="code-type">number[]</span> {
+  <span class="code-keyword">const</span> map = <span class="code-keyword">new</span> <span class="code-func">Map</span>&lt;<span class="code-type">number</span>, <span class="code-type">number</span>&gt;();
+  <span class="code-keyword">for</span> (<span class="code-keyword">let</span> i = <span class="code-num">0</span>; i &lt; nums.<span class="code-var">length</span>; i++) {
+    <span class="code-keyword">const</span> diff = target - nums[i];
+    <span class="code-keyword">if</span> (map.<span class="code-func">has</span>(diff)) {
+      <span class="code-keyword">return</span> [map.<span class="code-func">get</span>(diff)!, i];
+    }
+    map.<span class="code-func">set</span>(nums[i], i);
+  }
+  <span class="code-keyword">return</span> [];
+};</code></pre>
+            </div>
+
+            <div class="submission-toast">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              <div>
+                <strong style="color: #10b981; font-size: 14px;">Accepted · Runtime 48ms</strong>
+                <p style="font-size: 12px; color: #a7f3d0; margin: 0;">Victory Fanfare played in Anime Studio</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Grid -->
+  <section class="features-section" id="features">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Crafted For Engineers</span>
+        <h2 class="section-title">Designed so you never want to close LeetCode.</h2>
+        <p class="section-subtitle">Every pixel and sound effect is tuned for deep flow state, crisp syntax readability, and dopamine hits when tests pass.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">🌸</div>
+          <h3 class="feature-title">Studio Ghibli & Anime Scenes</h3>
+          <p class="feature-desc">Over a dozen high-resolution, hand-picked anime wallpapers ranging from Torii forest shrines to starry cyberpunk rain, fully optimized in WebP.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">🛡️</div>
+          <h3 class="feature-title">Strict Contrast Guarantee</h3>
+          <p class="feature-desc">Our intelligent glassmorphism engine locks the minimum contrast floor to 7.0:1 (exceeding WCAG AAA standards). Code syntax is always effortlessly legible.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">🎵</div>
+          <h3 class="feature-title">Lo-Fi Soundscapes & SFX</h3>
+          <p class="feature-desc">Integrated lofi rain soundtracks, subtle keypress audio, and an unmistakable victory fanfare triggered automatically when your solution is accepted.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">🖼️</div>
+          <h3 class="feature-title">Custom Wallpaper Uploads</h3>
+          <p class="feature-desc">Premium users can upload any custom PNG, JPEG, or WebP wallpaper. Set your favorite gaming landscape, 4K setup, or artwork directly behind the editor.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">⚡</div>
+          <h3 class="feature-title">Ultra Lightweight Engine</h3>
+          <p class="feature-desc">Written in 100% pure vanilla JavaScript and CSS with zero heavy third-party framework overhead. Consumes under 2MB RAM and runs at 60 FPS.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">🔑</div>
+          <h3 class="feature-title">Multi-Device License Freedom</h3>
+          <p class="feature-desc">One simple ₹29 lifetime license key works across up to 3 of your computers (Mac, Linux, or Windows). Instant recovery by email anytime.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing Section (Razorpay Compliant) -->
+  <section class="pricing-section" id="pricing">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Simple & Transparent Pricing</span>
+        <h2 class="section-title">One single payment. Lifetime ownership.</h2>
+        <p class="section-subtitle">No monthly subscriptions, no recurring bills. Unlock every premium anime scene, soundtrack, and custom upload feature forever.</p>
+      </div>
+
+      <div class="pricing-grid">
+        <!-- Free Starter Card -->
+        <div class="pricing-card">
+          <h3 class="pricing-plan-name">Free Starter</h3>
+          <p class="pricing-plan-desc">Essential aesthetic themes for every LeetCoder.</p>
+          <div class="pricing-price-box">
+            <span class="price-currency">₹</span>
+            <span class="price-amount">0</span>
+            <span class="price-period">/ forever</span>
+          </div>
+
+          <ul class="pricing-features-list">
+            <li class="pricing-feature-item">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Vintage Paper Theme</span>
+            </li>
+            <li class="pricing-feature-item">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Sakura Night Theme</span>
+            </li>
+            <li class="pricing-feature-item">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Blueprint Grid Theme</span>
+            </li>
+            <li class="pricing-feature-item">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Deep Orchid Theme</span>
+            </li>
+            <li class="pricing-feature-item">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Standard Dark Mode & Contrast Floor</span>
+            </li>
+          </ul>
+
+          <a href="https://chrome.google.com/webstore" target="_blank" class="btn btn-secondary">Install Free Extension</a>
+          <p class="pricing-micro-note">Available on Chrome, Edge & Brave</p>
+        </div>
+
+        <!-- Premium Lifetime Card -->
+        <div class="pricing-card featured">
+          <span class="pricing-badge">LIFETIME ACCESS</span>
+          <h3 class="pricing-plan-name">LeetGlow Premium</h3>
+          <p class="pricing-plan-desc">The full visual & audio suite with custom uploads.</p>
+          <div class="pricing-price-box">
+            <span class="price-currency">₹</span>
+            <span class="price-amount">29</span>
+            <span class="price-period">/ one-time payment</span>
+          </div>
+
+          <ul class="pricing-features-list">
+            <li class="pricing-feature-item">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span><strong>All Curated Anime Studio Wallpapers</strong></span>
+            </li>
+            <li class="pricing-feature-item">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span><strong>Custom Image & Wallpaper Uploads</strong></span>
+            </li>
+            <li class="pricing-feature-item">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Cyber Crawler, RPG Quest & 8-Bit Retro Themes</span>
+            </li>
+            <li class="pricing-feature-item">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Lofi Audio Soundscapes & Victory Fanfare SFX</span>
+            </li>
+            <li class="pricing-feature-item">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span><strong>3 Device Activations</strong> per license key</span>
+            </li>
+            <li class="pricing-feature-item">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Instant Digital Delivery & 7-Day Refund Evaluation</span>
+            </li>
+          </ul>
+
+          <a href="https://chrome.google.com/webstore" target="_blank" class="btn btn-primary">
+            Unlock Premium in Extension (₹29)
+          </a>
+          <p class="pricing-micro-note">Secure checkout powered by Razorpay (UPI, Cards & Netbanking)</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="faq-section" id="faq">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Got Questions?</span>
+        <h2 class="section-title">Frequently Asked Questions</h2>
+      </div>
+
+      <div class="faq-list">
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>How do I purchase and activate LeetGlow Premium?</span>
+            <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            Simply install the free extension from the Chrome Web Store. Open the LeetGlow side panel on any LeetCode problem, click on Anime Studio or any locked wallpaper, and choose "Get Premium Access". You will complete a secure ₹29 Razorpay payment (UPI/Card) and your features will unlock instantly.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>Can I use my license key on multiple laptops?</span>
+            <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            Yes! Every LeetGlow Premium license key is valid for up to 3 distinct devices (e.g., your personal MacBook, work laptop, and desktop computer). Enter your 16-character license key in the side panel to activate it immediately.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>What is your refund policy?</span>
+            <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            Because LeetGlow delivers digital software access immediately upon purchase, sales are generally final. However, if you experience any technical bugs or verification issues that our team cannot resolve, we offer a 7-day refund evaluation window. Just email anupamyadav6477@gmail.com with your payment reference.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>Does LeetGlow track my code or LeetCode passwords?</span>
+            <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            Never. LeetGlow operates with strict data minimization. We do not read, transmit, or record your code submissions, passwords, or personal browsing history. Your preferences and custom wallpapers stay strictly inside your local browser storage.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer (Razorpay & Legal Compliance) -->
+  <footer class="footer">
+    <div class="container">
+      <!-- Merchant Information Box for Razorpay Inspection -->
+      <div class="footer-merchant-box">
+        <strong style="color: #f8fafc;">Merchant & Business Information:</strong>
+        <span><strong>Legal Operator:</strong> Anupam Yadav (LeetGlow)</span>
+        <span><strong>Support Email:</strong> <a href="mailto:anupamyadav6477@gmail.com" style="color: #a5b4fc;">anupamyadav6477@gmail.com</a></span>
+        <span><strong>Operating Location:</strong> Prayagraj, Uttar Pradesh, India - 211001</span>
+        <span><strong>Digital Fulfillment:</strong> Instant delivery within the browser extension upon successful transaction.</span>
+      </div>
+
+      <div class="footer-top">
+        <div class="footer-brand">
+          <div class="nav-brand">
+            <img src="assets/icon128.png" alt="LeetGlow Logo" class="nav-logo">
+            <span class="nav-title">LeetGlow</span>
+          </div>
+          <p>The ultimate visual and audio customization companion for developers grinding LeetCode.</p>
+        </div>
+
+        <div>
+          <h4 class="footer-heading">Product</h4>
+          <ul class="footer-links">
+            <li><a href="#features" class="footer-link">Features</a></li>
+            <li><a href="#themes" class="footer-link">Theme Showcase</a></li>
+            <li><a href="#pricing" class="footer-link">Pricing (₹29)</a></li>
+            <li><a href="https://chrome.google.com/webstore" class="footer-link" target="_blank">Chrome Web Store</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-heading">Legal & Policies</h4>
+          <ul class="footer-links">
+            <li><a href="terms.html" class="footer-link">Terms and Conditions</a></li>
+            <li><a href="privacy.html" class="footer-link">Privacy Policy</a></li>
+            <li><a href="refunds.html" class="footer-link">Refund & Cancellation</a></li>
+            <li><a href="refunds.html#shipping" class="footer-link">Shipping & Delivery</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-heading">Support</h4>
+          <ul class="footer-links">
+            <li><a href="contact.html" class="footer-link">Contact Us</a></li>
+            <li><a href="mailto:anupamyadav6477@gmail.com" class="footer-link">Get Help</a></li>
+            <li><a href="https://github.com/the-insane-iconic/LeetGlow" class="footer-link" target="_blank">GitHub Repository</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>© 2026 LeetGlow. Crafted by Anupam Yadav. All rights reserved.</span>
+        <span>LeetGlow is not affiliated with, endorsed by, or sponsored by LeetCode Inc.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
