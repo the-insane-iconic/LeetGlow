@@ -878,7 +878,6 @@
         if (getPremiumBtn) {
           getPremiumBtn.click();
         } else {
-          if (credentialsForm) credentialsForm.reset();
           if (credentialsError) credentialsError.hidden = true;
           if (paymentError) paymentError.hidden = true;
           if (payBtn) {
@@ -916,7 +915,6 @@
     // 2. Open Purchase Modal (Starts at Step 1: Credentials)
     if (getPremiumBtn) {
       getPremiumBtn.addEventListener('click', () => {
-        if (credentialsForm) credentialsForm.reset();
         if (credentialsError) credentialsError.hidden = true;
         if (paymentError) paymentError.hidden = true;
         if (payBtn) {
@@ -933,6 +931,40 @@
       closePurchaseModal.addEventListener('click', () => purchaseModal.close());
     }
 
+    // Phone Sanitizer: strictly extracts digits, handles +91 / leading 0, and restricts to max 10 digits
+    function sanitizePhoneNumber(val) {
+      if (!val) return '';
+      let digits = String(val).replace(/\D/g, '');
+      if (digits.length === 12 && digits.startsWith('91')) {
+        digits = digits.slice(2);
+      } else if (digits.length === 11 && digits.startsWith('0')) {
+        digits = digits.slice(1);
+      }
+      return digits.slice(0, 10);
+    }
+
+    // Real-time phone sanitizer for typing, paste, and browser autofill events
+    if (custPhone) {
+      const onPhoneChange = () => {
+        const cleaned = sanitizePhoneNumber(custPhone.value);
+        if (custPhone.value !== cleaned) {
+          custPhone.value = cleaned;
+        }
+      };
+      custPhone.addEventListener('input', onPhoneChange);
+      custPhone.addEventListener('change', onPhoneChange);
+      custPhone.addEventListener('paste', () => setTimeout(onPhoneChange, 10));
+    }
+
+    // Clear validation error when user begins editing any field
+    [custName, custEmail, custPhone].forEach((inp) => {
+      if (inp) {
+        inp.addEventListener('input', () => {
+          if (credentialsError) credentialsError.hidden = true;
+        });
+      }
+    });
+
     // Step 1: Validate Credentials & Advance to Step 2
     if (credentialsForm) {
       credentialsForm.addEventListener('submit', (e) => {
@@ -941,7 +973,11 @@
 
         const name = custName ? custName.value.trim() : '';
         const email = custEmail ? custEmail.value.trim() : '';
-        const phone = custPhone ? custPhone.value.trim() : '';
+        const phone = custPhone ? sanitizePhoneNumber(custPhone.value) : '';
+
+        if (custPhone && custPhone.value !== phone) {
+          custPhone.value = phone;
+        }
 
         if (!name || !email || !phone) {
           if (credentialsError) {
@@ -951,11 +987,21 @@
           return;
         }
 
-        if (phone.length < 10) {
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
           if (credentialsError) {
-            credentialsError.textContent = 'Please enter a valid 10-digit phone number.';
+            credentialsError.textContent = 'Please enter a valid email address.';
             credentialsError.hidden = false;
           }
+          if (custEmail) custEmail.focus();
+          return;
+        }
+
+        if (phone.length !== 10 || !/^\d{10}$/.test(phone)) {
+          if (credentialsError) {
+            credentialsError.textContent = 'Please enter a valid 10-digit mobile number.';
+            credentialsError.hidden = false;
+          }
+          if (custPhone) custPhone.focus();
           return;
         }
 
@@ -987,9 +1033,9 @@
 
         const name = custName ? custName.value.trim() : '';
         const email = custEmail ? custEmail.value.trim() : '';
-        const phone = custPhone ? custPhone.value.trim() : '';
+        const phone = custPhone ? sanitizePhoneNumber(custPhone.value) : '';
 
-        if (!name || !email || !phone) {
+        if (!name || !email || !phone || phone.length !== 10) {
           setCheckoutStep(1);
           return;
         }
@@ -1038,6 +1084,11 @@
               prefill: { name, email, contact: phone },
               theme: { color: '#0f172a' },
               handler: async function (response) {
+                if (purchaseModal && !purchaseModal.open) {
+                  purchaseModal.showModal();
+                }
+                setCheckoutStep(2);
+                payBtn.disabled = true;
                 payBtn.innerHTML = '<span>Verifying payment with server…</span>';
                 const result = await Premium.recordPaymentAndIssueKey({
                   name, email, phone,
@@ -1049,6 +1100,11 @@
               },
               modal: {
                 ondismiss: function () {
+                  // User dismissed Razorpay: bring back the checkout modal at Step 2
+                  if (purchaseModal && !purchaseModal.open) {
+                    purchaseModal.showModal();
+                  }
+                  setCheckoutStep(2);
                   payBtn.disabled = false;
                   payBtn.innerHTML = '<span>Pay ₹29 via Razorpay</span>';
                 }
@@ -1061,6 +1117,10 @@
 
             const rzp = new window.Razorpay(rzpOptions);
             rzp.on('payment.failed', function (resp) {
+              if (purchaseModal && !purchaseModal.open) {
+                purchaseModal.showModal();
+              }
+              setCheckoutStep(2);
               if (paymentError) {
                 paymentError.textContent = resp.error ? resp.error.description : 'Payment failed. Please try again.';
                 paymentError.hidden = false;
@@ -1068,8 +1128,20 @@
               payBtn.disabled = false;
               payBtn.innerHTML = '<span>Pay ₹29 via Razorpay</span>';
             });
+
+            // CRITICAL FIX: Close purchaseModal so it leaves the browser's Top Layer!
+            // Razorpay iframe is appended to document.body. When an element is in the Top Layer via
+            // showModal(), the browser strictly renders all document.body elements behind it.
+            // Closing purchaseModal ensures Razorpay appears in front, fully interactive.
+            if (purchaseModal && purchaseModal.open) {
+              purchaseModal.close();
+            }
             rzp.open();
           } catch (err) {
+            if (purchaseModal && !purchaseModal.open) {
+              purchaseModal.showModal();
+            }
+            setCheckoutStep(2);
             if (paymentError) {
               paymentError.textContent = err.message || 'Could not open Razorpay checkout.';
               paymentError.hidden = false;
