@@ -1002,21 +1002,48 @@
 
         if (window.Razorpay && isLiveKey) {
           try {
-            const rzp = new window.Razorpay({
+            // Optional: Pre-create order via Edge Function if configured
+            let serverOrderId = null;
+            try {
+              const ordRes = await fetch(`${config.SUPABASE_URL}/functions/v1/create-order`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'apikey': config.SUPABASE_ANON_KEY,
+                  'Authorization': `Bearer ${config.SUPABASE_ANON_KEY}`
+                },
+                body: JSON.stringify({ name, email, phone })
+              });
+              if (ordRes.ok) {
+                const ordData = await ordRes.json();
+                if (ordData && ordData.order_id) {
+                  serverOrderId = ordData.order_id;
+                }
+              }
+            } catch (e) {
+              // Proceed with standard direct checkout
+            }
+
+            const iconUrl = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
+              ? chrome.runtime.getURL('icons/icon128.png')
+              : 'https://raw.githubusercontent.com/the-insane-iconic/LeetGlow/main/icons/icon128.png';
+
+            const rzpOptions = {
               key: config.RAZORPAY_KEY_ID,
               amount: config.PRODUCT_PRICE_PAISE,
               currency: config.CURRENCY || 'INR',
               name: config.PRODUCT_NAME || 'LeetGlow Premium',
               description: 'Lifetime Access to All Themes & Anime Scenes',
-              image: '../icons/icon128.png',
+              image: iconUrl,
               prefill: { name, email, contact: phone },
               theme: { color: '#0f172a' },
               handler: async function (response) {
                 payBtn.innerHTML = '<span>Verifying payment with server…</span>';
                 const result = await Premium.recordPaymentAndIssueKey({
                   name, email, phone,
-                  orderId: response.razorpay_order_id || ('ord_' + Date.now()),
-                  paymentId: response.razorpay_payment_id
+                  orderId: response.razorpay_order_id || serverOrderId || ('ord_' + Date.now()),
+                  paymentId: response.razorpay_payment_id,
+                  signature: response.razorpay_signature || ''
                 });
                 onPaymentSuccess(result, email);
               },
@@ -1026,7 +1053,13 @@
                   payBtn.innerHTML = '<span>Pay ₹29 via Razorpay</span>';
                 }
               }
-            });
+            };
+
+            if (serverOrderId) {
+              rzpOptions.order_id = serverOrderId;
+            }
+
+            const rzp = new window.Razorpay(rzpOptions);
             rzp.on('payment.failed', function (resp) {
               if (paymentError) {
                 paymentError.textContent = resp.error ? resp.error.description : 'Payment failed. Please try again.';

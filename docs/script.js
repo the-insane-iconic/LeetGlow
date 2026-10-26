@@ -9,10 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const stage = document.getElementById('previewStage');
 
   const THEME_WALLPAPERS = {
-    'sakura': 'assets/blossom-night.webp',
     'blue-dragon': 'assets/blue-dragon.webp',
     'harvest': 'assets/harvest-moon.webp',
-    'torii': 'assets/torii-forest.webp'
+    'golden-hour': 'assets/golden-hour.webp',
+    'moonlit-shrine': 'assets/moonlit-shrine.webp'
   };
 
   themePills.forEach(pill => {
@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Set default initial background
   if (stage) {
-    stage.style.backgroundImage = `url('assets/blossom-night.webp')`;
+    stage.style.backgroundImage = `url('assets/blue-dragon.webp')`;
   }
 
   // 2. FAQ Accordion

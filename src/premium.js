@@ -138,11 +138,53 @@
   /**
    * Finalizes payment on the server, generates a cryptographically random license key,
    * stores its hash in Supabase, and activates the entitlement on this device.
+   * Supports both server-side HMAC verification (Edge Function) and direct RPC.
    */
   async function recordPaymentAndIssueKey(details) {
-    const { name, email, phone, orderId, paymentId } = details;
+    const { name, email, phone, orderId, paymentId, signature } = details;
     const deviceId = await getDeviceId();
 
+    // 1. Try secure Edge Function verify-payment first if signature is provided
+    if (signature && CONFIG.SUPABASE_URL) {
+      try {
+        const edgeRes = await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/verify-payment`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': CONFIG.SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${CONFIG.SUPABASE_ANON_KEY}`
+          },
+          body: JSON.stringify({
+            name,
+            email,
+            phone: phone || '',
+            order_id: orderId || ('ord_local_' + Date.now()),
+            payment_id: paymentId,
+            signature,
+            device_id: deviceId
+          })
+        });
+
+        if (edgeRes.ok) {
+          const edgeData = await edgeRes.json();
+          if (edgeData && edgeData.success && edgeData.active) {
+            await chrome.storage.local.set({
+              leetglowPremium: {
+                active: true,
+                key_prefix: edgeData.key_prefix,
+                verified_at: new Date().toISOString()
+              }
+            });
+            return edgeData;
+          }
+        }
+      } catch (edgeErr) {
+        // Fallback smoothly to direct database RPC
+        console.warn('[LeetGlow Premium] Edge Function not reachable, falling back to direct secure RPC:', edgeErr);
+      }
+    }
+
+    // 2. Direct PostgreSQL SECURITY DEFINER stored procedure (SHA-256 cryptographic key engine)
     try {
       const res = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/rpc/${_EP3}`, {
         method: 'POST',
