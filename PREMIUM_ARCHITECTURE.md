@@ -14,7 +14,7 @@ sequenceDiagram
     participant Razorpay as Razorpay Checkout
     participant Edge as Supabase Edge Functions
     participant DB as Supabase PostgreSQL
-    participant Email as Transactional Email (Resend)
+    participant Email as Transactional Email (EmailJS)
 
     Note over User,DB: 1. Status Check (On Load)
     Ext->>DB: RPC check_entitlement(device_id)
@@ -116,7 +116,7 @@ Located in `supabase/functions/`:
    - Computes HMAC-SHA256 signature over `${order_id}|${payment_id}` using `RAZORPAY_KEY_SECRET`.
    - Validates against `razorpay_signature`.
    - Calls Supabase RPC `process_successful_payment`.
-   - Sends the plaintext license key to the customer's email via Resend API.
+   - Sends the plaintext license key to the customer's email via EmailJS REST API (`service_zo3rrys`).
 
 3. **`razorpay-webhook`**:
    - Validates `x-razorpay-signature` against `RAZORPAY_WEBHOOK_SECRET`.

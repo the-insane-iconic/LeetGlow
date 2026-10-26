@@ -2,6 +2,59 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
 
+// Helper: Send Transactional Email via EmailJS
+async function sendKeyEmail(email: string, name: string, key: string, orderId?: string) {
+  const serviceId = Deno.env.get("EMAILJS_SERVICE_ID") || "service_zo3rrys";
+  const templateId = Deno.env.get("EMAILJS_TEMPLATE_ID") || "template_s1jgrvc";
+  const publicKey = Deno.env.get("EMAILJS_PUBLIC_KEY") || "lr-VJt44cVESpln8f";
+  const privateKey = Deno.env.get("EMAILJS_PRIVATE_KEY") || "loLjzUSmwBA34U8ZGZF1s";
+
+  const purchaseDate = new Date().toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+
+  const payload: Record<string, any> = {
+    service_id: serviceId,
+    template_id: templateId,
+    user_id: publicKey,
+    accessToken: privateKey,
+    template_params: {
+      email: email,
+      to_email: email,
+      name: name || "there",
+      to_name: name || "there",
+      key: key,
+      license_key: key,
+      activation_key: key,
+      order_id: orderId || `ord_${Date.now()}`,
+      purchase_date: purchaseDate,
+      support_email: "anupamyadav6477@gmail.com",
+    },
+  };
+
+  try {
+    const res = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Origin": "https://dashboard.emailjs.com",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error("[EmailJS Webhook Error]", res.status, errText);
+    } else {
+      console.log(`[EmailJS Webhook] License key emailed to ${email}`);
+    }
+  } catch (err) {
+    console.error("[EmailJS Webhook Exception]", err);
+  }
+}
+
 serve(async (req) => {
   if (req.method !== "POST") {
     return new Response("Method not allowed", { status: 405 });
@@ -64,7 +117,7 @@ serve(async (req) => {
       const contact = paymentEntity.contact;
       const name = paymentEntity.notes?.customer_name || "Valued Customer";
 
-      await supabase.rpc("process_successful_payment", {
+      const { data } = await supabase.rpc("process_successful_payment", {
         p_name: name,
         p_email: email,
         p_phone: contact || "",
@@ -72,6 +125,10 @@ serve(async (req) => {
         p_payment_id: paymentId,
         p_device_id: "",
       });
+
+      if (data && data.key && email) {
+        await sendKeyEmail(email, name, data.key, orderId);
+      }
     }
 
     // 3. Record Webhook Event for idempotency

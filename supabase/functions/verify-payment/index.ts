@@ -28,45 +28,56 @@ async function verifyRazorpaySignature(orderId: string, paymentId: string, signa
   return computedSignature === signature;
 }
 
-// Helper: Send Transactional Email via Resend
-async function sendKeyEmail(email: string, name: string, key: string) {
-  const resendApiKey = Deno.env.get("RESEND_API_KEY");
-  if (!resendApiKey) {
-    console.log("[Email] RESEND_API_KEY not configured. Key for", email, "is:", key);
-    return;
-  }
+// Helper: Send Transactional Email via EmailJS
+async function sendKeyEmail(email: string, name: string, key: string, orderId?: string) {
+  const serviceId = Deno.env.get("EMAILJS_SERVICE_ID") || "service_zo3rrys";
+  const templateId = Deno.env.get("EMAILJS_TEMPLATE_ID") || "template_s1jgrvc";
+  const publicKey = Deno.env.get("EMAILJS_PUBLIC_KEY") || "lr-VJt44cVESpln8f";
+  const privateKey = Deno.env.get("EMAILJS_PRIVATE_KEY") || "loLjzUSmwBA34U8ZGZF1s";
+
+  const purchaseDate = new Date().toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+
+  const payload: Record<string, any> = {
+    service_id: serviceId,
+    template_id: templateId,
+    user_id: publicKey,
+    accessToken: privateKey,
+    template_params: {
+      email: email,
+      to_email: email,
+      name: name || "there",
+      to_name: name || "there",
+      key: key,
+      license_key: key,
+      activation_key: key,
+      order_id: orderId || `ord_${Date.now()}`,
+      purchase_date: purchaseDate,
+      support_email: "anupamyadav6477@gmail.com",
+    },
+  };
 
   try {
-    await fetch("https://api.resend.com/emails", {
+    const res = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${resendApiKey}`,
         "Content-Type": "application/json",
+        "Origin": "https://dashboard.emailjs.com",
       },
-      body: JSON.stringify({
-        from: "LeetGlow <premium@leetglow.com>",
-        to: email,
-        subject: "Your LeetGlow Premium License Key 🌟",
-        html: `
-          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 520px; margin: 0 auto; padding: 32px 24px; background: #0e0f17; color: #ecebf2; border-radius: 16px;">
-            <h2 style="color: #f98dc1; margin-top: 0;">Welcome to LeetGlow Premium!</h2>
-            <p>Hi ${name || "there"},</p>
-            <p>Thank you for purchasing LeetGlow Premium. Your payment has been verified and your lifetime access is confirmed.</p>
-            <div style="background: #181724; border: 1px dashed #a855f7; border-radius: 10px; padding: 16px 20px; text-align: center; margin: 24px 0;">
-              <span style="display: block; font-size: 12px; text-transform: uppercase; color: #a3a0b3; letter-spacing: 0.1em; margin-bottom: 6px;">Your 16-Character License Key</span>
-              <code style="font-size: 22px; font-weight: bold; color: #ffffff; letter-spacing: 2px;">${key}</code>
-            </div>
-            <p style="font-size: 13px; color: #a3a0b3; line-height: 1.6;">
-              You can activate this key on up to <strong>3 devices</strong>. Simply open Anime Studio in LeetGlow, click <strong>Activate Key</strong>, and paste your code.
-            </p>
-            <hr style="border: 0; border-top: 1px solid #2a2735; margin: 24px 0;" />
-            <p style="font-size: 12px; color: #6f6b80;">LeetGlow · Themes, Sound Effects & Anime Backgrounds for LeetCode</p>
-          </div>
-        `,
-      }),
+      body: JSON.stringify(payload),
     });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error("[EmailJS Error] Failed to send email:", res.status, errText);
+    } else {
+      console.log(`[EmailJS] License key successfully emailed to ${email}`);
+    }
   } catch (err) {
-    console.error("[Email Error]", err);
+    console.error("[EmailJS Exception]", err);
   }
 }
 
@@ -104,9 +115,9 @@ serve(async (req) => {
       throw error;
     }
 
-    // Send the license key via transactional email
+    // Send the license key via EmailJS transactional email
     if (data && data.key) {
-      await sendKeyEmail(email, name, data.key);
+      await sendKeyEmail(email, name, data.key, order_id);
     }
 
     return new Response(
