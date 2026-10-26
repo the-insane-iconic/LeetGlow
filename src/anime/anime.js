@@ -82,9 +82,16 @@ html[data-lc-focus] .lc-anime-live-video {
 }
 `;
 
+  let currentTheme = null, currentUrls = null;
+  let currentCt = 30, currentEt = 25;
+
   function publish(theme, urls, customAlpha) {
-    globalThis.__lctsAnimeScene = { wall: urls.wall };     // read by src/share.js
-    let css = globalThis.LCTSAnimeCss.build(theme, urls, customAlpha) + LIVE_OVERRIDE_CSS;
+    currentTheme = theme;
+    if (urls) currentUrls = urls;
+    lastAlpha = customAlpha;
+    const u = currentUrls || urls;
+    globalThis.__lctsAnimeScene = { wall: u ? u.wall : '' };     // read by src/share.js
+    let css = globalThis.LCTSAnimeCss.build(theme, u, customAlpha) + LIVE_OVERRIDE_CSS;
     if (css !== published) { styleEl().textContent = css; published = css; }
     globalThis.__lctsAnimeInk = theme.ink;
     const modeChanged = globalThis.__lctsAnimeMode !== theme.mode;
@@ -163,8 +170,8 @@ html[data-lc-focus] .lc-anime-live-video {
       : (res.lcAnime && typeof res.lcAnime.containerTransparency === 'number' ? res.lcAnime.containerTransparency : null);
     const et = typeof res.lcEditorTrans === 'number' ? res.lcEditorTrans
       : (res.lcAnime && typeof res.lcAnime.editorTransparency === 'number' ? res.lcAnime.editorTransparency : null);
-    if (ct !== null) a.panel = Math.max(0, Math.min(1, 1 - ct / 100));
-    if (et !== null) a.editor = Math.max(0, Math.min(1, 1 - et / 100));
+    if (ct !== null) { currentCt = ct; a.panel = Math.max(0, Math.min(1, 1 - ct / 100)); }
+    if (et !== null) { currentEt = et; a.editor = Math.max(0, Math.min(1, 1 - et / 100)); }
     return Object.keys(a).length ? a : null;
   }
 
@@ -376,7 +383,26 @@ html[data-lc-focus] .lc-anime-live-video {
   load();
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area !== 'local') return;
-    if (changes[THEME_KEY] || changes.lcAnime || changes.lcAnimeArt || changes.lcContainerTrans || changes.lcEditorTrans) {
+    if (changes[THEME_KEY] || changes.lcAnime || changes.lcAnimeArt) {
+      load();
+      return;
+    }
+    if (changes.lcContainerTrans || changes.lcEditorTrans) {
+      if (changes.lcContainerTrans && typeof changes.lcContainerTrans.newValue === 'number') {
+        currentCt = changes.lcContainerTrans.newValue;
+      }
+      if (changes.lcEditorTrans && typeof changes.lcEditorTrans.newValue === 'number') {
+        currentEt = changes.lcEditorTrans.newValue;
+      }
+      const alpha = {
+        panel: Math.max(0, Math.min(1, 1 - currentCt / 100)),
+        editor: Math.max(0, Math.min(1, 1 - currentEt / 100))
+      };
+      lastAlpha = alpha;
+      if (currentTheme && currentUrls && root.getAttribute('data-lc-theme') === 'anime') {
+        publish(currentTheme, currentUrls, alpha);
+        return;
+      }
       load();
       return;
     }

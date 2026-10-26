@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     'blue-dragon': 'assets/blue-dragon.webp',
     'harvest': 'assets/harvest-moon.webp',
     'golden-hour': 'assets/golden-hour.webp',
-    'moonlit-shrine': 'assets/moonlit-shrine.webp'
+    'moon-field': 'assets/moon-field.webp'
   };
 
   themePills.forEach(pill => {

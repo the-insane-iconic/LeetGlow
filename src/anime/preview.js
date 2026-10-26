@@ -40,10 +40,10 @@
   }
 
   let inkStyle = null, roleStyle = null;
-  function apply(theme, urls) {
+  function apply(theme, urls, customAlpha) {
     if (!roleStyle) { roleStyle = document.createElement('style'); document.head.appendChild(roleStyle); }
     if (!inkStyle) { inkStyle = document.createElement('style'); document.head.appendChild(inkStyle); }
-    roleStyle.textContent = globalThis.LCTSAnimeCss.build(theme, urls);
+    roleStyle.textContent = globalThis.LCTSAnimeCss.build(theme, urls, customAlpha);
     inkStyle.textContent = Object.keys(theme.ink).filter((k) => k !== 'a')
       .map((k) => `.monaco-editor .tok-${k}{color:${theme.ink[k]}}`).join('\n')
       + '\n.monaco-editor .tok-comment{font-style:italic}';

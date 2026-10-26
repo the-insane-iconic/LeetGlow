@@ -16,7 +16,14 @@
   const MAX_INPUT = 30 * 1024 * 1024;
 
   const settings = { scene: DEF, arcs: true, arcScenes: {}, glass: 'auto', visibility: 0.85,
+                     containerTransparency: 30,
                      titleCard: true, moments: true, japanese: true, sound: true, volume: 1 };
+  const getCustomAlpha = () => {
+    const ct = typeof settings.containerTransparency === 'number' ? settings.containerTransparency : 30;
+    return {
+      panel: Math.max(0, Math.min(1, 1 - ct / 100))
+    };
+  };
   let slot = 'medium';          // the difficulty slot being edited while arcs are on (opens on your last problem's)
   let justSet = null;           // the scene just given to `slot`, for the confirmation line
   const preparedCache = {};     // scene id -> samples + blobs
@@ -65,7 +72,7 @@
       previewUrls = { wall: URL.createObjectURL(prepared.wallBlob), blur: URL.createObjectURL(prepared.blurBlob) };
       currentPreviewScene = sceneId;
     }
-    frame.contentWindow.LCTSPreview.apply(theme, previewUrls);
+    frame.contentWindow.LCTSPreview.apply(theme, previewUrls, getCustomAlpha());
     if (settings.sceneMode === 'live' && settings.liveWallpaper && settings.liveWallpaper.videoUrl) {
       frame.contentWindow.LCTSPreview.setLiveVideo(settings.liveWallpaper.videoUrl);
     } else {
@@ -136,36 +143,160 @@
   function save(immediate) {
     clearTimeout(saveTimer);
     const write = () => chrome.storage.local.set({
-      lcAnime: Object.assign({}, settings, { themes, theme, themeFor: viewId() })
+      lcAnime: Object.assign({}, settings, { themes, theme, themeFor: viewId() }),
+      lcContainerTrans: settings.containerTransparency
     });
     if (immediate) write(); else saveTimer = setTimeout(write, 220);
   }
 
   /* ---- scene tiles ---------------------------------------------------------------- */
-  function renderScenes() {
+  /* ---- Hero Card, Upload Card & Difficulty Mapping ----------------------------- */
+  let lastRenderedState = null;
+
+  function updateHeroCard() {
+    const heroCard = $('heroSceneCard');
+    const heroTitle = $('heroSceneTitle');
+    const heroSlotTag = $('heroSlotTag');
+    const heroDescTag = $('heroDescTag');
+    if (!heroCard || !heroTitle) return;
+
+    const currentViewId = viewId();
+    const slotItem = SLOTS.find(([d]) => d === slot) || ['medium', 'Medium'];
+    const slotLabel = slotItem[1];
+
+    if (settings.sceneMode === 'live' && settings.liveWallpaper) {
+      heroTitle.textContent = settings.liveWallpaper.name || 'Dynamic Wallpaper';
+      if (heroSlotTag) heroSlotTag.textContent = 'Dynamic';
+      if (heroDescTag) heroDescTag.textContent = settings.liveWallpaper.desc ? settings.liveWallpaper.desc.split('·')[0].trim() : 'Looping Video';
+      const thumb = settings.liveWallpaper.thumbUrl || settings.liveWallpaper.imageUrl || '';
+      if (thumb) heroCard.style.backgroundImage = `url("${thumb}")`;
+      return;
+    }
+
+    if (currentViewId === 'custom') {
+      heroTitle.textContent = hasArt ? 'Your Picture' : 'Custom Image';
+      if (heroSlotTag) heroSlotTag.textContent = slotLabel;
+      if (heroDescTag) heroDescTag.textContent = 'Custom Wallpaper';
+      if (customThumb) heroCard.style.backgroundImage = `url("${customThumb}")`;
+      return;
+    }
+
+    const s = SCENES[currentViewId] || SCENES[DEF];
+    if (s) {
+      heroTitle.textContent = s.name;
+      if (heroSlotTag) heroSlotTag.textContent = slotLabel;
+      if (heroDescTag) {
+        const parts = s.desc ? s.desc.split(',') : [];
+        heroDescTag.textContent = parts.length > 0 ? parts[0].trim() : 'Anime Scene';
+      }
+      heroCard.style.backgroundImage = `url("${chrome.runtime.getURL(s.thumb || s.wall)}")`;
+    }
+  }
+
+  function updateUploadButton() {
+    const btn = $('uploadCustomBtn');
+    if (!btn) return;
+    const isCustomActive = settings.sceneMode !== 'live' && settings.scene === 'custom';
+    btn.classList.toggle('is-active', isCustomActive);
+
+    const titleEl = $('uploadCustomTitle');
+    const subEl = $('uploadCustomSub');
+    const removeBtn = $('customRemoveBtn');
+    const proBadge = $('uploadProBadge');
+
+    if (proBadge) proBadge.hidden = isPremium;
+
+    if (hasArt) {
+      if (titleEl) titleEl.textContent = 'Your picture';
+      if (subEl) subEl.textContent = isCustomActive ? 'Currently active' : 'Click to use your picture';
+      if (removeBtn) removeBtn.hidden = false;
+      if (customThumb) {
+        btn.style.backgroundImage = `linear-gradient(to right, rgba(255,255,255,0.92) 30%, rgba(255,255,255,0.65) 100%), url("${customThumb}")`;
+        btn.style.backgroundSize = 'cover';
+        btn.style.backgroundPosition = 'center';
+      }
+    } else {
+      if (titleEl) titleEl.textContent = 'Upload custom image';
+      if (subEl) subEl.textContent = 'JPG, PNG, WebP · up to 30 MB';
+      if (removeBtn) removeBtn.hidden = true;
+      btn.style.backgroundImage = '';
+    }
+  }
+
+  function renderDifficultyTabs() {
+    const tabs = document.querySelectorAll('.diff-tab');
+    const indicator = $('diffTabIndicator');
+    let activeTabEl = null;
+
+    tabs.forEach(tab => {
+      const isCurrent = tab.dataset.slot === slot;
+      tab.classList.toggle('active', isCurrent);
+      tab.setAttribute('aria-selected', String(isCurrent));
+      if (isCurrent) activeTabEl = tab;
+    });
+
+    if (indicator && activeTabEl) {
+      indicator.style.left = `${activeTabEl.offsetLeft}px`;
+      indicator.style.width = `${activeTabEl.offsetWidth}px`;
+    }
+  }
+
+  function updateSceneSelection() {
     const box = $('scenes');
+    if (!box) return;
+    const isLive = settings.sceneMode === 'live';
+    const currentId = viewId();
+    const isCustom = !isLive && settings.scene === 'custom';
+    box.querySelectorAll('.scene').forEach((btn) => {
+      if (isLive) {
+        btn.setAttribute('aria-checked', 'false');
+      } else if (btn.dataset.sceneId) {
+        btn.setAttribute('aria-checked', String(!isCustom && btn.dataset.sceneId === currentId));
+      }
+    });
+    updateHeroCard();
+    updateUploadButton();
+    renderCredit();
+  }
+
+  function renderScenes(force = false) {
+    const box = $('scenes');
+    if (!box) return;
+
+    const stateMatches = lastRenderedState &&
+      lastRenderedState.isPremium === isPremium;
+
+    if (!force && box.children.length > 0 && stateMatches) {
+      updateSceneSelection();
+      return;
+    }
+
+    const prevScrollTop = box.scrollTop;
     box.innerHTML = '';
-    /* your own picture comes first, so it is never scrolled out of sight */
     const presets = document.createDocumentFragment();
     Object.entries(SCENES).forEach(([id, s]) => {
       const b = document.createElement('button');
       b.type = 'button';
       b.className = 'scene';
+      b.dataset.sceneId = id;
       b.setAttribute('role', 'radio');
-      b.setAttribute('aria-checked', String(viewId() === id));
+      const isSelected = settings.sceneMode !== 'live' && settings.scene !== 'custom' && viewId() === id;
+      b.setAttribute('aria-checked', String(isSelected));
       b.style.backgroundImage = `url("${chrome.runtime.getURL(s.thumb || s.wall)}")`;
 
-      // When basic free tier, all scenes other than golden-hour are PRO
-      const isLocked = !isPremium && id !== 'golden-hour';
+      // Basic free tier scenes: Golden Hour, Moon Field, Ultimate Goku
+      const BASIC_SCENES = new Set(['golden-hour', 'moon-field', 'harvest-moon']);
+      const isLocked = !isPremium && !BASIC_SCENES.has(id);
       if (isLocked) {
         b.classList.add('is-locked');
       }
 
       const proBadgeHTML = isLocked
-        ? `<span class="scene-pro-badge" aria-label="PRO wallpaper">PRO</span>`
+        ? `<span class="pro-pill on-tile" aria-label="PRO wallpaper">PRO</span>`
         : '';
+      const checkedBadgeHTML = `<span class="scene-checked-badge" aria-hidden="true"><svg viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3.5 8.5l3 3 6-6"/></svg></span>`;
 
-      b.innerHTML = `${proBadgeHTML}<span class="name">${s.name}</span>`;
+      b.innerHTML = `${checkedBadgeHTML}${proBadgeHTML}<span class="name">${s.name}</span>`;
       b.title = isLocked
         ? `${s.name} (PRO Wallpaper — Click to unlock)`
         : s.desc + (s.credit ? ' · ' + s.credit : '');
@@ -180,56 +311,19 @@
       presets.appendChild(b);
     });
 
-    const up = document.createElement('button');
-    up.type = 'button';
-    up.className = 'scene upload' + (hasArt ? ' has-art' : '');
-    const upLocked = !isPremium;
-    if (upLocked) {
-      up.classList.add('is-locked');
-    }
-    up.setAttribute('role', 'radio');
-    up.setAttribute('aria-checked', String(settings.scene === 'custom'));
-    if (hasArt && customThumb) up.style.backgroundImage = `url("${customThumb}")`;
-
-    const upLockHTML = upLocked
-      ? `<span class="scene-pro-badge" aria-label="PRO feature">PRO</span>`
-      : '';
-
-    up.innerHTML = `${upLockHTML}<span class="plus" aria-hidden="true">+</span><span class="name">${hasArt ? 'Your picture' : 'Add your picture'}</span>`;
-    up.addEventListener('click', () => {
-      if (upLocked) {
-        $('purchaseModal').showModal();
-        return;
-      }
-      if (hasArt && settings.scene !== 'custom') pickScene('custom');
-      else $('file').click();
-    });
-    ['dragenter', 'dragover'].forEach((t) => up.addEventListener(t, (e) => { e.preventDefault(); up.classList.add('dragging'); }));
-    ['dragleave', 'drop'].forEach((t) => up.addEventListener(t, () => up.classList.remove('dragging')));
-    up.addEventListener('drop', (e) => {
-      e.preventDefault();
-      if (upLocked) {
-        $('purchaseModal').showModal();
-        return;
-      }
-      const f = e.dataTransfer.files && e.dataTransfer.files[0];
-      if (f) upload(f);
-    });
-    if (hasArt) {
-      const x = document.createElement('span');
-      /* an SVG cross, not the × character: a glyph sits on the font's
-         baseline and never lands in the circle's true centre */
-      x.className = 'remove'; x.title = 'Remove your picture';
-      x.setAttribute('aria-label', 'Remove your picture');
-      x.innerHTML = '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2.5 2.5l5 5M7.5 2.5l-5 5"/></svg>';
-      x.setAttribute('role', 'button');
-      x.addEventListener('click', (e) => { e.stopPropagation(); removeArt(); });
-      up.appendChild(x);
-    }
-    box.appendChild(up);
     box.appendChild(presets);
-    const picked = box.querySelector('[aria-checked="true"]');
-    if (picked) box.scrollTop = Math.max(0, picked.offsetTop - box.offsetTop - 8);
+
+    // Keep scroll position stable when re-rendering
+    if (prevScrollTop > 0) {
+      box.scrollTop = prevScrollTop;
+    }
+
+    lastRenderedState = {
+      isPremium
+    };
+
+    updateHeroCard();
+    updateUploadButton();
     renderCredit();
   }
 
@@ -306,7 +400,7 @@
       }
 
       const proBadgeHTML = isLocked
-        ? `<span class="scene-pro-badge" aria-label="PRO wallpaper">PRO</span>`
+        ? `<span class="pro-pill on-tile" aria-label="PRO wallpaper">PRO</span>`
         : '';
       const liveBadgeHTML = w.isLive
         ? `<span class="live-badge"><span class="live-pulse-dot"></span> LIVE</span>`
@@ -350,7 +444,7 @@
     if (frame && frame.contentWindow && frame.contentWindow.LCTSPreview) {
       frame.contentWindow.LCTSPreview.setLiveVideo(null);
       const urls = { wall: wallpaper.imageUrl, blur: wallpaper.imageUrl };
-      frame.contentWindow.LCTSPreview.apply(settings.theme || SCENES[DEF].theme, urls);
+      frame.contentWindow.LCTSPreview.apply(settings.theme || SCENES[DEF].theme, urls, getCustomAlpha());
     }
 
     await solveAndSave();
@@ -453,30 +547,19 @@
 
   /* ---- scenes by difficulty ------------------------------------------------------ */
   function renderArcs() {
-    $('arcs').checked = settings.arcs;
-    const box = $('arcSlots'), custom = settings.scene === 'custom';
-    box.hidden = !settings.arcs || custom;
+    if ($('arcs')) $('arcs').checked = settings.arcs;
+    const custom = settings.scene === 'custom';
     const label = (SLOTS.find(([d]) => d === slot) || [])[1] || '';
     const n = $('arcNote');
     if (n) {
       n.classList.toggle('done', !!justSet);
       if (custom) n.textContent = 'Your picture is used for every difficulty.';
-      else if (!settings.arcs) n.textContent = '';
-      else if (justSet) n.textContent = `✓ ${label} problems now use ${SCENES[justSet].name}. Pick another slot to change it too.`;
-      else n.innerHTML = `Choosing the scene for <b>${label}</b> problems. Pick a slot above to change another difficulty.`;
+      else if (!settings.arcs) n.textContent = 'Single scene mode: chosen scene is used for all problems.';
+      else if (justSet) n.textContent = `✓ ${label} problems now use ${SCENES[justSet] ? SCENES[justSet].name : justSet}.`;
+      else n.innerHTML = `Choosing the scene for <b>${label}</b> problems. Pick a tab above to switch difficulty.`;
     }
-    box.innerHTML = '';
-    SLOTS.forEach(([d, label, jp]) => {
-      const s = SCENES[arcScene(d)];
-      const b = document.createElement('button');
-      b.type = 'button'; b.className = 'slot'; b.dataset.slot = d;
-      b.setAttribute('role', 'radio'); b.setAttribute('aria-checked', String(d === slot));
-      b.style.backgroundImage = `url("${chrome.runtime.getURL(s.thumb || s.wall)}")`;
-      b.innerHTML = `<span class="slot-label"><b>${label}</b> <span class="jp">${jp}</span></span><span class="slot-name">${s.name}</span>`;
-      if (justSet && d === slot) { b.classList.remove('pulse'); void b.offsetWidth; b.classList.add('pulse'); }
-      b.addEventListener('click', async () => { slot = d; justSet = null; busy(true); try { await refresh(); } finally { busy(false); } });
-      box.appendChild(b);
-    });
+    renderDifficultyTabs();
+    updateHeroCard();
   }
 
   function busy(on, text) {
@@ -573,12 +656,28 @@
   });
   vis.addEventListener('change', () => solveAndSave());
 
-  $('arcs').addEventListener('change', async () => {
-    settings.arcs = $('arcs').checked;
-    if (settings.arcs && settings.scene === 'custom') settings.scene = ARC.medium;
-    busy(true);
-    try { await refresh(); await solveAndSave(); } finally { busy(false); }
-  });
+  const cTrans = $('containerTrans');
+  const showCTrans = () => {
+    const out = $('containerTransOut');
+    if (out) out.textContent = Math.round(settings.containerTransparency) + '%';
+  };
+  if (cTrans) {
+    cTrans.addEventListener('input', () => {
+      settings.containerTransparency = Number(cTrans.value);
+      showCTrans();
+      showPreview();
+      save();
+    });
+  }
+
+  if ($('arcs')) {
+    $('arcs').addEventListener('change', async () => {
+      settings.arcs = $('arcs').checked;
+      if (settings.arcs && settings.scene === 'custom') settings.scene = ARC.medium;
+      busy(true);
+      try { await refresh(); await solveAndSave(); } finally { busy(false); }
+    });
+  }
 
   $('file').addEventListener('change', (e) => { const f = e.target.files[0]; if (f) upload(f); e.target.value = ''; });
 
@@ -643,7 +742,7 @@
 
   /* ---- boot --------------------------------------------------------------------- */
   (async () => {
-    const res = await chrome.storage.local.get(['lcAnime', 'lcAnimeArt', 'lcThemeStudio', 'lcFocus', 'lcLastDifficulty']);
+    const res = await chrome.storage.local.get(['lcAnime', 'lcAnimeArt', 'lcThemeStudio', 'lcFocus', 'lcLastDifficulty', 'lcContainerTrans']);
     if (SLOTS.some(([d]) => d === res.lcLastDifficulty)) slot = res.lcLastDifficulty;
     const A = res.lcAnime;
     Object.assign(settings, A ? {
@@ -655,11 +754,13 @@
       arcScenes: A.arcScenes || {},
       glass: A.glass || 'auto',
       visibility: typeof res.lcAnime.visibility === 'number' ? res.lcAnime.visibility : 0.85,
+      containerTransparency: typeof res.lcContainerTrans === 'number' ? res.lcContainerTrans
+        : (typeof res.lcAnime.containerTransparency === 'number' ? res.lcAnime.containerTransparency : 30),
       titleCard: res.lcAnime.titleCard !== false, moments: res.lcAnime.moments !== false,
       japanese: res.lcAnime.japanese !== false,
       sound: res.lcAnime.sound !== false,
       volume: typeof res.lcAnime.volume === 'number' ? res.lcAnime.volume : 1
-    } : { sceneMode: 'static' });
+    } : { sceneMode: 'static', containerTransparency: typeof res.lcContainerTrans === 'number' ? res.lcContainerTrans : 30 });
     hasArt = !!res.lcAnimeArt;
     customThumb = hasArt ? res.lcAnimeArt.blur : null;
     if (settings.scene === 'custom' && !hasArt) settings.scene = DEF;
@@ -679,6 +780,7 @@
     }
 
     vis.value = Math.round(settings.visibility * 100); showVis();
+    if (cTrans) { cTrans.value = Math.round(settings.containerTransparency); showCTrans(); }
     renderGlass();
     $('titleCard').checked = settings.titleCard;
     $('moments').checked = settings.moments;
@@ -707,7 +809,7 @@
       await initPremiumSystem();
     }
 
-    // Static vs Live wallpaper mode toggles
+    // Static vs Dynamic wallpaper mode toggles (replaces search bar & old header toggle)
     function updateSceneModeUI(mode) {
       const isLive = mode === 'live';
       if ($('tabStatic')) {
@@ -720,9 +822,11 @@
       }
       if ($('staticScenesWrap')) $('staticScenesWrap').hidden = isLive;
       if ($('liveScenesWrap')) $('liveScenesWrap').hidden = !isLive;
+      if ($('difficultyTabsWrap')) $('difficultyTabsWrap').hidden = isLive;
       if (isLive) {
         renderLiveWallpapers();
       }
+      updateHeroCard();
     }
 
     if ($('tabStatic')) {
@@ -753,11 +857,113 @@
 
     const refreshLiveBtn = $('refreshLiveWallpapersBtn');
     if (refreshLiveBtn) {
-      refreshLiveBtn.addEventListener('click', async () => {
+      refreshLiveBtn.addEventListener('click', async (e) => {
+        if (e) e.stopPropagation();
         refreshLiveBtn.classList.add('spinning');
         liveWallpapersList = [];
+        if (settings.sceneMode !== 'live') {
+          updateSceneModeUI('live');
+        }
         await renderLiveWallpapers();
         setTimeout(() => refreshLiveBtn.classList.remove('spinning'), 600);
+      });
+    }
+
+    // Difficulty Tabs: Easy | Medium | Hard (Image 2)
+    document.querySelectorAll('.diff-tab').forEach(tab => {
+      tab.addEventListener('click', async () => {
+        const newSlot = tab.dataset.slot;
+        if (newSlot === slot) return;
+        slot = newSlot;
+        justSet = null;
+        busy(true);
+        try {
+          await refresh();
+        } finally {
+          busy(false);
+        }
+      });
+    });
+    window.addEventListener('resize', renderDifficultyTabs);
+
+    // Dedicated Upload Custom Image Button
+    const upBtn = $('uploadCustomBtn');
+    if (upBtn) {
+      upBtn.addEventListener('click', () => {
+        if (!isPremium) {
+          $('purchaseModal').showModal();
+          return;
+        }
+        if (hasArt && settings.scene !== 'custom') {
+          pickScene('custom');
+        } else {
+          $('file').click();
+        }
+      });
+
+      ['dragenter', 'dragover'].forEach((t) => upBtn.addEventListener(t, (e) => {
+        e.preventDefault();
+        upBtn.classList.add('dragging');
+      }));
+      ['dragleave', 'drop'].forEach((t) => upBtn.addEventListener(t, () => upBtn.classList.remove('dragging')));
+      upBtn.addEventListener('drop', (e) => {
+        e.preventDefault();
+        if (!isPremium) {
+          $('purchaseModal').showModal();
+          return;
+        }
+        const f = e.dataTransfer.files && e.dataTransfer.files[0];
+        if (f) upload(f);
+      });
+    }
+
+    const removeArtBtn = $('customRemoveBtn');
+    if (removeArtBtn) {
+      removeArtBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        removeArt();
+      });
+    }
+
+    // Accordion expand / collapse
+    document.querySelectorAll('.accordion-header').forEach(header => {
+      header.addEventListener('click', () => {
+        const item = header.closest('.accordion-item');
+        const isOpen = item.classList.contains('open');
+        item.classList.toggle('open', !isOpen);
+        header.setAttribute('aria-expanded', String(!isOpen));
+      });
+    });
+
+    // Bottom Action Buttons: Apply Theme & Reset
+    const applyBtn = $('applyThemeBtn');
+    if (applyBtn) {
+      applyBtn.addEventListener('click', () => {
+        activate();
+        applyBtn.classList.add('success');
+        applyBtn.innerHTML = `<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3.5 8.5l3 3 6-6"/></svg><span>Applied to LeetCode!</span>`;
+        setTimeout(() => {
+          applyBtn.classList.remove('success');
+          applyBtn.innerHTML = `<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3.5 8.5l3 3 6-6"/></svg><span>Apply Theme</span>`;
+        }, 1800);
+      });
+    }
+
+    const resetBtn = $('resetThemeBtn');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', async () => {
+        settings.scene = DEF;
+        settings.sceneMode = 'static';
+        settings.arcScenes = { easy: 'golden-hour', medium: 'moon-field', hard: 'harvest-moon' };
+        justSet = null;
+        busy(true);
+        try {
+          await refresh();
+          await solveAndSave();
+          activate();
+        } finally {
+          busy(false);
+        }
       });
     }
 
@@ -894,11 +1100,12 @@
       compActivePill.hidden = !isPremium;
     }
 
-    // When premium is inactive, ensure only Golden Hour is active
-    if (!isPremium && settings.scene !== 'golden-hour') {
+    // When premium is inactive, ensure only Basic tier scenes can be active
+    const BASIC_SCENES = new Set(['golden-hour', 'moon-field', 'harvest-moon']);
+    if (!isPremium && !BASIC_SCENES.has(settings.scene)) {
       settings.scene = 'golden-hour';
       if (settings.arcs) {
-        settings.arcScenes = { easy: 'golden-hour', medium: 'golden-hour', hard: 'golden-hour' };
+        settings.arcScenes = { easy: 'golden-hour', medium: 'moon-field', hard: 'harvest-moon' };
       }
     }
 

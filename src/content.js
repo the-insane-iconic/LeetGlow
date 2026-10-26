@@ -102,11 +102,14 @@
   globalThis.__lctsReassertMode = () => { if (current && current !== 'off') setBaseMode(current); };
 
   /* Sync container and editor transparency variables across all themes */
+  let currentCt = 30;
+  let currentEt = 25;
+
   function syncTransparency(cTrans, eTrans) {
-    const ct = typeof cTrans === 'number' ? cTrans : 30;
-    const et = typeof eTrans === 'number' ? eTrans : 25;
-    const cOp = Math.max(5, 100 - ct);
-    const eOp = Math.max(5, 100 - et);
+    if (typeof cTrans === 'number') currentCt = cTrans;
+    if (typeof eTrans === 'number') currentEt = eTrans;
+    const cOp = Math.max(5, 100 - currentCt);
+    const eOp = Math.max(5, 100 - currentEt);
     root.style.setProperty('--lc-container-opacity', `${cOp}%`);
     root.style.setProperty('--lc-editor-opacity', `${eOp}%`);
   }
@@ -124,9 +127,9 @@
       chrome.storage.local.get(KEY, (res) => apply((res && res[KEY]) || DEFAULT));
     }
     if (area === 'local' && (changes.lcContainerTrans || changes.lcEditorTrans)) {
-      chrome.storage.local.get(['lcContainerTrans', 'lcEditorTrans'], (res) => {
-        syncTransparency(res.lcContainerTrans, res.lcEditorTrans);
-      });
+      const ct = changes.lcContainerTrans ? changes.lcContainerTrans.newValue : currentCt;
+      const et = changes.lcEditorTrans ? changes.lcEditorTrans.newValue : currentEt;
+      syncTransparency(ct, et);
     }
   });
 

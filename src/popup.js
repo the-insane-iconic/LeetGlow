@@ -233,33 +233,24 @@ async function renderWallpaperGrid() {
 
   // 3. Preset scenes from globalThis.LCTS_SCENES (local to extension)
   const scenes = globalThis.LCTS_SCENES || {};
+  const BASIC_SCENES = new Set(['golden-hour', 'moon-field', 'harvest-moon']);
   Object.entries(scenes).forEach(([sceneId, s]) => {
     items.push({
       id: sceneId,
       name: s.name,
       thumb: chrome.runtime.getURL(s.thumb || s.wall),
-      isPro: sceneId !== 'golden-hour'
+      isPro: !BASIC_SCENES.has(sceneId)
     });
   });
 
-  // Requirement: If premium is NOT active, Golden Hour must be 1st, and Live Wallpaper 2nd
+  // Basic free tier ordering: ensure golden-hour, moon-field, harvest-moon are first
   if (!isPrem) {
-    const ghIndex = items.findIndex(it => it.id === 'golden-hour');
-    let ghItem = null;
-    if (ghIndex > -1) {
-      ghItem = items.splice(ghIndex, 1)[0];
-    }
-
-    const liveIndex = items.findIndex(it => it.isLive);
-    let liveItem = null;
-    if (liveIndex > -1) {
-      liveItem = items.splice(liveIndex, 1)[0];
-    }
-
-    const ordered = [];
-    if (ghItem) ordered.push(ghItem);
-    if (liveItem) ordered.push(liveItem);
-    items = ordered.concat(items);
+    const basicItems = [];
+    ['golden-hour', 'moon-field', 'harvest-moon'].forEach((bid) => {
+      const idx = items.findIndex((it) => it.id === bid);
+      if (idx > -1) basicItems.push(items.splice(idx, 1)[0]);
+    });
+    items = basicItems.concat(items);
   }
 
   box.innerHTML = '';
@@ -288,10 +279,10 @@ async function renderWallpaperGrid() {
     if (item.isLive) {
       badgeHTML = '<span class="wp-live-badge"><span class="wp-live-dot"></span> LIVE</span><span class="wp-spinner" aria-hidden="true"></span>';
       if (isLocked) {
-        badgeHTML += '<span class="wp-pro-badge">PRO</span>';
+        badgeHTML += '<span class="pro-pill on-tile">PRO</span>';
       }
     } else if (isLocked) {
-      badgeHTML = '<span class="wp-pro-badge">PRO</span>';
+      badgeHTML = '<span class="pro-pill on-tile">PRO</span>';
     }
 
     b.innerHTML = `
@@ -645,12 +636,16 @@ const volumeSlider = document.getElementById('volumeSlider');
 const volumeVal = document.getElementById('volumeVal');
 const testSoundBtn = document.getElementById('testSoundBtn');
 
-chrome.storage.local.get(['lcContainerTrans', 'lcEditorTrans', 'lcVolume', 'lcAnime', 'lcGameVolume'], (res) => {
-  const cfg = res.lcAnime || {};
+let animeCfgCache = null;
+let pixelCfgCache = null;
+
+chrome.storage.local.get(['lcContainerTrans', 'lcEditorTrans', 'lcVolume', 'lcAnime', 'lcPixel', 'lcGameVolume'], (res) => {
+  animeCfgCache = res.lcAnime || {};
+  pixelCfgCache = res.lcPixel || {};
 
   // Container Transparency (default 30%)
   const cVal = typeof res.lcContainerTrans === 'number' ? res.lcContainerTrans
-    : (typeof cfg.containerTransparency === 'number' ? cfg.containerTransparency : 30);
+    : (typeof animeCfgCache.containerTransparency === 'number' ? animeCfgCache.containerTransparency : 30);
   if (containerTransSlider && containerTransVal) {
     containerTransSlider.value = cVal;
     containerTransVal.textContent = cVal + '%';
@@ -658,7 +653,7 @@ chrome.storage.local.get(['lcContainerTrans', 'lcEditorTrans', 'lcVolume', 'lcAn
 
   // Editor Transparency (default 25%)
   const eVal = typeof res.lcEditorTrans === 'number' ? res.lcEditorTrans
-    : (typeof cfg.editorTransparency === 'number' ? cfg.editorTransparency : 25);
+    : (typeof animeCfgCache.editorTransparency === 'number' ? animeCfgCache.editorTransparency : 25);
   if (editorTransSlider && editorTransVal) {
     editorTransSlider.value = eVal;
     editorTransVal.textContent = eVal + '%';
@@ -666,7 +661,7 @@ chrome.storage.local.get(['lcContainerTrans', 'lcEditorTrans', 'lcVolume', 'lcAn
 
   // Volume (default 80%)
   const vVal = typeof res.lcVolume === 'number' ? res.lcVolume
-    : (typeof cfg.volume === 'number' ? Math.round(cfg.volume * 100)
+    : (typeof animeCfgCache.volume === 'number' ? Math.round(animeCfgCache.volume * 100)
       : (typeof res.lcGameVolume === 'number' ? Math.round(res.lcGameVolume * 100) : 80));
   if (volumeSlider && volumeVal) {
     volumeSlider.value = vVal;
@@ -674,15 +669,42 @@ chrome.storage.local.get(['lcContainerTrans', 'lcEditorTrans', 'lcVolume', 'lcAn
   }
 });
 
+let debounceAnimeTimer = null;
+function queueAnimeSave() {
+  clearTimeout(debounceAnimeTimer);
+  debounceAnimeTimer = setTimeout(() => {
+    chrome.storage.local.get(['lcAnime'], (r) => {
+      const current = Object.assign({}, r.lcAnime || {}, animeCfgCache || {});
+      animeCfgCache = current;
+      chrome.storage.local.set({ lcAnime: current });
+    });
+  }, 100);
+}
+
+let debounceVolumeTimer = null;
+function queueVolumeSave(norm) {
+  clearTimeout(debounceVolumeTimer);
+  debounceVolumeTimer = setTimeout(() => {
+    chrome.storage.local.get(['lcAnime', 'lcPixel'], (r) => {
+      const a = Object.assign({}, r.lcAnime || {}, animeCfgCache || {});
+      a.volume = norm;
+      animeCfgCache = a;
+      const p = Object.assign({}, r.lcPixel || {}, pixelCfgCache || {});
+      p.volume = norm;
+      pixelCfgCache = p;
+      chrome.storage.local.set({ lcAnime: a, lcPixel: p });
+    });
+  }, 100);
+}
+
 if (containerTransSlider) {
   containerTransSlider.addEventListener('input', () => {
     const val = Number(containerTransSlider.value);
     if (containerTransVal) containerTransVal.textContent = val + '%';
-    chrome.storage.local.get(['lcAnime'], (r) => {
-      const cfg = r.lcAnime || {};
-      cfg.containerTransparency = val;
-      chrome.storage.local.set({ lcContainerTrans: val, lcAnime: cfg });
-    });
+    chrome.storage.local.set({ lcContainerTrans: val });
+    if (!animeCfgCache) animeCfgCache = {};
+    animeCfgCache.containerTransparency = val;
+    queueAnimeSave();
   });
 }
 
@@ -690,11 +712,10 @@ if (editorTransSlider) {
   editorTransSlider.addEventListener('input', () => {
     const val = Number(editorTransSlider.value);
     if (editorTransVal) editorTransVal.textContent = val + '%';
-    chrome.storage.local.get(['lcAnime'], (r) => {
-      const cfg = r.lcAnime || {};
-      cfg.editorTransparency = val;
-      chrome.storage.local.set({ lcEditorTrans: val, lcAnime: cfg });
-    });
+    chrome.storage.local.set({ lcEditorTrans: val });
+    if (!animeCfgCache) animeCfgCache = {};
+    animeCfgCache.editorTransparency = val;
+    queueAnimeSave();
   });
 }
 
@@ -703,20 +724,29 @@ if (volumeSlider) {
     const val = Number(volumeSlider.value);
     if (volumeVal) volumeVal.textContent = val + '%';
     const norm = val / 100;
-    chrome.storage.local.get(['lcAnime', 'lcPixel'], (r) => {
-      const cfg = r.lcAnime || {};
-      cfg.volume = norm;
-      const pix = r.lcPixel || {};
-      pix.volume = norm;
-      chrome.storage.local.set({
-        lcVolume: val,
-        lcGameVolume: norm,
-        lcAnime: cfg,
-        lcPixel: pix
-      });
-    });
+    chrome.storage.local.set({ lcVolume: val, lcGameVolume: norm });
+    queueVolumeSave(norm);
   });
 }
+
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area !== 'local') return;
+  if (changes.lcContainerTrans && containerTransSlider && document.activeElement !== containerTransSlider) {
+    const v = changes.lcContainerTrans.newValue;
+    containerTransSlider.value = v;
+    if (containerTransVal) containerTransVal.textContent = v + '%';
+  }
+  if (changes.lcEditorTrans && editorTransSlider && document.activeElement !== editorTransSlider) {
+    const v = changes.lcEditorTrans.newValue;
+    editorTransSlider.value = v;
+    if (editorTransVal) editorTransVal.textContent = v + '%';
+  }
+  if (changes.lcVolume && volumeSlider && document.activeElement !== volumeSlider) {
+    const v = changes.lcVolume.newValue;
+    volumeSlider.value = v;
+    if (volumeVal) volumeVal.textContent = v + '%';
+  }
+});
 
 if (testSoundBtn) {
   testSoundBtn.addEventListener('click', () => {
@@ -1036,7 +1066,7 @@ if (resetCustomizeBtn) {
             }
           } else {
             const cfg = res.lcAnime || {};
-            cfg.scene = 'moonlit-shrine';
+            cfg.scene = 'golden-hour';
             updates.lcAnime = cfg;
             chrome.storage.local.remove('lcAnimeArt');
           }
@@ -1188,6 +1218,7 @@ if (resetCustomizeBtn) {
     if (changes.leetglowPremium) {
       isPremium = !!changes.leetglowPremium.newValue?.active;
       updatePremiumUI();
+      updateFooterTierBadge(isPremium);
       renderGallery();
     }
     if (changes.lcCustomGallery || changes.lcAnimeArt || changes.lcAnime) {
@@ -1199,6 +1230,27 @@ if (resetCustomizeBtn) {
   renderGallery();
 })();
 
+/* Footer tier badge: Basic (pink theme) vs PRO (shiny golden) */
+function updateFooterTierBadge(isPrem) {
+  const badge = document.getElementById('tierBadge');
+  if (!badge) return;
+  if (isPrem) {
+    badge.className = 'pro-pill';
+    badge.textContent = 'PRO';
+    badge.title = 'LeetGlow PRO Lifetime Active';
+  } else {
+    badge.className = 'tier-badge-pill basic';
+    badge.textContent = 'Basic';
+    badge.title = 'Basic Free Tier';
+  }
+}
+
+// Initial sync on popup boot
+chrome.storage.local.get('leetglowPremium', (data) => {
+  const isPrem = !!(data && data.leetglowPremium && data.leetglowPremium.active === true);
+  updateFooterTierBadge(isPrem);
+});
+
 /* Footer pill actions */
 if (globalThis.LCTSBugButton) {
   globalThis.LCTSBugButton(document.getElementById('bug'));
@@ -1208,19 +1260,5 @@ const shortcutsBtn = document.getElementById('shortcutsBtn');
 if (shortcutsBtn) {
   shortcutsBtn.addEventListener('click', () => {
     chrome.tabs.create({ url: 'chrome://extensions/shortcuts' });
-  });
-}
-
-const rateBtn = document.getElementById('rateBtn');
-if (rateBtn) {
-  rateBtn.addEventListener('click', () => {
-    chrome.tabs.create({ url: 'https://github.com/the-insane-iconic/LeetGlow' });
-  });
-}
-
-const docsBtn = document.getElementById('docsBtn');
-if (docsBtn) {
-  docsBtn.addEventListener('click', () => {
-    chrome.tabs.create({ url: chrome.runtime.getURL('src/studio.html') });
   });
 }

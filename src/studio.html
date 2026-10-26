@@ -56,130 +56,227 @@
   <main class="layout">
     <section class="controls" aria-label="Settings">
 
-      <div class="group">
-        <div class="scene-group-header">
-          <h2>Scene</h2>
-          <div id="wallpaperModeToggle" class="segmented wallpaper-mode-segmented" role="radiogroup" aria-label="Wallpaper Mode">
-            <button type="button" id="tabStatic" class="segmented-btn active" role="radio" aria-checked="true" data-mode="static">
-              <svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor"><path d="M14 3H2a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1zM2 2a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H2z"/><circle cx="5" cy="6" r="1.5"/><path d="m14 11-4.5-4.5L2 14h12v-3z"/></svg>
-              <span>Static</span>
-            </button>
-            <button type="button" id="tabLive" class="segmented-btn" role="radio" aria-checked="false" data-mode="live">
-              <span class="live-pulse-dot"></span>
-              <span>Live</span>
-              <span class="live-pro-tag">PRO</span>
-            </button>
+      <!-- Top: Selected Scene Hero Card -->
+      <div class="hero-scene-card" id="heroSceneCard">
+        <div class="hero-checked-badge" id="heroCheckedBadge" aria-label="Selected">
+          <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3.5 8.5l3 3 6-6"/>
+          </svg>
+        </div>
+        <div class="hero-meta">
+          <h2 class="hero-title" id="heroSceneTitle">Scene Title</h2>
+          <div class="hero-tags" id="heroSceneTags">
+            <span class="hero-tag" id="heroSlotTag">Medium</span>
+            <span class="hero-tag-sep">·</span>
+            <span class="hero-tag" id="heroDescTag">Anime Scene</span>
           </div>
         </div>
+      </div>
 
-        <!-- Static scenes options -->
-        <div id="staticScenesWrap">
-          <label class="switch"><input id="arcs" type="checkbox" /><span class="track"></span><span>A scene for each difficulty</span></label>
-          <div id="arcSlots" class="arc-slots" role="radiogroup" aria-label="Difficulty"></div>
-          <div id="scenes" class="scenes" role="radiogroup" aria-label="Scene"></div>
-          <input id="file" type="file" accept="image/png,image/jpeg,image/webp,image/avif,image/gif" hidden />
-          <p id="sceneCredit" class="note credit"></p>
-          <p id="uploadNote" class="note">Your picture is prepared once and stored only in this browser.</p>
+      <!-- Mode Switch: Static vs Dynamic (replaces search bar & old header toggle) -->
+      <div class="mode-toggle-wrap">
+        <div id="wallpaperModeToggle" class="mode-toggle-bar" role="radiogroup" aria-label="Wallpaper Mode">
+          <button type="button" id="tabStatic" class="mode-tab-btn active" role="radio" aria-checked="true" data-mode="static">
+            <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor"><path d="M14 3H2a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1zM2 2a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H2z"/><circle cx="5" cy="6" r="1.5"/><path d="m14 11-4.5-4.5L2 14h12v-3z"/></svg>
+            <span>Static</span>
+          </button>
+          <button type="button" id="tabLive" class="mode-tab-btn" role="radio" aria-checked="false" data-mode="live">
+            <span class="live-pulse-dot"></span>
+            <span>Dynamic</span>
+            <span class="pro-pill">PRO</span>
+          </button>
         </div>
+      </div>
 
-        <!-- Live Wallpapers section (fetched from Supabase livewallpaper bucket + built-ins) -->
-        <div id="liveScenesWrap" hidden>
-          <div class="live-header-info">
-            <span class="live-status-badge">
-              <span class="live-dot-glow"></span>
-              <span>Supabase: <code>livewallpaper</code></span>
+      <!-- Difficulty Tabs: Easy, Medium, Hard (Image 2) -->
+      <div class="difficulty-tabs-wrap" id="difficultyTabsWrap">
+        <div class="difficulty-tabs" id="difficultyTabs" role="tablist" aria-label="Difficulty">
+          <button type="button" class="diff-tab" data-slot="easy" role="tab" aria-selected="false">Easy</button>
+          <button type="button" class="diff-tab active" data-slot="medium" role="tab" aria-selected="true">Medium</button>
+          <button type="button" class="diff-tab" data-slot="hard" role="tab" aria-selected="false">Hard</button>
+          <div class="diff-tab-indicator" id="diffTabIndicator"></div>
+        </div>
+      </div>
+
+      <!-- Static scenes gallery -->
+      <div id="staticScenesWrap">
+        <div id="scenes" class="scenes" role="radiogroup" aria-label="Scene"></div>
+      </div>
+
+      <!-- Dynamic / Live Wallpapers gallery -->
+      <div id="liveScenesWrap" hidden>
+        <div class="live-header-bar">
+          <button type="button" id="refreshLiveWallpapersBtn" class="refresh-live-icon-btn" title="Sync dynamic wallpapers from Supabase" aria-label="Sync dynamic wallpapers">
+            <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M1.5 8a6.5 6.5 0 1 0 1.9-4.6L1 5.8M1 2v4h4"/></svg>
+          </button>
+        </div>
+        <div id="liveScenes" class="scenes live-scenes-grid" role="radiogroup" aria-label="Dynamic Wallpapers"></div>
+        <p class="note live-note">Dynamic video loops seamlessly in the background on LeetCode without affecting editor performance.</p>
+      </div>
+
+      <!-- Upload Custom Image Card (Image 1) -->
+      <div class="upload-card-wrap">
+        <button type="button" class="upload-custom-card" id="uploadCustomBtn" role="button" aria-label="Upload custom image">
+          <div class="upload-custom-icon">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242M12 12v9m-4-4 4-4 4 4"/>
+            </svg>
+          </div>
+          <div class="upload-custom-text">
+            <span class="upload-custom-title" id="uploadCustomTitle">Upload custom image</span>
+            <span class="upload-custom-sub" id="uploadCustomSub">JPG, PNG, WebP · up to 30 MB</span>
+          </div>
+          <div class="upload-actions">
+            <span class="pro-pill upload-pro-badge" id="uploadProBadge" aria-label="PRO feature">PRO</span>
+            <span class="custom-remove-btn" id="customRemoveBtn" title="Remove custom picture" hidden>
+              <svg viewBox="0 0 10 10" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 2l6 6M8 2l-6 6"/></svg>
             </span>
-            <button id="refreshLiveWallpapersBtn" class="refresh-live-btn" type="button" title="Check Supabase for newly uploaded videos">
-              <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1.5 8a6.5 6.5 0 1 0 1.9-4.6L1 5.8M1 2v4h4"/></svg>
-              <span>Sync</span>
-            </button>
           </div>
-          <div id="liveScenes" class="scenes live-scenes-grid" role="radiogroup" aria-label="Live Wallpapers"></div>
-          <p class="note live-note">Live video loops in the background on LeetCode without affecting editor typing performance.</p>
-        </div>
+        </button>
+        <input id="file" type="file" accept="image/png,image/jpeg,image/webp,image/avif,image/gif" hidden />
+        <p id="uploadNote" class="note" hidden>Your picture is prepared once and stored only in this browser.</p>
       </div>
 
-      <div class="group">
-        <h2>Appearance</h2>
-        <div class="setting-row">
-          <span class="setting-title">Glass Theme</span>
-          <div id="glass" class="segmented" role="radiogroup" aria-label="Glass">
-            <button type="button" role="radio" data-v="auto">Auto</button>
-            <button type="button" role="radio" data-v="dark">Dark</button>
-            <button type="button" role="radio" data-v="light">Light</button>
-          </div>
-        </div>
-        <div class="setting-slider-wrap">
-          <div class="row-between">
-            <label for="visibility" class="setting-title">Scene Visibility</label>
-            <output id="visibilityOut" for="visibility"></output>
-          </div>
-          <input id="visibility" type="range" min="0" max="100" step="1" />
-        </div>
-      </div>
+      <!-- Collapsible Accordion Sections (Image 1) -->
+      <div class="studio-accordions">
 
-      <div class="group">
-        <h2>Moments</h2>
-        <label class="switch"><input id="titleCard" type="checkbox" /><span class="track"></span><span>Episode title card when you open a problem</span></label>
-        <label class="switch"><input id="moments" type="checkbox" /><span class="track"></span><span>Verdict moments after Run and Submit</span></label>
-        <label class="switch"><input id="japanese" type="checkbox" /><span class="track"></span><span>Japanese typography <span class="note">(第1話, 完了！ and arc titles)</span></span></label>
-        <label class="switch"><input id="share" type="checkbox" /><span class="track"></span><span>Offer share card after Accepted</span></label>
-      </div>
-
-      <div class="group">
-        <h2>Sound Effects</h2>
-        <label class="switch"><input id="sound" type="checkbox" /><span class="track"></span><span>Verdict and celebration sound effects</span></label>
-        <div id="soundControls" class="sound-controls">
-          <div class="volume-slider-row">
-            <div class="row-between">
-              <label for="volume" class="setting-title">Volume</label>
-              <output id="volumeOut" for="volume"></output>
+        <!-- Accordion 1: Appearance -->
+        <div class="accordion-item open" id="accAppearance">
+          <button type="button" class="accordion-header" aria-expanded="true">
+            <span class="acc-title-group">
+              <svg class="acc-icon" viewBox="0 0 20 20" width="16" height="16" fill="currentColor">
+                <path d="M5 3a1 1 0 0 0-1 1v2.17A3.001 3.001 0 0 0 4 12v4a1 1 0 1 0 2 0v-4a3.001 3.001 0 0 0 0-5.83V4a1 1 0 0 0-1-1zm0 5a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm5-5a1 1 0 0 0-1 1v6.17a3.001 3.001 0 0 0 0 5.83V16a1 1 0 1 0 2 0v-2a3.001 3.001 0 0 0 0-5.83V4a1 1 0 0 0-1-1zm0 9a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm5-9a1 1 0 0 0-1 1v2.17a3.001 3.001 0 0 0 0 5.83V16a1 1 0 1 0 2 0v-7.83a3.001 3.001 0 0 0 0-5.83V4a1 1 0 0 0-1-1zm0 5a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+              </svg>
+              <span>Appearance</span>
+            </span>
+            <svg class="acc-chevron" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 6l4 4 4-4"/>
+            </svg>
+          </button>
+          <div class="accordion-body">
+            <div class="setting-row">
+              <span class="setting-title">Glass Theme</span>
+              <div id="glass" class="segmented" role="radiogroup" aria-label="Glass">
+                <button type="button" role="radio" data-v="auto">Auto</button>
+                <button type="button" role="radio" data-v="dark">Dark</button>
+                <button type="button" role="radio" data-v="light">Light</button>
+              </div>
             </div>
-            <input id="volume" type="range" min="0" max="100" step="1" />
-          </div>
-          <div class="sound-test-box">
-            <div class="sound-test-header">
-              <span class="setting-title">Preview Sounds</span>
+            <div class="setting-slider-wrap">
+              <div class="row-between">
+                <label for="visibility" class="setting-title">Scene Visibility</label>
+                <output id="visibilityOut" for="visibility"></output>
+              </div>
+              <input id="visibility" type="range" min="0" max="100" step="1" />
             </div>
-            <div class="sound-grid">
-              <button class="sound-pill" type="button" data-play="ac" title="Play Accepted sound">
-                <svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
-                <span>Accepted</span>
-              </button>
-              <button class="sound-pill" type="button" data-play="run" title="Play Tests passed sound">
-                <svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
-                <span>Tests Passed</span>
-              </button>
-              <button class="sound-pill" type="button" data-play="wa" title="Play Wrong answer (Run) sound">
-                <svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
-                <span>WA (Run)</span>
-              </button>
-              <button class="sound-pill" type="button" data-play="wa-submit" title="Play Wrong answer (Submit) sound">
-                <svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
-                <span>WA (Submit)</span>
-              </button>
-              <button class="sound-pill" type="button" data-play="tle" title="Play Time limit sound">
-                <svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
-                <span>Time Limit</span>
-              </button>
-              <button class="sound-pill" type="button" data-play="err" title="Play Error sound">
-                <svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
-                <span>Runtime Error</span>
-              </button>
-              <button class="sound-pill sound-pill-wide" type="button" data-play="title" title="Play Episode title card sound">
-                <svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
-                <span>Episode Title Card</span>
-              </button>
+            <div class="setting-slider-wrap">
+              <div class="row-between">
+                <label for="containerTrans" class="setting-title">Container Transparency</label>
+                <output id="containerTransOut" for="containerTrans"></output>
+              </div>
+              <input id="containerTrans" type="range" min="0" max="100" step="1" />
             </div>
           </div>
         </div>
+
+        <!-- Accordion 2: Advanced Settings -->
+        <div class="accordion-item" id="accAdvanced">
+          <button type="button" class="accordion-header" aria-expanded="false">
+            <span class="acc-title-group">
+              <svg class="acc-icon" viewBox="0 0 20 20" width="16" height="16" fill="currentColor">
+                <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 0 1-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 0 1 .947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 0 1 2.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 0 1 2.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 0 1 .947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 0 1-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 0 1-2.287-.947zM10 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" clip-rule="evenodd"/>
+              </svg>
+              <span>Advanced Settings</span>
+            </span>
+            <svg class="acc-chevron" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 6l4 4 4-4"/>
+            </svg>
+          </button>
+          <div class="accordion-body">
+            <div class="acc-inner-group">
+              <h3 class="acc-subheading">Moments</h3>
+              <label class="switch"><input id="titleCard" type="checkbox" /><span class="track"></span><span>Episode title card when you open a problem</span></label>
+              <label class="switch"><input id="moments" type="checkbox" /><span class="track"></span><span>Verdict moments after Run and Submit</span></label>
+              <label class="switch"><input id="japanese" type="checkbox" /><span class="track"></span><span>Japanese typography <span class="note">(第1話, 完了！ and arc titles)</span></span></label>
+              <label class="switch"><input id="share" type="checkbox" /><span class="track"></span><span>Offer share card after Accepted</span></label>
+            </div>
+
+            <div class="acc-inner-group">
+              <h3 class="acc-subheading">Sound Effects</h3>
+              <label class="switch"><input id="sound" type="checkbox" /><span class="track"></span><span>Verdict and celebration sound effects</span></label>
+              <div id="soundControls" class="sound-controls">
+                <div class="volume-slider-row">
+                  <div class="row-between">
+                    <label for="volume" class="setting-title">Volume</label>
+                    <output id="volumeOut" for="volume"></output>
+                  </div>
+                  <input id="volume" type="range" min="0" max="100" step="1" />
+                </div>
+                <div class="sound-test-box">
+                  <div class="sound-test-header">
+                    <span class="setting-title">Preview Sounds</span>
+                  </div>
+                  <div class="sound-grid">
+                    <button class="sound-pill" type="button" data-play="ac" title="Play Accepted sound">
+                      <svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
+                      <span>Accepted</span>
+                    </button>
+                    <button class="sound-pill" type="button" data-play="run" title="Play Tests passed sound">
+                      <svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
+                      <span>Tests Passed</span>
+                    </button>
+                    <button class="sound-pill" type="button" data-play="wa" title="Play Wrong answer (Run) sound">
+                      <svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
+                      <span>WA (Run)</span>
+                    </button>
+                    <button class="sound-pill" type="button" data-play="wa-submit" title="Play Wrong answer (Submit) sound">
+                      <svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
+                      <span>WA (Submit)</span>
+                    </button>
+                    <button class="sound-pill" type="button" data-play="tle" title="Play Time limit sound">
+                      <svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
+                      <span>Time Limit</span>
+                    </button>
+                    <button class="sound-pill" type="button" data-play="err" title="Play Error sound">
+                      <svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
+                      <span>Runtime Error</span>
+                    </button>
+                    <button class="sound-pill sound-pill-wide" type="button" data-play="title" title="Play Episode title card sound">
+                      <svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
+                      <span>Episode Title Card</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="acc-inner-group">
+              <h3 class="acc-subheading">Focus Mode</h3>
+              <label class="switch"><input id="focus" type="checkbox" /><span class="track"></span><span>Hide the scene and moments, keep the colours</span></label>
+              <p class="note">Shortcut <kbd id="shortcut">not set</kbd> toggles it on every open problem tab. <button id="shortcuts" class="link" type="button">Change shortcut</button></p>
+            </div>
+          </div>
+        </div>
+
+
       </div>
 
-      <div class="group">
-        <h2>Focus mode</h2>
-        <label class="switch"><input id="focus" type="checkbox" /><span class="track"></span><span>Hide the scene and moments, keep the colours</span></label>
-        <p class="note">Shortcut <kbd id="shortcut">not set</kbd> toggles it on every open problem tab. <button id="shortcuts" class="link" type="button">Change shortcut</button></p>
+      <!-- Bottom Action Buttons (Image 1) -->
+      <div class="studio-bottom-actions">
+        <button type="button" class="studio-btn-reset" id="resetThemeBtn">
+          <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2.5 8a5.5 5.5 0 1 1 1.6 3.9L2 14M2 9.5V14h4.5"/>
+          </svg>
+          <span>Reset</span>
+        </button>
+        <button type="button" class="studio-btn-apply" id="applyThemeBtn">
+          <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3.5 8.5l3 3 6-6"/>
+          </svg>
+          <span>Apply Theme</span>
+        </button>
       </div>
+
     </section>
 
     <section class="stage" aria-label="Preview">
