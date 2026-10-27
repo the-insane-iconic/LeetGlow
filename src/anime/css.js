@@ -18,12 +18,18 @@
   const over = (total, under) => Math.max(0, 1 - (1 - total) / (1 - under));
 
   /* theme: what LCTSAnimeSolver.analyze returned; urls: { wall, blur } */
-  function build(theme, urls, customAlpha) {
-    const r = theme.roles;
+  function build(theme, urls, customAlpha, paletteId) {
+    const r = Object.assign({}, theme.roles);
+    let scrim = theme.scrim;
+    const pal = (paletteId && paletteId !== 'auto' && globalThis.LCTS_PALETTES && globalThis.LCTS_PALETTES[paletteId]) || null;
+    if (pal) {
+      if (pal.scrim) scrim = pal.scrim;
+      if (pal.roles) Object.assign(r, pal.roles);
+    }
     const a = Object.assign({}, theme.alpha, customAlpha || {});
-    const scrim = theme.scrim;
     const veil = (x) => `linear-gradient(${rgba(scrim, x)},${rgba(scrim, x)})`;
-    const wall = `url("${urls.wall}")`, blur = `url("${urls.blur}")`;
+    const wall = urls && urls.wall ? `url("${urls.wall}")` : 'none';
+    const blur = urls && urls.blur ? `url("${urls.blur}")` : 'none';
     const out = Object.keys(r).map((k) => `${k}:${r[k]};`);
     out.push(
       `color-scheme:${theme.mode};`,

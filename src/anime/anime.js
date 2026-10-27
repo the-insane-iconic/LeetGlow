@@ -85,14 +85,16 @@ html[data-lc-focus] .lc-anime-live-video {
   let currentTheme = null, currentUrls = null;
   let cfgNow = null, shownId = null, lastAlpha = null;
   let currentCt = 30, currentEt = 25;
+  let currentPalette = 'auto';
 
-  function publish(theme, urls, customAlpha) {
+  function publish(theme, urls, customAlpha, paletteId) {
     currentTheme = theme;
     if (urls) currentUrls = urls;
     lastAlpha = customAlpha;
+    if (paletteId !== undefined && paletteId !== null) currentPalette = paletteId;
     const u = currentUrls || urls;
     globalThis.__lctsAnimeScene = { wall: u ? u.wall : '' };     // read by src/share.js
-    let css = globalThis.LCTSAnimeCss.build(theme, u, customAlpha) + LIVE_OVERRIDE_CSS;
+    let css = globalThis.LCTSAnimeCss.build(theme, u, customAlpha, currentPalette) + LIVE_OVERRIDE_CSS;
     if (css !== published) { styleEl().textContent = css; published = css; }
     globalThis.__lctsAnimeInk = theme.ink;
     const modeChanged = globalThis.__lctsAnimeMode !== theme.mode;
@@ -101,9 +103,9 @@ html[data-lc-focus] .lc-anime-live-video {
     if (modeChanged && globalThis.__lctsReassertMode) globalThis.__lctsReassertMode();
   }
 
-  function publishPreset(id, customAlpha) {
+  function publishPreset(id, customAlpha, paletteId) {
     if (!SCENES[id]) id = DEF;
-    publish(SCENES[id].theme, presetUrls(id), customAlpha);
+    publish(SCENES[id].theme, presetUrls(id), customAlpha, paletteId);
   }
 
   /* a data URL becomes a short blob: URL, so the stylesheet carries a few
@@ -148,7 +150,7 @@ html[data-lc-focus] .lc-anime-live-video {
   const arcsOn = (cfg) => cfg.scene !== 'custom' && (cfg.arcs !== undefined ? !!cfg.arcs : !cfg.scene);
   function sceneFor(cfg, difficulty) {
     if (cfg && cfg.sceneMode === 'live') {
-      const liveTheme = (cfg.liveWallpaper && cfg.liveWallpaper.themeId) || cfg.scene || 'neon-rain';
+      const liveTheme = (cfg.liveWallpaper && cfg.liveWallpaper.themeId) || (cfg.scene && cfg.scene !== 'neon-rain' ? cfg.scene : null) || 'golden-hour';
       return SCENES[liveTheme] ? liveTheme : DEF;
     }
     if (cfg && cfg.staticWallpaper && cfg.scene === cfg.staticWallpaper.id) {
@@ -219,6 +221,7 @@ html[data-lc-focus] .lc-anime-live-video {
       liveVideoEl.muted = true;
       liveVideoEl.playsInline = true;
       liveVideoEl.defaultMuted = true;
+      liveVideoEl.volume = 0;
       liveVideoEl.style.cssText = 'position:fixed !important;top:0 !important;left:0 !important;width:100vw !important;height:100vh !important;object-fit:cover !important;z-index:-1 !important;pointer-events:none !important;display:block !important;opacity:0;transition:opacity 0.45s ease-in-out;background:transparent !important;';
 
       const markReady = () => {
@@ -235,8 +238,7 @@ html[data-lc-focus] .lc-anime-live-video {
         if (liveVideoEl && liveVideoEl.readyState >= 2) markReady();
       });
       liveVideoEl.addEventListener('canplaythrough', markReady);
-      liveVideoEl.addEventListener('error', (err) => {
-        console.warn('[LeetGlow Live] Video playback error, keeping static wallpaper visible:', err);
+      liveVideoEl.addEventListener('error', () => {
         liveVideoEl.classList.remove('is-ready');
         liveVideoEl.style.opacity = '0';
         root.classList.remove('live-ready');
@@ -265,8 +267,8 @@ html[data-lc-focus] .lc-anime-live-video {
 
       const playPromise = liveVideoEl.play();
       if (playPromise !== undefined) {
-        playPromise.catch((err) => {
-          console.warn('[LeetGlow Live] Autoplay delayed or restricted, listening for first interaction:', err);
+        playPromise.catch(() => {
+          // Autoplay policy delayed playback - resume upon user's first click or keypress
           const resume = () => {
             if (liveVideoEl && liveVideoEl.paused) {
               liveVideoEl.play().catch(() => { });
@@ -310,8 +312,9 @@ html[data-lc-focus] .lc-anime-live-video {
   let loading = 0;
   function load() {
     const ticket = ++loading;
-    chrome.storage.local.get([THEME_KEY, 'lcAnime', 'lcFocus', 'lcContainerTrans', 'lcEditorTrans'], async (res) => {
+    chrome.storage.local.get([THEME_KEY, 'lcAnime', 'lcFocus', 'lcContainerTrans', 'lcEditorTrans', 'lcPalette'], async (res) => {
       if (ticket !== loading) return;
+      currentPalette = res.lcPalette || 'auto';
       root.toggleAttribute('data-lc-focus', !!res.lcFocus);
       /* nothing saved = a fresh install, which content.js runs as anime (its DEFAULT) */
       if ((res[THEME_KEY] || 'anime') !== 'anime') {
@@ -383,6 +386,32 @@ html[data-lc-focus] .lc-anime-live-video {
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area !== 'local') return;
     if (changes[THEME_KEY] || changes.lcAnime || changes.lcAnimeArt) {
+      if (changes.lcAnime && !changes[THEME_KEY] && !changes.lcAnimeArt) {
+        const o = changes.lcAnime.oldValue || {};
+        const n = changes.lcAnime.newValue || {};
+        const wallChanged = o.scene !== n.scene ||
+                            o.sceneMode !== n.sceneMode ||
+                            JSON.stringify(o.liveWallpaper) !== JSON.stringify(n.liveWallpaper) ||
+                            JSON.stringify(o.staticWallpaper) !== JSON.stringify(n.staticWallpaper) ||
+                            JSON.stringify(o.arcScenes) !== JSON.stringify(n.arcScenes) ||
+                            o.arcs !== n.arcs ||
+                            JSON.stringify(o.themes) !== JSON.stringify(n.themes);
+        if (!wallChanged) {
+          // Wallpaper did not change - only transparency or settings changed.
+          // Smoothly update alpha without reloading scene or resetting live video!
+          if (typeof n.containerTransparency === 'number') currentCt = n.containerTransparency;
+          if (typeof n.editorTransparency === 'number') currentEt = n.editorTransparency;
+          const alpha = {
+            panel: Math.max(0, Math.min(1, 1 - currentCt / 100)),
+            editor: Math.max(0, Math.min(1, 1 - currentEt / 100))
+          };
+          lastAlpha = alpha;
+          if (currentTheme && currentUrls && root.getAttribute('data-lc-theme') === 'anime') {
+            publish(currentTheme, currentUrls, alpha);
+          }
+          return;
+        }
+      }
       load();
       return;
     }
@@ -399,11 +428,18 @@ html[data-lc-focus] .lc-anime-live-video {
       };
       lastAlpha = alpha;
       if (currentTheme && currentUrls && root.getAttribute('data-lc-theme') === 'anime') {
-        publish(currentTheme, currentUrls, alpha);
+        publish(currentTheme, currentUrls, alpha, currentPalette);
         return;
       }
       load();
       return;
+    }
+    if (changes.lcPalette) {
+      currentPalette = changes.lcPalette.newValue || 'auto';
+      if (currentTheme && currentUrls && root.getAttribute('data-lc-theme') === 'anime') {
+        publish(currentTheme, currentUrls, lastAlpha, currentPalette);
+        return;
+      }
     }
     if (changes.lcFocus) root.toggleAttribute('data-lc-focus', !!changes.lcFocus.newValue);
   });

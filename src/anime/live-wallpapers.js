@@ -23,8 +23,8 @@
    * Uses an off-screen HTML5 video and canvas with crossOrigin="anonymous"
    */
   function captureVideoSnapshot(videoUrl) {
-    return new Promise((resolve, reject) => {
-      if (!videoUrl) return reject(new Error('No video URL provided'));
+    return new Promise((resolve) => {
+      if (!videoUrl) return resolve(null);
 
       const video = document.createElement('video');
       video.crossOrigin = 'anonymous';
@@ -35,8 +35,8 @@
       let finished = false;
       const timeout = setTimeout(() => {
         cleanup();
-        reject(new Error('Video snapshot timeout'));
-      }, 9000);
+        resolve(null);
+      }, 4000);
 
       function cleanup() {
         if (finished) return;
@@ -57,7 +57,7 @@
           const targetTime = minSec + Math.random() * (maxSec - minSec);
           video.currentTime = Math.max(0.4, targetTime);
         } catch (e) {
-          video.currentTime = 1.0;
+          try { video.currentTime = 1.0; } catch (err) { cleanup(); resolve(null); }
         }
       }, { once: true });
 
@@ -83,13 +83,13 @@
           resolve(dataUrl);
         } catch (err) {
           cleanup();
-          reject(err);
+          resolve(null);
         }
       }, { once: true });
 
-      video.addEventListener('error', (err) => {
+      video.addEventListener('error', () => {
         cleanup();
-        reject(err || new Error('Video loading error'));
+        resolve(null);
       }, { once: true });
 
       video.src = videoUrl;
@@ -130,7 +130,7 @@
         return dataUrl;
       }
     } catch (err) {
-      console.warn('[LeetGlow Live] Could not extract video snapshot:', err);
+      // Graceful fallback
     }
 
     return null;
@@ -179,7 +179,7 @@
         isLive: true,
         isSupabase: true,
         isPro: isPro,
-        themeId: 'neon-rain'
+        themeId: null
       });
     });
 
@@ -212,7 +212,7 @@
         isLive: false,
         isSupabase: true,
         isPro: isPro,
-        themeId: 'neon-rain'
+        themeId: null
       });
     });
 
@@ -246,7 +246,7 @@
         }
       }
     } catch (rpcErr) {
-      console.warn('[LeetGlow Live] RPC check fallback:', rpcErr);
+      // Proceed to candidate buckets fallback
     }
 
     // Strategy 2: Standard Storage List API across common bucket casing/names
@@ -329,7 +329,7 @@
           return URL.createObjectURL(blob);
         }
       } catch (cacheErr) {
-        console.warn('[LeetGlow Live] Cache API fallback to direct URL:', cacheErr);
+        // Direct stream fallback
       }
     }
 

@@ -60,14 +60,114 @@
 
   <!-- View 2: Customize View -->
   <div id="view-customize" class="tab-view" role="tabpanel" aria-labelledby="tab-customize" hidden>
+    <!-- Color Palette Card -->
+    <div class="panel-card palette-card">
+      <div class="panel-card-head">
+        <div class="card-icon-title">
+          <div class="card-icon-wrap palette-icon-wrap">
+            <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/>
+              <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/>
+              <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/>
+              <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/>
+              <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/>
+            </svg>
+          </div>
+          <div>
+            <h3>Color Palette</h3>
+            <p class="panel-card-sub">Choose a base color for the theme's accents and highlights.</p>
+          </div>
+        </div>
+      </div>
+      <div id="colorPaletteGrid" class="color-palette-grid" role="radiogroup" aria-label="Color Palette">
+        <button class="palette-swatch-item active" data-palette="auto" type="button" role="radio" aria-checked="true" aria-label="Auto">
+          <div class="palette-swatch-color swatch-auto">
+            <svg class="swatch-check" viewBox="0 0 16 16" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3.5 8.5 6.5 11.5 12.5 4.5"/>
+            </svg>
+            <svg class="swatch-sparkle" viewBox="0 0 16 16" fill="#ffffff" width="11" height="11">
+              <path d="M8 1l1.5 4.5L14 7l-4.5 1.5L8 13l-1.5-4.5L2 7l4.5-1.5z"/>
+            </svg>
+          </div>
+          <span class="palette-swatch-label">Auto</span>
+        </button>
+        <button class="palette-swatch-item" data-palette="pink" type="button" role="radio" aria-checked="false" aria-label="Pink">
+          <div class="palette-swatch-color" style="background: linear-gradient(135deg, #f472b6, #ec4899);">
+            <svg class="swatch-check" viewBox="0 0 16 16" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3.5 8.5 6.5 11.5 12.5 4.5"/>
+            </svg>
+          </div>
+          <span class="palette-swatch-label">Pink</span>
+        </button>
+        <button class="palette-swatch-item" data-palette="purple" type="button" role="radio" aria-checked="false" aria-label="Purple">
+          <div class="palette-swatch-color" style="background: linear-gradient(135deg, #c084fc, #a855f7);">
+            <svg class="swatch-check" viewBox="0 0 16 16" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3.5 8.5 6.5 11.5 12.5 4.5"/>
+            </svg>
+          </div>
+          <span class="palette-swatch-label">Purple</span>
+        </button>
+        <button class="palette-swatch-item" data-palette="blue" type="button" role="radio" aria-checked="false" aria-label="Blue">
+          <div class="palette-swatch-color" style="background: linear-gradient(135deg, #60a5fa, #3b82f6);">
+            <svg class="swatch-check" viewBox="0 0 16 16" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3.5 8.5 6.5 11.5 12.5 4.5"/>
+            </svg>
+          </div>
+          <span class="palette-swatch-label">Blue</span>
+        </button>
+        <button class="palette-swatch-item" data-palette="cyan" type="button" role="radio" aria-checked="false" aria-label="Cyan">
+          <div class="palette-swatch-color" style="background: linear-gradient(135deg, #22d3ee, #06b6d4);">
+            <svg class="swatch-check" viewBox="0 0 16 16" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3.5 8.5 6.5 11.5 12.5 4.5"/>
+            </svg>
+          </div>
+          <span class="palette-swatch-label">Cyan</span>
+        </button>
+        <button class="palette-swatch-item" data-palette="green" type="button" role="radio" aria-checked="false" aria-label="Green">
+          <div class="palette-swatch-color" style="background: linear-gradient(135deg, #4ade80, #22c55e);">
+            <svg class="swatch-check" viewBox="0 0 16 16" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3.5 8.5 6.5 11.5 12.5 4.5"/>
+            </svg>
+          </div>
+          <span class="palette-swatch-label">Green</span>
+        </button>
+        <button class="palette-swatch-item" data-palette="amber" type="button" role="radio" aria-checked="false" aria-label="Amber">
+          <div class="palette-swatch-color" style="background: linear-gradient(135deg, #fcd34d, #f59e0b);">
+            <svg class="swatch-check" viewBox="0 0 16 16" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3.5 8.5 6.5 11.5 12.5 4.5"/>
+            </svg>
+          </div>
+          <span class="palette-swatch-label">Amber</span>
+        </button>
+        <button class="palette-swatch-item" data-palette="red" type="button" role="radio" aria-checked="false" aria-label="Red">
+          <div class="palette-swatch-color" style="background: linear-gradient(135deg, #f87171, #ef4444);">
+            <svg class="swatch-check" viewBox="0 0 16 16" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3.5 8.5 6.5 11.5 12.5 4.5"/>
+            </svg>
+          </div>
+          <span class="palette-swatch-label">Red</span>
+        </button>
+        <button class="palette-swatch-item" data-palette="dark" type="button" role="radio" aria-checked="false" aria-label="Dark">
+          <div class="palette-swatch-color" style="background: linear-gradient(135deg, #64748b, #1e293b);">
+            <svg class="swatch-check" viewBox="0 0 16 16" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3.5 8.5 6.5 11.5 12.5 4.5"/>
+            </svg>
+          </div>
+          <span class="palette-swatch-label">Dark</span>
+        </button>
+      </div>
+    </div>
+
     <!-- Containers Transparency Slider -->
     <div class="panel-card">
       <div class="panel-card-head">
         <div class="card-icon-title">
-          <svg class="card-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="2" width="7.5" height="7.5" rx="1.5"/>
-            <rect x="6.5" y="6.5" width="7.5" height="7.5" rx="1.5" stroke-dasharray="2 1.5"/>
-          </svg>
+          <div class="card-icon-wrap">
+            <svg class="card-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="7.5" height="7.5" rx="1.5"/>
+              <rect x="6.5" y="6.5" width="7.5" height="7.5" rx="1.5" stroke-dasharray="2 1.5"/>
+            </svg>
+          </div>
           <h3>Containers Transparency</h3>
         </div>
         <span id="containerTransVal" class="slider-val-badge">30%</span>
@@ -81,15 +181,17 @@
       </div>
     </div>
 
-    <!-- Coding Container (Editor) Transparency Slider -->
+    <!-- Coding Container Transparency Slider -->
     <div class="panel-card">
       <div class="panel-card-head">
         <div class="card-icon-title">
-          <svg class="card-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="4.5 4.5 1.5 8 4.5 11.5"/>
-            <polyline points="11.5 4.5 14.5 8 11.5 11.5"/>
-            <line x1="9.5" y1="2.5" x2="6.5" y2="13.5"/>
-          </svg>
+          <div class="card-icon-wrap">
+            <svg class="card-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="4.5 4.5 1.5 8 4.5 11.5"/>
+              <polyline points="11.5 4.5 14.5 8 11.5 11.5"/>
+              <line x1="9.5" y1="2.5" x2="6.5" y2="13.5"/>
+            </svg>
+          </div>
           <h3>Coding Container Transparency</h3>
         </div>
         <span id="editorTransVal" class="slider-val-badge">25%</span>
@@ -107,11 +209,21 @@
     <div class="panel-card">
       <div class="panel-card-head">
         <div class="card-icon-title">
-          <svg class="card-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="7 3 3 6 1 6 1 10 3 10 7 13 7 3" fill="currentColor"/>
-            <path d="M10.5 4.5a5 5 0 0 1 0 7M13 2a8.5 8.5 0 0 1 0 12"/>
-          </svg>
-          <h3>Sound Effects Volume</h3>
+          <div class="card-icon-wrap">
+            <svg class="card-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="7 3 3 6 1 6 1 10 3 10 7 13 7 3" fill="currentColor"/>
+              <path d="M10.5 4.5a5 5 0 0 1 0 7M13 2a8.5 8.5 0 0 1 0 12"/>
+            </svg>
+          </div>
+          <div class="title-with-pill">
+            <h3>Sound Effects Volume</h3>
+            <button id="testSoundBtn" class="btn-test-sound" type="button" title="Test audio volume">
+              <svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor" aria-hidden="true">
+                <polygon points="4 2 13 8 4 14 4 2"/>
+              </svg>
+              <span>Test Sound</span>
+            </button>
+          </div>
         </div>
         <span id="volumeVal" class="slider-val-badge">80%</span>
       </div>
@@ -119,7 +231,6 @@
         <input id="volumeSlider" class="range-slider" type="range" min="0" max="100" step="1" value="80" aria-label="Sound effects volume" />
         <div class="slider-scale">
           <span>Mute (0%)</span>
-          <button id="testSoundBtn" class="btn-micro" type="button" title="Test audio volume">▶ Test Sound</button>
           <span>Max (100%)</span>
         </div>
       </div>
@@ -129,23 +240,34 @@
     <div class="panel-card">
       <div class="panel-card-head">
         <div class="card-icon-title">
-          <h3>Focus Mode</h3>
+          <div class="card-icon-wrap">
+            <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="22" y1="12" x2="18" y2="12"/>
+              <line x1="6" y1="12" x2="2" y2="12"/>
+              <line x1="12" y1="6" x2="12" y2="2"/>
+              <line x1="12" y1="22" x2="12" y2="18"/>
+            </svg>
+          </div>
+          <div>
+            <h3>Focus Mode</h3>
+            <p class="panel-card-sub">Toggle a distraction-free view across the problem page.</p>
+            <div class="panel-card-meta">
+              <span class="key-pill">⌘ + Shift + .</span>
+            </div>
+          </div>
         </div>
         <label class="switch-toggle" title="Toggle Focus Mode (⌘+Shift+.)">
           <input id="focusSwitch" type="checkbox" />
           <span class="toggle-track"></span>
         </label>
       </div>
-      <div class="panel-card-meta">
-        <span class="key-pill">⌘ + Shift + .</span>
-        <span class="meta-hint">Toggles everywhere live</span>
-      </div>
     </div>
 
     <!-- Reset to Default Button -->
     <div class="customize-actions">
       <button id="resetCustomizeBtn" class="btn-reset-default" type="button" title="Reset transparency and volume settings to original config">
-        <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M2.5 8a5.5 5.5 0 1 0 1.2-3.4L1.5 6"/>
           <path d="M1.5 2v4h4"/>
         </svg>
@@ -155,17 +277,24 @@
     </div>
 
     <!-- Full Studio Link -->
-    <div class="panel-card">
-      <div class="panel-card-head">
-        <div>
-          <h3>Full Glass & Contrast Studio</h3>
-          <p>Tune opacity, frosted blur, and syntax contrast floors in full screen.</p>
+    <div class="panel-card full-studio-card">
+      <div class="panel-card-head studio-card-head">
+        <div class="card-icon-title">
+          <div class="card-icon-wrap studio-icon-wrap">
+            <svg class="card-icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2l2.4 7.2L21 12l-6.6 2.8L12 22l-2.4-7.2L3 12l6.6-2.8z"/>
+            </svg>
+          </div>
+          <div>
+            <h3>Full Glass & Contrast Studio</h3>
+            <p class="panel-card-sub">Tune opacity, frosted blur, and syntax contrast floors in full screen.</p>
+          </div>
         </div>
+        <button id="openStudioTuner" class="btn-open-studio" type="button">
+          <span>Open Glass Studio Controls</span>
+          <span aria-hidden="true">→</span>
+        </button>
       </div>
-      <button id="openStudioTuner" class="btn-subtle-action" type="button">
-        <span>Open Glass Studio Controls</span>
-        <span aria-hidden="true">→</span>
-      </button>
     </div>
   </div>
 
@@ -175,12 +304,17 @@
     <div class="panel-card myspace-hero-card">
       <div class="panel-card-head">
         <div class="card-icon-title">
-          <svg class="card-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="2.5" width="12" height="11" rx="2"/>
-            <circle cx="5.5" cy="5.8" r="1.2"/>
-            <path d="M14 10.2l-3.2-3.2L3.5 13"/>
-          </svg>
-          <h3>Custom Wallpapers</h3>
+          <div class="card-icon-wrap">
+            <svg class="card-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2.5" width="12" height="11" rx="2"/>
+              <circle cx="5.5" cy="5.8" r="1.2"/>
+              <path d="M14 10.2l-3.2-3.2L3.5 13"/>
+            </svg>
+          </div>
+          <div>
+            <h3>Custom Wallpapers</h3>
+            <p class="panel-card-sub">Upload 4K artwork & skin your LeetCode problem workspace.</p>
+          </div>
         </div>
         <span id="myspacePremBadge" class="prem-tier-badge free">Free Plan</span>
       </div>
@@ -199,12 +333,17 @@
     <div class="panel-card">
       <div class="panel-card-head">
         <div class="card-icon-title">
-          <svg class="card-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-            <rect x="2" y="2" width="12" height="12" rx="2"/>
-            <circle cx="5.5" cy="5.5" r="1.5"/>
-            <path d="M14 10l-3.5-3.5L3 14"/>
-          </svg>
-          <h3>Your Uploaded Wallpapers</h3>
+          <div class="card-icon-wrap">
+            <svg class="card-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="12" height="12" rx="2"/>
+              <circle cx="5.5" cy="5.5" r="1.5"/>
+              <path d="M14 10l-3.5-3.5L3 14"/>
+            </svg>
+          </div>
+          <div>
+            <h3>Your Uploaded Wallpapers</h3>
+            <p class="panel-card-sub">Switch, manage, or remove your personalized collection.</p>
+          </div>
         </div>
         <span id="customGalleryCount" class="slider-val-badge">0</span>
       </div>
@@ -213,25 +352,27 @@
       </div>
     </div>
 
-    <!-- Multi-Difficulty Arcs Link -->
-    <div class="panel-card">
-      <div class="panel-card-head">
+    <!-- Multi-Difficulty Arcs Link Card -->
+    <div class="panel-card full-studio-card">
+      <div class="panel-card-head studio-card-head">
         <div class="card-icon-title">
-          <svg class="card-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="8 2 14 5 8 8 2 5 8 2"/>
-            <polyline points="2 8.5 8 11.5 14 8.5"/>
-            <polyline points="2 12 8 15 14 12"/>
-          </svg>
+          <div class="card-icon-wrap studio-icon-wrap">
+            <svg class="card-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="8 2 14 5 8 8 2 5 8 2"/>
+              <polyline points="2 8.5 8 11.5 14 8.5"/>
+              <polyline points="2 12 8 15 14 12"/>
+            </svg>
+          </div>
           <div>
             <h3>Difficulty Scene Arcs</h3>
-            <p>Assign separate wallpapers for Easy, Medium, and Hard.</p>
+            <p class="panel-card-sub">Assign separate wallpapers for Easy, Medium, and Hard.</p>
           </div>
         </div>
+        <button id="openStudioArcs" class="btn-open-studio" type="button">
+          <span>Configure in Studio</span>
+          <span aria-hidden="true">→</span>
+        </button>
       </div>
-      <button id="openStudioArcs" class="btn-subtle-action" type="button">
-        <span>Configure Arc Scenes in Studio</span>
-        <span aria-hidden="true">→</span>
-      </button>
     </div>
   </div>
 

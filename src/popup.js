@@ -349,15 +349,13 @@ async function selectWallpaper(item, isLocked) {
     cfg.sceneMode = 'live';
     cfg.liveWallpaper = item.liveData;
     delete cfg.staticWallpaper;
-    const themeId = (item.liveData && item.liveData.themeId) || 'neon-rain';
+    const themeId = (item.liveData && item.liveData.themeId) || (cfg.scene && cfg.scene !== 'neon-rain' ? cfg.scene : null) || 'golden-hour';
     cfg.scene = themeId;
-    if (cfg.arcs) {
-      cfg.arcScenes = Object.assign({}, cfg.arcScenes || {}, {
-        easy: themeId,
-        medium: themeId,
-        hard: themeId
-      });
-    }
+    cfg.arcScenes = Object.assign({}, cfg.arcScenes || {}, {
+      easy: themeId,
+      medium: themeId,
+      hard: themeId
+    });
   } else if (item.isCustom) {
     cfg.sceneMode = 'static';
     cfg.scene = 'custom';
@@ -368,26 +366,24 @@ async function selectWallpaper(item, isLocked) {
     cfg.scene = item.id;
     cfg.staticWallpaper = item.bucketData;
     delete cfg.liveWallpaper;
-    if (cfg.arcs) {
-      cfg.arcScenes = Object.assign({}, cfg.arcScenes || {}, {
-        easy: item.id,
-        medium: item.id,
-        hard: item.id
-      });
-    }
+    cfg.arcScenes = Object.assign({}, cfg.arcScenes || {}, {
+      easy: item.id,
+      medium: item.id,
+      hard: item.id
+    });
   } else {
     cfg.sceneMode = 'static';
     cfg.scene = item.id;
     delete cfg.staticWallpaper;
     delete cfg.liveWallpaper;
-    if (cfg.arcs) {
-      cfg.arcScenes = Object.assign({}, cfg.arcScenes || {}, {
-        easy: item.id,
-        medium: item.id,
-        hard: item.id
-      });
-    }
+    cfg.arcScenes = Object.assign({}, cfg.arcScenes || {}, {
+      easy: item.id,
+      medium: item.id,
+      hard: item.id
+    });
   }
+
+  animeCfgCache = cfg;
 
   await chrome.storage.local.set({
     lcAnime: cfg,
@@ -646,7 +642,17 @@ const tabButtons = [
   { btn: document.getElementById('tab-myspace'), view: document.getElementById('view-myspace') }
 ];
 
+function updateSliderFill(slider) {
+  if (!slider) return;
+  const min = Number(slider.min) || 0;
+  const max = Number(slider.max) || 100;
+  const val = Number(slider.value);
+  const pct = Math.max(0, Math.min(100, ((val - min) / (max - min)) * 100));
+  slider.style.background = `linear-gradient(to right, #ec4899 0%, #ec4899 ${pct}%, #ede9fe ${pct}%, #ede9fe 100%)`;
+}
+
 function switchTab(targetId) {
+  if (document.body) document.body.dataset.activeTab = targetId;
   tabButtons.forEach(({ btn, view }) => {
     if (!btn || !view) return;
     const isActive = btn.id === targetId;
@@ -666,6 +672,37 @@ tabButtons.forEach(({ btn }) => {
   if (!btn) return;
   btn.addEventListener('click', () => switchTab(btn.id));
 });
+
+// Set default active tab
+if (document.body) document.body.dataset.activeTab = 'tab-themes';
+
+/* Color Palette Selector */
+const paletteGrid = document.getElementById('colorPaletteGrid');
+const paletteSwatches = document.querySelectorAll('.palette-swatch-item');
+
+function setActivePaletteUI(paletteId) {
+  paletteSwatches.forEach((btn) => {
+    const isSelected = btn.dataset.palette === paletteId;
+    btn.classList.toggle('active', isSelected);
+    btn.setAttribute('aria-checked', String(isSelected));
+  });
+}
+
+chrome.storage.local.get(['lcPalette'], (res) => {
+  const currentPal = res.lcPalette || 'auto';
+  setActivePaletteUI(currentPal);
+});
+
+if (paletteGrid) {
+  paletteGrid.addEventListener('click', (e) => {
+    const btn = e.target.closest('.palette-swatch-item');
+    if (!btn) return;
+    const palId = btn.dataset.palette;
+    if (!palId) return;
+    setActivePaletteUI(palId);
+    chrome.storage.local.set({ lcPalette: palId });
+  });
+}
 
 /* Customize sliders: Container Transparency, Editor Transparency, Volume */
 const containerTransSlider = document.getElementById('containerTransSlider');
@@ -689,6 +726,7 @@ chrome.storage.local.get(['lcContainerTrans', 'lcEditorTrans', 'lcVolume', 'lcAn
   if (containerTransSlider && containerTransVal) {
     containerTransSlider.value = cVal;
     containerTransVal.textContent = cVal + '%';
+    updateSliderFill(containerTransSlider);
   }
 
   // Editor Transparency (default 25%)
@@ -697,6 +735,7 @@ chrome.storage.local.get(['lcContainerTrans', 'lcEditorTrans', 'lcVolume', 'lcAn
   if (editorTransSlider && editorTransVal) {
     editorTransSlider.value = eVal;
     editorTransVal.textContent = eVal + '%';
+    updateSliderFill(editorTransSlider);
   }
 
   // Volume (default 80%)
@@ -706,6 +745,7 @@ chrome.storage.local.get(['lcContainerTrans', 'lcEditorTrans', 'lcVolume', 'lcAn
   if (volumeSlider && volumeVal) {
     volumeSlider.value = vVal;
     volumeVal.textContent = vVal + '%';
+    updateSliderFill(volumeSlider);
   }
 });
 
@@ -714,7 +754,13 @@ function queueAnimeSave() {
   clearTimeout(debounceAnimeTimer);
   debounceAnimeTimer = setTimeout(() => {
     chrome.storage.local.get(['lcAnime'], (r) => {
-      const current = Object.assign({}, r.lcAnime || {}, animeCfgCache || {});
+      const current = r.lcAnime || {};
+      if (animeCfgCache && typeof animeCfgCache.containerTransparency === 'number') {
+        current.containerTransparency = animeCfgCache.containerTransparency;
+      }
+      if (animeCfgCache && typeof animeCfgCache.editorTransparency === 'number') {
+        current.editorTransparency = animeCfgCache.editorTransparency;
+      }
       animeCfgCache = current;
       chrome.storage.local.set({ lcAnime: current });
     });
@@ -726,10 +772,10 @@ function queueVolumeSave(norm) {
   clearTimeout(debounceVolumeTimer);
   debounceVolumeTimer = setTimeout(() => {
     chrome.storage.local.get(['lcAnime', 'lcPixel'], (r) => {
-      const a = Object.assign({}, r.lcAnime || {}, animeCfgCache || {});
+      const a = r.lcAnime || {};
       a.volume = norm;
       animeCfgCache = a;
-      const p = Object.assign({}, r.lcPixel || {}, pixelCfgCache || {});
+      const p = r.lcPixel || {};
       p.volume = norm;
       pixelCfgCache = p;
       chrome.storage.local.set({ lcAnime: a, lcPixel: p });
@@ -741,6 +787,7 @@ if (containerTransSlider) {
   containerTransSlider.addEventListener('input', () => {
     const val = Number(containerTransSlider.value);
     if (containerTransVal) containerTransVal.textContent = val + '%';
+    updateSliderFill(containerTransSlider);
     chrome.storage.local.set({ lcContainerTrans: val });
     if (!animeCfgCache) animeCfgCache = {};
     animeCfgCache.containerTransparency = val;
@@ -752,6 +799,7 @@ if (editorTransSlider) {
   editorTransSlider.addEventListener('input', () => {
     const val = Number(editorTransSlider.value);
     if (editorTransVal) editorTransVal.textContent = val + '%';
+    updateSliderFill(editorTransSlider);
     chrome.storage.local.set({ lcEditorTrans: val });
     if (!animeCfgCache) animeCfgCache = {};
     animeCfgCache.editorTransparency = val;
@@ -763,6 +811,7 @@ if (volumeSlider) {
   volumeSlider.addEventListener('input', () => {
     const val = Number(volumeSlider.value);
     if (volumeVal) volumeVal.textContent = val + '%';
+    updateSliderFill(volumeSlider);
     const norm = val / 100;
     chrome.storage.local.set({ lcVolume: val, lcGameVolume: norm });
     queueVolumeSave(norm);
@@ -771,20 +820,32 @@ if (volumeSlider) {
 
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area !== 'local') return;
+  if (changes.lcAnime && changes.lcAnime.newValue) {
+    animeCfgCache = changes.lcAnime.newValue;
+  }
+  if (changes.lcPixel && changes.lcPixel.newValue) {
+    pixelCfgCache = changes.lcPixel.newValue;
+  }
+  if (changes.lcPalette && changes.lcPalette.newValue) {
+    setActivePaletteUI(changes.lcPalette.newValue);
+  }
   if (changes.lcContainerTrans && containerTransSlider && document.activeElement !== containerTransSlider) {
     const v = changes.lcContainerTrans.newValue;
     containerTransSlider.value = v;
     if (containerTransVal) containerTransVal.textContent = v + '%';
+    updateSliderFill(containerTransSlider);
   }
   if (changes.lcEditorTrans && editorTransSlider && document.activeElement !== editorTransSlider) {
     const v = changes.lcEditorTrans.newValue;
     editorTransSlider.value = v;
     if (editorTransVal) editorTransVal.textContent = v + '%';
+    updateSliderFill(editorTransSlider);
   }
   if (changes.lcVolume && volumeSlider && document.activeElement !== volumeSlider) {
     const v = changes.lcVolume.newValue;
     volumeSlider.value = v;
     if (volumeVal) volumeVal.textContent = v + '%';
+    updateSliderFill(volumeSlider);
   }
 });
 
@@ -826,16 +887,26 @@ if (resetCustomizeBtn) {
     const DEFAULT_VOLUME = 80;
     const DEFAULT_VOLUME_NORM = 0.8;
 
-    if (containerTransSlider) containerTransSlider.value = DEFAULT_CONTAINER;
+    if (containerTransSlider) {
+      containerTransSlider.value = DEFAULT_CONTAINER;
+      updateSliderFill(containerTransSlider);
+    }
     if (containerTransVal) containerTransVal.textContent = DEFAULT_CONTAINER + '%';
 
-    if (editorTransSlider) editorTransSlider.value = DEFAULT_EDITOR;
+    if (editorTransSlider) {
+      editorTransSlider.value = DEFAULT_EDITOR;
+      updateSliderFill(editorTransSlider);
+    }
     if (editorTransVal) editorTransVal.textContent = DEFAULT_EDITOR + '%';
 
-    if (volumeSlider) volumeSlider.value = DEFAULT_VOLUME;
+    if (volumeSlider) {
+      volumeSlider.value = DEFAULT_VOLUME;
+      updateSliderFill(volumeSlider);
+    }
     if (volumeVal) volumeVal.textContent = DEFAULT_VOLUME + '%';
 
     if (focusSwitch) focusSwitch.checked = false;
+    setActivePaletteUI('auto');
 
     chrome.storage.local.get(['lcAnime', 'lcPixel'], (r) => {
       const cfg = r.lcAnime || {};
@@ -851,6 +922,7 @@ if (resetCustomizeBtn) {
         lcEditorTrans: DEFAULT_EDITOR,
         lcVolume: DEFAULT_VOLUME,
         lcGameVolume: DEFAULT_VOLUME_NORM,
+        lcPalette: 'auto',
         lcFocus: false,
         lcAnime: cfg,
         lcPixel: pix
@@ -1069,6 +1141,7 @@ if (resetCustomizeBtn) {
           cfg.theme = item.theme;
           cfg.themeFor = 'custom';
         }
+        animeCfgCache = cfg;
         chrome.storage.local.set({
           lcAnimeArt: { wall: item.wall, blur: item.blur || item.thumb, name: item.name },
           lcAnime: cfg,

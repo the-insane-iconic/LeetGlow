@@ -25,7 +25,7 @@
   if (globalThis.LCTSShare) return;
 
   /* where a viewer of the post can get the extension */
-  const SHARE_URL = 'https://chromewebstore.google.com/detail/ecpfpadofaimilfpjedgoedhoaglpjdb';
+  const SHARE_URL = 'chromewebstore.google.com/detail/ecpfpadofaimilfpjedgoedhoaglpjdb';
   const W = 1200, H = 630;
   const root = document.documentElement;
   const themeId = () => root.getAttribute('data-lc-theme');
@@ -124,25 +124,18 @@
     const desk = cssVar('--lc-desk', '#120d1c');
     try { await document.fonts.load('80px "Dela Gothic One"'); } catch (e) {}
 
-    /* background: the scene the user codes on, or the theme's own colours */
-    const scene = themeId() === 'anime' && globalThis.__lctsAnimeScene;
-    const bmp = scene && scene.wall ? await bitmapFrom(scene.wall) : null;
-    c.fillStyle = desk; c.fillRect(0, 0, W, H);
-    if (bmp) {
-      const s = Math.max(W / bmp.width, H / bmp.height);
-      c.drawImage(bmp, (W - bmp.width * s) / 2, (H - bmp.height * s) / 2, bmp.width * s, bmp.height * s);
-    } else {
-      const g = c.createLinearGradient(0, 0, W, H);
-      g.addColorStop(0, desk); g.addColorStop(1, cssVar('--lc-bg2', '#1f1830'));
-      c.fillStyle = g; c.fillRect(0, 0, W, H);
-      c.globalAlpha = 0.18; c.strokeStyle = accent; c.lineWidth = 2;
-      for (let x = -H; x < W; x += 34) { c.beginPath(); c.moveTo(x, H); c.lineTo(x + H, 0); c.stroke(); }
-      c.globalAlpha = 1;
-      const glow = c.createRadialGradient(W * 0.85, H * 0.2, 10, W * 0.85, H * 0.2, 520);
-      glow.addColorStop(0, accent + '66'); glow.addColorStop(1, 'transparent');
-      c.fillStyle = glow; c.fillRect(0, 0, W, H);
-    }
-    /* a readable dark side for the words, the art stays bright on the right */
+    /* background: sleek dark gradient with diagonal stripes and radial glow (previous template in Screenshot 1) */
+    const g = c.createLinearGradient(0, 0, W, H);
+    g.addColorStop(0, desk); g.addColorStop(1, cssVar('--lc-bg2', '#1f1830'));
+    c.fillStyle = g; c.fillRect(0, 0, W, H);
+    c.globalAlpha = 0.18; c.strokeStyle = accent; c.lineWidth = 2;
+    for (let x = -H; x < W; x += 34) { c.beginPath(); c.moveTo(x, H); c.lineTo(x + H, 0); c.stroke(); }
+    c.globalAlpha = 1;
+    const glow = c.createRadialGradient(W * 0.85, H * 0.2, 10, W * 0.85, H * 0.2, 520);
+    glow.addColorStop(0, accent + '66'); glow.addColorStop(1, 'transparent');
+    c.fillStyle = glow; c.fillRect(0, 0, W, H);
+
+    /* a readable dark side for the words */
     const veil = c.createLinearGradient(0, 0, W * 0.78, 0);
     veil.addColorStop(0, 'rgba(8,6,14,.92)'); veil.addColorStop(0.62, 'rgba(8,6,14,.62)'); veil.addColorStop(1, 'rgba(8,6,14,0)');
     c.fillStyle = veil; c.fillRect(0, 0, W, H);
@@ -151,16 +144,8 @@
     c.fillStyle = foot; c.fillRect(0, H - 150, W, 150);
 
     const X = 64;
-    const arc = ARC[d.difficulty] || null;
-    /* each theme's card speaks its own moments' language */
     const n = d.number;
-    const WORDS = {
-      anime:   { kick: (n ? 'EPISODE ' + n : 'EPISODE') + (arc ? '  ·  ' + arc[1] : ''), stamp: japanese ? (n ? '第' + n + '話' : '完了！') : (n ? 'EP. ' + n : 'CLEARED!'), line: 'CLEARED' },
-      crawler: { kick: (n ? 'NODE #' + n : 'NODE') + '  ·  CRAWL COMPLETE', stamp: '200 OK', line: 'NODE COMPILED' },
-      game:    { kick: n ? 'LEVEL ' + n : 'LEVEL', stamp: 'QUEST', line: 'COMPLETE' },
-      pixel:   { kick: n ? 'STAGE ' + n : 'STAGE', stamp: 'STAGE', line: 'CLEAR!' }
-    };
-    const w = WORDS[themeId()] || { kick: n ? 'PROBLEM ' + n : 'LEETCODE', stamp: 'SOLVED', line: 'ACCEPTED' };
+    const w = { kick: n ? 'PROBLEM ' + n : 'LEETCODE', stamp: 'SOLVED', line: 'ACCEPTED' };
     c.textBaseline = 'alphabetic';
     c.font = '26px ' + DISPLAY; c.fillStyle = accent;
     c.fillText(w.kick, X, 84);
@@ -193,11 +178,10 @@
     /* signature */
     c.textBaseline = 'alphabetic';
     c.font = '600 22px ' + SANS; c.fillStyle = 'rgba(255,255,255,.92)';
-    c.fillText('LeetGlow - Custom Themes, Sound Effects & Backgrounds', X, H - 50);
+    c.fillText('LeetGlow - Custom Themes, Sound Effects & Backgrounds', X, H - 36);
     c.font = '20px ' + SANS; c.fillStyle = 'rgba(255,255,255,.62)';
-    c.fillText(SHARE_URL.replace(/^https?:\/\//, ''), X, H - 22);
     c.textAlign = 'right';
-    c.fillText(new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }), W - 40, H - 22);
+    c.fillText(new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }), W - 40, H - 36);
     c.textAlign = 'left';
 
     return new Promise((res) => cv.toBlob((b) => res(b), 'image/png'));
@@ -205,7 +189,7 @@
 
   function caption(d) {
     const parts = [];
-    parts.push((d.number && themeId() === 'anime' ? 'Episode ' + d.number + ' cleared' : 'Solved') + ' ✅ ' + (d.title || 'a LeetCode problem') +
+    parts.push('Solved ✅ ' + (d.title || 'a LeetCode problem') +
       (d.difficulty ? ' (' + d.difficulty[0].toUpperCase() + d.difficulty.slice(1) + ')' : '') + ' on LeetCode' +
       (d.beats ? ', beats ' + d.beats + '%' : '') + (d.lang ? ' in ' + d.lang : '') + '.');
     if (d.streak >= 2) parts.push('Day ' + d.streak + ' of my streak.');
@@ -216,62 +200,98 @@
 
   /* ---- UI --------------------------------------------------------------------- */
   const STYLE = `
-.lcts-share-toast, .lcts-share-modal { --a: var(--lc-accent, #f98dc1); font-family: ${SANS}; color: #f4f2f8; }
+.lcts-share-toast, .lcts-share-modal { --a: var(--lc-accent, #f98dc1); font-family: ${SANS}; }
 .lcts-share-toast {
   position: fixed; right: 22px; bottom: 22px; z-index: 2147483200; width: 360px;
   display: grid; grid-template-columns: 128px 1fr; gap: 12px; padding: 12px;
   background: rgba(16,13,24,.94); border: 1px solid rgba(255,255,255,.1); border-radius: 14px;
   box-shadow: 0 18px 50px -18px rgba(0,0,0,.8), 0 0 0 1px color-mix(in srgb, var(--a) 30%, transparent);
-  transform: translateY(24px); opacity: 0; transition: transform .35s cubic-bezier(.2,.9,.3,1), opacity .25s ease;
+  color: #f4f2f8; transform: translateY(24px); opacity: 0; transition: transform .35s cubic-bezier(.2,.9,.3,1), opacity .25s ease;
 }
 .lcts-share-toast.is-in { transform: none; opacity: 1; }
 .lcts-share-toast img { width: 128px; height: 67px; object-fit: cover; border-radius: 8px; display: block; cursor: pointer; }
 .lcts-share-toast b { display: block; font-size: 14px; margin: 1px 0 3px; }
 .lcts-share-toast p { margin: 0 0 8px; font-size: 12px; color: rgba(244,242,248,.68); line-height: 1.35; }
-.lcts-share-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-.lcts-share-btn {
+.lcts-share-toast .lcts-share-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.lcts-share-toast .lcts-share-btn {
   border: 0; border-radius: 8px; padding: 7px 12px; font: 600 12.5px ${SANS}; cursor: pointer;
   background: rgba(255,255,255,.1); color: #fff;
 }
-.lcts-share-btn:hover { background: rgba(255,255,255,.18); }
-.lcts-share-btn.primary { background: var(--a); color: #0d0a14; }
-.lcts-share-btn.primary:hover { filter: brightness(1.08); }
+.lcts-share-toast .lcts-share-btn:hover { background: rgba(255,255,255,.18); }
+.lcts-share-toast .lcts-share-btn.primary { background: var(--a); color: #0d0a14; }
 .lcts-share-link { border: 0; background: none; padding: 0; color: rgba(244,242,248,.55); font: 11.5px ${SANS}; cursor: pointer; text-decoration: underline; }
-.lcts-share-x { position: absolute; top: 6px; right: 8px; border: 0; background: none; color: rgba(255,255,255,.5); font: 18px/1 ${SANS}; cursor: pointer; }
+.lcts-share-toast .lcts-share-x { position: absolute; top: 6px; right: 8px; border: 0; background: none; color: rgba(255,255,255,.5); font: 18px/1 ${SANS}; cursor: pointer; }
+
+/* Modal - Clean White Theme */
 .lcts-share-modal {
   position: fixed; inset: 0; z-index: 2147483300; display: grid; place-items: center;
-  background: rgba(6,5,10,.72);
+  background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(8px);
 }
 .lcts-share-box {
-  position: relative; width: min(760px, calc(100vw - 40px)); max-height: calc(100vh - 40px); overflow: auto;
-  background: #120f1b; border: 1px solid rgba(255,255,255,.1); border-radius: 16px; padding: 18px;
-  box-shadow: 0 30px 80px -20px rgba(0,0,0,.9);
+  position: relative; width: min(780px, calc(100vw - 36px)); max-height: calc(100vh - 40px); overflow-y: auto;
+  background: #ffffff; color: #1e293b; border: 1px solid #e2e8f0; border-radius: 20px; padding: 22px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05);
 }
-.lcts-share-box img { width: 100%; border-radius: 10px; display: block; }
+.lcts-share-box img {
+  width: 100%; border-radius: 12px; display: block;
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.15);
+}
+html[data-lc-theme] .lcts-share-box textarea,
 .lcts-share-box textarea {
-  width: 100%; box-sizing: border-box; margin: 12px 0 10px; min-height: 96px; resize: vertical;
-  background: rgba(255,255,255,.05); color: #f4f2f8; border: 1px solid rgba(255,255,255,.12); border-radius: 10px;
-  padding: 10px 12px; font: 13px/1.45 ${SANS};
+  width: 100%; box-sizing: border-box; margin: 14px 0 12px; min-height: 90px; resize: vertical;
+  background: #f8fafc !important; color: #0f172a !important; -webkit-text-fill-color: #0f172a !important;
+  caret-color: #0f172a !important; border: 1px solid #cbd5e1 !important; border-radius: 12px;
+  padding: 12px 14px; font: 500 13px/1.5 ${SANS}; transition: border-color .15s, box-shadow .15s;
 }
-.lcts-share-box textarea:focus { outline: none; border-color: color-mix(in srgb, var(--a) 60%, transparent); }
-.lcts-share-box .lcts-share-row { gap: 8px; }
-.lcts-share-box .lcts-share-btn { padding: 9px 14px; font-size: 13px; }
+html[data-lc-theme] .lcts-share-box textarea:focus,
+.lcts-share-box textarea:focus {
+  outline: none; border-color: #2563eb !important; background: #ffffff !important;
+  color: #0f172a !important; -webkit-text-fill-color: #0f172a !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+.lcts-share-box .lcts-share-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.lcts-share-box .lcts-share-btn {
+  border: 1px solid #e2e8f0; border-radius: 9px; padding: 8px 15px; font: 600 13px ${SANS}; cursor: pointer;
+  background: #f1f5f9; color: #334155; transition: all .15s ease;
+}
+.lcts-share-box .lcts-share-btn:hover { background: #e2e8f0; color: #0f172a; }
+.lcts-share-box .lcts-share-btn.primary {
+  background: #0f172a; color: #ffffff; border-color: #0f172a;
+}
+.lcts-share-box .lcts-share-btn.primary:hover {
+  background: #1e293b; border-color: #1e293b;
+}
+.lcts-share-box .lcts-share-btn.linkedin {
+  background: #0a66c2; color: #ffffff; border-color: #0a66c2;
+}
+.lcts-share-box .lcts-share-btn.linkedin:hover {
+  background: #004182; border-color: #004182;
+}
+.lcts-share-box .lcts-share-x {
+  position: absolute; top: 12px; right: 14px; width: 32px; height: 32px;
+  display: grid; place-items: center; border-radius: 50%; border: 1px solid #e2e8f0; background: #f8fafc;
+  color: #64748b; font: 20px/1 ${SANS}; cursor: pointer; transition: all .15s ease;
+}
+.lcts-share-box .lcts-share-x:hover { background: #e2e8f0; color: #0f172a; }
 .lcts-share-include {
-  display: inline-flex; align-items: center; gap: 6px; font-size: 12px;
-  color: rgba(244,242,248,.88); cursor: pointer; user-select: none; margin-left: 6px;
+  display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 500;
+  color: #475569; cursor: pointer; user-select: none; margin-left: 6px;
 }
 .lcts-share-include input[type="checkbox"] {
-  accent-color: var(--a); cursor: pointer; width: 14px; height: 14px; margin: 0;
+  accent-color: #0a66c2; cursor: pointer; width: 15px; height: 15px; margin: 0;
 }
-.lcts-share-hint {
-  margin: 12px 0 0; font-size: 12.5px; line-height: 1.45; color: rgba(244,242,248,.85);
-  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12);
-  border-radius: 8px; padding: 9px 12px; box-sizing: border-box;
+.lcts-share-foot {
+  margin-top: 14px; padding-top: 12px; border-top: 1px solid #e2e8f0;
+  display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
 }
-.lcts-share-hint.copied { background: rgba(34,197,94,.14); border-color: rgba(34,197,94,.35); color: #86efac; }
-.lcts-share-hint.downloaded { background: rgba(59,130,246,.14); border-color: rgba(59,130,246,.35); color: #93c5fd; }
-.lcts-share-foot { margin-top: 12px; display: flex; justify-content: space-between; align-items: center; }
-.lcts-share-foot label { font-size: 12px; color: rgba(244,242,248,.6); display: flex; gap: 6px; align-items: center; cursor: pointer; }
+.lcts-share-tip {
+  font-size: 12.5px; line-height: 1.45; font-weight: 500;
+  background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d;
+  border-radius: 8px; padding: 7px 12px; box-sizing: border-box;
+  display: inline-flex; align-items: center; gap: 6px; flex: 1; min-width: 260px;
+}
+.lcts-share-tip.downloaded { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
+.lcts-share-tip.error { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
 @media (prefers-reduced-motion: reduce) { .lcts-share-toast { transition: none; } }
 `;
   function ensureStyle() {
@@ -290,7 +310,7 @@
   function download(blob, d) {
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'leetcode-' + (d.number || 'clear') + '-cleared.png';
+    a.download = 'leetcode-' + (d.number || 'problem') + '-solved.png';
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 4000);
   }
@@ -305,73 +325,78 @@
     const box = el('div', 'lcts-share-box');
     const img = el('img'); img.src = url; img.alt = 'Your share card';
     const text = el('textarea'); text.value = caption(d); text.setAttribute('aria-label', 'Post text');
-    const hint = el('div', 'lcts-share-hint');
-    hint.innerHTML = '<strong>💡 Tip:</strong> Keep <strong>Include card image</strong> checked to copy & download this image card so you can attach it directly to your LinkedIn or X post!';
     const row = el('div', 'lcts-share-row');
     const close = () => { modal.remove(); document.removeEventListener('keydown', onKey, true); };
     const onKey = (e) => { if (e.key === 'Escape') close(); };
     document.addEventListener('keydown', onKey, true);
 
+    const tip = el('div', 'lcts-share-tip');
     const incLabel = el('label', 'lcts-share-include');
     const incBox = el('input'); incBox.type = 'checkbox'; incBox.checked = true;
+
+    function updateTip() {
+      tip.className = 'lcts-share-tip';
+      if (incBox.checked) {
+        tip.innerHTML = '<span style="color:#16a34a;font-weight:700;">✓</span> <strong>Card copied!</strong> Click in the post and press <strong>⌘V</strong> (Ctrl+V) to paste the image.';
+      } else {
+        tip.innerHTML = '<span style="color:#64748b;">📝</span> <span>Sharing text and link only.</span>';
+      }
+    }
+    updateTip();
+
     chrome.storage.local.get('lcShareIncludeImg', (r) => {
       if (r && r.lcShareIncludeImg !== undefined) incBox.checked = !!r.lcShareIncludeImg;
+      updateTip();
+      if (incBox.checked) copyImage(blob);
     });
     incBox.addEventListener('change', () => {
       chrome.storage.local.set({ lcShareIncludeImg: incBox.checked });
+      updateTip();
+      if (incBox.checked) copyImage(blob);
     });
     incLabel.append(incBox, el('span', null, 'Include card image in post'));
 
-    /* the image goes to the clipboard first (while this click still counts as
-       a user gesture), then the composer opens with the text filled in */
-    const post = (label, makeUrl) => {
-      const b = el('button', 'lcts-share-btn primary', label); b.type = 'button';
+    /* the image goes to the clipboard immediately and on post click */
+    copyImage(blob);
+
+    const post = (label, makeUrl, extraCls) => {
+      const b = el('button', 'lcts-share-btn primary ' + (extraCls || ''), label); b.type = 'button';
       b.addEventListener('click', async () => {
-        const includeImage = incBox.checked;
-        if (includeImage) {
+        if (incBox.checked) {
           await copyImage(blob);
-          download(blob, d);
+          tip.className = 'lcts-share-tip';
+          tip.innerHTML = '<span style="color:#16a34a;font-weight:700;">✓</span> <strong>Card copied!</strong> Click in the post and press <strong>⌘V</strong> (Ctrl+V) to paste the image.';
         }
         window.open(makeUrl(text.value), '_blank', 'noopener');
-        if (includeImage) {
-          hint.className = 'lcts-share-hint copied';
-          hint.innerHTML = '<strong>✅ Card copied & downloaded!</strong> In your new tab, press <strong>⌘V</strong> (Ctrl+V) or drag the downloaded card directly into your post.<br><small style="opacity:0.85;display:inline-block;margin-top:3px;">Tip: On LinkedIn, click ✕ on the link preview box to let your solve card be the hero image!</small>';
-        } else {
-          hint.className = 'lcts-share-hint';
-          hint.innerHTML = '<strong>📝 Text shared!</strong> Opened in a new tab.';
-        }
       });
       return b;
     };
     row.append(
-      post('Post on LinkedIn', (t) => 'https://www.linkedin.com/feed/?shareActive=true&text=' + encodeURIComponent(t)),
+      post('Post on LinkedIn', (t) => 'https://www.linkedin.com/feed/?shareActive=true&text=' + encodeURIComponent(t), 'linkedin'),
       post('Post on X', (t) => 'https://x.com/intent/post?text=' + encodeURIComponent(t))
     );
     const copyBtn = el('button', 'lcts-share-btn', 'Copy image'); copyBtn.type = 'button';
     copyBtn.addEventListener('click', async () => {
       const ok = await copyImage(blob);
-      hint.className = 'lcts-share-hint ' + (ok ? 'copied' : '');
-      hint.innerHTML = ok
-        ? '<strong>✅ Card copied!</strong> Press <strong>⌘V</strong> (or <strong>Ctrl+V</strong>) in LinkedIn/X to paste it.'
-        : 'Copying is blocked here. Use Download instead.';
+      tip.className = 'lcts-share-tip ' + (ok ? '' : 'error');
+      tip.innerHTML = ok
+        ? '<span style="color:#16a34a;font-weight:700;">✓</span> <strong>Card copied!</strong> Click in the post and press <strong>⌘V</strong> (Ctrl+V) to paste the image.'
+        : '<span style="color:#ef4444;">✕</span> Copying is blocked here. Use Download instead.';
     });
     const dl = el('button', 'lcts-share-btn', 'Download'); dl.type = 'button';
     dl.addEventListener('click', () => {
       download(blob, d);
-      hint.className = 'lcts-share-hint downloaded';
-      hint.innerHTML = '<strong>⬇️ Card downloaded!</strong> Attach it using the photo icon on LinkedIn or X.';
+      tip.className = 'lcts-share-tip downloaded';
+      tip.innerHTML = '<span style="color:#2563eb;font-weight:700;">⬇️</span> <strong>Card downloaded!</strong> Attach it to your post.';
     });
     row.append(copyBtn, dl, incLabel);
 
     const foot = el('div', 'lcts-share-foot');
-    const lab = el('label'); const cb = el('input'); cb.type = 'checkbox';
-    cb.addEventListener('change', () => { if (cb.checked) turnOff(); else { enabled = true; chrome.storage.local.set({ lcShare: { enabled: true } }); } });
-    lab.append(cb, document.createTextNode("Don't offer this after Accepted"));
     const done = el('button', 'lcts-share-btn', 'Close'); done.type = 'button'; done.addEventListener('click', close);
-    foot.append(lab, done);
+    foot.append(tip, done);
 
     const x = el('button', 'lcts-share-x', '×'); x.type = 'button'; x.setAttribute('aria-label', 'Close'); x.addEventListener('click', close);
-    box.append(x, img, text, row, hint, foot);
+    box.append(x, img, text, row, foot);
     modal.append(box);
     modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
     document.body.appendChild(modal);
@@ -395,7 +420,7 @@
     row.append(share, later);
     const off = el('button', 'lcts-share-link', "Don't show again"); off.type = 'button';
     off.addEventListener('click', () => { turnOff(); closeToast(); });
-    body.append(el('b', null, (d.number ? 'Episode ' + d.number : 'Problem') + ' cleared'),
+    body.append(el('b', null, (d.number ? 'Problem ' + d.number : 'Problem') + ' solved'),
                 el('p', null, 'Your card is ready. Share it in one click.'), row);
     const x = el('button', 'lcts-share-x', '×'); x.type = 'button'; x.setAttribute('aria-label', 'Close'); x.addEventListener('click', closeToast);
     body.append(off);
