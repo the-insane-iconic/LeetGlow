@@ -1658,8 +1658,9 @@ html[data-no-jp] .brand-jp, html[data-no-jp] .slot .jp { display: none; }
   margin-top: 4px;
 }
 .breakdown-total .total-price {
-  font-size: 18px;
-  color: #0f172a;
+  font-size: 19px;
+  font-weight: 800;
+  color: #059669;
 }
 
 /* Payment Action Card */
