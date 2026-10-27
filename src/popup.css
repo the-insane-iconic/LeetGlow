@@ -486,6 +486,12 @@ body {
   border-color: #ffffff;
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25), 0 8px 24px -8px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
+.card.is-locked:hover {
+  border-color: rgba(34, 197, 94, 0.4);
+}
+.card.is-locked:hover .corner-ribbon {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.55), 0 0 12px rgba(34, 197, 94, 0.5);
+}
 
 /* ---- Wallpaper Drawer (2*n grid in sidepanel) ---------------------------- */
 .wallpaper-drawer {

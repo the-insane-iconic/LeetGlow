@@ -1481,11 +1481,36 @@
       });
     }
 
-    if (window.location.hash === '#upgrade' || window.location.search.includes('upgrade')) {
-      if (!isPremium && purchaseModal) purchaseModal.showModal();
-    } else if (window.location.hash === '#activate' || window.location.search.includes('activate')) {
-      if (!isPremium && activationModal) activationModal.showModal();
+    function openUpgradeModalDirectly() {
+      if (isPremium || !purchaseModal) return;
+      if (getPremiumBtn) {
+        getPremiumBtn.click();
+      } else {
+        if (credentialsError) credentialsError.hidden = true;
+        if (paymentError) paymentError.hidden = true;
+        if (payBtn) {
+          payBtn.disabled = false;
+          payBtn.innerHTML = '<span>Pay ₹29 via Razorpay</span>';
+        }
+        setCheckoutStep(1);
+        if (!purchaseModal.open) purchaseModal.showModal();
+        if (custName) custName.focus();
+      }
     }
+
+    if (window.location.hash === '#upgrade' || window.location.search.includes('upgrade')) {
+      openUpgradeModalDirectly();
+    } else if (window.location.hash === '#activate' || window.location.search.includes('activate')) {
+      if (!isPremium && activationModal && !activationModal.open) activationModal.showModal();
+    }
+
+    window.addEventListener('hashchange', () => {
+      if (window.location.hash === '#upgrade' || window.location.search.includes('upgrade')) {
+        openUpgradeModalDirectly();
+      } else if (window.location.hash === '#activate' || window.location.search.includes('activate')) {
+        if (!isPremium && activationModal && !activationModal.open) activationModal.showModal();
+      }
+    });
   }
 
   chrome.storage.onChanged.addListener((ch, area) => {

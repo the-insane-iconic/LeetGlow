@@ -4,6 +4,24 @@
 const KEY = 'lcThemeStudio';
 const DEFAULT = 'anime';
 
+let isPremium = false;
+
+function openStudioCheckout() {
+  const url = chrome.runtime.getURL('src/studio.html#upgrade');
+  try {
+    chrome.tabs.query({ url: chrome.runtime.getURL('src/studio.html*') }, (tabs) => {
+      if (tabs && tabs.length > 0) {
+        chrome.tabs.update(tabs[0].id, { active: true, url });
+        if (tabs[0].windowId) chrome.windows.update(tabs[0].windowId, { focused: true });
+      } else {
+        chrome.tabs.create({ url });
+      }
+    });
+  } catch (e) {
+    chrome.tabs.create({ url });
+  }
+}
+
 /* Per-theme preview palette (mirrors the real editor colors). */
 const THEMES = {
   paper: {
@@ -172,10 +190,11 @@ async function renderWallpaperGrid() {
     renderWallpaperSkeletons();
   }
 
-  let isPrem = false;
+  let isPrem = isPremium;
   try {
     const pData = await chrome.storage.local.get('leetglowPremium');
     isPrem = !!(pData.leetglowPremium && pData.leetglowPremium.active === true);
+    isPremium = isPrem;
   } catch (e) { }
 
   const res = await chrome.storage.local.get(['lcAnime', 'lcAnimeArt']);
@@ -294,8 +313,7 @@ async function renderWallpaperGrid() {
     b.addEventListener('click', async (e) => {
       e.stopPropagation();
       if (isLocked) {
-        const purchaseModal = document.getElementById('purchaseModal');
-        if (purchaseModal) purchaseModal.showModal();
+        openStudioCheckout();
         return;
       }
 
@@ -320,8 +338,7 @@ async function renderWallpaperGrid() {
 
 async function selectWallpaper(item, isLocked) {
   if (isLocked) {
-    const purchaseModal = document.getElementById('purchaseModal');
-    if (purchaseModal) purchaseModal.showModal();
+    openStudioCheckout();
     return;
   }
 
@@ -401,13 +418,17 @@ function render(selected) {
   const preview = previewHTML();
   ORDER.forEach((id) => {
     const t = THEMES[id];
+    const isLocked = !isPremium && id === 'crawler';
     const card = document.createElement('button');
-    card.className = 'card';
+    card.className = 'card' + (isLocked ? ' is-locked' : '');
     card.type = 'button';
     card.setAttribute('role', 'radio');
     card.setAttribute('aria-checked', String(id === selected));
-    card.setAttribute('aria-label', `${t.name} theme`);
+    card.setAttribute('aria-label', isLocked ? `${t.name} theme (PRO — Click to unlock)` : `${t.name} theme`);
     card.dataset.id = id;
+    if (isLocked) {
+      card.title = `${t.name} (PRO Theme — Click to unlock in Anime Studio)`;
+    }
     card.style.setProperty('--card-accent', t.accent);
     card.innerHTML =
       `<div class="preview tex-${t.tex}" style="${pvVars(t.pv)}">${preview}</div>` +
@@ -418,6 +439,10 @@ function render(selected) {
       `<span class="check">${CHECK}</span>` +
       `</div>`;
     card.addEventListener('click', () => {
+      if (id === 'crawler' && !isPremium) {
+        openStudioCheckout();
+        return;
+      }
       if (id === 'anime') {
         choose(id);
         toggleWallpaperDrawer();
@@ -427,27 +452,29 @@ function render(selected) {
       }
     });
     grid.appendChild(card);
-    if (id === 'anime') {
-      paintAnimeCard(card.querySelector('.preview'));
+    if (id === 'anime' || id === 'crawler') {
+      if (id === 'anime') paintAnimeCard(card.querySelector('.preview'));
       const ribbon = document.createElement('div');
       ribbon.className = 'corner-ribbon-wrap';
       ribbon.setAttribute('aria-hidden', 'true');
       ribbon.innerHTML = '<span class="corner-ribbon">Premium</span>';
       card.appendChild(ribbon);
 
-      const meta = card.querySelector('.meta');
-      if (meta) {
-        const toggleBadge = document.createElement('span');
-        toggleBadge.className = 'drawer-toggle-badge';
-        toggleBadge.setAttribute('aria-label', 'Toggle wallpapers');
-        toggleBadge.innerHTML = `<svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l4 4 4-4"/></svg>`;
-        const check = meta.querySelector('.check');
-        if (check) meta.insertBefore(toggleBadge, check);
-        else meta.appendChild(toggleBadge);
-      }
+      if (id === 'anime') {
+        const meta = card.querySelector('.meta');
+        if (meta) {
+          const toggleBadge = document.createElement('span');
+          toggleBadge.className = 'drawer-toggle-badge';
+          toggleBadge.setAttribute('aria-label', 'Toggle wallpapers');
+          toggleBadge.innerHTML = `<svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l4 4 4-4"/></svg>`;
+          const check = meta.querySelector('.check');
+          if (check) meta.insertBefore(toggleBadge, check);
+          else meta.appendChild(toggleBadge);
+        }
 
-      grid.appendChild(studioButton);
-      grid.appendChild(wallpaperDrawer);
+        grid.appendChild(studioButton);
+        grid.appendChild(wallpaperDrawer);
+      }
     }
     if (id === 'game') {
       /* a baked card: the night realm with an RPG HUD (scripts/build-game-card.py) */
@@ -553,6 +580,10 @@ function markSelected(id) {
 }
 
 function choose(id) {
+  if (id === 'crawler' && !isPremium) {
+    openStudioCheckout();
+    return;
+  }
   markSelected(id);
   chrome.storage.local.set({ [KEY]: id });
   /* content.js hears the storage change and applies it live in every open
@@ -574,8 +605,13 @@ try {
 } catch (e) { }
 
 /* boot */
-chrome.storage.local.get(KEY, (res) => {
-  const selected = (res && res[KEY]) || DEFAULT;
+chrome.storage.local.get([KEY, 'leetglowPremium'], (res) => {
+  isPremium = !!(res && res.leetglowPremium && res.leetglowPremium.active === true);
+  let selected = (res && res[KEY]) || DEFAULT;
+  if (selected === 'crawler' && !isPremium) {
+    selected = DEFAULT;
+    chrome.storage.local.set({ [KEY]: DEFAULT });
+  }
   render(selected);
   if (studioButton) studioButton.classList.toggle('lit', selected === 'anime');
 });
@@ -596,6 +632,10 @@ document.addEventListener('keydown', (e) => {
   const dir = (e.key === 'ArrowDown' || e.key === 'ArrowRight') ? 1 : -1;
   const next = cards[(idx + dir + cards.length) % cards.length];
   next.focus();
+  if (next.dataset.id === 'crawler' && !isPremium) {
+    openStudioCheckout();
+    return;
+  }
   choose(next.dataset.id);
 });
 
@@ -852,8 +892,6 @@ if (resetCustomizeBtn) {
 
   if (!dropzone || !galleryList) return;
 
-  let isPremium = false;
-
   async function checkPremium() {
     try {
       const data = await chrome.storage.local.get('leetglowPremium');
@@ -930,7 +968,7 @@ if (resetCustomizeBtn) {
     if (upgradeModal && typeof upgradeModal.showModal === 'function') {
       upgradeModal.showModal();
     } else {
-      chrome.tabs.create({ url: chrome.runtime.getURL('src/studio.html#upgrade') });
+      openStudioCheckout();
     }
   }
 
@@ -1220,6 +1258,10 @@ if (resetCustomizeBtn) {
       updatePremiumUI();
       updateFooterTierBadge(isPremium);
       renderGallery();
+      chrome.storage.local.get(KEY, (res) => {
+        const cur = (res && res[KEY]) || DEFAULT;
+        render(cur);
+      });
     }
     if (changes.lcCustomGallery || changes.lcAnimeArt || changes.lcAnime) {
       renderGallery();
