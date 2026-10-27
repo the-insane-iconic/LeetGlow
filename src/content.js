@@ -71,7 +71,7 @@
     }
   }
 
-  const PREMIUM_THEMES = new Set(['crawler', 'game', 'pixel']);
+  const PREMIUM_THEMES = new Set(['crawler']);
 
   async function checkAllowed(theme) {
     if (!PREMIUM_THEMES.has(theme)) return theme;

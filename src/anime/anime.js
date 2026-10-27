@@ -83,6 +83,7 @@ html[data-lc-focus] .lc-anime-live-video {
 `;
 
   let currentTheme = null, currentUrls = null;
+  let cfgNow = null, shownId = null, lastAlpha = null;
   let currentCt = 30, currentEt = 25;
 
   function publish(theme, urls, customAlpha) {
@@ -161,8 +162,6 @@ html[data-lc-focus] .lc-anime-live-video {
   /* the Studio saves a solve per scene for the user's glass settings */
   const solvedFor = (cfg, id) =>
     (cfg.themes && cfg.themes[id]) || (cfg.theme && cfg.themeFor === id ? cfg.theme : null) || (SCENES[id] ? SCENES[id].theme : SCENES[DEF].theme);
-
-  let cfgNow = null, shownId = null, lastAlpha = null;
 
   function customAlpha(res) {
     const a = {};

@@ -25,7 +25,7 @@
   if (globalThis.LCTSShare) return;
 
   /* where a viewer of the post can get the extension */
-  const SHARE_URL = 'https://github.com/the-insane-iconic/LeetGlow';
+  const SHARE_URL = 'https://chromewebstore.google.com/detail/ecpfpadofaimilfpjedgoedhoaglpjdb';
   const W = 1200, H = 630;
   const root = document.documentElement;
   const themeId = () => root.getAttribute('data-lc-theme');
@@ -193,7 +193,7 @@
     /* signature */
     c.textBaseline = 'alphabetic';
     c.font = '600 22px ' + SANS; c.fillStyle = 'rgba(255,255,255,.92)';
-    c.fillText('LeetGlow - Custome Theme & Sound Effects and Background', X, H - 50);
+    c.fillText('LeetGlow - Custom Themes, Sound Effects & Backgrounds', X, H - 50);
     c.font = '20px ' + SANS; c.fillStyle = 'rgba(255,255,255,.62)';
     c.fillText(SHARE_URL.replace(/^https?:\/\//, ''), X, H - 22);
     c.textAlign = 'right';
@@ -209,7 +209,7 @@
       (d.difficulty ? ' (' + d.difficulty[0].toUpperCase() + d.difficulty.slice(1) + ')' : '') + ' on LeetCode' +
       (d.beats ? ', beats ' + d.beats + '%' : '') + (d.lang ? ' in ' + d.lang : '') + '.');
     if (d.streak >= 2) parts.push('Day ' + d.streak + ' of my streak.');
-    parts.push('\nCoding in style with LeetGlow - Custome Theme & Sound Effects and Background by AnshYadav → ' + SHARE_URL);
+    parts.push('\nCoding in style with LeetGlow - Custom Themes, Sound Effects & Backgrounds by AnshYadav → ' + SHARE_URL);
     parts.push('\n#LeetCode #100DaysOfCode #DSA');
     return parts.join(' ').replace(/ \n/g, '\n');
   }
@@ -256,7 +256,20 @@
 .lcts-share-box textarea:focus { outline: none; border-color: color-mix(in srgb, var(--a) 60%, transparent); }
 .lcts-share-box .lcts-share-row { gap: 8px; }
 .lcts-share-box .lcts-share-btn { padding: 9px 14px; font-size: 13px; }
-.lcts-share-hint { margin: 10px 0 0; font-size: 12px; color: rgba(244,242,248,.62); min-height: 16px; }
+.lcts-share-include {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 12px;
+  color: rgba(244,242,248,.88); cursor: pointer; user-select: none; margin-left: 6px;
+}
+.lcts-share-include input[type="checkbox"] {
+  accent-color: var(--a); cursor: pointer; width: 14px; height: 14px; margin: 0;
+}
+.lcts-share-hint {
+  margin: 12px 0 0; font-size: 12.5px; line-height: 1.45; color: rgba(244,242,248,.85);
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12);
+  border-radius: 8px; padding: 9px 12px; box-sizing: border-box;
+}
+.lcts-share-hint.copied { background: rgba(34,197,94,.14); border-color: rgba(34,197,94,.35); color: #86efac; }
+.lcts-share-hint.downloaded { background: rgba(59,130,246,.14); border-color: rgba(59,130,246,.35); color: #93c5fd; }
 .lcts-share-foot { margin-top: 12px; display: flex; justify-content: space-between; align-items: center; }
 .lcts-share-foot label { font-size: 12px; color: rgba(244,242,248,.6); display: flex; gap: 6px; align-items: center; cursor: pointer; }
 @media (prefers-reduced-motion: reduce) { .lcts-share-toast { transition: none; } }
@@ -292,22 +305,41 @@
     const box = el('div', 'lcts-share-box');
     const img = el('img'); img.src = url; img.alt = 'Your share card';
     const text = el('textarea'); text.value = caption(d); text.setAttribute('aria-label', 'Post text');
-    const hint = el('p', 'lcts-share-hint');
+    const hint = el('div', 'lcts-share-hint');
+    hint.innerHTML = '<strong>💡 Tip:</strong> Keep <strong>Include card image</strong> checked to copy & download this image card so you can attach it directly to your LinkedIn or X post!';
     const row = el('div', 'lcts-share-row');
     const close = () => { modal.remove(); document.removeEventListener('keydown', onKey, true); };
     const onKey = (e) => { if (e.key === 'Escape') close(); };
     document.addEventListener('keydown', onKey, true);
+
+    const incLabel = el('label', 'lcts-share-include');
+    const incBox = el('input'); incBox.type = 'checkbox'; incBox.checked = true;
+    chrome.storage.local.get('lcShareIncludeImg', (r) => {
+      if (r && r.lcShareIncludeImg !== undefined) incBox.checked = !!r.lcShareIncludeImg;
+    });
+    incBox.addEventListener('change', () => {
+      chrome.storage.local.set({ lcShareIncludeImg: incBox.checked });
+    });
+    incLabel.append(incBox, el('span', null, 'Include card image in post'));
 
     /* the image goes to the clipboard first (while this click still counts as
        a user gesture), then the composer opens with the text filled in */
     const post = (label, makeUrl) => {
       const b = el('button', 'lcts-share-btn primary', label); b.type = 'button';
       b.addEventListener('click', async () => {
-        const ok = await copyImage(blob);
-        if (!ok) download(blob, d);
+        const includeImage = incBox.checked;
+        if (includeImage) {
+          await copyImage(blob);
+          download(blob, d);
+        }
         window.open(makeUrl(text.value), '_blank', 'noopener');
-        hint.textContent = ok ? 'Card copied. In the post, press Ctrl+V (⌘V on Mac) to add it.'
-                              : 'Card downloaded. Attach it to your post.';
+        if (includeImage) {
+          hint.className = 'lcts-share-hint copied';
+          hint.innerHTML = '<strong>✅ Card copied & downloaded!</strong> In your new tab, press <strong>⌘V</strong> (Ctrl+V) or drag the downloaded card directly into your post.<br><small style="opacity:0.85;display:inline-block;margin-top:3px;">Tip: On LinkedIn, click ✕ on the link preview box to let your solve card be the hero image!</small>';
+        } else {
+          hint.className = 'lcts-share-hint';
+          hint.innerHTML = '<strong>📝 Text shared!</strong> Opened in a new tab.';
+        }
       });
       return b;
     };
@@ -316,10 +348,20 @@
       post('Post on X', (t) => 'https://x.com/intent/post?text=' + encodeURIComponent(t))
     );
     const copyBtn = el('button', 'lcts-share-btn', 'Copy image'); copyBtn.type = 'button';
-    copyBtn.addEventListener('click', async () => { hint.textContent = (await copyImage(blob)) ? 'Card copied.' : 'Copying is blocked here. Use Download instead.'; });
+    copyBtn.addEventListener('click', async () => {
+      const ok = await copyImage(blob);
+      hint.className = 'lcts-share-hint ' + (ok ? 'copied' : '');
+      hint.innerHTML = ok
+        ? '<strong>✅ Card copied!</strong> Press <strong>⌘V</strong> (or <strong>Ctrl+V</strong>) in LinkedIn/X to paste it.'
+        : 'Copying is blocked here. Use Download instead.';
+    });
     const dl = el('button', 'lcts-share-btn', 'Download'); dl.type = 'button';
-    dl.addEventListener('click', () => { download(blob, d); hint.textContent = 'Saved.'; });
-    row.append(copyBtn, dl);
+    dl.addEventListener('click', () => {
+      download(blob, d);
+      hint.className = 'lcts-share-hint downloaded';
+      hint.innerHTML = '<strong>⬇️ Card downloaded!</strong> Attach it using the photo icon on LinkedIn or X.';
+    });
+    row.append(copyBtn, dl, incLabel);
 
     const foot = el('div', 'lcts-share-foot');
     const lab = el('label'); const cb = el('input'); cb.type = 'checkbox';
