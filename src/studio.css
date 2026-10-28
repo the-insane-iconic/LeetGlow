@@ -24,6 +24,7 @@
 html, body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); -webkit-font-smoothing: antialiased; }
 body { min-height: 100vh; }
 button { font: inherit; color: inherit; }
+[hidden] { display: none !important; }
 
 /* ---- header ---------------------------------------------------------------- */
 .top {
@@ -75,6 +76,30 @@ button { font: inherit; color: inherit; }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 650; }
 .btn.chip { padding: 5px 11px; font-size: 12px; border-radius: 99px; background: #ffffff; border: 1px solid var(--line-2); color: #334155; }
 .btn.chip:hover { background: var(--panel-2); color: #0f172a; }
+.btn.btn-top-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 999px;
+  border: 1px solid var(--line-2);
+  background: #ffffff;
+  color: var(--text);
+  white-space: nowrap;
+}
+.btn.btn-top-nav:hover {
+  background: var(--panel-2);
+  border-color: #cbd5e1;
+  transform: translateY(-0.5px);
+}
+.btn.btn-top-nav.leetcode-btn svg {
+  color: #f59e0b;
+}
+.btn.btn-top-nav.support-us-btn svg {
+  color: #e11d48;
+}
 .link { background: none; border: 0; padding: 0; color: var(--accent-text, var(--accent)); cursor: pointer; font-size: inherit; text-decoration: underline; text-underline-offset: 2px; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 kbd { font-family: ui-monospace, Menlo, monospace; font-size: 11.5px; padding: 1px 6px; border-radius: 5px; border: 1px solid var(--line-2); background: var(--panel-2); color: var(--text); }

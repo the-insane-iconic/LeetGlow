@@ -671,6 +671,32 @@
     else if (globalThis.LCTSBugButton) globalThis.LCTSBugButton(helpBtn);
   }
 
+  // Header "Go to LeetCode" button: navigates or switches to LeetCode tab
+  const studioLcBtn = $('studioOpenLeetCodeBtn');
+  if (studioLcBtn) {
+    studioLcBtn.addEventListener('click', async () => {
+      try {
+        if (chrome && chrome.tabs && chrome.tabs.query) {
+          const tabs = await chrome.tabs.query({ url: ['https://leetcode.com/*', 'https://leetcode.cn/*'] });
+          if (tabs && tabs.length > 0) {
+            await chrome.tabs.update(tabs[0].id, { active: true });
+            if (tabs[0].windowId) await chrome.windows.update(tabs[0].windowId, { focused: true });
+            return;
+          }
+        }
+      } catch (e) {}
+      window.open('https://leetcode.com/problemset/', '_blank');
+    });
+  }
+
+  // Header "Support Us" button: opens standalone support page
+  const studioSupBtn = $('studioSupportUsBtn');
+  if (studioSupBtn) {
+    studioSupBtn.addEventListener('click', () => {
+      window.open('https://leetglow.vercel.app/support.html', '_blank');
+    });
+  }
+
   /* ---- controls ---------------------------------------------------------------- */
   function renderGlass() {
     document.querySelectorAll('#glass button').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.v === settings.glass)));

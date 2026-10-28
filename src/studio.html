@@ -41,6 +41,24 @@
         </svg>
         <span>Activate Key</span>
       </button>
+      <!-- Go to LeetCode Button -->
+      <button id="studioOpenLeetCodeBtn" class="btn btn-top-nav leetcode-btn" type="button" title="Go to LeetCode problem window">
+        <svg viewBox="0 0 16 16" aria-hidden="true" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 3h2a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h2"/>
+          <polyline points="9 1 13 1 13 5"/>
+          <line x1="6" y1="8" x2="13" y2="1"/>
+        </svg>
+        <span>Go to LeetCode</span>
+      </button>
+
+      <!-- Support Us Button -->
+      <button id="studioSupportUsBtn" class="btn btn-top-nav support-us-btn" type="button" title="Support LeetGlow independent development">
+        <svg viewBox="0 0 24 24" aria-hidden="true" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+        </svg>
+        <span>Support Us</span>
+      </button>
+
       <button id="getHelpBtn" class="btn support help" type="button" title="Need help or have questions? Contact support (opens email compose)">
         <svg viewBox="0 0 16 16" aria-hidden="true" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="8" cy="8" r="6.25"/>
@@ -83,7 +101,6 @@
           <button type="button" id="tabLive" class="mode-tab-btn" role="radio" aria-checked="false" data-mode="live">
             <span class="live-pulse-dot"></span>
             <span>Dynamic</span>
-            <span class="pro-pill">PRO</span>
           </button>
         </div>
       </div>
@@ -127,7 +144,7 @@
             <span class="upload-custom-sub" id="uploadCustomSub">JPG, PNG, WebP · up to 30 MB</span>
           </div>
           <div class="upload-actions">
-            <span class="pro-pill upload-pro-badge" id="uploadProBadge" aria-label="PRO feature">PRO</span>
+            <span class="pro-pill upload-pro-badge" id="uploadProBadge" aria-label="PRO feature" style="display: none;" hidden>PRO</span>
             <span class="custom-remove-btn" id="customRemoveBtn" title="Remove custom picture" hidden>
               <svg viewBox="0 0 10 10" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 2l6 6M8 2l-6 6"/></svg>
             </span>

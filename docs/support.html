@@ -20,13 +20,11 @@
       --text-main: #0f172a;
       --text-muted: #475569;
       --text-faint: #94a3b8;
-      --brand-purple: #7c3aed;
-      --brand-purple-soft: #f3e8ff;
       --brand-green: #059669;
       --brand-green-hover: #047857;
-      --brand-green-soft: #ecfdf5;
-      --rose-accent: #e11d48;
-      --rose-soft: #fff1f2;
+      --pink-soft: #fdf2f8;
+      --pink-border: #fbcfe8;
+      --pink-accent: #db2777;
       --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
@@ -36,19 +34,24 @@
       padding: 0;
     }
 
+    html, body {
+      height: 100%;
+      max-height: 100vh;
+      overflow-x: hidden;
+    }
+
     body {
       font-family: var(--font-sans);
       background-color: var(--bg-page);
       color: var(--text-main);
-      min-height: 100vh;
       display: flex;
       flex-direction: column;
-      line-height: 1.55;
+      line-height: 1.5;
       -webkit-font-smoothing: antialiased;
       position: relative;
     }
 
-    /* Subtle dot grid pattern */
+    /* Subtle architectural dot grid */
     body::before {
       content: "";
       position: fixed;
@@ -64,14 +67,15 @@
     .top-bar {
       position: relative;
       z-index: 10;
-      padding: 16px 36px;
-      background: rgba(255, 255, 255, 0.92);
+      padding: 12px 32px;
+      background: rgba(255, 255, 255, 0.94);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border-subtle);
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-shrink: 0;
     }
     .brand-link {
       display: inline-flex;
@@ -80,29 +84,29 @@
       text-decoration: none;
       color: var(--text-main);
       font-weight: 800;
-      font-size: 18px;
+      font-size: 17px;
       letter-spacing: -0.02em;
     }
     .brand-logo {
-      width: 30px;
-      height: 30px;
+      width: 28px;
+      height: 28px;
       border-radius: 7px;
     }
     .top-bar-right {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
     .btn-ghost {
       display: inline-flex;
       align-items: center;
-      gap: 7px;
+      gap: 6px;
       color: var(--text-muted);
       text-decoration: none;
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 600;
-      padding: 7px 15px;
-      border-radius: 9px;
+      padding: 6px 14px;
+      border-radius: 8px;
       border: 1px solid var(--border-subtle);
       background: var(--bg-surface);
       transition: all 0.15s ease;
@@ -111,149 +115,162 @@
       color: var(--text-main);
       border-color: #cbd5e1;
       background: #f1f5f9;
-      transform: translateY(-1px);
+      transform: translateY(-0.5px);
     }
 
-    /* Main Split Container */
+    /* Main Split Container: Perfectly balanced & vertically centered */
     .support-wrapper {
       position: relative;
       z-index: 1;
       flex: 1;
-      max-width: 1160px;
+      max-width: 1120px;
       width: 100%;
       margin: 0 auto;
-      padding: 44px 24px 64px;
+      padding: clamp(20px, 3.5vh, 36px) 24px 24px;
       display: grid;
-      grid-template-columns: 1.15fr 0.95fr;
-      gap: 52px;
+      grid-template-columns: 1.25fr 0.85fr;
+      gap: 36px;
       align-items: start;
     }
 
-    /* Left Column: Story & Deliverables */
+    /* Left Column: Mission, Deliverables & Gratitude */
     .support-story {
       display: flex;
       flex-direction: column;
-      gap: 22px;
+      gap: 12px;
     }
+
+    /* Pink theme badge for Independent & Open Source */
     .story-badge {
       align-self: flex-start;
       display: inline-flex;
       align-items: center;
-      gap: 7px;
-      background: var(--rose-soft);
-      color: var(--rose-accent);
-      border: 1px solid #fecdd3;
-      padding: 5px 14px;
+      gap: 6px;
+      background: var(--pink-soft);
+      color: var(--pink-accent);
+      border: 1px solid var(--pink-border);
+      padding: 4px 12px;
       border-radius: 9999px;
-      font-size: 12.5px;
+      font-size: 12px;
       font-weight: 650;
       letter-spacing: 0.01em;
     }
     .story-badge svg {
-      width: 13px;
-      height: 13px;
-      fill: currentColor;
+      width: 12px;
+      height: 12px;
+      fill: var(--pink-accent);
     }
 
     .story-title {
-      font-size: 40px;
+      font-size: 32px;
       font-weight: 850;
-      line-height: 1.18;
-      letter-spacing: -0.028em;
+      line-height: 1.15;
+      letter-spacing: -0.025em;
       color: var(--text-main);
     }
+
+    /* Gradient pink and slight purple for LeetGlow */
     .story-title .gradient-brand {
-      background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+      background: linear-gradient(135deg, #f43f5e 0%, #ec4899 45%, #a855f7 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
       display: inline-block;
     }
 
     .story-intro {
-      font-size: 15.5px;
+      font-size: 13.5px;
       color: var(--text-muted);
-      line-height: 1.62;
-      max-width: 530px;
+      line-height: 1.5;
+      max-width: 520px;
     }
 
-    /* Creator Quote Card */
+    /* Creator Quote Card: Consistent pink/purple accent */
     .creator-quote-card {
-      background: #fbfbfe;
-      border: 1px solid #ede9fe;
-      border-left: 4px solid var(--brand-purple);
-      border-radius: 14px;
-      padding: 20px 22px;
-      box-shadow: 0 2px 8px -2px rgba(124, 58, 237, 0.04);
+      background: #fff8fc;
+      border: 1px solid #fce7f3;
+      border-left: 3.5px solid #ec4899;
+      border-radius: 12px;
+      padding: 12px 16px;
+      box-shadow: 0 2px 8px -2px rgba(236, 72, 153, 0.06);
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 6px;
     }
     .quote-icon-wrap {
-      color: var(--brand-purple);
+      color: #ec4899;
       margin-bottom: -2px;
     }
+    .quote-icon-wrap svg {
+      width: 18px;
+      height: 18px;
+    }
     .quote-text {
-      font-size: 14px;
+      font-size: 12.5px;
       color: #334155;
       font-style: italic;
-      line-height: 1.6;
+      line-height: 1.5;
     }
     .quote-author {
-      font-size: 13px;
+      font-size: 11.5px;
       font-weight: 600;
       color: var(--text-muted);
       font-style: normal;
     }
 
-    /* What your support delivers */
+    /* Deliverables Section: Compact 2x2 Grid with Clean SVGs */
     .deliverables-section {
-      margin-top: 6px;
+      margin-top: 2px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 8px;
     }
     .deliverables-heading {
-      font-size: 20px;
-      font-weight: 800;
+      font-size: 16px;
+      font-weight: 750;
       color: var(--text-main);
       letter-spacing: -0.015em;
     }
 
-    /* 2x2 Grid of Deliverables */
     .deliverables-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 14px;
+      gap: 10px;
     }
     .deliverable-card {
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
-      border-radius: 16px;
-      padding: 16px 16px;
+      border-radius: 12px;
+      padding: 10px 12px;
       display: flex;
       align-items: flex-start;
-      gap: 12px;
+      gap: 10px;
       box-shadow: 0 1px 3px rgba(15, 23, 42, 0.02);
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .deliverable-card:hover {
       border-color: #cbd5e1;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.05);
+      transform: translateY(-1.5px);
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
     }
 
     .del-icon-box {
-      width: 38px;
-      height: 38px;
-      border-radius: 10px;
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
     }
+    .del-icon-box svg {
+      width: 15px;
+      height: 15px;
+    }
     .del-icon-box.purple {
-      background: #f3e8ff;
-      color: #9333ea;
+      background: #fdf2f8;
+      color: #db2777;
     }
     .del-icon-box.orange {
       background: #ffedd5;
@@ -273,82 +290,60 @@
       min-width: 0;
     }
     .del-title {
-      font-size: 13.5px;
+      font-size: 12px;
       font-weight: 700;
       color: var(--text-main);
-      margin-bottom: 3px;
-      line-height: 1.35;
+      margin-bottom: 2px;
+      line-height: 1.3;
     }
     .del-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    /* Right Column: Support Our Work Container (Shrunk by 10-15% for perfect balance) */
+    .support-checkout-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 20px 20px 18px;
+      box-shadow: 0 12px 32px -6px rgba(15, 23, 42, 0.07), 0 3px 10px -2px rgba(15, 23, 42, 0.03);
+      max-width: 440px;
+      width: 100%;
+      justify-self: end;
+    }
+
+    .checkout-header {
+      margin-bottom: 12px;
+    }
+    .checkout-title {
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.015em;
+      margin-bottom: 4px;
+    }
+    .checkout-desc {
       font-size: 12px;
       color: var(--text-muted);
       line-height: 1.45;
     }
 
-    /* Right Column: Checkout Card */
-    .support-checkout-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: 24px;
-      padding: 32px 28px;
-      box-shadow: 0 16px 40px -8px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.03);
-      position: sticky;
-      top: 32px;
-    }
-
-    .checkout-header {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-bottom: 22px;
-    }
-    .checkout-header-row {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-    .checkout-badge-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      background: var(--brand-purple-soft);
-      color: var(--brand-purple);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    .checkout-badge-icon svg {
-      width: 22px;
-      height: 22px;
-      fill: currentColor;
-    }
-    .checkout-title {
-      font-size: 22px;
-      font-weight: 850;
-      color: var(--text-main);
-      letter-spacing: -0.015em;
-    }
-    .checkout-desc {
-      font-size: 13.5px;
-      color: var(--text-muted);
-      line-height: 1.5;
-    }
-
-    /* Preset amount chips */
+    /* Preset amount chips: Green active styling preserved */
     .chips-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      margin-bottom: 16px;
+      gap: 6px;
+      margin-bottom: 12px;
     }
     .chip-btn {
-      height: 44px;
+      height: 38px;
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
-      border-radius: 12px;
+      border-radius: 10px;
       font-family: var(--font-sans);
-      font-size: 14.5px;
+      font-size: 13.5px;
       font-weight: 700;
       color: var(--text-main);
       cursor: pointer;
@@ -361,32 +356,31 @@
       border-color: #cbd5e1;
       background: #f8fafc;
     }
-    /* Green active chip to feel positive and generous */
     .chip-btn.active {
       background: var(--brand-green);
       color: #ffffff;
       border-color: var(--brand-green);
-      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.28);
+      box-shadow: 0 3px 10px rgba(5, 150, 105, 0.28);
     }
 
     /* Custom amount input */
     .field-label {
       display: block;
-      font-size: 12.5px;
+      font-size: 11.5px;
       font-weight: 650;
       color: #334155;
-      margin-bottom: 7px;
+      margin-bottom: 5px;
     }
     .custom-input-wrap {
       position: relative;
       display: flex;
       align-items: center;
-      margin-bottom: 18px;
+      margin-bottom: 12px;
     }
     .custom-currency-symbol {
       position: absolute;
-      left: 16px;
-      font-size: 17px;
+      left: 14px;
+      font-size: 15px;
       font-weight: 750;
       color: #475569;
       pointer-events: none;
@@ -394,12 +388,12 @@
     }
     .custom-amount-input {
       width: 100%;
-      height: 48px;
-      padding: 0 16px 0 36px;
+      height: 40px;
+      padding: 0 14px 0 32px;
       border: 1px solid var(--border-subtle);
-      border-radius: 12px;
+      border-radius: 10px;
       font-family: var(--font-sans);
-      font-size: 17px;
+      font-size: 15px;
       font-weight: 750;
       color: var(--text-main);
       background: var(--bg-surface);
@@ -408,12 +402,12 @@
     }
     .custom-amount-input:focus {
       border-color: var(--border-focus);
-      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+      box-shadow: 0 0 0 2.5px rgba(16, 185, 129, 0.15);
     }
 
-    /* Supporter Inputs with clean left vector icons */
+    /* Supporter Inputs with vector icons */
     .input-field-group {
-      margin-bottom: 14px;
+      margin-bottom: 9px;
     }
     .input-with-icon-wrap {
       position: relative;
@@ -422,7 +416,7 @@
     }
     .field-vector-icon {
       position: absolute;
-      left: 14px;
+      left: 12px;
       color: var(--text-faint);
       pointer-events: none;
       display: flex;
@@ -430,16 +424,16 @@
       justify-content: center;
     }
     .field-vector-icon.top-align {
-      top: 13px;
+      top: 10px;
     }
     .supporter-input {
       width: 100%;
-      height: 44px;
-      padding: 0 14px 0 40px;
+      height: 38px;
+      padding: 0 12px 0 34px;
       border: 1px solid var(--border-subtle);
-      border-radius: 10px;
+      border-radius: 9px;
       font-family: var(--font-sans);
-      font-size: 13.5px;
+      font-size: 12.5px;
       color: var(--text-main);
       background: var(--bg-surface);
       outline: none;
@@ -447,71 +441,65 @@
     }
     .supporter-input:focus {
       border-color: var(--border-focus);
-      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+      box-shadow: 0 0 0 2.5px rgba(16, 185, 129, 0.12);
     }
     textarea.supporter-input {
-      height: 66px;
-      padding: 10px 14px 10px 40px;
+      height: 48px;
+      padding: 8px 12px 8px 34px;
       resize: vertical;
-      line-height: 1.45;
+      line-height: 1.4;
     }
 
-    /* Emerald Green Primary Button */
+    /* Emerald Green Primary Button (Clean without heart icon) */
     .btn-pay-emerald {
       width: 100%;
-      height: 52px;
+      height: 44px;
       background: linear-gradient(135deg, #10b981 0%, #059669 100%);
       color: #ffffff;
       border: none;
-      border-radius: 12px;
+      border-radius: 10px;
       font-family: var(--font-sans);
-      font-size: 16px;
+      font-size: 14.5px;
       font-weight: 750;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 9px;
       cursor: pointer;
-      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+      box-shadow: 0 3px 12px rgba(16, 185, 129, 0.35);
       transition: all 0.18s ease;
-      margin-top: 14px;
+      margin-top: 10px;
     }
     .btn-pay-emerald:hover {
       background: linear-gradient(135deg, #059669 0%, #047857 100%);
-      transform: translateY(-1px);
-      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
+      transform: translateY(-0.5px);
+      box-shadow: 0 5px 15px rgba(16, 185, 129, 0.45);
     }
     .btn-pay-emerald:active {
       transform: translateY(0.5px);
     }
-    .btn-pay-emerald svg {
-      width: 18px;
-      height: 18px;
-      fill: currentColor;
-    }
 
     /* Trust Footer with Secure Shield & Payment Badges */
     .trust-container {
-      margin-top: 18px;
-      padding-top: 14px;
+      margin-top: 12px;
+      padding-top: 10px;
       border-top: 1px solid #f1f5f9;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: 8px;
     }
     .trust-security-text {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      font-size: 12px;
+      gap: 5px;
+      font-size: 11px;
       font-weight: 600;
       color: var(--text-muted);
     }
     .trust-security-text svg {
-      width: 14px;
-      height: 14px;
+      width: 13px;
+      height: 13px;
       fill: #10b981;
       flex-shrink: 0;
     }
@@ -519,18 +507,18 @@
     .trust-methods-row {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
     }
     .pay-chip {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      height: 22px;
-      padding: 0 7px;
-      border-radius: 5px;
+      height: 20px;
+      padding: 0 6px;
+      border-radius: 4px;
       background: #f8fafc;
       border: 1px solid var(--border-subtle);
-      font-size: 10.5px;
+      font-size: 10px;
       font-weight: 700;
       color: #334155;
       letter-spacing: 0.02em;
@@ -545,16 +533,16 @@
       font-weight: 850;
       font-style: italic;
       font-family: serif;
-      font-size: 11.5px;
+      font-size: 11px;
     }
     .pay-chip.mc-chip {
-      padding: 0 5px;
+      padding: 0 4px;
       background: #ffffff;
       gap: 0;
     }
     .mc-dot {
-      width: 11px;
-      height: 11px;
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
       display: inline-block;
     }
@@ -566,7 +554,7 @@
       background: #f59e0b;
     }
     .pay-chip.netbank-chip {
-      font-size: 10px;
+      font-size: 9.5px;
       font-weight: 650;
       color: #475569;
     }
@@ -574,70 +562,74 @@
     /* Success pane */
     .success-pane {
       text-align: center;
-      padding: 32px 14px;
+      padding: 24px 10px;
     }
     .success-icon-wrap {
-      width: 60px;
-      height: 60px;
+      width: 52px;
+      height: 52px;
       background: #dcfce7;
       color: #15803d;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 18px;
+      margin: 0 auto 14px;
     }
     .success-icon-wrap svg {
-      width: 28px;
-      height: 28px;
+      width: 24px;
+      height: 24px;
       fill: currentColor;
     }
     .success-pane h3 {
-      font-size: 22px;
+      font-size: 20px;
       font-weight: 800;
       color: var(--text-main);
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
     .success-pane p {
-      font-size: 14px;
+      font-size: 13px;
       color: var(--text-muted);
-      line-height: 1.55;
-      max-width: 380px;
+      line-height: 1.5;
+      max-width: 360px;
       margin: 0 auto;
     }
 
     /* Responsive Breakdown */
     @media (max-width: 960px) {
+      html, body {
+        height: auto;
+        max-height: none;
+      }
       .support-wrapper {
         grid-template-columns: 1fr;
-        gap: 40px;
-        padding-top: 28px;
+        gap: 32px;
+        padding: 24px 20px 48px;
+        align-items: start;
       }
       .support-checkout-card {
-        position: static;
-        max-width: 580px;
+        max-width: 520px;
         margin: 0 auto;
-        width: 100%;
+        justify-self: center;
       }
     }
 
     @media (max-width: 580px) {
       .top-bar {
-        padding: 14px 20px;
+        padding: 12px 18px;
       }
       .story-title {
-        font-size: 32px;
+        font-size: 28px;
       }
       .deliverables-grid {
         grid-template-columns: 1fr;
       }
       .support-checkout-card {
-        padding: 24px 18px;
+        padding: 18px 16px;
       }
       .trust-container {
         flex-direction: column;
         align-items: center;
-        gap: 12px;
+        gap: 10px;
       }
     }
   </style>
@@ -652,7 +644,7 @@
     </a>
     <div class="top-bar-right">
       <a href="https://chromewebstore.google.com/detail/ecpfpadofaimilfpjedgoedhoaglpjdb" target="_blank" rel="noopener" class="btn-ghost">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="21.17" y1="8" x2="12" y2="8"/><line x1="3.95" y1="6.06" x2="8.54" y2="14"/><line x1="10.88" y1="21.94" x2="15.46" y2="14"/>
         </svg>
         <span>Add to Chrome</span>
@@ -661,16 +653,18 @@
     </div>
   </header>
 
-  <!-- Split Screen Content -->
+  <!-- Split Screen Content: Perfectly symmetric & vertically centered -->
   <main class="support-wrapper">
 
     <!-- Left Column: Mission, Deliverables & Gratitude -->
     <div class="support-story">
+      <!-- Pink themed Independent & Open Source badge -->
       <div class="story-badge">
         <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
         <span>Independent & Open Source</span>
       </div>
 
+      <!-- Gradient Pink & Slight Purple on LeetGlow -->
       <h1 class="story-title">
         Fueling the future of<br>
         <span class="gradient-brand">LeetGlow.</span>
@@ -680,10 +674,10 @@
         A free, community-driven extension that turns your LeetCode experience into a focused, inspiring, and personalized space.
       </p>
 
-      <!-- Creator Quote Card with Purple Accent -->
+      <!-- Creator Quote Card with Pink Accent -->
       <div class="creator-quote-card">
         <div class="quote-icon-wrap">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+          <svg viewBox="0 0 24 24" fill="currentColor">
             <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
           </svg>
         </div>
@@ -695,7 +689,7 @@
         </div>
       </div>
 
-      <!-- Deliverables Section: 2x2 Grid with Clean SVGs -->
+      <!-- Deliverables Section: Compact 2x2 Grid with Clean SVGs -->
       <div class="deliverables-section">
         <h2 class="deliverables-heading">Your support helps us deliver</h2>
         <div class="deliverables-grid">
@@ -703,7 +697,7 @@
           <!-- Card 1: 4K CDN Hosting -->
           <div class="deliverable-card">
             <div class="del-icon-box purple">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <svg viewBox="0 0 24 24" fill="currentColor">
                 <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
               </svg>
             </div>
@@ -716,7 +710,7 @@
           <!-- Card 2: Fresh Weekly Themes -->
           <div class="deliverable-card">
             <div class="del-icon-box orange">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <svg viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2C6.49 2 2 6.49 2 12c0 4.42 3.58 8 8 8 .55 0 1-.45 1-1 0-.28-.11-.53-.29-.71-.18-.18-.29-.43-.29-.71 0-.55.45-1 1-1h1.58c3.87 0 7-3.13 7-7 0-4.97-4.03-9-9-9zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 8 6.5 8 8 8.67 8 9.5 7.33 11 6.5 11zm3-4C8.67 7 8 6.33 8 5.5S8.67 4 9.5 4s1.5.67 1.5 1.5S10.33 7 9.5 7zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 4 14.5 4s1.5.67 1.5 1.5S15.33 7 14.5 7zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 8 17.5 8s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
               </svg>
             </div>
@@ -729,7 +723,7 @@
           <!-- Card 3: Bespoke Focus Soundscapes -->
           <div class="deliverable-card">
             <div class="del-icon-box violet">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <svg viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
               </svg>
             </div>
@@ -742,7 +736,7 @@
           <!-- Card 4: Lightweight & Reliable -->
           <div class="deliverable-card">
             <div class="del-icon-box indigo">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <svg viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
               </svg>
             </div>
@@ -756,21 +750,16 @@
       </div>
     </div>
 
-    <!-- Right Column: Elevated Support Checkout Card -->
+    <!-- Right Column: Support Our Work Container (Shrunk by 10-15%, No Heart Icon in Header) -->
     <div class="support-checkout-card" id="checkoutCard">
       <div class="checkout-header">
-        <div class="checkout-header-row">
-          <div class="checkout-badge-icon">
-            <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-          </div>
-          <h2 class="checkout-title">Support Our Work</h2>
-        </div>
+        <h2 class="checkout-title">Support Our Work</h2>
         <p class="checkout-desc">Pick an amount or enter a <strong>custom contribution</strong>. Every bit helps us keep LeetGlow free and growing.</p>
       </div>
 
       <!-- Checkout Interactive Form -->
       <div id="checkoutFormPane">
-        <!-- Preset Chips (₹50 active by default) -->
+        <!-- Preset Chips: Green active styling -->
         <div class="chips-grid">
           <button type="button" class="chip-btn active" data-amt="50">₹50</button>
           <button type="button" class="chip-btn" data-amt="100">₹100</button>
@@ -790,7 +779,7 @@
           <label for="supporterName" class="field-label">Your Name (Optional)</label>
           <div class="input-with-icon-wrap">
             <div class="field-vector-icon">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                 <circle cx="12" cy="7" r="4"/>
               </svg>
@@ -804,7 +793,7 @@
           <label for="supporterEmail" class="field-label">Email Address (For receipt)</label>
           <div class="input-with-icon-wrap">
             <div class="field-vector-icon">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect width="20" height="16" x="2" y="4" rx="2"/>
                 <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
               </svg>
@@ -818,7 +807,7 @@
           <label for="supporterMessage" class="field-label">Message / Note (Optional)</label>
           <div class="input-with-icon-wrap">
             <div class="field-vector-icon top-align">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
               </svg>
             </div>
@@ -826,9 +815,8 @@
           </div>
         </div>
 
-        <!-- Primary Action CTA Button: Emerald Green for positive giving emotion -->
+        <!-- Primary Action CTA Button: Green button WITHOUT heart icon -->
         <button type="button" id="payRazorpayBtn" class="btn-pay-emerald">
-          <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
           <span id="payBtnLabel">Support with ₹50</span>
         </button>
 
@@ -857,7 +845,7 @@
         </div>
         <h3>Thank You So Much!</h3>
         <p>Your contribution was successful. You are actively keeping LeetGlow 100% free, fast, and inspiring for every developer grinding LeetCode.</p>
-        <a href="index.html" class="btn-ghost" style="margin-top: 20px; display: inline-flex;">Back to LeetGlow</a>
+        <a href="index.html" class="btn-ghost" style="margin-top: 16px; display: inline-flex;">Back to LeetGlow</a>
       </div>
     </div>
 
@@ -935,7 +923,7 @@
             email: email || undefined
           },
           theme: {
-            color: '#059669' // Emerald Green to match the button & active chip!
+            color: '#059669' // Emerald Green matching the UI button
           },
           handler: function(response) {
             formPane.style.display = 'none';
