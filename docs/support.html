@@ -8,24 +8,26 @@
   <link rel="icon" type="image/png" href="assets/icon128.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <style>
     :root {
       --bg-page: #f8fafc;
       --bg-surface: #ffffff;
-      --bg-surface-subtle: #f1f5f9;
+      --bg-surface-subtle: #f8fafc;
       --border-subtle: #e2e8f0;
-      --border-focus: #3b82f6;
+      --border-focus: #10b981;
       --text-main: #0f172a;
       --text-muted: #475569;
       --text-faint: #94a3b8;
-      --primary: #0284c7;
-      --primary-hover: #0369a1;
+      --brand-purple: #7c3aed;
+      --brand-purple-soft: #f3e8ff;
+      --brand-green: #059669;
+      --brand-green-hover: #047857;
+      --brand-green-soft: #ecfdf5;
       --rose-accent: #e11d48;
       --rose-soft: #fff1f2;
       --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
     }
 
     *, *::before, *::after {
@@ -43,12 +45,29 @@
       flex-direction: column;
       line-height: 1.55;
       -webkit-font-smoothing: antialiased;
+      position: relative;
     }
 
-    /* Top simple header */
+    /* Subtle dot grid pattern */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+      background-size: 28px 28px;
+      opacity: 0.35;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Top minimalist navigation bar */
     .top-bar {
-      padding: 18px 32px;
-      background: var(--bg-surface);
+      position: relative;
+      z-index: 10;
+      padding: 16px 36px;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border-subtle);
       display: flex;
       align-items: center;
@@ -60,14 +79,14 @@
       gap: 10px;
       text-decoration: none;
       color: var(--text-main);
-      font-weight: 700;
-      font-size: 17px;
-      letter-spacing: -0.01em;
+      font-weight: 800;
+      font-size: 18px;
+      letter-spacing: -0.02em;
     }
     .brand-logo {
-      width: 28px;
-      height: 28px;
-      border-radius: 6px;
+      width: 30px;
+      height: 30px;
+      border-radius: 7px;
     }
     .top-bar-right {
       display: flex;
@@ -77,13 +96,13 @@
     .btn-ghost {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 7px;
       color: var(--text-muted);
       text-decoration: none;
       font-size: 13px;
-      font-weight: 550;
-      padding: 6px 14px;
-      border-radius: 8px;
+      font-weight: 600;
+      padding: 7px 15px;
+      border-radius: 9px;
       border: 1px solid var(--border-subtle);
       background: var(--bg-surface);
       transition: all 0.15s ease;
@@ -91,196 +110,273 @@
     .btn-ghost:hover {
       color: var(--text-main);
       border-color: #cbd5e1;
-      background: var(--bg-surface-subtle);
+      background: #f1f5f9;
+      transform: translateY(-1px);
     }
 
     /* Main Split Container */
     .support-wrapper {
+      position: relative;
+      z-index: 1;
       flex: 1;
-      max-width: 1140px;
+      max-width: 1160px;
       width: 100%;
       margin: 0 auto;
-      padding: 48px 24px 64px;
+      padding: 44px 24px 64px;
       display: grid;
       grid-template-columns: 1.15fr 0.95fr;
-      gap: 48px;
+      gap: 52px;
       align-items: start;
     }
 
-    /* Left Half: The Story & Deliverables */
+    /* Left Column: Story & Deliverables */
     .support-story {
       display: flex;
       flex-direction: column;
-      gap: 24px;
+      gap: 22px;
     }
     .story-badge {
       align-self: flex-start;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 7px;
       background: var(--rose-soft);
       color: var(--rose-accent);
       border: 1px solid #fecdd3;
-      padding: 4px 12px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.02em;
+      padding: 5px 14px;
+      border-radius: 9999px;
+      font-size: 12.5px;
+      font-weight: 650;
+      letter-spacing: 0.01em;
     }
+    .story-badge svg {
+      width: 13px;
+      height: 13px;
+      fill: currentColor;
+    }
+
     .story-title {
-      font-size: 32px;
-      font-weight: 800;
-      line-height: 1.25;
-      letter-spacing: -0.02em;
+      font-size: 40px;
+      font-weight: 850;
+      line-height: 1.18;
+      letter-spacing: -0.028em;
       color: var(--text-main);
     }
-    .story-title span {
-      color: var(--primary);
+    .story-title .gradient-brand {
+      background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-block;
     }
+
     .story-intro {
-      font-size: 15px;
+      font-size: 15.5px;
       color: var(--text-muted);
-      line-height: 1.65;
+      line-height: 1.62;
+      max-width: 530px;
     }
-    .creator-quote {
-      background: var(--bg-surface);
-      border-left: 3px solid var(--primary);
-      border-radius: 0 10px 10px 0;
-      padding: 16px 20px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-      border-top: 1px solid var(--border-subtle);
-      border-right: 1px solid var(--border-subtle);
-      border-bottom: 1px solid var(--border-subtle);
+
+    /* Creator Quote Card */
+    .creator-quote-card {
+      background: #fbfbfe;
+      border: 1px solid #ede9fe;
+      border-left: 4px solid var(--brand-purple);
+      border-radius: 14px;
+      padding: 20px 22px;
+      box-shadow: 0 2px 8px -2px rgba(124, 58, 237, 0.04);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
-    .creator-quote p {
+    .quote-icon-wrap {
+      color: var(--brand-purple);
+      margin-bottom: -2px;
+    }
+    .quote-text {
       font-size: 14px;
       color: #334155;
       font-style: italic;
-      margin-bottom: 8px;
+      line-height: 1.6;
     }
-    .creator-quote span {
-      font-size: 12.5px;
+    .quote-author {
+      font-size: 13px;
       font-weight: 600;
       color: var(--text-muted);
       font-style: normal;
     }
 
-    .deliverables-card {
+    /* What your support delivers */
+    .deliverables-section {
+      margin-top: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .deliverables-heading {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.015em;
+    }
+
+    /* 2x2 Grid of Deliverables */
+    .deliverables-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+    .deliverable-card {
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
       border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.04);
-    }
-    .deliverables-heading {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--text-main);
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .deliverables-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-    .deliverable-item {
+      padding: 16px 16px;
       display: flex;
       align-items: flex-start;
       gap: 12px;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.02);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .del-icon {
-      width: 24px;
-      height: 24px;
-      border-radius: 6px;
-      background: #eff6ff;
-      color: var(--primary);
+    .deliverable-card:hover {
+      border-color: #cbd5e1;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.05);
+    }
+
+    .del-icon-box {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      font-size: 12px;
-      margin-top: 2px;
     }
-    .del-content strong {
-      display: block;
-      font-size: 14px;
-      font-weight: 650;
+    .del-icon-box.purple {
+      background: #f3e8ff;
+      color: #9333ea;
+    }
+    .del-icon-box.orange {
+      background: #ffedd5;
+      color: #ea580c;
+    }
+    .del-icon-box.violet {
+      background: #ede9fe;
+      color: #7c3aed;
+    }
+    .del-icon-box.indigo {
+      background: #e0e7ff;
+      color: #4f46e5;
+    }
+
+    .del-body {
+      flex: 1;
+      min-width: 0;
+    }
+    .del-title {
+      font-size: 13.5px;
+      font-weight: 700;
       color: var(--text-main);
-      margin-bottom: 2px;
+      margin-bottom: 3px;
+      line-height: 1.35;
     }
-    .del-content p {
-      font-size: 13px;
+    .del-desc {
+      font-size: 12px;
       color: var(--text-muted);
       line-height: 1.45;
     }
 
-    /* Right Half: Payment Form */
+    /* Right Column: Checkout Card */
     .support-checkout-card {
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
-      border-radius: 20px;
+      border-radius: 24px;
       padding: 32px 28px;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+      box-shadow: 0 16px 40px -8px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.03);
       position: sticky;
       top: 32px;
     }
-    .checkout-head {
+
+    .checkout-header {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
       margin-bottom: 22px;
     }
+    .checkout-header-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .checkout-badge-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: var(--brand-purple-soft);
+      color: var(--brand-purple);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .checkout-badge-icon svg {
+      width: 22px;
+      height: 22px;
+      fill: currentColor;
+    }
     .checkout-title {
-      font-size: 20px;
-      font-weight: 700;
+      font-size: 22px;
+      font-weight: 850;
       color: var(--text-main);
-      margin-bottom: 6px;
+      letter-spacing: -0.015em;
     }
     .checkout-desc {
       font-size: 13.5px;
       color: var(--text-muted);
+      line-height: 1.5;
     }
 
     /* Preset amount chips */
-    .amount-label {
-      display: block;
-      font-size: 13px;
-      font-weight: 600;
-      color: #334155;
-      margin-bottom: 8px;
-    }
     .chips-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 8px;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
     }
     .chip-btn {
-      padding: 10px 0;
-      background: var(--bg-surface-subtle);
+      height: 44px;
+      background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
-      border-radius: 10px;
+      border-radius: 12px;
       font-family: var(--font-sans);
-      font-size: 14px;
-      font-weight: 600;
+      font-size: 14.5px;
+      font-weight: 700;
       color: var(--text-main);
       cursor: pointer;
-      transition: all 0.15s ease;
-      text-align: center;
+      transition: all 0.16s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .chip-btn:hover {
-      border-color: #94a3b8;
-      background: #e2e8f0;
+      border-color: #cbd5e1;
+      background: #f8fafc;
     }
+    /* Green active chip to feel positive and generous */
     .chip-btn.active {
-      background: #0284c7;
+      background: var(--brand-green);
       color: #ffffff;
-      border-color: #0284c7;
-      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3);
+      border-color: var(--brand-green);
+      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.28);
     }
 
-    /* Custom input box */
+    /* Custom amount input */
+    .field-label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 650;
+      color: #334155;
+      margin-bottom: 7px;
+    }
     .custom-input-wrap {
       position: relative;
       display: flex;
@@ -289,21 +385,22 @@
     }
     .custom-currency-symbol {
       position: absolute;
-      left: 14px;
-      font-size: 18px;
-      font-weight: 700;
-      color: #64748b;
+      left: 16px;
+      font-size: 17px;
+      font-weight: 750;
+      color: #475569;
       pointer-events: none;
+      user-select: none;
     }
     .custom-amount-input {
       width: 100%;
       height: 48px;
-      padding: 0 14px 0 32px;
+      padding: 0 16px 0 36px;
       border: 1px solid var(--border-subtle);
-      border-radius: 10px;
+      border-radius: 12px;
       font-family: var(--font-sans);
-      font-size: 18px;
-      font-weight: 700;
+      font-size: 17px;
+      font-weight: 750;
       color: var(--text-main);
       background: var(--bg-surface);
       outline: none;
@@ -311,124 +408,236 @@
     }
     .custom-amount-input:focus {
       border-color: var(--border-focus);
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
     }
 
-    /* Contributor Fields */
-    .form-group {
+    /* Supporter Inputs with clean left vector icons */
+    .input-field-group {
       margin-bottom: 14px;
     }
-    .form-label {
-      display: block;
-      font-size: 12.5px;
-      font-weight: 600;
-      color: #475569;
-      margin-bottom: 5px;
+    .input-with-icon-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
     }
-    .form-input {
+    .field-vector-icon {
+      position: absolute;
+      left: 14px;
+      color: var(--text-faint);
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .field-vector-icon.top-align {
+      top: 13px;
+    }
+    .supporter-input {
       width: 100%;
-      height: 40px;
-      padding: 0 12px;
+      height: 44px;
+      padding: 0 14px 0 40px;
       border: 1px solid var(--border-subtle);
-      border-radius: 8px;
+      border-radius: 10px;
       font-family: var(--font-sans);
       font-size: 13.5px;
       color: var(--text-main);
       background: var(--bg-surface);
       outline: none;
-      transition: border-color 0.15s;
+      transition: all 0.15s ease;
     }
-    .form-input:focus {
+    .supporter-input:focus {
       border-color: var(--border-focus);
-      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
     }
-    textarea.form-input {
-      height: 60px;
-      padding: 8px 12px;
+    textarea.supporter-input {
+      height: 66px;
+      padding: 10px 14px 10px 40px;
       resize: vertical;
+      line-height: 1.45;
     }
 
-    /* Pay CTA button */
-    .btn-pay-rzp {
+    /* Emerald Green Primary Button */
+    .btn-pay-emerald {
       width: 100%;
-      height: 48px;
-      background: #0284c7;
+      height: 52px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
       color: #ffffff;
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       font-family: var(--font-sans);
-      font-size: 15px;
-      font-weight: 700;
+      font-size: 16px;
+      font-weight: 750;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 9px;
       cursor: pointer;
-      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.25);
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
       transition: all 0.18s ease;
-      margin-top: 10px;
+      margin-top: 14px;
     }
-    .btn-pay-rzp:hover {
-      background: #0369a1;
+    .btn-pay-emerald:hover {
+      background: linear-gradient(135deg, #059669 0%, #047857 100%);
       transform: translateY(-1px);
-      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
     }
-    .btn-pay-rzp:active {
+    .btn-pay-emerald:active {
       transform: translateY(0.5px);
     }
+    .btn-pay-emerald svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
 
-    .trust-footer {
-      margin-top: 16px;
+    /* Trust Footer with Secure Shield & Payment Badges */
+    .trust-container {
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid #f1f5f9;
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 6px;
-      font-size: 11.5px;
-      color: var(--text-faint);
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
     }
-    .trust-footer svg {
-      width: 13px;
-      height: 13px;
+    .trust-security-text {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .trust-security-text svg {
+      width: 14px;
+      height: 14px;
       fill: #10b981;
+      flex-shrink: 0;
     }
 
-    /* Success Toast */
+    .trust-methods-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pay-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 22px;
+      padding: 0 7px;
+      border-radius: 5px;
+      background: #f8fafc;
+      border: 1px solid var(--border-subtle);
+      font-size: 10.5px;
+      font-weight: 700;
+      color: #334155;
+      letter-spacing: 0.02em;
+      user-select: none;
+    }
+    .pay-chip.upi-chip {
+      color: #0f766e;
+      font-weight: 800;
+    }
+    .pay-chip.visa-chip {
+      color: #1e40af;
+      font-weight: 850;
+      font-style: italic;
+      font-family: serif;
+      font-size: 11.5px;
+    }
+    .pay-chip.mc-chip {
+      padding: 0 5px;
+      background: #ffffff;
+      gap: 0;
+    }
+    .mc-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .mc-dot.red {
+      background: #ef4444;
+      margin-right: -4px;
+    }
+    .mc-dot.amber {
+      background: #f59e0b;
+    }
+    .pay-chip.netbank-chip {
+      font-size: 10px;
+      font-weight: 650;
+      color: #475569;
+    }
+
+    /* Success pane */
     .success-pane {
       text-align: center;
-      padding: 24px 12px;
+      padding: 32px 14px;
     }
-    .success-icon {
-      width: 56px;
-      height: 56px;
+    .success-icon-wrap {
+      width: 60px;
+      height: 60px;
       background: #dcfce7;
       color: #15803d;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 26px;
-      margin: 0 auto 16px;
+      margin: 0 auto 18px;
+    }
+    .success-icon-wrap svg {
+      width: 28px;
+      height: 28px;
+      fill: currentColor;
     }
     .success-pane h3 {
-      font-size: 20px;
-      font-weight: 750;
+      font-size: 22px;
+      font-weight: 800;
       color: var(--text-main);
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
     .success-pane p {
       font-size: 14px;
       color: var(--text-muted);
-      line-height: 1.5;
+      line-height: 1.55;
+      max-width: 380px;
+      margin: 0 auto;
     }
 
-    @media (max-width: 860px) {
+    /* Responsive Breakdown */
+    @media (max-width: 960px) {
       .support-wrapper {
         grid-template-columns: 1fr;
-        gap: 36px;
-        padding-top: 24px;
+        gap: 40px;
+        padding-top: 28px;
       }
       .support-checkout-card {
         position: static;
+        max-width: 580px;
+        margin: 0 auto;
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 580px) {
+      .top-bar {
+        padding: 14px 20px;
+      }
+      .story-title {
+        font-size: 32px;
+      }
+      .deliverables-grid {
+        grid-template-columns: 1fr;
+      }
+      .support-checkout-card {
+        padding: 24px 18px;
+      }
+      .trust-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
       }
     }
   </style>
@@ -442,8 +651,10 @@
       <span>LeetGlow</span>
     </a>
     <div class="top-bar-right">
-      <a href="https://chromewebstore.google.com/detail/ecpfpadofaimilfpjedgoedhoaglpjdb" target="_blank" class="btn-ghost">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="21.17" y1="8" x2="12" y2="8"/><line x1="3.95" y1="6.06" x2="8.54" y2="14"/><line x1="10.88" y1="21.94" x2="15.46" y2="14"/></svg>
+      <a href="https://chromewebstore.google.com/detail/ecpfpadofaimilfpjedgoedhoaglpjdb" target="_blank" rel="noopener" class="btn-ghost">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="21.17" y1="8" x2="12" y2="8"/><line x1="3.95" y1="6.06" x2="8.54" y2="14"/><line x1="10.88" y1="21.94" x2="15.46" y2="14"/>
+        </svg>
         <span>Add to Chrome</span>
       </a>
       <a href="index.html" class="btn-ghost">Back to Home</a>
@@ -453,115 +664,200 @@
   <!-- Split Screen Content -->
   <main class="support-wrapper">
 
-    <!-- Left Half: Mission, Deliverables & Gratitude -->
+    <!-- Left Column: Mission, Deliverables & Gratitude -->
     <div class="support-story">
       <div class="story-badge">
-        <span>❤️</span> Independent & Open
+        <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        <span>Independent & Open Source</span>
       </div>
 
       <h1 class="story-title">
-        Fueling the future of <span>LeetGlow</span>.
+        Fueling the future of<br>
+        <span class="gradient-brand">LeetGlow.</span>
       </h1>
 
       <p class="story-intro">
-        LeetGlow is built with love by developers, for developers. We believe you shouldn't have to look at a boring gray screen during hours of interview preparation. Every feature is completely free with no intrusive ads.
+        A free, community-driven extension that turns your LeetCode experience into a focused, inspiring, and personalized space.
       </p>
 
-      <div class="creator-quote">
-        <p>"I created LeetGlow because LeetCode deserves to feel inspiring. Your support directly funds server costs and allows us to keep everything 100% free and open for the community."</p>
-        <span>— Anupam Yadav, Creator of LeetGlow</span>
+      <!-- Creator Quote Card with Purple Accent -->
+      <div class="creator-quote-card">
+        <div class="quote-icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
+          </svg>
+        </div>
+        <p class="quote-text">
+          “I created LeetGlow because LeetCode deserves to feel inspiring. Your support directly funds server costs and allows us to keep everything 100% free and open for the community.”
+        </p>
+        <div class="quote-author">
+          — Anupam Yadav, Creator of LeetGlow
+        </div>
       </div>
 
-      <div class="deliverables-card">
-        <h2 class="deliverables-heading">
-          <span>🚀</span> What your support delivers
-        </h2>
-        <ul class="deliverables-list">
-          <li class="deliverable-item">
-            <div class="del-icon">⚡</div>
-            <div class="del-content">
-              <strong>High-Speed 4K CDN Hosting</strong>
-              <p>Ensures ultra-fast streaming of WebP 4K wallpapers and dynamic anime scenes worldwide.</p>
+      <!-- Deliverables Section: 2x2 Grid with Clean SVGs -->
+      <div class="deliverables-section">
+        <h2 class="deliverables-heading">Your support helps us deliver</h2>
+        <div class="deliverables-grid">
+
+          <!-- Card 1: 4K CDN Hosting -->
+          <div class="deliverable-card">
+            <div class="del-icon-box purple">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+              </svg>
             </div>
-          </li>
-          <li class="deliverable-item">
-            <div class="del-icon">🎨</div>
-            <div class="del-content">
-              <strong>Fresh Weekly Anime & Cyber Themes</strong>
-              <p>Funding digital art licensing and custom background creation tailored for LeetCode's layout.</p>
+            <div class="del-body">
+              <div class="del-title">High-Speed 4K CDN Hosting</div>
+              <div class="del-desc">Ultra-fast streaming of wallpapers and anime scenes worldwide.</div>
             </div>
-          </li>
-          <li class="deliverable-item">
-            <div class="del-icon">🎵</div>
-            <div class="del-content">
-              <strong>Bespoke Focus Soundscapes</strong>
-              <p>Mastering ambient lofi soundtracks and victory fanfares when your hard problem passes.</p>
+          </div>
+
+          <!-- Card 2: Fresh Weekly Themes -->
+          <div class="deliverable-card">
+            <div class="del-icon-box orange">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.49 2 2 6.49 2 12c0 4.42 3.58 8 8 8 .55 0 1-.45 1-1 0-.28-.11-.53-.29-.71-.18-.18-.29-.43-.29-.71 0-.55.45-1 1-1h1.58c3.87 0 7-3.13 7-7 0-4.97-4.03-9-9-9zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 8 6.5 8 8 8.67 8 9.5 7.33 11 6.5 11zm3-4C8.67 7 8 6.33 8 5.5S8.67 4 9.5 4s1.5.67 1.5 1.5S10.33 7 9.5 7zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 4 14.5 4s1.5.67 1.5 1.5S15.33 7 14.5 7zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 8 17.5 8s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+              </svg>
             </div>
-          </li>
-          <li class="deliverable-item">
-            <div class="del-icon">🛠️</div>
-            <div class="del-content">
-              <strong>Zero-Lag Maintenance & LeetCode UI Updates</strong>
-              <p>Keeping the extension under 2MB RAM and instantly patching whenever LeetCode updates its DOM.</p>
+            <div class="del-body">
+              <div class="del-title">Fresh Weekly Themes</div>
+              <div class="del-desc">New anime & cyber themes and custom backgrounds tailored for LeetCode.</div>
             </div>
-          </li>
-        </ul>
+          </div>
+
+          <!-- Card 3: Bespoke Focus Soundscapes -->
+          <div class="deliverable-card">
+            <div class="del-icon-box violet">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+              </svg>
+            </div>
+            <div class="del-body">
+              <div class="del-title">Bespoke Focus Soundscapes</div>
+              <div class="del-desc">Ambient lofi soundtracks and victory fanfares for a better coding flow.</div>
+            </div>
+          </div>
+
+          <!-- Card 4: Lightweight & Reliable -->
+          <div class="deliverable-card">
+            <div class="del-icon-box indigo">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
+              </svg>
+            </div>
+            <div class="del-body">
+              <div class="del-title">Lightweight & Reliable</div>
+              <div class="del-desc">Under 2MB RAM usage and instant updates with new features and themes.</div>
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
 
-    <!-- Right Half: Razorpay Custom Amount Form -->
+    <!-- Right Column: Elevated Support Checkout Card -->
     <div class="support-checkout-card" id="checkoutCard">
-      <div class="checkout-head">
-        <h2 class="checkout-title">Support Our Work</h2>
-        <p class="checkout-desc">Pick an amount or enter any contribution you'd like. Every bit fuels continuous development.</p>
+      <div class="checkout-header">
+        <div class="checkout-header-row">
+          <div class="checkout-badge-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          </div>
+          <h2 class="checkout-title">Support Our Work</h2>
+        </div>
+        <p class="checkout-desc">Pick an amount or enter a <strong>custom contribution</strong>. Every bit helps us keep LeetGlow free and growing.</p>
       </div>
 
+      <!-- Checkout Interactive Form -->
       <div id="checkoutFormPane">
-        <label class="amount-label">Select Amount (INR)</label>
+        <!-- Preset Chips (₹50 active by default) -->
         <div class="chips-grid">
-          <button type="button" class="chip-btn" data-amt="50">₹50</button>
-          <button type="button" class="chip-btn active" data-amt="100">₹100</button>
+          <button type="button" class="chip-btn active" data-amt="50">₹50</button>
+          <button type="button" class="chip-btn" data-amt="100">₹100</button>
           <button type="button" class="chip-btn" data-amt="250">₹250</button>
           <button type="button" class="chip-btn" data-amt="500">₹500</button>
         </div>
 
+        <!-- Custom Amount Input -->
+        <label for="customAmountInput" class="field-label">Or enter a custom amount (INR)</label>
         <div class="custom-input-wrap">
           <span class="custom-currency-symbol">₹</span>
-          <input type="number" id="customAmountInput" class="custom-amount-input" value="100" min="10" step="10" placeholder="Custom amount" />
+          <input type="number" id="customAmountInput" class="custom-amount-input" value="50" min="10" step="10" placeholder="Custom amount" />
         </div>
 
-        <div class="form-group">
-          <label for="supporterName" class="form-label">Your Name (Optional)</label>
-          <input type="text" id="supporterName" class="form-input" placeholder="e.g. Alex" />
+        <!-- Supporter Name with SVG Icon -->
+        <div class="input-field-group">
+          <label for="supporterName" class="field-label">Your Name (Optional)</label>
+          <div class="input-with-icon-wrap">
+            <div class="field-vector-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </div>
+            <input type="text" id="supporterName" class="supporter-input" placeholder="e.g. Alex" />
+          </div>
         </div>
 
-        <div class="form-group">
-          <label for="supporterEmail" class="form-label">Email Address (For receipt)</label>
-          <input type="email" id="supporterEmail" class="form-input" placeholder="alex@example.com" />
+        <!-- Supporter Email with SVG Icon -->
+        <div class="input-field-group">
+          <label for="supporterEmail" class="field-label">Email Address (For receipt)</label>
+          <div class="input-with-icon-wrap">
+            <div class="field-vector-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="20" height="16" x="2" y="4" rx="2"/>
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+              </svg>
+            </div>
+            <input type="email" id="supporterEmail" class="supporter-input" placeholder="alex@example.com" />
+          </div>
         </div>
 
-        <div class="form-group">
-          <label for="supporterMessage" class="form-label">Message / Note (Optional)</label>
-          <textarea id="supporterMessage" class="form-input" placeholder="Say hi or suggest a theme!"></textarea>
+        <!-- Supporter Message with SVG Icon -->
+        <div class="input-field-group">
+          <label for="supporterMessage" class="field-label">Message / Note (Optional)</label>
+          <div class="input-with-icon-wrap">
+            <div class="field-vector-icon top-align">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+            </div>
+            <textarea id="supporterMessage" class="supporter-input" placeholder="Say hi or suggest a theme!"></textarea>
+          </div>
         </div>
 
-        <button type="button" id="payRazorpayBtn" class="btn-pay-rzp">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/></svg>
-          <span id="payBtnLabel">Support with ₹100</span>
+        <!-- Primary Action CTA Button: Emerald Green for positive giving emotion -->
+        <button type="button" id="payRazorpayBtn" class="btn-pay-emerald">
+          <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          <span id="payBtnLabel">Support with ₹50</span>
         </button>
 
-        <div class="trust-footer">
-          <svg viewBox="0 0 16 16"><path d="M8 0L1 3v5c0 4.4 3 8.5 7 9.5 4-1 7-5.1 7-9.5V3L8 0zm-1 11L4 8l1.4-1.4L7 8.2l3.6-3.6L12 6l-5 5z"/></svg>
-          <span>Powered by Razorpay · UPI, Cards, NetBanking</span>
+        <!-- Trust & Payment Methods Footer -->
+        <div class="trust-container">
+          <div class="trust-security-text">
+            <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+            <span>Secure payments via Razorpay</span>
+          </div>
+          <div class="trust-methods-row">
+            <span class="pay-chip upi-chip">UPI</span>
+            <span class="pay-chip visa-chip">VISA</span>
+            <span class="pay-chip mc-chip" title="Mastercard">
+              <span class="mc-dot red"></span>
+              <span class="mc-dot amber"></span>
+            </span>
+            <span class="pay-chip netbank-chip">NetBanking</span>
+          </div>
         </div>
       </div>
 
-      <!-- Success Pane (Hidden by default) -->
+      <!-- Success Pane (Shown on completion) -->
       <div id="successPane" class="success-pane" style="display: none;">
-        <div class="success-icon">✓</div>
+        <div class="success-icon-wrap">
+          <svg viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
+        </div>
         <h3>Thank You So Much!</h3>
-        <p>Your contribution was successful. You are actively keeping LeetGlow free, ad-free, and inspiring for every developer grinding LeetCode.</p>
-        <a href="index.html" class="btn-ghost" style="margin-top: 18px; display: inline-flex;">Back to LeetGlow</a>
+        <p>Your contribution was successful. You are actively keeping LeetGlow 100% free, fast, and inspiring for every developer grinding LeetCode.</p>
+        <a href="index.html" class="btn-ghost" style="margin-top: 20px; display: inline-flex;">Back to LeetGlow</a>
       </div>
     </div>
 
@@ -576,7 +872,7 @@
       const formPane = document.getElementById('checkoutFormPane');
       const successPane = document.getElementById('successPane');
 
-      let currentAmount = 100;
+      let currentAmount = 50;
 
       function updateAmount(val) {
         val = parseInt(val, 10);
@@ -585,7 +881,7 @@
         customInput.value = val;
         payLabel.textContent = `Support with ₹${val}`;
 
-        // Sync chips
+        // Sync chip styles
         chips.forEach(chip => {
           if (parseInt(chip.getAttribute('data-amt'), 10) === val) {
             chip.classList.add('active');
@@ -639,7 +935,7 @@
             email: email || undefined
           },
           theme: {
-            color: '#0284c7'
+            color: '#059669' // Emerald Green to match the button & active chip!
           },
           handler: function(response) {
             formPane.style.display = 'none';
@@ -659,4 +955,3 @@
   </script>
 </body>
 </html>
-

@@ -462,13 +462,13 @@ function render(selected) {
       if (id === 'anime') {
         const meta = card.querySelector('.meta');
         if (meta) {
-          const toggleBadge = document.createElement('span');
-          toggleBadge.className = 'drawer-toggle-badge';
-          toggleBadge.setAttribute('aria-label', 'Toggle wallpapers');
-          toggleBadge.innerHTML = `<svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l4 4 4-4"/></svg>`;
-          const check = meta.querySelector('.check');
-          if (check) meta.insertBefore(toggleBadge, check);
-          else meta.appendChild(toggleBadge);
+          meta.innerHTML = `
+            <span class="name">${t.name}</span>
+            <span class="drawer-toggle-badge" aria-label="Toggle wallpapers">
+              <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l4 4 4-4"/></svg>
+            </span>
+            <span class="check">${CHECK}</span>
+          `;
         }
 
         grid.appendChild(studioButton);
@@ -1419,5 +1419,37 @@ const rateUsBtn = document.getElementById('rateUsBtn');
 if (rateUsBtn) {
   rateUsBtn.addEventListener('click', () => {
     chrome.tabs.create({ url: 'https://chromewebstore.google.com/detail/ecpfpadofaimilfpjedgoedhoaglpjdb/reviews' });
+  });
+}
+
+/* Header "Open LeetCode" badge: hides when active tab is already on LeetCode */
+async function checkLeetCodeTab() {
+  const btn = document.getElementById('openLeetCodeBtn');
+  if (!btn) return;
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (tab && tab.url && (tab.url.includes('leetcode.com') || tab.url.includes('leetcode.cn'))) {
+      btn.hidden = true;
+    } else {
+      btn.hidden = false;
+    }
+  } catch (e) {
+    btn.hidden = false;
+  }
+}
+checkLeetCodeTab();
+
+const openLeetCodeBtn = document.getElementById('openLeetCodeBtn');
+if (openLeetCodeBtn) {
+  openLeetCodeBtn.addEventListener('click', async () => {
+    try {
+      const tabs = await chrome.tabs.query({ url: ['https://leetcode.com/*', 'https://leetcode.cn/*'] });
+      if (tabs && tabs.length > 0) {
+        await chrome.tabs.update(tabs[0].id, { active: true });
+        if (tabs[0].windowId) await chrome.windows.update(tabs[0].windowId, { focused: true });
+        return;
+      }
+    } catch (e) {}
+    chrome.tabs.create({ url: 'https://leetcode.com/problemset/' });
   });
 }

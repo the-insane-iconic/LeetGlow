@@ -8,11 +8,21 @@
 </head>
 <body>
   <header class="head">
-    <img class="mark" src="../icons/logo.png" alt="LeetGlow Logo" width="32" height="32" aria-hidden="true" />
-    <div class="head-text">
-      <h1>LeetGlow</h1>
-      <p>Pick a look for the LeetCode problem page. Applies instantly.</p>
+    <div class="head-left">
+      <img class="mark" src="../icons/logo.png" alt="LeetGlow Logo" width="32" height="32" aria-hidden="true" />
+      <div class="head-text">
+        <h1>LeetGlow</h1>
+        <p>Pick a look for the LeetCode problem page. Applies instantly.</p>
+      </div>
     </div>
+    <button id="openLeetCodeBtn" class="badge-open-leetcode" type="button" title="Open LeetCode problem set in a new tab" hidden>
+      <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M11 3h2a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h2"/>
+        <polyline points="9 1 13 1 13 5"/>
+        <line x1="6" y1="8" x2="13" y2="1"/>
+      </svg>
+      <span>Open LeetCode</span>
+    </button>
   </header>
 
   <!-- Navigation Segmented Tabs (Themes / Customize / My Space) -->

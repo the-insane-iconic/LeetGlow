@@ -1,13 +1,13 @@
 :root {
-  --pop-bg:      #0e0f13;
-  --pop-panel:   #15171d;
-  --pop-panel-2: #1b1e26;
-  --pop-border:  #262a33;
-  --pop-border-2:#333846;
-  --pop-text:    #e7e9ee;
-  --pop-muted:   #8b90a0;
-  --pop-faint:   #5b6070;
-  --pop-accent:  #7aa2f7;              /* follows the selected theme */
+  --pop-bg:       #13161f;
+  --pop-panel:    #1a1e2a;
+  --pop-panel-2:  #222736;
+  --pop-border:   #2a3042;
+  --pop-border-2: #384058;
+  --pop-text:     #f1f5f9;
+  --pop-muted:    #94a3b8;
+  --pop-faint:    #64748b;
+  --pop-accent:   #38bdf8;              /* follows the selected theme */
 
   --font-ui: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace;
@@ -52,9 +52,18 @@ body {
 /* ---- header ------------------------------------------------------------- */
 .head {
   display: flex;
-  gap: 10px;
   align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   margin-bottom: 14px;
+}
+
+.head-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .mark {
@@ -88,20 +97,51 @@ body {
   text-overflow: ellipsis;
 }
 
-/* ---- navigation tabs (Themes / Customize / My Space - Light Pastel Theme) -- */
+/* Open LeetCode Header Badge */
+.badge-open-leetcode {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5.5px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #f8fafc;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .16s ease;
+  white-space: nowrap;
+}
+.badge-open-leetcode svg {
+  color: #fbbf24;
+}
+.badge-open-leetcode:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.28);
+  transform: translateY(-0.5px);
+}
+.badge-open-leetcode[hidden] {
+  display: none !important;
+}
+
+/* ---- navigation tabs (Clean Modern White Container - No Pink) ------------ */
 .nav-tabs {
   display: flex;
   align-items: center;
   width: 100%;
   box-sizing: border-box;
-  background: linear-gradient(180deg, #fdf1f5 0%, #fbe1eb 100%);
-  border: 1px solid #f9ccd8;
-  border-radius: 14px;
-  padding: 3.5px;
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 13px;
+  padding: 4px;
+  min-height: 42px;
   margin-bottom: 14px;
-  gap: 2px;
+  gap: 3px;
   user-select: none;
-  box-shadow: 0 4px 18px -2px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.22), inset 0 1px 1px #ffffff;
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.25), 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 .nav-tab {
   flex: 1 1 0;
@@ -110,19 +150,19 @@ body {
   align-items: center;
   justify-content: center;
   gap: 5.5px;
-  padding: 6.5px 8px;
-  border-radius: 10px;
+  padding: 7px 8px;
+  border-radius: 9px;
   border: 1px solid transparent;
   background: transparent;
-  color: #311424;
+  color: #64748b;
   font-family: var(--font-ui);
   font-size: 11.5px;
-  font-weight: 550;
+  font-weight: 600;
   letter-spacing: -0.01em;
   cursor: pointer;
   white-space: nowrap;
-  transition: all .2s cubic-bezier(0.16, 1, 0.3, 1);
-  --knob-bg: #fbe1eb;
+  transition: all .18s cubic-bezier(0.16, 1, 0.3, 1);
+  --knob-bg: #cbd5e1;
 }
 .nav-tab span {
   white-space: nowrap;
@@ -130,21 +170,19 @@ body {
   text-overflow: ellipsis;
 }
 .nav-tab:hover:not(.active) {
-  color: #150611;
-  background: rgba(255, 255, 255, 0.5);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  color: #0f172a;
+  background: #f8fafc;
 }
 .nav-tab:active {
   transform: scale(0.98);
 }
 .nav-tab.active {
-  color: #8a0225;
-  font-weight: 650;
-  background: linear-gradient(180deg, #ffffff 0%, #fec5d8 100%);
-  border: 1px solid #fca5c5;
-  border-bottom: 2px solid #f497bd;
-  box-shadow: 0 2px 8px rgba(244, 114, 182, 0.28), 0 1px 2px rgba(0, 0, 0, 0.04), inset 0 1px 1px #ffffff;
-  --knob-bg: #fec5d8;
+  color: #0f172a;
+  font-weight: 700;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --knob-bg: #94a3b8;
 }
 .tab-icon {
   width: 14px;
@@ -259,7 +297,7 @@ body {
 ============================================================================= */
 body[data-active-tab="tab-customize"],
 body[data-active-tab="tab-myspace"] {
-  background: linear-gradient(180deg, #fef2f6 0%, #fae8f0 100%);
+  background: #f8fafc;
 }
 body[data-active-tab="tab-customize"] .head-text h1,
 body[data-active-tab="tab-myspace"] .head-text h1 {
@@ -997,29 +1035,72 @@ body[data-active-tab="tab-myspace"] .ver {
   display: none !important;
 }
 
-/* Anime card indicator when expanded */
+/* Anime card footer: Clean white, centered "Anime Studio", clean downward arrow below */
+.card[data-id="anime"] .meta {
+  position: relative;
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 10px 14px 8px;
+  text-align: center;
+}
+.card[data-id="anime"] .meta .name {
+  color: #0f172a;
+  font-size: 13.5px;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+}
+.card[data-id="anime"] .meta .desc,
+.card[data-id="anime"] .meta .spacer {
+  display: none !important;
+}
 .card[data-id="anime"] .drawer-toggle-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.75);
+  background: #f1f5f9;
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
   transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.15s ease, color 0.15s ease;
   flex-shrink: 0;
+  margin-top: 1px;
 }
-
+.card[data-id="anime"] .drawer-toggle-badge svg {
+  width: 12px;
+  height: 12px;
+  stroke: #0f172a;
+  stroke-width: 2.4;
+}
 .card[data-id="anime"]:hover .drawer-toggle-badge {
-  background: rgba(255, 255, 255, 0.16);
-  color: #ffffff;
+  background: #e2e8f0;
+  color: #0f172a;
 }
-
 .grid.wallpapers-expanded .card[data-id="anime"] .drawer-toggle-badge {
   transform: rotate(180deg);
-  background: rgba(255, 255, 255, 0.2);
+  background: #0f172a;
   color: #ffffff;
+  border-color: #0f172a;
+}
+.grid.wallpapers-expanded .card[data-id="anime"] .drawer-toggle-badge svg {
+  stroke: #ffffff;
+}
+.card[data-id="anime"] .meta .check {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #0f172a;
+  border-color: #0f172a;
+}
+.card[data-id="anime"] .meta .check svg path {
+  stroke: #ffffff;
 }
 
 .grid.wallpapers-expanded .card[data-id="anime"] {
@@ -1475,39 +1556,38 @@ body[data-active-tab="tab-myspace"] .ver {
   gap: 12px;
   width: 100%;
   margin-top: -1px;
-  padding: 10px 13px;
-  border: 1px solid #f9ccd8;
-  border-radius: 12px;
-  background: linear-gradient(180deg, #fdf2f6 0%, #fbe4ed 100%);
-  color: #260f1c;
+  padding: 11px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 13px;
+  background: #ffffff;
+  color: #0f172a;
   font: inherit;
   text-align: left;
   cursor: pointer;
-  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.18), inset 0 1px 1.5px #ffffff;
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.25), 0 2px 6px rgba(0, 0, 0, 0.1);
   transition: all .18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .studio:hover {
-  background: linear-gradient(135deg, #ffffff 0%, #fbe0eb 100%);
-  border-color: #fca5c5;
-  box-shadow: 0 6px 20px -2px rgba(244, 114, 182, 0.28), 0 3px 8px rgba(0, 0, 0, 0.22), inset 0 1px 1.5px #ffffff;
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 6px 20px -2px rgba(0, 0, 0, 0.35);
   transform: translateY(-1px);
 }
 .studio:active {
   transform: translateY(0);
 }
 .studio.lit {
-  border-color: #fca5c5;
-  border-bottom: 2px solid #f497bd;
-  box-shadow: 0 2px 10px rgba(244, 114, 182, 0.3), inset 0 1px 1.5px #ffffff;
+  border-color: #94a3b8;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 }
 .studio:focus-visible {
-  outline: 2px solid #f472b6;
+  outline: 2px solid #0284c7;
   outline-offset: 2px;
 }
 .studio-jp {
   font-family: "Dela Gothic One", var(--font-ui);
   font-size: 15px;
-  color: #8a0225;
+  color: #0f172a;
   white-space: nowrap;
 }
 .studio-text {
@@ -1517,13 +1597,13 @@ body[data-active-tab="tab-myspace"] .ver {
   flex: 1 1 auto;
 }
 .studio-text b {
-  font-size: 12.5px;
-  font-weight: 650;
-  color: #260f1c;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
 }
 .studio-text span {
-  font-size: 10.5px;
-  color: #6d4b5f;
+  font-size: 11px;
+  color: #64748b;
   line-height: 1.35;
 }
 
@@ -1714,7 +1794,7 @@ body[data-active-tab="tab-myspace"] .ver {
 .studio-jp i { display: inline-block; font-style: normal; animation: studio-wave .9s ease-in-out .5s 1 both; }
 .studio-jp i:nth-child(2) { animation-delay: .62s; }
 .studio-jp i:nth-child(3) { animation-delay: .74s; }
-.studio-arrow { color: #8a0225; display: inline-block; animation: studio-nudge .9s ease-in-out .9s 1 both; }
+.studio-arrow { color: #0f172a; display: inline-block; animation: studio-nudge .9s ease-in-out .9s 1 both; }
 @keyframes studio-sheen { to { transform: translateX(320%); } }
 @keyframes studio-wave { 0%, 100% { transform: translateY(0); } 25% { transform: translateY(-3px); } 75% { transform: translateY(1.5px); } }
 @keyframes studio-nudge { 0%, 100% { transform: translateX(0); } 30% { transform: translateX(4px); } 55% { transform: translateX(0); } 75% { transform: translateX(2px); } }
