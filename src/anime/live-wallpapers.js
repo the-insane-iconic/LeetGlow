@@ -137,79 +137,138 @@
   }
 
   /**
-   * Maps raw storage objects to structured wallpaper cards (both live videos & static images)
-   * If a file name contains 'pro' (case-insensitive), it is marked as a PRO feature.
+   * Cleans human-readable title from raw filename or base name.
+   * Strips static/dynamic/live/pro prefixes (e.g. static_, dynamic-, live_, pro_),
+   * strips resolution tags, converts hyphens/underscores to spaces, and capitalizes words.
+   */
+  function cleanWallpaperTitle(rawBaseName) {
+    if (!rawBaseName) return 'Wallpaper';
+    return rawBaseName
+      // Strip leading static/dynamic/live/pro prefixes (repeating for chained tags like pro_static_)
+      .replace(/^(static|dynamic|live|pro)[-_.]+/gi, '')
+      .replace(/^(static|dynamic|live|pro)[-_.]+/gi, '')
+      // Strip trailing type tags (e.g. _static, -dynamic)
+      .replace(/[-_.+](static|dynamic|live|pro)$/gi, '')
+      // Replace hyphens, underscores and dots with spaces
+      .replace(/[-_.]+/g, ' ')
+      // Strip resolution tags (4k, 2k, 1080p, 720p, uhd, hd)
+      .replace(/\b(\d{3,4}x\d{3,4}|4k|2k|1080p|720p|uhd|hd)\b/gi, '')
+      // Collapse multiple whitespace
+      .replace(/\s+/g, ' ')
+      .trim()
+      // Title case
+      .replace(/\b\w/g, char => char.toUpperCase()) || 'Wallpaper';
+  }
+
+  /**
+   * Checks if filename is explicitly tagged as dynamic/live
+   */
+  function isExplicitlyDynamic(name) {
+    const lower = (name || '').toLowerCase();
+    return /^(dynamic|live)[-_.]/i.test(lower) || /[-_.](dynamic|live)[-_.]/i.test(lower);
+  }
+
+  /**
+   * Checks if filename is explicitly tagged as static
+   */
+  function isExplicitlyStatic(name) {
+    const lower = (name || '').toLowerCase();
+    return /^static[-_.]/i.test(lower) || /[-_.]static[-_.]/i.test(lower);
+  }
+
+  /**
+   * Maps raw storage objects to structured wallpaper cards (both dynamic/live & static wallpapers)
+   *
+   * Classification Rules:
+   * 1. If filename starts with or contains static_ or static-:
+   *    -> classified as STATIC (isLive: false)
+   * 2. If filename starts with or contains dynamic_ / live_ / dynamic- / live-:
+   *    -> classified as DYNAMIC (isLive: true)
+   * 3. If neither prefix is present:
+   *    -> Video formats (.mp4, .webm, .mov, .m4v) default to DYNAMIC (isLive: true)
+   *    -> Image formats (.webp, .jpg, .jpeg, .png, .avif, .gif) default to STATIC (isLive: false)
+   * 4. Title is automatically trimmed so neither 'static' nor 'dynamic' appears in the UI name.
    */
   function mapObjectsToWallpapers(files, defaultBucket = BUCKET_NAME) {
     if (!Array.isArray(files) || !files.length) return [];
 
     const videoExts = ['.mp4', '.webm', '.mov', '.m4v'];
-    const imageExts = ['.webp', '.jpg', '.jpeg', '.png', '.avif'];
+    const imageExts = ['.webp', '.jpg', '.jpeg', '.png', '.avif', '.gif'];
 
     const videos = files.filter(f => videoExts.some(ext => (f.name || '').toLowerCase().endsWith(ext)));
     const images = files.filter(f => imageExts.some(ext => (f.name || '').toLowerCase().endsWith(ext)));
 
     const result = [];
 
-    // 1. Process Video Wallpapers (Live Wallpapers)
+    // Helper to check if an image file is solely a companion thumbnail for a video
+    function isThumbnailOfVideo(imgFile) {
+      const imgBase = imgFile.name.replace(/\.[^/.]+$/, '').toLowerCase();
+      return videos.some(v => {
+        const vBase = v.name.replace(/\.[^/.]+$/, '').toLowerCase();
+        return imgBase === vBase || imgBase === `${vBase}_thumb` || imgBase === `${vBase}-thumb`;
+      });
+    }
+
+    // 1. Process Video Files
     videos.forEach(v => {
       const bucket = v.bucket_id || defaultBucket;
       const publicBase = `${SUPABASE_URL}/storage/v1/object/public/${bucket}/`;
       const baseName = v.name.replace(/\.[^/.]+$/, '');
       const matchThumb = images.find(img => img.name.startsWith(baseName));
 
-      // Clean human-readable title (strip resolution tags and clean spacing)
-      const cleanName = baseName
-        .replace(/\b(\d{3,4}x\d{3,4}|4k|2k|1080p|720p|uhd|hd)\b/gi, '')
-        .replace(/[-_]+/g, ' ')
-        .trim()
-        .replace(/\s+/g, ' ')
-        .replace(/\b\w/g, char => char.toUpperCase());
+      // Clean, prefix-free human-readable title
+      const cleanName = cleanWallpaperTitle(baseName);
 
-      // If filename has 'pro' in it, treat it as a PRO wallpaper for premium users only
+      // Explicit static override (rare for videos, but supported if user renamed to static_...)
+      const isStaticOverride = isExplicitlyStatic(v.name);
+      const isLive = !isStaticOverride;
+
+      // Pro flag: 'pro' in filename marks wallpaper for premium users only
       const isPro = (v.name || '').toLowerCase().includes('pro');
 
       result.push({
         id: `supabase-${baseName}`,
-        name: cleanName || 'Live Wallpaper',
-        desc: `Live Wallpaper (${bucket})`,
+        name: cleanName,
+        desc: `${isLive ? 'Dynamic' : 'Static'} Wallpaper (${bucket})`,
         thumbUrl: matchThumb ? `${publicBase}${matchThumb.name}` : null,
         thumb: null,
         videoUrl: `${publicBase}${v.name}`,
-        isLive: true,
+        imageUrl: matchThumb ? `${publicBase}${matchThumb.name}` : null,
+        isLive: isLive,
+        isDynamic: isLive,
         isSupabase: true,
         isPro: isPro,
         themeId: null
       });
     });
 
-    // 2. Process Static Images (Static Wallpapers from Bucket)
-    // Any image that is NOT merely a companion thumbnail for one of the videos is a static wallpaper
+    // 2. Process Image Files
     images.forEach(img => {
-      const baseName = img.name.replace(/\.[^/.]+$/, '');
-      const isCompanionOfVideo = videos.some(v => v.name.replace(/\.[^/.]+$/, '') === baseName);
-      if (isCompanionOfVideo) return; // Dedicated thumbnail for video
+      // If this image is already paired as the companion thumbnail for a video, don't duplicate it
+      if (isThumbnailOfVideo(img)) return;
 
+      const baseName = img.name.replace(/\.[^/.]+$/, '');
       const bucket = img.bucket_id || defaultBucket;
       const publicBase = `${SUPABASE_URL}/storage/v1/object/public/${bucket}/`;
-      const cleanName = baseName
-        .replace(/\b(\d{3,4}x\d{3,4}|4k|2k|1080p|720p|uhd|hd)\b/gi, '')
-        .replace(/[-_]+/g, ' ')
-        .trim()
-        .replace(/\s+/g, ' ')
-        .replace(/\b\w/g, char => char.toUpperCase());
 
-      // If filename has 'pro' in it, treat it as a PRO wallpaper for premium users only
+      // Clean, prefix-free human-readable title
+      const cleanName = cleanWallpaperTitle(baseName);
+
+      // If user uploaded image with dynamic_ or live_ prefix (e.g. animated webp or gif), treat as dynamic
+      const isDynamic = isExplicitlyDynamic(img.name);
+
+      // Pro flag
       const isPro = (img.name || '').toLowerCase().includes('pro');
 
       result.push({
         id: `supabase-img-${baseName}`,
         name: cleanName,
-        desc: `Static Wallpaper (${bucket})`,
+        desc: `${isDynamic ? 'Dynamic' : 'Static'} Wallpaper (${bucket})`,
         thumbUrl: `${publicBase}${img.name}`,
         imageUrl: `${publicBase}${img.name}`,
         thumb: null,
-        isLive: false,
+        isLive: isDynamic,
+        isDynamic: isDynamic,
         isSupabase: true,
         isPro: isPro,
         themeId: null
@@ -339,8 +398,11 @@
 
   root.LCTSLiveWallpapers = {
     getAll: getAllLiveWallpapers,
+    getDynamic: async () => (await getAllLiveWallpapers()).filter(w => w.isLive),
+    getStatic: async () => (await getAllLiveWallpapers()).filter(w => !w.isLive),
     getThumbnail: getVideoThumbnail,
-    downloadAndCache: downloadAndCacheVideo
+    downloadAndCache: downloadAndCacheVideo,
+    cleanTitle: cleanWallpaperTitle
   };
 
 })(globalThis);

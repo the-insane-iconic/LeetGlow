@@ -153,7 +153,31 @@ function pvVars(pv) {
 const wallpaperDrawer = document.createElement('div');
 wallpaperDrawer.id = 'wallpaperDrawer';
 wallpaperDrawer.className = 'wallpaper-drawer';
-wallpaperDrawer.innerHTML = '<div id="wallpaperGrid" class="wallpaper-grid"></div>';
+wallpaperDrawer.innerHTML = `
+  <div class="drawer-filter-bar" id="drawerFilterBar" role="tablist" aria-label="Filter wallpapers">
+    <button type="button" class="drawer-filter-btn active" data-filter="all" role="tab" aria-selected="true">All</button>
+    <button type="button" class="drawer-filter-btn" data-filter="dynamic" role="tab" aria-selected="false">Dynamic ✦</button>
+    <button type="button" class="drawer-filter-btn" data-filter="static" role="tab" aria-selected="false">Static</button>
+  </div>
+  <div id="wallpaperGrid" class="wallpaper-grid"></div>
+`;
+
+let currentDrawerFilter = 'all';
+
+wallpaperDrawer.addEventListener('click', (e) => {
+  const btn = e.target.closest('.drawer-filter-btn');
+  if (!btn) return;
+  e.stopPropagation();
+  const filter = btn.dataset.filter || 'all';
+  if (filter === currentDrawerFilter) return;
+  currentDrawerFilter = filter;
+  wallpaperDrawer.querySelectorAll('.drawer-filter-btn').forEach(b => {
+    const isAct = b.dataset.filter === filter;
+    b.classList.toggle('active', isAct);
+    b.setAttribute('aria-selected', String(isAct));
+  });
+  renderWallpaperGrid();
+});
 
 let wallpapersDrawerOpen = false;
 
@@ -273,7 +297,19 @@ async function renderWallpaperGrid() {
     items = basicItems.concat(items);
   }
 
+  // Filter items based on active category (All, Dynamic, Static)
+  if (currentDrawerFilter === 'dynamic') {
+    items = items.filter(it => it.isLive);
+  } else if (currentDrawerFilter === 'static') {
+    items = items.filter(it => !it.isLive);
+  }
+
   box.innerHTML = '';
+
+  if (!items.length) {
+    box.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 24px 12px; font-size: 12px; color: var(--pop-muted);">No ${currentDrawerFilter} wallpapers found.</div>`;
+    return;
+  }
 
   items.forEach(item => {
     const isLocked = !isPrem && item.isPro;
@@ -463,10 +499,12 @@ function render(selected) {
         const meta = card.querySelector('.meta');
         if (meta) {
           meta.innerHTML = `
-            <span class="name">${t.name}</span>
-            <span class="drawer-toggle-badge" aria-label="Toggle wallpapers">
-              <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l4 4 4-4"/></svg>
-            </span>
+            <div class="anime-meta-title-row">
+              <span class="name">${t.name}</span>
+              <span class="drawer-toggle-badge" aria-label="Toggle wallpapers">
+                <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l4 4 4-4"/></svg>
+              </span>
+            </div>
             <span class="check">${CHECK}</span>
           `;
         }
@@ -589,9 +627,11 @@ function choose(id) {
      problem tab, so there is nothing to refresh */
   if (studioButton) studioButton.classList.toggle('lit', id === 'anime');
   const status = document.getElementById('status');
-  status.textContent = id === 'off'
-    ? 'Theme off. LeetCode is back to its own look.'
-    : `${THEMES[id].name} applied to your open problem tabs.`;
+  if (status) {
+    status.textContent = id === 'off'
+      ? 'Theme off. LeetCode is back to its own look.'
+      : `${THEMES[id].name} applied to your open problem tabs.`;
+  }
 }
 
 /* Stamp the running version into the footer. If this does not match the

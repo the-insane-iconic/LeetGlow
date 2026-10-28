@@ -313,6 +313,38 @@
       presets.appendChild(b);
     });
 
+    // Render static wallpapers from Supabase bucket (e.g. static_... files or uploaded static images)
+    const bucketStaticWallpapers = (liveWallpapersList || []).filter(w => !w.isLive);
+    bucketStaticWallpapers.forEach(w => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'scene bucket-static';
+      b.dataset.sceneId = w.id;
+      b.setAttribute('role', 'radio');
+      const isSelected = settings.sceneMode === 'static' && (settings.scene === w.id || (settings.staticWallpaper && settings.staticWallpaper.id === w.id));
+      b.setAttribute('aria-checked', String(isSelected));
+      const thumbUrl = w.thumbUrl || w.imageUrl;
+      if (thumbUrl) b.style.backgroundImage = `url("${thumbUrl}")`;
+
+      const isLocked = !isPremium && !isFreeBeta && w.isPro;
+      if (isLocked) b.classList.add('is-locked');
+
+      const proBadgeHTML = isLocked ? `<span class="pro-pill on-tile" aria-label="PRO wallpaper">PRO</span>` : '';
+      const checkedBadgeHTML = `<span class="scene-checked-badge" aria-hidden="true"><svg viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3.5 8.5l3 3 6-6"/></svg></span>`;
+
+      b.innerHTML = `${checkedBadgeHTML}${proBadgeHTML}<span class="name">${w.name}</span>`;
+      b.title = isLocked ? `${w.name} (PRO Wallpaper — Click to unlock)` : `${w.name}: Static Wallpaper`;
+
+      b.addEventListener('click', async () => {
+        if (isLocked) {
+          $('purchaseModal').showModal();
+        } else {
+          await pickBucketStaticWallpaper(w, b);
+        }
+      });
+      presets.appendChild(b);
+    });
+
     box.appendChild(presets);
 
     // Keep scroll position stable when re-rendering
@@ -354,28 +386,31 @@
   async function renderLiveWallpapers() {
     const box = $('liveScenes');
     if (!box) return;
-    box.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 24px; font-size: 13px; color: var(--muted);"><span class="scene-spinner" style="display:inline-block; position:relative; top:3px; margin-right:8px;"></span>Syncing live wallpapers from Supabase…</div>';
+    box.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 24px; font-size: 13px; color: var(--muted);"><span class="scene-spinner" style="display:inline-block; position:relative; top:3px; margin-right:8px;"></span>Syncing dynamic wallpapers from Supabase…</div>';
 
     if (!liveWallpapersList.length && globalThis.LCTSLiveWallpapers) {
       liveWallpapersList = await globalThis.LCTSLiveWallpapers.getAll();
+      // Ensure static container is updated with any static bucket wallpapers
+      renderScenes(true);
     }
 
     box.innerHTML = '';
     const activeLiveId = settings.liveWallpaper ? settings.liveWallpaper.id : null;
 
-    if (!liveWallpapersList.length) {
-      box.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 24px; font-size: 13px; color: var(--muted);">No live wallpapers found in bucket. Upload MP4/WebM videos to Supabase bucket <code>livewallpaper</code> to see them here!</div>';
+    // Filter to dynamic wallpapers only
+    const dynamicList = (liveWallpapersList || []).filter(w => w.isLive);
+
+    if (!dynamicList.length) {
+      box.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 24px; font-size: 13px; color: var(--muted);">No dynamic wallpapers found in bucket. Upload MP4/WebM videos or images with <code>dynamic_</code> prefix to Supabase to see them here!</div>';
       return;
     }
 
-    liveWallpapersList.forEach(w => {
+    dynamicList.forEach(w => {
       const b = document.createElement('button');
       b.type = 'button';
-      b.className = 'scene' + (w.isLive ? ' live-item' : ' bucket-static');
+      b.className = 'scene live-item';
       b.setAttribute('role', 'radio');
-      const isSelected = w.isLive
-        ? (settings.sceneMode === 'live' && activeLiveId === w.id)
-        : (settings.scene === w.id);
+      const isSelected = (settings.sceneMode === 'live' && activeLiveId === w.id);
       b.setAttribute('aria-checked', String(isSelected));
 
       // Fast thumbnail: direct thumbUrl, cached snapshot, or dynamic snapshot from video
@@ -405,12 +440,8 @@
       const proBadgeHTML = isLocked
         ? `<span class="pro-pill on-tile" aria-label="PRO wallpaper">PRO</span>`
         : '';
-      const liveBadgeHTML = w.isLive
-        ? `<span class="live-badge"><span class="live-pulse-dot"></span> LIVE</span>`
-        : '';
-      const spinnerHTML = w.isLive
-        ? `<span class="scene-spinner" title="Loading video..."></span>`
-        : '';
+      const liveBadgeHTML = `<span class="live-badge"><span class="live-pulse-dot"></span> LIVE</span>`;
+      const spinnerHTML = `<span class="scene-spinner" title="Loading video..."></span>`;
 
       b.innerHTML = `
         ${liveBadgeHTML}
@@ -420,18 +451,14 @@
       `;
       b.title = isLocked
         ? `${w.name} (PRO Wallpaper — Click to unlock)`
-        : `${w.name}: ${w.desc}`;
+        : `${w.name}: Dynamic Wallpaper`;
 
       b.addEventListener('click', async () => {
         if (isLocked) {
           $('purchaseModal').showModal();
           return;
         }
-        if (w.isLive) {
-          await pickLiveWallpaper(w, b);
-        } else {
-          await pickBucketStaticWallpaper(w, b);
-        }
+        await pickLiveWallpaper(w, b);
       });
 
       box.appendChild(b);
@@ -543,6 +570,12 @@
   async function refresh() {
     await loadScene(viewId());
     solveNow();
+    if (!liveWallpapersList.length && globalThis.LCTSLiveWallpapers && globalThis.LCTSLiveWallpapers.getAll) {
+      globalThis.LCTSLiveWallpapers.getAll().then(list => {
+        liveWallpapersList = list || [];
+        renderScenes(true);
+      }).catch(() => {});
+    }
     renderScenes();
     renderArcs();
     await showPreview();
