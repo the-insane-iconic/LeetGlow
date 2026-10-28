@@ -77,8 +77,10 @@
     if (!PREMIUM_THEMES.has(theme)) return theme;
     try {
       const prem = (await chrome.storage.local.get('leetglowPremium'))?.leetglowPremium;
-      if (prem && prem.active) return theme;
-    } catch (e) {}
+      if (!prem || prem.active !== false || prem.is_free_beta !== false) return theme;
+    } catch (e) {
+      return theme;
+    }
     return 'sakura';
   }
 

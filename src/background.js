@@ -16,14 +16,35 @@ chrome.commands.onCommand.addListener((command) => {
 /* Title cards used to be limited to once per problem per day, remembered in
    lcAnimeSeen. They now follow the problem's solved state instead, so the old
    list is cleared once when the extension installs or updates. */
+function initFreeBetaEntitlement() {
+  chrome.storage.local.get('leetglowPremium', (res) => {
+    const p = res && res.leetglowPremium;
+    if (!p || p.active !== true) {
+      chrome.storage.local.set({
+        leetglowPremium: {
+          active: true,
+          is_free_beta: true,
+          key_prefix: 'LG-FREE',
+          activated_at: new Date().toISOString(),
+          verified_at: new Date().toISOString()
+        }
+      });
+    }
+  });
+}
+
 chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.local.remove('lcAnimeSeen');
+  initFreeBetaEntitlement();
   if (chrome.sidePanel && chrome.sidePanel.setPanelBehavior) {
     chrome.sidePanel
       .setPanelBehavior({ openPanelOnActionClick: true })
       .catch((error) => console.error('[LeetGlow] sidePanel.setPanelBehavior error:', error));
   }
 });
+
+// Also ensure initial entitlement is primed on startup
+initFreeBetaEntitlement();
 
 /* Side Panel: Open sidebar on extension icon click (Chrome Side Panel API) */
 if (chrome.sidePanel && chrome.sidePanel.setPanelBehavior) {

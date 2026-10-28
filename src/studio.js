@@ -40,7 +40,8 @@
   let previewUrls = null;       // object URLs the preview is showing
   let hasArt = false;
   let customThumb = null;
-  let isPremium = false;
+  let isPremium = true;
+  let isFreeBeta = true;
 
   /* ---- preview frame --------------------------------------------------------- */
   const frame = $('frame');
@@ -204,7 +205,7 @@
     const removeBtn = $('customRemoveBtn');
     const proBadge = $('uploadProBadge');
 
-    if (proBadge) proBadge.hidden = isPremium;
+    if (proBadge) proBadge.hidden = isPremium || isFreeBeta;
 
     if (hasArt) {
       if (titleEl) titleEl.textContent = 'Your picture';
@@ -264,7 +265,8 @@
     if (!box) return;
 
     const stateMatches = lastRenderedState &&
-      lastRenderedState.isPremium === isPremium;
+      lastRenderedState.isPremium === isPremium &&
+      lastRenderedState.isFreeBeta === isFreeBeta;
 
     if (!force && box.children.length > 0 && stateMatches) {
       updateSceneSelection();
@@ -284,9 +286,9 @@
       b.setAttribute('aria-checked', String(isSelected));
       b.style.backgroundImage = `url("${chrome.runtime.getURL(s.thumb || s.wall)}")`;
 
-      // Basic free tier scenes: Golden Hour, Moon Field, Ultimate Goku
+      // Basic free tier scenes vs full unlock in free beta
       const BASIC_SCENES = new Set(['golden-hour', 'moon-field', 'harvest-moon']);
-      const isLocked = !isPremium && !BASIC_SCENES.has(id);
+      const isLocked = !isPremium && !isFreeBeta && !BASIC_SCENES.has(id);
       if (isLocked) {
         b.classList.add('is-locked');
       }
@@ -319,7 +321,8 @@
     }
 
     lastRenderedState = {
-      isPremium
+      isPremium,
+      isFreeBeta
     };
 
     updateHeroCard();
@@ -393,8 +396,8 @@
         }
       }
 
-      // Lock status (pro in filename = PRO for premium users only)
-      const isLocked = !isPremium && w.isPro;
+      // Lock status (pro in filename = PRO for premium users only; bypassed in free beta)
+      const isLocked = !isPremium && !isFreeBeta && w.isPro;
       if (isLocked) {
         b.classList.add('is-locked');
       }
@@ -512,7 +515,7 @@
   }
 
   async function pickScene(id) {
-    if (id === 'custom' && !isPremium) {
+    if (id === 'custom' && !isPremium && !isFreeBeta) {
       $('purchaseModal').showModal();
       return;
     }
@@ -574,7 +577,7 @@
   }
 
   async function upload(file) {
-    if (!isPremium) {
+    if (!isPremium && !isFreeBeta) {
       $('purchaseModal').showModal();
       note('Custom picture backgrounds are a LeetGlow Premium feature.', true);
       return;
@@ -890,7 +893,7 @@
     const upBtn = $('uploadCustomBtn');
     if (upBtn) {
       upBtn.addEventListener('click', () => {
-        if (!isPremium) {
+        if (!isPremium && !isFreeBeta) {
           $('purchaseModal').showModal();
           return;
         }
@@ -908,7 +911,7 @@
       ['dragleave', 'drop'].forEach((t) => upBtn.addEventListener(t, () => upBtn.classList.remove('dragging')));
       upBtn.addEventListener('drop', (e) => {
         e.preventDefault();
-        if (!isPremium) {
+        if (!isPremium && !isFreeBeta) {
           $('purchaseModal').showModal();
           return;
         }
@@ -1073,13 +1076,15 @@
     // 1. Initial server-verified entitlement check
     const status = await Premium.checkServerEntitlement();
     isPremium = !!(status && status.active);
-    Premium.updateBadge(badge, isPremium, status.key_prefix);
-    if (isPremium && getPremiumBtn) {
+    isFreeBeta = status.is_free_beta !== false;
+    Premium.updateBadge(badge, isPremium, status.key_prefix, isFreeBeta);
+    Premium.syncUIElements(document, status);
+    if ((isPremium || isFreeBeta) && getPremiumBtn) {
       getPremiumBtn.hidden = true;
     }
 
     if (compUpgradeBtn) {
-      compUpgradeBtn.hidden = isPremium;
+      compUpgradeBtn.hidden = isPremium || isFreeBeta;
       compUpgradeBtn.onclick = () => {
         if (getPremiumBtn) {
           getPremiumBtn.click();
@@ -1097,22 +1102,22 @@
       };
     }
     if (compActivePill) {
-      compActivePill.hidden = !isPremium;
+      compActivePill.hidden = !isPremium || isFreeBeta;
     }
 
     // When premium is inactive, ensure only Basic tier scenes can be active
     const BASIC_SCENES = new Set(['golden-hour', 'moon-field', 'harvest-moon']);
-    if (!isPremium && !BASIC_SCENES.has(settings.scene)) {
+    if (!isPremium && !isFreeBeta && !BASIC_SCENES.has(settings.scene)) {
       settings.scene = 'golden-hour';
       if (settings.arcs) {
         settings.arcScenes = { easy: 'golden-hour', medium: 'moon-field', hard: 'harvest-moon' };
       }
     }
 
-    // Allow clicking on Basic Plan badge to open upgrade modal
+    // Allow clicking on Basic Plan badge to open upgrade modal (only when monetized)
     if (badge) {
       badge.addEventListener('click', () => {
-        if (!isPremium) {
+        if (!isPremium && !isFreeBeta) {
           if (getPremiumBtn) getPremiumBtn.click();
           else purchaseModal.showModal();
         }
@@ -1482,7 +1487,7 @@
     }
 
     function openUpgradeModalDirectly() {
-      if (isPremium || !purchaseModal) return;
+      if (isPremium || isFreeBeta || !purchaseModal) return;
       if (getPremiumBtn) {
         getPremiumBtn.click();
       } else {
@@ -1501,14 +1506,14 @@
     if (window.location.hash === '#upgrade' || window.location.search.includes('upgrade')) {
       openUpgradeModalDirectly();
     } else if (window.location.hash === '#activate' || window.location.search.includes('activate')) {
-      if (!isPremium && activationModal && !activationModal.open) activationModal.showModal();
+      if (!isPremium && !isFreeBeta && activationModal && !activationModal.open) activationModal.showModal();
     }
 
     window.addEventListener('hashchange', () => {
       if (window.location.hash === '#upgrade' || window.location.search.includes('upgrade')) {
         openUpgradeModalDirectly();
       } else if (window.location.hash === '#activate' || window.location.search.includes('activate')) {
-        if (!isPremium && activationModal && !activationModal.open) activationModal.showModal();
+        if (!isPremium && !isFreeBeta && activationModal && !activationModal.open) activationModal.showModal();
       }
     });
   }
@@ -1520,17 +1525,20 @@
     if (ch.lcShare) $('share').checked = !(ch.lcShare.newValue && ch.lcShare.newValue.enabled === false);
     if (ch.leetglowPremium && typeof LeetGlowPremium !== 'undefined') {
       const active = !!ch.leetglowPremium.newValue?.active;
+      const isFreeBetaVal = ch.leetglowPremium.newValue?.is_free_beta !== false;
       isPremium = active;
+      isFreeBeta = isFreeBetaVal;
       const badge = $('premiumBadge');
-      LeetGlowPremium.updateBadge(badge, active, ch.leetglowPremium.newValue?.key_prefix);
+      LeetGlowPremium.updateBadge(badge, active, ch.leetglowPremium.newValue?.key_prefix, isFreeBeta);
+      LeetGlowPremium.syncUIElements(document, ch.leetglowPremium.newValue);
       const getPremiumBtn = $('getPremiumBtn');
       if (getPremiumBtn) {
-        getPremiumBtn.hidden = active;
+        getPremiumBtn.hidden = active || isFreeBeta;
       }
       const compUpgradeBtn = $('comparisonUpgradeBtn');
-      if (compUpgradeBtn) compUpgradeBtn.hidden = active;
+      if (compUpgradeBtn) compUpgradeBtn.hidden = active || isFreeBeta;
       const compActivePill = $('comparisonActivePill');
-      if (compActivePill) compActivePill.hidden = !active;
+      if (compActivePill) compActivePill.hidden = !active || isFreeBeta;
       renderScenes();
       renderArcs();
     }

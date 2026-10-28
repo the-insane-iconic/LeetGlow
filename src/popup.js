@@ -4,7 +4,8 @@
 const KEY = 'lcThemeStudio';
 const DEFAULT = 'anime';
 
-let isPremium = false;
+let isPremium = true;
+let isFreeBeta = true;
 
 function openStudioCheckout() {
   const url = chrome.runtime.getURL('src/studio.html#upgrade');
@@ -414,7 +415,7 @@ function render(selected) {
   const preview = previewHTML();
   ORDER.forEach((id) => {
     const t = THEMES[id];
-    const isLocked = !isPremium && id === 'crawler';
+    const isLocked = !isPremium && !isFreeBeta && id === 'crawler';
     const card = document.createElement('button');
     card.className = 'card' + (isLocked ? ' is-locked' : '');
     card.type = 'button';
@@ -435,7 +436,7 @@ function render(selected) {
       `<span class="check">${CHECK}</span>` +
       `</div>`;
     card.addEventListener('click', () => {
-      if (id === 'crawler' && !isPremium) {
+      if (id === 'crawler' && !isPremium && !isFreeBeta) {
         openStudioCheckout();
         return;
       }
@@ -450,11 +451,13 @@ function render(selected) {
     grid.appendChild(card);
     if (id === 'anime' || id === 'crawler') {
       if (id === 'anime') paintAnimeCard(card.querySelector('.preview'));
-      const ribbon = document.createElement('div');
-      ribbon.className = 'corner-ribbon-wrap';
-      ribbon.setAttribute('aria-hidden', 'true');
-      ribbon.innerHTML = '<span class="corner-ribbon">Premium</span>';
-      card.appendChild(ribbon);
+      if (!isFreeBeta) {
+        const ribbon = document.createElement('div');
+        ribbon.className = 'corner-ribbon-wrap';
+        ribbon.setAttribute('aria-hidden', 'true');
+        ribbon.innerHTML = '<span class="corner-ribbon">Premium</span>';
+        card.appendChild(ribbon);
+      }
 
       if (id === 'anime') {
         const meta = card.querySelector('.meta');
@@ -576,7 +579,7 @@ function markSelected(id) {
 }
 
 function choose(id) {
-  if (id === 'crawler' && !isPremium) {
+  if (id === 'crawler' && !isPremium && !isFreeBeta) {
     openStudioCheckout();
     return;
   }
@@ -602,9 +605,10 @@ try {
 
 /* boot */
 chrome.storage.local.get([KEY, 'leetglowPremium'], (res) => {
-  isPremium = !!(res && res.leetglowPremium && res.leetglowPremium.active === true);
+  isPremium = res?.leetglowPremium ? !!res.leetglowPremium.active : true;
+  isFreeBeta = res?.leetglowPremium ? res.leetglowPremium.is_free_beta !== false : true;
   let selected = (res && res[KEY]) || DEFAULT;
-  if (selected === 'crawler' && !isPremium) {
+  if (selected === 'crawler' && !isPremium && !isFreeBeta) {
     selected = DEFAULT;
     chrome.storage.local.set({ [KEY]: DEFAULT });
   }
@@ -628,7 +632,7 @@ document.addEventListener('keydown', (e) => {
   const dir = (e.key === 'ArrowDown' || e.key === 'ArrowRight') ? 1 : -1;
   const next = cards[(idx + dir + cards.length) % cards.length];
   next.focus();
-  if (next.dataset.id === 'crawler' && !isPremium) {
+  if (next.dataset.id === 'crawler' && !isPremium && !isFreeBeta) {
     openStudioCheckout();
     return;
   }
@@ -967,26 +971,41 @@ if (resetCustomizeBtn) {
   async function checkPremium() {
     try {
       const data = await chrome.storage.local.get('leetglowPremium');
-      isPremium = !!(data.leetglowPremium && data.leetglowPremium.active === true);
+      if (data && data.leetglowPremium) {
+        isPremium = data.leetglowPremium.active === true;
+        isFreeBeta = data.leetglowPremium.is_free_beta !== false;
+      } else {
+        isPremium = true;
+        isFreeBeta = true;
+      }
     } catch (e) {
-      isPremium = false;
+      isPremium = true;
+      isFreeBeta = true;
     }
     updatePremiumUI();
+    if (globalThis.LeetGlowPremium && typeof LeetGlowPremium.syncUIElements === 'function') {
+      LeetGlowPremium.syncUIElements(document, { active: isPremium, is_free_beta: isFreeBeta });
+    }
   }
 
   function updatePremiumUI() {
     if (badge) {
-      if (isPremium) {
-        badge.innerHTML = '<span class="badge-dot"></span><span>Premium Active</span>';
-        badge.className = 'prem-tier-badge pro';
+      if (isFreeBeta) {
+        badge.style.display = 'none';
       } else {
-        badge.innerHTML = '<span>Free Plan</span>';
-        badge.className = 'prem-tier-badge free';
+        badge.style.display = '';
+        if (isPremium) {
+          badge.innerHTML = '<span class="badge-dot"></span><span>Premium Active</span>';
+          badge.className = 'prem-tier-badge pro';
+        } else {
+          badge.innerHTML = '<span>Free Plan</span>';
+          badge.className = 'prem-tier-badge free';
+        }
       }
     }
 
     if (dropzone) {
-      if (isPremium) {
+      if (isPremium || isFreeBeta) {
         dropzone.classList.remove('locked');
         dropzoneContent.innerHTML = `
           <div class="dropzone-active-body">
@@ -1037,6 +1056,7 @@ if (resetCustomizeBtn) {
   }
 
   function openUpgrade() {
+    if (isFreeBeta) return;
     if (upgradeModal && typeof upgradeModal.showModal === 'function') {
       upgradeModal.showModal();
     } else {
@@ -1328,8 +1348,12 @@ if (resetCustomizeBtn) {
     if (area !== 'local') return;
     if (changes.leetglowPremium) {
       isPremium = !!changes.leetglowPremium.newValue?.active;
+      isFreeBeta = changes.leetglowPremium.newValue?.is_free_beta !== false;
       updatePremiumUI();
-      updateFooterTierBadge(isPremium);
+      updateFooterTierBadge(isPremium, isFreeBeta);
+      if (globalThis.LeetGlowPremium && typeof LeetGlowPremium.syncUIElements === 'function') {
+        LeetGlowPremium.syncUIElements(document, changes.leetglowPremium.newValue);
+      }
       renderGallery();
       chrome.storage.local.get(KEY, (res) => {
         const cur = (res && res[KEY]) || DEFAULT;
@@ -1345,10 +1369,15 @@ if (resetCustomizeBtn) {
   renderGallery();
 })();
 
-/* Footer tier badge: Basic (pink theme) vs PRO (shiny golden) */
-function updateFooterTierBadge(isPrem) {
+/* Footer tier badge: Basic (pink theme) vs PRO (shiny golden); hidden in free beta */
+function updateFooterTierBadge(isPrem, isBeta) {
   const badge = document.getElementById('tierBadge');
   if (!badge) return;
+  if (isBeta !== false) {
+    badge.style.display = 'none';
+    return;
+  }
+  badge.style.display = '';
   if (isPrem) {
     badge.className = 'pro-pill';
     badge.textContent = 'PRO';
@@ -1362,8 +1391,16 @@ function updateFooterTierBadge(isPrem) {
 
 // Initial sync on popup boot
 chrome.storage.local.get('leetglowPremium', (data) => {
-  const isPrem = !!(data && data.leetglowPremium && data.leetglowPremium.active === true);
-  updateFooterTierBadge(isPrem);
+  const isPrem = data?.leetglowPremium ? !!data.leetglowPremium.active : true;
+  const isBeta = data?.leetglowPremium ? data.leetglowPremium.is_free_beta !== false : true;
+  updateFooterTierBadge(isPrem, isBeta);
+  if (globalThis.LeetGlowPremium && typeof LeetGlowPremium.syncUIElements === 'function') {
+    LeetGlowPremium.syncUIElements(document, { active: isPrem, is_free_beta: isBeta });
+  }
+  // Seamlessly check remote entitlement in the background
+  if (globalThis.LeetGlowPremium && typeof LeetGlowPremium.checkServerEntitlement === 'function') {
+    LeetGlowPremium.checkServerEntitlement().catch(() => {});
+  }
 });
 
 /* Footer pill actions */
@@ -1371,9 +1408,16 @@ if (globalThis.LCTSBugButton) {
   globalThis.LCTSBugButton(document.getElementById('bug'));
 }
 
-const shortcutsBtn = document.getElementById('shortcutsBtn');
-if (shortcutsBtn) {
-  shortcutsBtn.addEventListener('click', () => {
-    chrome.tabs.create({ url: 'chrome://extensions/shortcuts' });
+const supportUsBtn = document.getElementById('supportUsBtn');
+if (supportUsBtn) {
+  supportUsBtn.addEventListener('click', () => {
+    chrome.tabs.create({ url: 'https://leetglow.vercel.app/support.html' });
+  });
+}
+
+const rateUsBtn = document.getElementById('rateUsBtn');
+if (rateUsBtn) {
+  rateUsBtn.addEventListener('click', () => {
+    chrome.tabs.create({ url: 'https://chromewebstore.google.com/detail/ecpfpadofaimilfpjedgoedhoaglpjdb/reviews' });
   });
 }

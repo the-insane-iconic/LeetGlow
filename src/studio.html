@@ -18,24 +18,24 @@
     <div class="top-actions">
       <span id="activeState" class="state"></span>
 
-      <!-- Server-Verified Plan Status Badge -->
-      <div id="premiumBadge" class="premium-badge inactive" title="Basic Free Tier · Click to view Premium comparison & upgrade">
+      <!-- Server-Verified Plan Status Badge (Hidden during Free Beta) -->
+      <div id="premiumBadge" class="premium-badge inactive" style="display: none;" title="Basic Free Tier · Click to view Premium comparison & upgrade">
         <span class="badge-dot inactive"></span>
         <span class="badge-text">Basic Plan</span>
       </div>
 
-      <!-- Get Premium Access Button -->
-      <button id="getPremiumBtn" class="btn premium-action-btn" type="button" title="Unlock all premium themes and anime scenes for ₹29">
+      <!-- Get Premium Access Button (Hidden during Free Beta) -->
+      <button id="getPremiumBtn" class="btn premium-action-btn" style="display: none;" type="button" title="Unlock all premium themes and anime scenes for ₹29">
         <svg viewBox="0 0 16 16" aria-hidden="true" width="13" height="13" fill="currentColor">
           <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
         </svg>
         <span>Get Premium</span>
       </button>
 
-      <span class="top-nav-sep" aria-hidden="true"></span>
+      <span id="premiumNavSep" class="top-nav-sep" style="display: none;" aria-hidden="true"></span>
 
-      <!-- Activate Key Button -->
-      <button id="activatePremiumBtn" class="btn activate-key-btn" type="button" title="Activate using your 16-character license key">
+      <!-- Activate Key Button (Hidden during Free Beta) -->
+      <button id="activatePremiumBtn" class="btn activate-key-btn" style="display: none;" type="button" title="Activate using your 16-character license key">
         <svg viewBox="0 0 16 16" aria-hidden="true" width="13" height="13" fill="currentColor">
           <path d="M0 8a4 4 0 0 1 7.465-2H14a.5.5 0 0 1 .354.146l1.5 1.5a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708 0L13 9.207l-.646.647a.5.5 0 0 1-.708 0L11 9.207l-.646.647a.5.5 0 0 1-.708 0L9 9.207l-.646.647a.5.5 0 0 1-.708 0L7.465 10A4 4 0 0 1 0 8zm4-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
         </svg>
@@ -291,7 +291,7 @@
 
   <!-- Comparison between Basic and Premium Features -->
   <div class="studio-bottom">
-    <div class="tier-comparison-card" id="tierComparison">
+    <div class="tier-comparison-card" id="tierComparison" style="display: none;">
       <div class="comparison-card-header">
         <div class="header-text-group">
           <span class="comparison-badge">Plan Overview</span>

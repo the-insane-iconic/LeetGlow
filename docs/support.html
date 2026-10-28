@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Support LeetGlow — Keep LeetCoding Beautiful & Free</title>
+  <meta name="description" content="Support LeetGlow's independent development, 4K anime scene CDN servers, and community updates. 100% free for all developers.">
+  <link rel="icon" type="image/png" href="assets/icon128.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <style>
+    :root {
+      --bg-page: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-surface-subtle: #f1f5f9;
+      --border-subtle: #e2e8f0;
+      --border-focus: #3b82f6;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-faint: #94a3b8;
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --rose-accent: #e11d48;
+      --rose-soft: #fff1f2;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top simple header */
+    .top-bar {
+      padding: 18px 32px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text-main);
+      font-weight: 700;
+      font-size: 17px;
+      letter-spacing: -0.01em;
+    }
+    .brand-logo {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+    }
+    .top-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 550;
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+      transition: all 0.15s ease;
+    }
+    .btn-ghost:hover {
+      color: var(--text-main);
+      border-color: #cbd5e1;
+      background: var(--bg-surface-subtle);
+    }
+
+    /* Main Split Container */
+    .support-wrapper {
+      flex: 1;
+      max-width: 1140px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 48px 24px 64px;
+      display: grid;
+      grid-template-columns: 1.15fr 0.95fr;
+      gap: 48px;
+      align-items: start;
+    }
+
+    /* Left Half: The Story & Deliverables */
+    .support-story {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .story-badge {
+      align-self: flex-start;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--rose-soft);
+      color: var(--rose-accent);
+      border: 1px solid #fecdd3;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .story-title {
+      font-size: 32px;
+      font-weight: 800;
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+    }
+    .story-title span {
+      color: var(--primary);
+    }
+    .story-intro {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+    .creator-quote {
+      background: var(--bg-surface);
+      border-left: 3px solid var(--primary);
+      border-radius: 0 10px 10px 0;
+      padding: 16px 20px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      border-top: 1px solid var(--border-subtle);
+      border-right: 1px solid var(--border-subtle);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .creator-quote p {
+      font-size: 14px;
+      color: #334155;
+      font-style: italic;
+      margin-bottom: 8px;
+    }
+    .creator-quote span {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      font-style: normal;
+    }
+
+    .deliverables-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.04);
+    }
+    .deliverables-heading {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .deliverables-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .deliverable-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .del-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: #eff6ff;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 12px;
+      margin-top: 2px;
+    }
+    .del-content strong {
+      display: block;
+      font-size: 14px;
+      font-weight: 650;
+      color: var(--text-main);
+      margin-bottom: 2px;
+    }
+    .del-content p {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    /* Right Half: Payment Form */
+    .support-checkout-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 32px 28px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+      position: sticky;
+      top: 32px;
+    }
+    .checkout-head {
+      margin-bottom: 22px;
+    }
+    .checkout-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+    .checkout-desc {
+      font-size: 13.5px;
+      color: var(--text-muted);
+    }
+
+    /* Preset amount chips */
+    .amount-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 8px;
+    }
+    .chips-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .chip-btn {
+      padding: 10px 0;
+      background: var(--bg-surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      font-family: var(--font-sans);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: center;
+    }
+    .chip-btn:hover {
+      border-color: #94a3b8;
+      background: #e2e8f0;
+    }
+    .chip-btn.active {
+      background: #0284c7;
+      color: #ffffff;
+      border-color: #0284c7;
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3);
+    }
+
+    /* Custom input box */
+    .custom-input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+    .custom-currency-symbol {
+      position: absolute;
+      left: 14px;
+      font-size: 18px;
+      font-weight: 700;
+      color: #64748b;
+      pointer-events: none;
+    }
+    .custom-amount-input {
+      width: 100%;
+      height: 48px;
+      padding: 0 14px 0 32px;
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      font-family: var(--font-sans);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-main);
+      background: var(--bg-surface);
+      outline: none;
+      transition: all 0.15s ease;
+    }
+    .custom-amount-input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    /* Contributor Fields */
+    .form-group {
+      margin-bottom: 14px;
+    }
+    .form-label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 5px;
+    }
+    .form-input {
+      width: 100%;
+      height: 40px;
+      padding: 0 12px;
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      font-family: var(--font-sans);
+      font-size: 13.5px;
+      color: var(--text-main);
+      background: var(--bg-surface);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .form-input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+    }
+    textarea.form-input {
+      height: 60px;
+      padding: 8px 12px;
+      resize: vertical;
+    }
+
+    /* Pay CTA button */
+    .btn-pay-rzp {
+      width: 100%;
+      height: 48px;
+      background: #0284c7;
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      font-family: var(--font-sans);
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.25);
+      transition: all 0.18s ease;
+      margin-top: 10px;
+    }
+    .btn-pay-rzp:hover {
+      background: #0369a1;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+    }
+    .btn-pay-rzp:active {
+      transform: translateY(0.5px);
+    }
+
+    .trust-footer {
+      margin-top: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 11.5px;
+      color: var(--text-faint);
+    }
+    .trust-footer svg {
+      width: 13px;
+      height: 13px;
+      fill: #10b981;
+    }
+
+    /* Success Toast */
+    .success-pane {
+      text-align: center;
+      padding: 24px 12px;
+    }
+    .success-icon {
+      width: 56px;
+      height: 56px;
+      background: #dcfce7;
+      color: #15803d;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      margin: 0 auto 16px;
+    }
+    .success-pane h3 {
+      font-size: 20px;
+      font-weight: 750;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+    .success-pane p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    @media (max-width: 860px) {
+      .support-wrapper {
+        grid-template-columns: 1fr;
+        gap: 36px;
+        padding-top: 24px;
+      }
+      .support-checkout-card {
+        position: static;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Minimal Header -->
+  <header class="top-bar">
+    <a href="index.html" class="brand-link">
+      <img src="assets/icon128.png" alt="LeetGlow" class="brand-logo">
+      <span>LeetGlow</span>
+    </a>
+    <div class="top-bar-right">
+      <a href="https://chromewebstore.google.com/detail/ecpfpadofaimilfpjedgoedhoaglpjdb" target="_blank" class="btn-ghost">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="21.17" y1="8" x2="12" y2="8"/><line x1="3.95" y1="6.06" x2="8.54" y2="14"/><line x1="10.88" y1="21.94" x2="15.46" y2="14"/></svg>
+        <span>Add to Chrome</span>
+      </a>
+      <a href="index.html" class="btn-ghost">Back to Home</a>
+    </div>
+  </header>
+
+  <!-- Split Screen Content -->
+  <main class="support-wrapper">
+
+    <!-- Left Half: Mission, Deliverables & Gratitude -->
+    <div class="support-story">
+      <div class="story-badge">
+        <span>❤️</span> Independent & Open
+      </div>
+
+      <h1 class="story-title">
+        Fueling the future of <span>LeetGlow</span>.
+      </h1>
+
+      <p class="story-intro">
+        LeetGlow is built with love by developers, for developers. We believe you shouldn't have to look at a boring gray screen during hours of interview preparation. Every feature is completely free with no intrusive ads.
+      </p>
+
+      <div class="creator-quote">
+        <p>"I created LeetGlow because LeetCode deserves to feel inspiring. Your support directly funds server costs and allows us to keep everything 100% free and open for the community."</p>
+        <span>— Anupam Yadav, Creator of LeetGlow</span>
+      </div>
+
+      <div class="deliverables-card">
+        <h2 class="deliverables-heading">
+          <span>🚀</span> What your support delivers
+        </h2>
+        <ul class="deliverables-list">
+          <li class="deliverable-item">
+            <div class="del-icon">⚡</div>
+            <div class="del-content">
+              <strong>High-Speed 4K CDN Hosting</strong>
+              <p>Ensures ultra-fast streaming of WebP 4K wallpapers and dynamic anime scenes worldwide.</p>
+            </div>
+          </li>
+          <li class="deliverable-item">
+            <div class="del-icon">🎨</div>
+            <div class="del-content">
+              <strong>Fresh Weekly Anime & Cyber Themes</strong>
+              <p>Funding digital art licensing and custom background creation tailored for LeetCode's layout.</p>
+            </div>
+          </li>
+          <li class="deliverable-item">
+            <div class="del-icon">🎵</div>
+            <div class="del-content">
+              <strong>Bespoke Focus Soundscapes</strong>
+              <p>Mastering ambient lofi soundtracks and victory fanfares when your hard problem passes.</p>
+            </div>
+          </li>
+          <li class="deliverable-item">
+            <div class="del-icon">🛠️</div>
+            <div class="del-content">
+              <strong>Zero-Lag Maintenance & LeetCode UI Updates</strong>
+              <p>Keeping the extension under 2MB RAM and instantly patching whenever LeetCode updates its DOM.</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Right Half: Razorpay Custom Amount Form -->
+    <div class="support-checkout-card" id="checkoutCard">
+      <div class="checkout-head">
+        <h2 class="checkout-title">Support Our Work</h2>
+        <p class="checkout-desc">Pick an amount or enter any contribution you'd like. Every bit fuels continuous development.</p>
+      </div>
+
+      <div id="checkoutFormPane">
+        <label class="amount-label">Select Amount (INR)</label>
+        <div class="chips-grid">
+          <button type="button" class="chip-btn" data-amt="50">₹50</button>
+          <button type="button" class="chip-btn active" data-amt="100">₹100</button>
+          <button type="button" class="chip-btn" data-amt="250">₹250</button>
+          <button type="button" class="chip-btn" data-amt="500">₹500</button>
+        </div>
+
+        <div class="custom-input-wrap">
+          <span class="custom-currency-symbol">₹</span>
+          <input type="number" id="customAmountInput" class="custom-amount-input" value="100" min="10" step="10" placeholder="Custom amount" />
+        </div>
+
+        <div class="form-group">
+          <label for="supporterName" class="form-label">Your Name (Optional)</label>
+          <input type="text" id="supporterName" class="form-input" placeholder="e.g. Alex" />
+        </div>
+
+        <div class="form-group">
+          <label for="supporterEmail" class="form-label">Email Address (For receipt)</label>
+          <input type="email" id="supporterEmail" class="form-input" placeholder="alex@example.com" />
+        </div>
+
+        <div class="form-group">
+          <label for="supporterMessage" class="form-label">Message / Note (Optional)</label>
+          <textarea id="supporterMessage" class="form-input" placeholder="Say hi or suggest a theme!"></textarea>
+        </div>
+
+        <button type="button" id="payRazorpayBtn" class="btn-pay-rzp">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/></svg>
+          <span id="payBtnLabel">Support with ₹100</span>
+        </button>
+
+        <div class="trust-footer">
+          <svg viewBox="0 0 16 16"><path d="M8 0L1 3v5c0 4.4 3 8.5 7 9.5 4-1 7-5.1 7-9.5V3L8 0zm-1 11L4 8l1.4-1.4L7 8.2l3.6-3.6L12 6l-5 5z"/></svg>
+          <span>Powered by Razorpay · UPI, Cards, NetBanking</span>
+        </div>
+      </div>
+
+      <!-- Success Pane (Hidden by default) -->
+      <div id="successPane" class="success-pane" style="display: none;">
+        <div class="success-icon">✓</div>
+        <h3>Thank You So Much!</h3>
+        <p>Your contribution was successful. You are actively keeping LeetGlow free, ad-free, and inspiring for every developer grinding LeetCode.</p>
+        <a href="index.html" class="btn-ghost" style="margin-top: 18px; display: inline-flex;">Back to LeetGlow</a>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    (function() {
+      const chips = document.querySelectorAll('.chip-btn');
+      const customInput = document.getElementById('customAmountInput');
+      const payBtn = document.getElementById('payRazorpayBtn');
+      const payLabel = document.getElementById('payBtnLabel');
+      const formPane = document.getElementById('checkoutFormPane');
+      const successPane = document.getElementById('successPane');
+
+      let currentAmount = 100;
+
+      function updateAmount(val) {
+        val = parseInt(val, 10);
+        if (isNaN(val) || val < 10) val = 10;
+        currentAmount = val;
+        customInput.value = val;
+        payLabel.textContent = `Support with ₹${val}`;
+
+        // Sync chips
+        chips.forEach(chip => {
+          if (parseInt(chip.getAttribute('data-amt'), 10) === val) {
+            chip.classList.add('active');
+          } else {
+            chip.classList.remove('active');
+          }
+        });
+      }
+
+      chips.forEach(chip => {
+        chip.addEventListener('click', () => {
+          const amt = parseInt(chip.getAttribute('data-amt'), 10);
+          updateAmount(amt);
+        });
+      });
+
+      customInput.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value, 10);
+        if (!isNaN(val) && val >= 10) {
+          currentAmount = val;
+          payLabel.textContent = `Support with ₹${val}`;
+          chips.forEach(chip => {
+            if (parseInt(chip.getAttribute('data-amt'), 10) === val) {
+              chip.classList.add('active');
+            } else {
+              chip.classList.remove('active');
+            }
+          });
+        }
+      });
+
+      payBtn.addEventListener('click', () => {
+        const name = document.getElementById('supporterName').value.trim();
+        const email = document.getElementById('supporterEmail').value.trim();
+        const message = document.getElementById('supporterMessage').value.trim();
+
+        if (currentAmount < 10) {
+          alert('Minimum contribution is ₹10.');
+          return;
+        }
+
+        const options = {
+          key: 'rzp_live_TsQqQz1qNKYvdP', // Live Razorpay Key
+          amount: currentAmount * 100, // paise
+          currency: 'INR',
+          name: 'LeetGlow Support',
+          description: message ? `LeetGlow Community Support: "${message.slice(0, 40)}"` : 'Contribution to keep LeetGlow free & open',
+          image: 'assets/icon128.png',
+          prefill: {
+            name: name || undefined,
+            email: email || undefined
+          },
+          theme: {
+            color: '#0284c7'
+          },
+          handler: function(response) {
+            formPane.style.display = 'none';
+            successPane.style.display = 'block';
+          }
+        };
+
+        try {
+          const rzp = new Razorpay(options);
+          rzp.open();
+        } catch (err) {
+          console.error('[LeetGlow Support] Razorpay error:', err);
+          alert('Unable to load Razorpay checkout. Please check your internet connection.');
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
+

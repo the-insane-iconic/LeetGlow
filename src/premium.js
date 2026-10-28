@@ -59,11 +59,13 @@
 
       const data = await res.json();
       const isActive = !!(data && data.active === true);
+      const isFreeBeta = !!(data && data.is_free_beta === true);
       
-      // Update local storage cache with server timestamp
+      // Update local storage cache with server timestamp and beta status
       await chrome.storage.local.set({
         leetglowPremium: {
           active: isActive,
+          is_free_beta: isFreeBeta,
           key_prefix: data.key_prefix || null,
           activated_at: data.activated_at || null,
           verified_at: new Date().toISOString()
@@ -72,6 +74,7 @@
 
       return {
         active: isActive,
+        is_free_beta: isFreeBeta,
         key_prefix: data.key_prefix || null,
         activated_at: data.activated_at || null
       };
@@ -84,7 +87,8 @@
           return cached;
         }
       } catch (e) {}
-      return { active: false, error: err.message };
+      // Default to true for free beta if no cache exists
+      return { active: true, is_free_beta: true, key_prefix: 'LG-FREE' };
     }
   }
 
@@ -230,8 +234,13 @@
    * Sleek Slate Glass = Basic Plan
    * Emerald Glow = Premium Active
    */
-  function updateBadge(badgeEl, isActive, keyPrefix) {
+  function updateBadge(badgeEl, isActive, keyPrefix, isFreeBeta) {
     if (!badgeEl) return;
+    if (isFreeBeta !== false) {
+      badgeEl.style.display = 'none';
+      return;
+    }
+    badgeEl.style.display = '';
     badgeEl.classList.remove('active', 'inactive', 'checking');
     
     if (isActive) {
@@ -251,12 +260,54 @@
     }
   }
 
+  /**
+   * Componentized UI State Manager:
+   * Dynamically toggles visibility of all commercial / paywall elements.
+   * When isFreeBeta is true:
+   *   - Hides "Get Premium" and "Activate Key" action buttons
+   *   - Hides Plan Status badges and tier comparison tables
+   *   - Hides footer tier pills and promotional corner ribbons
+   * When isFreeBeta is false:
+   *   - Restores standard monetization UI seamlessly
+   */
+  function syncUIElements(rootDoc = document, status = {}) {
+    const isFreeBeta = status.is_free_beta !== false;
+
+    const betaHiddenIds = [
+      'getPremiumBtn',
+      'premiumBadge',
+      'activatePremiumBtn',
+      'tierComparison',
+      'tierBadge',
+      'myspacePremBadge',
+      'premiumNavSep',
+      'btnUnlockPremDropzone'
+    ];
+
+    betaHiddenIds.forEach((id) => {
+      const el = rootDoc.getElementById ? rootDoc.getElementById(id) : document.getElementById(id);
+      if (el) {
+        if (isFreeBeta) {
+          el.style.display = 'none';
+        } else {
+          el.style.display = '';
+        }
+      }
+    });
+
+    const ribbons = (rootDoc.querySelectorAll ? rootDoc : document).querySelectorAll('.corner-ribbon-wrap');
+    ribbons.forEach((r) => {
+      r.style.display = isFreeBeta ? 'none' : '';
+    });
+  }
+
   root.LeetGlowPremium = {
     CONFIG,
     getDeviceId,
     checkServerEntitlement,
     activateKey,
     recordPaymentAndIssueKey,
-    updateBadge
+    updateBadge,
+    syncUIElements
   };
 })(globalThis);
