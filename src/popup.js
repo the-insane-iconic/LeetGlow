@@ -91,13 +91,13 @@ const THEMES = {
 const ORDER = ['anime', 'grid', 'game', 'pixel', 'crawler', 'off'];
 const LCT_ORDER = [
   'sakura-dream',
-  'forest-mist',
+  'paper',
   'midnight-ink',
   'lofi-cafe',
   'rainy-window',
   'meadow-breeze',
   'ocean-deep',
-  'paper',
+  'forest-mist',
   'nord'
 ];
 
