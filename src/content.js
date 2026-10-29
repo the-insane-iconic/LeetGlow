@@ -99,6 +99,7 @@
     }
     root.setAttribute('data-lc-theme', theme);
     setBaseMode(theme);
+    try { sessionStorage.setItem('__lcts_active_theme', theme); } catch (e) {}
   }
 
   globalThis.__lctsReassertMode = () => { if (current && current !== 'off') setBaseMode(current); };
@@ -120,7 +121,13 @@
     syncTransparency(res.lcContainerTrans, res.lcEditorTrans);
   });
 
-  apply(DEFAULT);
+  let initialTheme = DEFAULT;
+  try {
+    const cached = sessionStorage.getItem('__lcts_active_theme');
+    if (cached && VALID.has(cached)) initialTheme = cached;
+  } catch (e) {}
+
+  apply(initialTheme);
   chrome.storage.local.get(KEY, (res) => apply((res && res[KEY]) || DEFAULT));
 
   chrome.storage.onChanged.addListener((changes, area) => {

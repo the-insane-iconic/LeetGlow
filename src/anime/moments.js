@@ -18,6 +18,15 @@
      has no settings UI yet, so it simply runs on DEFAULTS until one exists. */
   const DEFAULTS = { titleCard: true, moments: true, sound: true, volume: 1 };
   let settings = { anime: Object.assign({}, DEFAULTS), crawler: Object.assign({}, DEFAULTS) };
+
+  const MOMENT_THEMES = new Set(['anime', 'crawler']);
+  const theme = () => root.getAttribute('data-lc-theme');
+  const activeSettings = () => settings[theme()] || DEFAULTS;
+  /* a tab not clicked yet plays through the offscreen page: open it early */
+  function primeSound() {
+    if (SFX && MOMENT_THEMES.has(theme()) && activeSettings().sound && activeSettings().titleCard) SFX.prime(theme());
+  }
+
   chrome.storage.local.get(['lcAnime', 'lcCrawler'], (res) => {
     if (res.lcAnime) settings.anime = Object.assign({}, DEFAULTS, res.lcAnime);
     if (res.lcCrawler) settings.crawler = Object.assign({}, DEFAULTS, res.lcCrawler);
@@ -30,14 +39,6 @@
     if (ch.lcAnime && UI && UI.setJapanese) UI.setJapanese(settings.anime.japanese);
     if (ch.lcCrawler) settings.crawler = Object.assign({}, DEFAULTS, ch.lcCrawler.newValue || {});
   });
-
-  const MOMENT_THEMES = new Set(['anime', 'crawler']);
-  const theme = () => root.getAttribute('data-lc-theme');
-  const activeSettings = () => settings[theme()] || DEFAULTS;
-  /* a tab not clicked yet plays through the offscreen page: open it early */
-  function primeSound() {
-    if (SFX && MOMENT_THEMES.has(theme()) && activeSettings().sound && activeSettings().titleCard) SFX.prime(theme());
-  }
 
   /* the overlay and its sound always start together */
   function sound(kind) {

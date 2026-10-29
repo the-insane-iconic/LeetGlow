@@ -187,28 +187,6 @@ html[data-lc-focus] .lc-anime-live-video {
   }
 
   let liveVideoEl = null;
-  const VIDEO_CACHE_NAME = 'leetglow-live-wallpapers-v1';
-
-  async function getCachedOrFetchVideoUrl(url) {
-    if (!url || url.startsWith('blob:') || url.startsWith('data:')) return url;
-    if (typeof caches !== 'undefined') {
-      try {
-        const cache = await caches.open(VIDEO_CACHE_NAME);
-        const match = await cache.match(url);
-        if (match) {
-          const blob = await match.blob();
-          return URL.createObjectURL(blob);
-        }
-        // Cache in background so future tabs/sessions load offline with 0 CDN latency
-        fetch(url, { mode: 'cors' }).then(async (res) => {
-          if (res.ok) {
-            await cache.put(url, res.clone());
-          }
-        }).catch(() => { });
-      } catch (e) { }
-    }
-    return url;
-  }
 
   // Pause video decoding immediately when tab is hidden to eliminate GPU/battery usage
   document.addEventListener('visibilitychange', () => {
@@ -225,10 +203,9 @@ html[data-lc-focus] .lc-anime-live-video {
   });
 
   function ensureVideoAttached() {
-    if (!liveVideoEl) return;
-    const target = document.body || root;
-    if (liveVideoEl.parentNode !== target) {
-      target.prepend(liveVideoEl);
+    if (!liveVideoEl || !document.body) return;
+    if (liveVideoEl.parentNode !== document.body) {
+      document.body.prepend(liveVideoEl);
     }
   }
 
@@ -294,63 +271,43 @@ html[data-lc-focus] .lc-anime-live-video {
       if (document.body) document.body.classList.remove('live-ready');
 
       liveVideoEl.dataset.currentUrl = url;
+      liveVideoEl.innerHTML = `
+        <source src="${url}" type="video/mp4">
+        <source src="${url}" type="video/quicktime">
+        <source src="${url}" type="video/webm">
+      `;
+      liveVideoEl.src = url;
+      liveVideoEl.load();
 
-      getCachedOrFetchVideoUrl(url).then((playableUrl) => {
-        if (!liveVideoEl || liveVideoEl.dataset.currentUrl !== url) return;
-
-        liveVideoEl.innerHTML = `
-          <source src="${playableUrl}" type="video/mp4">
-          <source src="${playableUrl}" type="video/quicktime">
-          <source src="${playableUrl}" type="video/webm">
-        `;
-        liveVideoEl.src = playableUrl;
-        liveVideoEl.load();
-
-        if (!document.hidden) {
-          const playPromise = liveVideoEl.play();
-          if (playPromise !== undefined) {
-            playPromise.catch(() => {
-              // Autoplay policy delayed playback - resume upon user's first click or keypress
-              const resume = () => {
-                if (liveVideoEl && liveVideoEl.paused && !document.hidden) {
-                  liveVideoEl.play().catch(() => { });
-                }
-                window.removeEventListener('click', resume);
-                window.removeEventListener('keydown', resume);
-              };
-              window.addEventListener('click', resume, { once: true });
-              window.addEventListener('keydown', resume, { once: true });
-            });
-          }
+      if (!document.hidden) {
+        const playPromise = liveVideoEl.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(() => {
+            // Autoplay policy delayed playback - resume upon user's first click or keypress
+            const resume = () => {
+              if (liveVideoEl && liveVideoEl.paused && !document.hidden) {
+                liveVideoEl.play().catch(() => { });
+              }
+              window.removeEventListener('click', resume);
+              window.removeEventListener('keydown', resume);
+            };
+            window.addEventListener('click', resume, { once: true });
+            window.addEventListener('keydown', resume, { once: true });
+          });
         }
-      });
+      }
     }
     root.classList.add('has-live-wallpaper');
     if (document.body) document.body.classList.add('has-live-wallpaper');
   }
 
-  // Ensure live video stays properly prepended inside document.body as the DOM constructs and during SPA transitions
-  const spaObserver = new MutationObserver(() => {
-    if (root.classList.contains('has-live-wallpaper') && liveVideoEl) {
-      ensureVideoAttached();
-      if (document.body) {
-        if (!document.body.classList.contains('has-live-wallpaper')) {
-          document.body.classList.add('has-live-wallpaper');
-        }
-        if (root.classList.contains('live-ready') && !document.body.classList.contains('live-ready')) {
-          document.body.classList.add('live-ready');
-        }
-      }
-    }
-  });
-  spaObserver.observe(root, { childList: true });
-  if (document.body) {
-    spaObserver.observe(document.body, { childList: true });
-  } else {
+  // Attach live video once body is available without thrashing the DOM with observers
+  if (!document.body) {
     document.addEventListener('DOMContentLoaded', () => {
       ensureVideoAttached();
-      if (document.body) spaObserver.observe(document.body, { childList: true });
-    });
+    }, { once: true });
+  } else {
+    ensureVideoAttached();
   }
 
   let loading = 0;
@@ -423,6 +380,7 @@ html[data-lc-focus] .lc-anime-live-video {
   /* a problem's difficulty became known, or you moved to another problem */
   if (globalThis.LCTSProblem) {
     globalThis.LCTSProblem.onChange(() => {
+      ensureVideoAttached();
       if (cfgNow && root.getAttribute('data-lc-theme') === 'anime') showPreset(cfgNow, lastAlpha);
     });
   }

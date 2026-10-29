@@ -315,8 +315,8 @@
 
   <!-- View 3: My Space View -->
   <div id="view-myspace" class="tab-view" role="tabpanel" aria-labelledby="tab-myspace" hidden>
-    <!-- Custom Wallpapers Hero Card with Gated Dropzone -->
-    <div class="panel-card myspace-hero-card">
+    <!-- Unified Custom Wallpapers Card -->
+    <div class="panel-card myspace-card" id="myspaceDropContainer">
       <div class="panel-card-head">
         <div class="card-icon-title">
           <div class="card-icon-wrap">
@@ -332,39 +332,31 @@
             <p class="panel-card-sub">Upload 4K artwork & skin your LeetCode problem workspace.</p>
           </div>
         </div>
-        <span id="myspacePremBadge" class="prem-tier-badge free" style="display: none;">Free Plan</span>
+        <div class="myspace-head-actions">
+          <span id="myspacePremBadge" class="prem-tier-badge free" style="display: none;">Free Plan</span>
+          <span id="customGalleryCount" class="slider-val-badge">0</span>
+          <button id="myspaceUploadBtn" class="myspace-upload-btn" type="button" title="Upload custom wallpaper">
+            <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="8" y1="3" x2="8" y2="13"></line>
+              <line x1="3" y1="8" x2="13" y2="8"></line>
+            </svg>
+            <span>Upload Image</span>
+          </button>
+        </div>
       </div>
 
-      <!-- Upload Dropzone (Active by default for free beta) -->
+      <input type="file" id="customUploadInput" accept="image/png,image/jpeg,image/webp" hidden />
+      <div id="uploadStatusText" class="upload-status-text" hidden></div>
+
+      <!-- Upload Dropzone (shows empty state / drop target) -->
       <div id="customUploadDropzone" class="custom-dropzone">
-        <input type="file" id="customUploadInput" accept="image/png,image/jpeg,image/webp" hidden />
         <div id="dropzoneContent" class="dropzone-content">
           <!-- Dynamically populated based on Premium state -->
         </div>
       </div>
-      <div id="uploadStatusText" class="upload-status-text" hidden></div>
-    </div>
 
-    <!-- Uploaded Wallpapers Gallery Card -->
-    <div class="panel-card">
-      <div class="panel-card-head">
-        <div class="card-icon-title">
-          <div class="card-icon-wrap">
-            <svg class="card-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"
-              stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="2" width="12" height="12" rx="2" />
-              <circle cx="5.5" cy="5.5" r="1.5" />
-              <path d="M14 10l-3.5-3.5L3 14" />
-            </svg>
-          </div>
-          <div>
-            <h3>Your Uploaded Wallpapers</h3>
-            <p class="panel-card-sub">Switch, manage, or remove your personalized collection.</p>
-          </div>
-        </div>
-        <span id="customGalleryCount" class="slider-val-badge">0</span>
-      </div>
-      <div id="customGalleryList" class="custom-gallery-list">
+      <!-- Uploaded Wallpapers Gallery List (shows cards when uploads exist) -->
+      <div id="customGalleryList" class="custom-gallery-list" hidden>
         <!-- Rendered dynamically -->
       </div>
     </div>

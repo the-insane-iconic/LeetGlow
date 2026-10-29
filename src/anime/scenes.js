@@ -25,6 +25,8 @@ globalThis.LCTS_PALETTES = {
     roles: {
       '--lc-desk': '#1e0e18',
       '--lc-bg0': '#1e0e18',
+      '--lc-text': '#ffffff',
+      '--lc-text2': '#ffffff',
       '--lc-accent': '#f472b6',
       '--lc-accent-2': '#fb7185',
       '--lc-rule': '#f472b6',
@@ -43,6 +45,8 @@ globalThis.LCTS_PALETTES = {
     roles: {
       '--lc-desk': '#140c24',
       '--lc-bg0': '#140c24',
+      '--lc-text': '#ffffff',
+      '--lc-text2': '#ffffff',
       '--lc-accent': '#c084fc',
       '--lc-accent-2': '#e879f9',
       '--lc-rule': '#c084fc',
@@ -61,6 +65,8 @@ globalThis.LCTS_PALETTES = {
     roles: {
       '--lc-desk': '#09182a',
       '--lc-bg0': '#09182a',
+      '--lc-text': '#ffffff',
+      '--lc-text2': '#ffffff',
       '--lc-accent': '#60a5fa',
       '--lc-accent-2': '#38bdf8',
       '--lc-rule': '#60a5fa',
@@ -79,6 +85,8 @@ globalThis.LCTS_PALETTES = {
     roles: {
       '--lc-desk': '#081d24',
       '--lc-bg0': '#081d24',
+      '--lc-text': '#ffffff',
+      '--lc-text2': '#ffffff',
       '--lc-accent': '#22d3ee',
       '--lc-accent-2': '#67e8f9',
       '--lc-rule': '#22d3ee',
@@ -97,6 +105,8 @@ globalThis.LCTS_PALETTES = {
     roles: {
       '--lc-desk': '#0a1c12',
       '--lc-bg0': '#0a1c12',
+      '--lc-text': '#ffffff',
+      '--lc-text2': '#ffffff',
       '--lc-accent': '#4ade80',
       '--lc-accent-2': '#86efac',
       '--lc-rule': '#4ade80',
@@ -115,6 +125,8 @@ globalThis.LCTS_PALETTES = {
     roles: {
       '--lc-desk': '#1c1509',
       '--lc-bg0': '#1c1509',
+      '--lc-text': '#ffffff',
+      '--lc-text2': '#ffffff',
       '--lc-accent': '#fcd34d',
       '--lc-accent-2': '#fbbf24',
       '--lc-rule': '#fcd34d',
@@ -133,6 +145,8 @@ globalThis.LCTS_PALETTES = {
     roles: {
       '--lc-desk': '#200c0f',
       '--lc-bg0': '#200c0f',
+      '--lc-text': '#ffffff',
+      '--lc-text2': '#ffffff',
       '--lc-accent': '#f87171',
       '--lc-accent-2': '#fca5a5',
       '--lc-rule': '#f87171',

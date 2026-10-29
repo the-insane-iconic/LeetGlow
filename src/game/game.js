@@ -77,20 +77,30 @@
   const slugOf = () => { const m = /^\/problems\/([^/]+)/.exec(location.pathname); return m ? m[1] : null; };
 
   function titleEl(slug) {
-    const t = document.querySelector('.flexlayout__tab .text-title-large');
-    if (!t) return null;
-    const a = t.querySelector('a[href]');
-    if (a && a.getAttribute('href').indexOf('/problems/' + slug) === -1) return null;
+    const t = document.querySelector('.text-title-large, [data-track-load="description_content"] h4, [data-track-load="description_content"] [class*="title"]');
     return t;
   }
 
   function readTitle(slug) {
+    const P = globalThis.LCTSProblem;
+    if (P && typeof P.get === 'function') {
+      const p = P.get();
+      if (p && p.slug === slug && p.title) {
+        return { number: p.number || '', title: p.title, difficulty: p.difficulty || '' };
+      }
+    }
     const t = titleEl(slug);
     if (!t) return null;
-    const m = /^\s*(\d+)\.\s+(.+?)\s*$/.exec(t.textContent);
-    if (!m) return null;
-    const d = document.querySelector('.flexlayout__tab [class*="text-difficulty-"]');
-    return { number: m[1], title: m[2], difficulty: d ? d.textContent.trim() : '' };
+    const raw = t.textContent.trim();
+    const m = /^\s*(\d+)\.\s+(.+?)(?:\s+(?:Solved|已解答))?\s*$/i.exec(raw);
+    const d = document.querySelector('[class*="text-difficulty-"], [class*="difficulty"]');
+    const diff = d ? d.textContent.trim() : '';
+    if (m) {
+      return { number: m[1], title: m[2], difficulty: diff };
+    } else if (raw.length > 0) {
+      return { number: '', title: raw.replace(/\s*(?:Solved|已解答)\s*$/i, '').trim(), difficulty: diff };
+    }
+    return null;
   }
 
   const whenVisible = () => new Promise((res) => {
@@ -111,24 +121,57 @@
     let tries = 0, since = 0;
     const P = globalThis.LCTSProblem;
     const iv = setInterval(async () => {
-      if (my !== ticket || ++tries > 90 || !on()) { clearInterval(iv); return; }
+      if (my !== ticket || !on()) { clearInterval(iv); return; }
+      if (++tries > 90) {
+        clearInterval(iv);
+        setLevel('easy');
+        if (!globalThis.LCTSGame) return;
+        await whenVisible();
+        if (my !== ticket || !on()) return;
+        const fallbackTitle = slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+        globalThis.LCTSGame.titleCard({
+          level: 1,
+          levelLabel: 'LEVEL 1',
+          tagline: 'MYSTICAL NIGHT',
+          title: fallbackTitle
+        });
+        if (globalThis.LCTSGameSounds) globalThis.LCTSGameSounds.play('title', { retryWithin: 2600 });
+        return;
+      }
       /* a full page load: LeetCode's server-rendered data has the problem ~1.2 s
          in, seconds before the panel layout draws its title (src/problem.js) */
       const s = P && P.ssr(slug);
       const info = s ? { number: s.number, title: s.title, difficulty: s.difficulty || '' } : readTitle(slug);
       if (!info) return;
-      setLevel((info.difficulty || '').toLowerCase() === 'easy' ? 'easy' : 'other');
-      /* from the page, give title/difficulty ~0.7 s to settle -- by the clock:
-         counting timer ticks let a busy page stretch this to seconds */
-      if (!s) {
+      setLevel('easy');
+      /* from the page, give difficulty a moment to settle if not present yet */
+      if (!s && !info.difficulty) {
         if (!since) since = performance.now();
-        if (performance.now() - since < 700) return;
+        if (performance.now() - since < 500) return;
       }
       clearInterval(iv);
-      if ((info.difficulty || '').toLowerCase() !== 'easy' || !globalThis.LCTSGame) return;
+      if (!globalThis.LCTSGame) return;
       await whenVisible();
       if (my !== ticket || !on()) return;
-      globalThis.LCTSGame.titleCard({ title: info.number + '. ' + info.title });
+
+      const diff = (info.difficulty || '').toLowerCase();
+      let lvl = 1, lvlLabel = 'LEVEL 1', tagline = 'MYSTICAL NIGHT';
+      if (diff === 'medium') {
+        lvl = 2;
+        lvlLabel = 'LEVEL 2';
+        tagline = 'THE FALLEN FOREST';
+      } else if (diff === 'hard') {
+        lvl = 3;
+        lvlLabel = 'LEVEL 3';
+        tagline = 'THE EDGE OF THE WORLD';
+      }
+
+      globalThis.LCTSGame.titleCard({
+        level: lvl,
+        levelLabel: lvlLabel,
+        tagline: tagline,
+        title: (info.number ? info.number + '. ' : '') + info.title
+      });
       /* the level intro's cue (sounds/game/title-card.mp3). retryWithin is
          what makes this one actually audible on a cold page load: the card
          fires on problem open, so unlike a verdict there is no click behind

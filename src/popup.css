@@ -1791,6 +1791,69 @@ body[data-active-tab="tab-myspace"] .ver {
   box-shadow: 0 0 6px #c084fc;
 }
 
+.myspace-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.myspace-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5.5px 12px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+  color: #ffffff;
+  font-family: var(--font-ui);
+  font-size: 11.5px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(236, 72, 153, 0.35);
+  transition: all .16s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+.myspace-upload-btn:hover {
+  background: linear-gradient(135deg, #f472b6 0%, #ec4899 100%);
+  box-shadow: 0 4px 14px rgba(236, 72, 153, 0.5);
+  transform: translateY(-0.5px);
+}
+.myspace-upload-btn:active {
+  transform: scale(0.97);
+}
+.myspace-upload-btn svg {
+  flex-shrink: 0;
+}
+
+.panel-card.myspace-card.dragover {
+  border-color: #ec4899;
+  box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.2), 0 8px 24px rgba(244, 114, 182, 0.25);
+}
+
+.custom-wallpaper-add-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 8px 12px;
+  border-radius: 11px;
+  border: 1.5px dashed #fbcfe8;
+  background: linear-gradient(180deg, #fff7fa 0%, #fdf2f8 100%);
+  color: #db2777;
+  font-family: var(--font-ui);
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .16s cubic-bezier(0.16, 1, 0.3, 1);
+  margin-top: 4px;
+}
+.custom-wallpaper-add-card:hover {
+  border-color: #ec4899;
+  background: #fdf2f8;
+  box-shadow: 0 2px 10px rgba(236, 72, 153, 0.2);
+  transform: translateY(-0.5px);
+}
+
 .custom-dropzone {
   margin-top: 4px;
   border: 1.5px dashed #fbcfe8;

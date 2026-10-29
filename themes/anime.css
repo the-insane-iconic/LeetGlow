@@ -455,10 +455,37 @@ html[data-lc-theme="anime"] .lcts-card { pointer-events: auto; cursor: pointer; 
   .lcts-moment .lcts-dz-swirl, .lcts-moment .lcts-orbit { display: none !important; }
 }
 
+/* ---- Problem Description Typography: Bright White for High Contrast -----------
+   When anime theme is active with any color palette (or auto dark mode),
+   render the grey description prose in bright white (#ffffff) for crisp legibility,
+   while preserving the highlighted accent code chips (m x n, accounts) and links as they are. */
+html[data-lc-theme="anime"]:not([data-lc-palette="dark"]) [data-track-load="description_content"] {
+  color: #ffffff !important;
+}
+html[data-lc-theme="anime"]:not([data-lc-palette="dark"]) [data-track-load="description_content"] :is(p, li, dd, dt, blockquote) {
+  color: #ffffff !important;
+}
+html[data-lc-theme="anime"]:not([data-lc-palette="dark"]) [data-track-load="description_content"] :is(h1, h2, h3, h4, h5, h6, strong, b) {
+  color: #ffffff !important;
+}
+html[data-lc-theme="anime"]:not([data-lc-palette="dark"]) :is([class*="text-title"], [class*="text-heading"], .text-title-large, .text-title-large a, [data-cy="question-title"]) {
+  color: #ffffff !important;
+}
+html[data-lc-theme="anime"]:not([data-lc-palette="dark"]) [data-track-load="description_content"] :not(pre) > code {
+  color: var(--lc-accent) !important;
+  background-color: var(--lc-inset) !important;
+}
+html[data-lc-theme="anime"]:not([data-lc-palette="dark"]) [data-track-load="description_content"] :not(pre) > code * {
+  color: inherit !important;
+}
+html[data-lc-theme="anime"]:not([data-lc-palette="dark"]) [data-track-load="description_content"] a {
+  color: var(--lc-accent) !important;
+}
+
 /* ---- High-Contrast Dark Palette for White/Bright Wallpapers ------------------
    When the Dark palette is chosen in Customize, ensure the problem description,
    titles, worked examples, and constraints render with deep, readable dark ink
-   even on bright or white-dominated wallpapers (e.g. Clean White). */
+   even on bright or white-dominated wallpapers (e.g. Clean White or Monogatari). */
 html[data-lc-theme="anime"][data-lc-palette="dark"] [data-track-load="description_content"] {
   color: #0f172a !important;
 }
@@ -468,7 +495,7 @@ html[data-lc-theme="anime"][data-lc-palette="dark"] [data-track-load="descriptio
 html[data-lc-theme="anime"][data-lc-palette="dark"] [data-track-load="description_content"] :is(h1, h2, h3, h4, h5, h6, strong, b) {
   color: #0f172a !important;
 }
-html[data-lc-theme="anime"][data-lc-palette="dark"] :is([class*="text-title"], [class*="text-heading"], .text-title-large, .text-title-large a) {
+html[data-lc-theme="anime"][data-lc-palette="dark"] :is([class*="text-title"], [class*="text-heading"], .text-title-large, .text-title-large a, [data-cy="question-title"]) {
   color: #0f172a !important;
 }
 html[data-lc-theme="anime"][data-lc-palette="dark"] pre,
@@ -486,7 +513,11 @@ html[data-lc-theme="anime"][data-lc-palette="dark"] :not(pre) > code {
   border: 1px solid rgba(15, 23, 42, 0.16) !important;
 }
 html[data-lc-theme="anime"][data-lc-palette="dark"] .flexlayout__tabset.pane-desc,
-html[data-lc-theme="anime"][data-lc-palette="dark"] .flexlayout__tabset:not(:has(#editor)):not(.pane-code) {
+html[data-lc-theme="anime"][data-lc-palette="dark"] .flexlayout__tabset.pane-console,
+html[data-lc-theme="anime"][data-lc-palette="dark"] .flexlayout__tabset:has([data-track-load="description_content"]) {
+  background: rgba(255, 255, 255, 0.82) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
   --color-tab-selected: #0f172a;
   --color-tab-unselected: #334155;
 }

@@ -86,9 +86,7 @@
     RUN_LOC,
     '[data-e2e-locator*="result"]',
     '[class*="result-state"]',
-    '[class*="verdict"]',
-    'div[class*="text-title"]',
-    'span[class*="text-title"]'
+    '[class*="verdict"]'
   ].join(',');
 
   function scan(action) {

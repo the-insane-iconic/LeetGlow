@@ -967,6 +967,8 @@ if (resetCustomizeBtn) {
 (function initMySpace() {
   const badge = document.getElementById('myspacePremBadge');
   const dropzone = document.getElementById('customUploadDropzone');
+  const dropContainer = document.getElementById('myspaceDropContainer') || dropzone;
+  const uploadBtn = document.getElementById('myspaceUploadBtn');
   const fileInput = document.getElementById('customUploadInput');
   const dropzoneContent = document.getElementById('dropzoneContent');
   const statusText = document.getElementById('uploadStatusText');
@@ -1109,51 +1111,68 @@ if (resetCustomizeBtn) {
       if (galleryCount) galleryCount.textContent = gallery.length;
 
       if (gallery.length === 0) {
-        galleryList.innerHTML = `
-          <div class="custom-gallery-empty">
-            <div class="empty-icon-wrap">
-              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="3"/>
-                <circle cx="8.5" cy="8.5" r="1.5"/>
-                <path d="M21 15l-5-5L5 21"/>
-              </svg>
-            </div>
-            <div class="empty-title">No Custom Wallpapers</div>
-            <div class="empty-sub">Upload your favorite artwork to skin your LeetCode problem workspace.</div>
-          </div>
-        `;
+        if (dropzone) dropzone.hidden = false;
+        if (galleryList) {
+          galleryList.hidden = true;
+          galleryList.innerHTML = '';
+        }
         return;
       }
 
-      galleryList.innerHTML = gallery.map((item) => {
-        const isActive = isCustomActive && currentArt && (currentArt.name === item.name || currentArt.wall === item.wall);
-        return `
-          <div class="custom-wallpaper-card ${isActive ? 'active' : ''}" data-id="${item.id}">
-            <div class="custom-wallpaper-thumb" style="background-image: url('${item.thumb || item.wall}')">
-              ${isActive ? '<span class="active-indicator-tag">● Active</span>' : ''}
-            </div>
-            <div class="custom-wallpaper-info">
-              <span class="custom-wallpaper-name" title="${item.name || 'Wallpaper'}">${item.name || 'Custom Wallpaper'}</span>
-              <div class="custom-wallpaper-actions">
-                ${isActive
-            ? '<span class="active-chip">Applied</span>'
-            : `<button class="btn-micro-action btn-apply-wall" data-id="${item.id}" type="button">Apply</button>`
-          }
-                <button class="btn-micro-icon btn-delete-wall" data-id="${item.id}" type="button" title="Delete wallpaper">
-                  <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path d="M2.5 4.5h11M5.5 4.5V3a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v1.5M6 7.5v4.5M10 7.5v4.5M3.5 4.5l.8 9.5a1 1 0 0 0 1 .9h5.4a1 1 0 0 0 1-.9l.8-9.5"/>
-                  </svg>
-                </button>
+      if (dropzone) dropzone.hidden = true;
+      if (galleryList) {
+        galleryList.hidden = false;
+        const cardsHtml = gallery.map((item) => {
+          const isActive = isCustomActive && currentArt && (currentArt.name === item.name || currentArt.wall === item.wall);
+          return `
+            <div class="custom-wallpaper-card ${isActive ? 'active' : ''}" data-id="${item.id}">
+              <div class="custom-wallpaper-thumb" style="background-image: url('${item.thumb || item.wall}')">
+                ${isActive ? '<span class="active-indicator-tag">● Active</span>' : ''}
+              </div>
+              <div class="custom-wallpaper-info">
+                <span class="custom-wallpaper-name" title="${item.name || 'Wallpaper'}">${item.name || 'Custom Wallpaper'}</span>
+                <div class="custom-wallpaper-actions">
+                  ${isActive
+              ? '<span class="active-chip">Applied</span>'
+              : `<button class="btn-micro-action btn-apply-wall" data-id="${item.id}" type="button">Apply</button>`
+            }
+                  <button class="btn-micro-icon btn-delete-wall" data-id="${item.id}" type="button" title="Delete wallpaper">
+                    <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <path d="M2.5 4.5h11M5.5 4.5V3a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v1.5M6 7.5v4.5M10 7.5v4.5M3.5 4.5l.8 9.5a1 1 0 0 0 1 .9h5.4a1 1 0 0 0 1-.9l.8-9.5"/>
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          `;
+        }).join('');
+
+        const addMoreHtml = `
+          <button class="custom-wallpaper-add-card" id="btnAddMoreWallpapers" type="button" title="Upload another artwork">
+            <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="8" y1="3" x2="8" y2="13"></line>
+              <line x1="3" y1="8" x2="13" y2="8"></line>
+            </svg>
+            <span>Upload Another Artwork</span>
+          </button>
         `;
-      }).join('');
+        galleryList.innerHTML = cardsHtml + addMoreHtml;
+      }
     });
   }
 
-  /* Handle Apply & Delete */
+  /* Handle Apply, Delete & Add More */
   galleryList.addEventListener('click', async (e) => {
+    const addMoreBtn = e.target.closest('#btnAddMoreWallpapers');
+    if (addMoreBtn) {
+      if (!isPremium) {
+        openUpgrade();
+        return;
+      }
+      if (fileInput) fileInput.click();
+      return;
+    }
+
     const applyBtn = e.target.closest('.btn-apply-wall');
     if (applyBtn) {
       const id = applyBtn.dataset.id;
@@ -1221,34 +1240,54 @@ if (resetCustomizeBtn) {
     }
   });
 
+  /* Header Upload Button */
+  if (uploadBtn) {
+    uploadBtn.addEventListener('click', () => {
+      if (!isPremium) {
+        openUpgrade();
+        return;
+      }
+      if (fileInput) fileInput.click();
+    });
+  }
+
   /* Dropzone and File Upload logic */
-  dropzone.addEventListener('click', () => {
-    if (!isPremium) {
-      openUpgrade();
-      return;
-    }
-    if (fileInput) fileInput.click();
-  });
+  if (dropzone) {
+    dropzone.addEventListener('click', () => {
+      if (!isPremium) {
+        openUpgrade();
+        return;
+      }
+      if (fileInput) fileInput.click();
+    });
+  }
 
-  dropzone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    dropzone.classList.add('dragover');
-  });
+  if (dropContainer) {
+    dropContainer.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropContainer.classList.add('dragover');
+      if (dropzone) dropzone.classList.add('dragover');
+    });
 
-  dropzone.addEventListener('dragleave', () => {
-    dropzone.classList.remove('dragover');
-  });
+    dropContainer.addEventListener('dragleave', (e) => {
+      if (!dropContainer.contains(e.relatedTarget)) {
+        dropContainer.classList.remove('dragover');
+        if (dropzone) dropzone.classList.remove('dragover');
+      }
+    });
 
-  dropzone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    dropzone.classList.remove('dragover');
-    if (!isPremium) {
-      openUpgrade();
-      return;
-    }
-    const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
-    if (file) handleUpload(file);
-  });
+    dropContainer.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropContainer.classList.remove('dragover');
+      if (dropzone) dropzone.classList.remove('dragover');
+      if (!isPremium) {
+        openUpgrade();
+        return;
+      }
+      const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      if (file) handleUpload(file);
+    });
+  }
 
   if (fileInput) {
     fileInput.addEventListener('change', () => {

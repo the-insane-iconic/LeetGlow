@@ -43,7 +43,6 @@
      the theme's on/off state, never the URL. Ambient decoration belongs on
      the page you're actually solving a problem on. */
   const on = () => root.getAttribute('data-lc-theme') === 'game' &&
-    root.getAttribute('data-lc-game-level') === 'easy' &&
     /^\/problems\/[^/]+/.test(location.pathname);
 
   const PETAL_URL = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
@@ -62,7 +61,17 @@
      symptom exactly, so this stops the layer outright rather than just
      visually hiding it: display:none removes it from compositing, so it
      can't be a cost to anything sampling the page behind the modal. */
-  const dialogOpen = () => !!document.querySelector('[role="dialog"], [aria-modal="true"]');
+  function dialogOpen() {
+    const dialogs = document.querySelectorAll('[role="dialog"], [aria-modal="true"]');
+    for (let i = 0; i < dialogs.length; i++) {
+      const el = dialogs[i];
+      if (el.getAttribute('aria-hidden') === 'true') continue;
+      if (el.classList.contains('hidden')) continue;
+      const r = el.getBoundingClientRect();
+      if (r.width > 0 && r.height > 0) return true;
+    }
+    return false;
+  }
 
   /* the Problem List drawer is a different case from a real modal above: it
      only covers part of the screen and the petals should keep drifting over
@@ -74,7 +83,7 @@
      off-screen (translated out via a class, not removed) even while
      closed. */
   function listDrawerOpen() {
-    const el = document.querySelector('[class~="bg-lc-layer-01"]');
+    const el = document.querySelector('[class*="drawer"][class*="layer"], [class*="drawer"] [class*="bg-lc-layer-01"]');
     if (!el) return false;
     const r = el.getBoundingClientRect();
     return r.width > 0 && r.right > 0 && r.left < innerWidth;

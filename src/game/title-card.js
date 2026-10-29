@@ -42,74 +42,89 @@
   /* info: { level, levelLabel, tagline, title } */
   function titleCard(info, host) {
     info = info || {};
-    host = host || document.body || document.documentElement;
-    host.querySelectorAll(':scope > .lctg-card').forEach(function (n) {
-      if (n._lctgPetals) n._lctgPetals.destroy();   // stop its rAF loop, not just detach the node
-      n.remove();
-    });
 
-    var level = info.level || 1;
-    var levelLabel = info.levelLabel || ('LEVEL ' + level);
-    var tagline = info.tagline || 'MYSTICAL NIGHT';
-    var taglineWords = tagline.split(' ');
-    var mid = Math.ceil(taglineWords.length / 2);
-    var left = taglineWords.slice(0, mid).join(' ');
-    var right = taglineWords.slice(mid).join(' ');
+    function doMount() {
+      var target = host || document.body || document.documentElement;
+      if (!target) return;
 
-    var node = el('div', 'lctg-card');
-    node.setAttribute('aria-hidden', 'true');
-    node.setAttribute('data-lctg-level', String(level));
-    node.append(el('div', 'lctg-dim'), el('div', 'lctg-bar top'), el('div', 'lctg-bar bottom'));
+      document.querySelectorAll('.lctg-card').forEach(function (n) {
+        if (n._lctgPetals) n._lctgPetals.destroy();   // stop its rAF loop, not just detach the node
+        n.remove();
+      });
 
-    var emblem = el('div', 'lctg-emblem');
-    emblem.append(el('span', 'lctg-emblem-line l'), svg(EMBLEM_SVG), el('span', 'lctg-emblem-line r'));
+      var level = info.level || 1;
+      var levelLabel = info.levelLabel || ('LEVEL ' + level);
+      var tagline = info.tagline || 'MYSTICAL NIGHT';
+      var taglineWords = tagline.split(' ');
+      var mid = Math.ceil(taglineWords.length / 2);
+      var left = taglineWords.slice(0, mid).join(' ');
+      var right = taglineWords.slice(mid).join(' ');
 
-    var main = el('div', 'lctg-main');
-    main.append(
-      el('span', 'lctg-half l', left), el('span', 'lctg-half r', right),
-      el('div', 'lctg-glint a'), el('div', 'lctg-glint b')
-    );
+      var node = el('div', 'lctg-card');
+      node.setAttribute('aria-hidden', 'true');
+      node.setAttribute('data-lctg-level', String(level));
+      node.append(el('div', 'lctg-dim'), el('div', 'lctg-bar top'), el('div', 'lctg-bar bottom'));
 
-    var lower = el('div', 'lctg-lower');
-    lower.append(el('span', 'lctg-emblem-line l'), el('span', 'lctg-diamond'), el('span', 'lctg-emblem-line r'));
+      var emblem = el('div', 'lctg-emblem');
+      emblem.append(el('span', 'lctg-emblem-line l'), svg(EMBLEM_SVG), el('span', 'lctg-emblem-line r'));
 
-    var stage = el('div', 'lctg-stage');
-    stage.append(
-      emblem,
-      el('div', 'lctg-level', levelLabel),
-      main,
-      lower,
-      el('div', 'lctg-problem', info.title || '')
-    );
-    node.append(stage);
+      var main = el('div', 'lctg-main');
+      main.append(
+        el('span', 'lctg-half l', left), el('span', 'lctg-half r', right),
+        el('div', 'lctg-glint a'), el('div', 'lctg-glint b')
+      );
 
-    host.appendChild(node);
-    var petals = root.LCTSGamePetals ? root.LCTSGamePetals.mount(node, { imageUrl: info.petalImageUrl }) : null;
-    node._lctgPetals = petals;
+      var lower = el('div', 'lctg-lower');
+      lower.append(el('span', 'lctg-emblem-line l'), el('span', 'lctg-diamond'), el('span', 'lctg-emblem-line r'));
 
-    var removed = false, leaving = false;
-    function cleanup() {
-      if (removed) return;
-      removed = true;
-      if (petals) petals.destroy();
-      node.remove();
-      document.removeEventListener('keydown', leave, true);
+      var stage = el('div', 'lctg-stage');
+      stage.append(
+        emblem,
+        el('div', 'lctg-level', levelLabel),
+        main,
+        lower,
+        el('div', 'lctg-problem', info.title || '')
+      );
+      node.append(stage);
+
+      target.appendChild(node);
+      var petals = root.LCTSGamePetals ? root.LCTSGamePetals.mount(node, { imageUrl: info.petalImageUrl }) : null;
+      node._lctgPetals = petals;
+
+      var removed = false, leaving = false;
+      function cleanup() {
+        if (removed) return;
+        removed = true;
+        if (petals) petals.destroy();
+        node.remove();
+        document.removeEventListener('keydown', onKey, true);
+      }
+      function leave() {
+        if (leaving) return;
+        leaving = true;
+        clearTimeout(holdTimer);
+        node.classList.add('is-leaving');
+      }
+      function onKey(e) {
+        if (e.key === 'Shift' || e.key === 'Control' || e.key === 'Alt' || e.key === 'Meta') return;
+        leave();
+      }
+      node.addEventListener('click', leave);
+      /* any key dismisses it, and the key still reaches the editor */
+      document.addEventListener('keydown', onKey, true);
+      /* the shell's own exit animation is the last thing to finish */
+      node.addEventListener('animationend', function (e) { if (e.target === node && leaving) cleanup(); });
+      var holdTimer = setTimeout(leave, 3300);
+      setTimeout(cleanup, 4500);           // backstop: see moments-ui.js's note on display:none cancelling animations
+
+      return node;
     }
-    function leave() {
-      if (leaving) return;
-      leaving = true;
-      clearTimeout(holdTimer);
-      node.classList.add('is-leaving');
-    }
-    node.addEventListener('click', leave);
-    /* any key dismisses it, and the key still reaches the editor */
-    document.addEventListener('keydown', leave, true);
-    /* the shell's own exit animation is the last thing to finish */
-    node.addEventListener('animationend', function (e) { if (e.target === node && leaving) cleanup(); });
-    var holdTimer = setTimeout(leave, 3300);
-    setTimeout(cleanup, 4500);           // backstop: see moments-ui.js's note on display:none cancelling animations
 
-    return node;
+    if (!host && !document.body && document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', doMount, { once: true });
+      return null;
+    }
+    return doMount();
   }
 
   root.LCTSGame = { titleCard: titleCard };

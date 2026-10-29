@@ -404,11 +404,11 @@ html[data-lc-theme] .flexlayout__tab {
   box-shadow: var(--lc-panel-shadow) !important;
 }
 
-html[data-lc-theme]:not([data-lc-theme="anime"]) .flexlayout__tabset {
+html[data-lc-theme]:not([data-lc-theme="anime"]):not([data-lc-theme="game"]) .flexlayout__tabset {
   background-color: color-mix(in srgb, var(--lc-bg2) var(--lc-container-opacity, 100%), transparent) !important;
 }
-html[data-lc-theme]:not([data-lc-theme="anime"]) .flexlayout__tabset:has(#editor),
-html[data-lc-theme]:not([data-lc-theme="anime"]) .pane-code.flexlayout__tabset {
+html[data-lc-theme]:not([data-lc-theme="anime"]):not([data-lc-theme="game"]) .flexlayout__tabset:has(#editor),
+html[data-lc-theme]:not([data-lc-theme="anime"]):not([data-lc-theme="game"]) .pane-code.flexlayout__tabset {
   background-color: color-mix(in srgb, var(--lc-editor-bg, var(--lc-bg2)) var(--lc-editor-opacity, 100%), transparent) !important;
 }
 html[data-lc-theme]:not([data-lc-theme="anime"]) .flexlayout__tab {
