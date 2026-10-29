@@ -68,7 +68,7 @@ html[data-lc-theme="game"] {
      no difficulty, where the page renders without it */
   --lc-tex-body:
     linear-gradient(180deg, rgba(6,10,18,.55), rgba(6,10,18,0) 22%, rgba(6,10,18,0) 68%, rgba(6,10,18,.58)),
-    url("chrome-extension://__MSG_@@extension_id__/textures/game/background-level1.png");
+    url("chrome-extension://__MSG_@@extension_id__/textures/game/background-level1.webp");
   --lc-tex-body-size: 100% 100%, cover;
   --lc-tex-body-repeat: no-repeat, no-repeat;
   --lc-tex-panel:none; --lc-tex-panel-size:auto;
@@ -175,7 +175,7 @@ html[data-lc-theme="game"][data-lc-game-level="easy"] {
      than the default top-left crop */
   --lc-tex-body:
     linear-gradient(180deg, rgba(6,10,18,.55), rgba(6,10,18,0) 22%, rgba(6,10,18,0) 68%, rgba(6,10,18,.58)),
-    url("chrome-extension://__MSG_@@extension_id__/textures/game/background-level1.png");
+    url("chrome-extension://__MSG_@@extension_id__/textures/game/background-level1.webp");
   --lc-tex-body-size: 100% 100%, cover;
   --lc-tex-body-repeat: no-repeat, no-repeat;
   --lc-tex-panel:none; --lc-tex-panel-size:auto;

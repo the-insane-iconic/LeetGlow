@@ -1737,7 +1737,7 @@ chrome.storage.local.get('leetglowPremium', (data) => {
   }
   // Seamlessly check remote entitlement in the background
   if (globalThis.LeetGlowPremium && typeof LeetGlowPremium.checkServerEntitlement === 'function') {
-    LeetGlowPremium.checkServerEntitlement().catch(() => {});
+    LeetGlowPremium.checkServerEntitlement().catch(() => { });
   }
 });
 
