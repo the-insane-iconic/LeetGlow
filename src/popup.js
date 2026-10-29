@@ -90,13 +90,13 @@ const THEMES = {
 };
 const ORDER = ['anime', 'grid', 'game', 'pixel', 'crawler', 'off'];
 const LCT_ORDER = [
-  'nord',
+  'ocean-deep',
   'paper',
   'midnight-ink',
   'lofi-cafe',
   'rainy-window',
   'meadow-breeze',
-  'ocean-deep',
+  'nord',
   'forest-mist',
   'sakura-dream'
 ];
