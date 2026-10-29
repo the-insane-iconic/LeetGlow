@@ -6,7 +6,7 @@
          "32": "icons/icon32.png",
          "48": "icons/icon48.png"
       },
-      "default_title": "LeetGlow - Mindful Workspace & Aesthetic Themes & After Effects"
+      "default_title": "LeetGlow – Aesthetic LeetCode Themes, Clean Animations & Focus Tools"
    },
    "author": "AnshYadav",
    "background": {
@@ -46,7 +46,7 @@
       "https://*.razorpay.com/*"
    ],
    "manifest_version": 3,
-   "name": "LeetGlow - Mindful Workspace & Aesthetic Themes & After Effects",
+   "name": "LeetGlow – Aesthetic LeetCode Themes, Clean Animations & Focus Tools",
    "permissions": [ "storage", "offscreen", "sidePanel" ],
    "short_name": "LeetGlow",
    "side_panel": {
