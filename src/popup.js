@@ -90,7 +90,7 @@ const THEMES = {
 };
 const ORDER = ['anime', 'grid', 'game', 'pixel', 'crawler', 'off'];
 const LCT_ORDER = [
-  'sakura-dream',
+  'nord',
   'paper',
   'midnight-ink',
   'lofi-cafe',
@@ -98,7 +98,7 @@ const LCT_ORDER = [
   'meadow-breeze',
   'ocean-deep',
   'forest-mist',
-  'nord'
+  'sakura-dream'
 ];
 
 if (globalThis.LCT && globalThis.LCT.THEMES) {
