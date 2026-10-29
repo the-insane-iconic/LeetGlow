@@ -18,6 +18,7 @@ html[data-lct-enabled='true'] #lct-backdrop {
 .lct-bg-base {
   background: var(--lct-bg);
   transform: scale(1.001);
+  transition: background-color 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .lct-bg-media {

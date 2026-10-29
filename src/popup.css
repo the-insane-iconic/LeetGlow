@@ -34,6 +34,7 @@ html {
   min-height: 100%;
   background: var(--pop-bg);
   scrollbar-gutter: stable;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -47,11 +48,14 @@ body {
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
   overflow-y: auto;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
 }
 
 /* sleek sidebar scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
@@ -59,6 +63,7 @@ body {
 ::-webkit-scrollbar-thumb {
   background: var(--pop-border-2);
   border-radius: 99px;
+  transition: background-color 0.2s ease;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--pop-muted);
@@ -127,16 +132,23 @@ body {
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
-  transition: all .16s ease;
+  transition: all .18s cubic-bezier(0.16, 1, 0.3, 1);
   white-space: nowrap;
 }
 .badge-open-leetcode svg {
   color: #fbbf24;
+  transition: transform .18s ease;
 }
 .badge-open-leetcode:hover {
   background: rgba(255, 255, 255, 0.12);
   border-color: rgba(255, 255, 255, 0.28);
   transform: translateY(-0.5px);
+}
+.badge-open-leetcode:hover svg {
+  transform: scale(1.1);
+}
+.badge-open-leetcode:active {
+  transform: translateY(0) scale(0.97);
 }
 .badge-open-leetcode[hidden] {
   display: none !important;
@@ -189,7 +201,7 @@ body {
   background: #f8fafc;
 }
 .nav-tab:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 .nav-tab.active {
   color: #0f172a;
@@ -203,10 +215,10 @@ body {
   width: 14px;
   height: 14px;
   flex-shrink: 0;
-  transition: transform .18s ease;
+  transition: transform .18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .nav-tab:hover .tab-icon {
-  transform: translateY(-0.5px);
+  transform: translateY(-0.5px) scale(1.06);
 }
 
 /* tab views */
@@ -217,11 +229,12 @@ body {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  animation: tab-fade-in .2s ease both;
+  animation: tab-fade-in .26s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity;
 }
 @keyframes tab-fade-in {
-  from { opacity: 0; transform: translateY(3px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(6px) scale(0.995); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 /* ---- Customize & My Space panels --------------------------------------- */
@@ -233,10 +246,13 @@ body {
   border: 1px solid var(--pop-border);
   border-radius: 11px;
   background: var(--pop-panel);
-  transition: border-color .16s ease;
+  transition: border-color .2s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow .2s cubic-bezier(0.16, 1, 0.3, 1),
+              transform .2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .panel-card:hover {
   border-color: var(--pop-border-2);
+  transform: translateY(-1px);
 }
 .panel-card-head {
   display: flex;
@@ -291,12 +307,16 @@ body {
   font-size: 11.5px;
   font-weight: 550;
   cursor: pointer;
-  transition: all .15s ease;
+  transition: all .18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .btn-subtle-action:hover {
   background: rgba(255, 255, 255, 0.06);
   border-color: var(--pop-accent);
   color: #ffffff;
+  transform: translateY(-0.5px);
+}
+.btn-subtle-action:active {
+  transform: translateY(0) scale(0.98);
 }
 
 /* Reset to Default Action */
@@ -309,7 +329,7 @@ body {
 
 /* =============================================================================
    CUSTOMIZE & MY SPACE VIEWS (Light Cards on Grey-Dark Canvas)
-============================================================================= */
+   ============================================================================= */
 #view-customize,
 #view-myspace {
   display: flex;
@@ -328,12 +348,15 @@ body {
   border: 1.5px solid rgba(255, 255, 255, 0.9);
   border-radius: 16px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16), 0 0 12px rgba(255, 255, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 1);
-  transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease;
+  transition: border-color .2s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow .2s cubic-bezier(0.16, 1, 0.3, 1),
+              transform .2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 #view-customize .panel-card:hover,
 #view-myspace .panel-card:hover {
   border-color: #cbd5e1;
+  transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22), 0 0 16px rgba(255, 255, 255, 0.35), inset 0 1px 0 rgba(255, 255, 255, 1);
 }
 
@@ -504,8 +527,19 @@ body {
   justify-content: center;
   margin: 0;
   flex-shrink: 0;
-  transition: all 0.15s ease;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
+}
+
+.pomo-toggle-item input[type="checkbox"]::after {
+  content: "";
+  display: block;
+  width: 4px;
+  height: 8px;
+  border: solid #ffffff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) translate(-1px, -1px) scale(0);
+  transition: transform 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .pomo-toggle-item input[type="checkbox"]:checked {
@@ -514,13 +548,7 @@ body {
 }
 
 .pomo-toggle-item input[type="checkbox"]:checked::after {
-  content: "";
-  display: block;
-  width: 4px;
-  height: 8px;
-  border: solid #ffffff;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg) translate(-1px, -1px);
+  transform: rotate(45deg) translate(-1px, -1px) scale(1);
 }
 
 /* Color Palette Swatches Grid (2-row center-aligned) */
@@ -547,11 +575,15 @@ body {
   outline: none;
   flex: 0 0 auto;
   width: 48px;
-  transition: transform 0.14s ease;
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .palette-swatch-item:hover {
-  transform: translateY(-1.5px);
+  transform: translateY(-2px);
+}
+
+.palette-swatch-item:active {
+  transform: scale(0.95);
 }
 
 .palette-swatch-color {
@@ -943,7 +975,7 @@ body {
   inset: 0;
   background: var(--pop-border-2);
   border-radius: 99px;
-  transition: background-color .2s ease;
+  transition: background-color .22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow .22s ease;
 }
 .toggle-track::before {
   content: "";
@@ -954,7 +986,7 @@ body {
   top: 3px;
   background: #ffffff;
   border-radius: 50%;
-  transition: transform .2s ease;
+  transition: transform .22s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 1px 3px rgba(0,0,0,0.4);
 }
 .switch-toggle input:checked + .toggle-track {
@@ -1107,7 +1139,7 @@ body {
     inset 0 1px 0 rgba(255, 255, 255, 1);
   box-sizing: border-box;
   height: 126px;
-  transition: transform 0.18s cubic-bezier(.2,.8,.3,1.2), box-shadow 0.18s ease;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .quick-matrix-card:hover {
   transform: translateY(-2px);
@@ -1134,7 +1166,7 @@ body {
   border: 1px solid rgba(0, 0, 0, 0.06);
   background: #ffffff;
   cursor: pointer;
-  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
+  transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease, color 0.16s ease;
   padding: 4px 2px;
   outline: none;
   font-family: inherit;
@@ -1142,11 +1174,11 @@ body {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 .quick-action-btn:hover {
-  transform: translateY(-1px);
+  transform: translateY(-1.5px);
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
 }
 .quick-action-btn:active {
-  transform: translateY(0);
+  transform: scale(0.96) translateY(0);
 }
 .quick-action-btn:focus-visible {
   outline: 2px solid #6366f1;
@@ -1160,6 +1192,10 @@ body {
   width: 17px;
   height: 17px;
   display: block;
+  transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.quick-action-btn:hover .q-icon svg {
+  transform: scale(1.08);
 }
 .quick-action-btn .q-label {
   font-size: 10px;
@@ -1279,7 +1315,10 @@ body {
   cursor: pointer;
   height: 126px;
   box-sizing: border-box;
-  transition: transform 0.18s cubic-bezier(.2,.8,.3,1.2), border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              background 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   font: inherit;
   color: inherit;
 }
@@ -1293,7 +1332,7 @@ body {
     inset 0 1px 0 rgba(255, 255, 255, 1);
 }
 .theme-card:active {
-  transform: translateY(0);
+  transform: scale(0.98) translateY(0);
 }
 .theme-card:focus-visible {
   outline: 2px solid var(--pv-accent, #c4a6ff);
@@ -1451,6 +1490,12 @@ body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), 0 0 8px color-mix(in srgb, var(--pv-accent) 60%, transparent);
   border: 1.5px solid #ffffff;
   z-index: 3;
+  animation: check-pop 0.24s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+@keyframes check-pop {
+  0% { opacity: 0; transform: scale(0.35); }
+  100% { opacity: 1; transform: scale(1); }
 }
 .theme-card .theme-meta {
   display: flex;
@@ -1611,17 +1656,17 @@ body {
 .wallpaper-drawer {
   display: none;
   width: 100%;
-  animation: wp-drawer-expand 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: wp-drawer-expand 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes wp-drawer-expand {
   from {
     opacity: 0;
-    transform: translateY(-8px);
+    transform: translateY(-10px) scale(0.99);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -1711,8 +1756,8 @@ body {
   width: 8px;
   height: 8px;
   opacity: 0;
-  transform: scale(0.6);
-  transition: opacity 0.16s ease, transform 0.16s ease;
+  transform: scale(0.4);
+  transition: opacity 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 .card[data-id="anime"][aria-checked="true"] .meta .check {
   background: #0f172a !important;
@@ -1763,7 +1808,7 @@ body {
   font: inherit;
   color: inherit;
   user-select: none;
-  transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .wp-card::before {
@@ -1782,7 +1827,7 @@ body {
 }
 
 .wp-card:active {
-  transform: translateY(0);
+  transform: scale(0.97) translateY(0);
 }
 
 .wp-card[aria-checked="true"] {
@@ -1820,6 +1865,7 @@ body {
 
 .wp-card[aria-checked="true"] .wp-check {
   display: grid;
+  animation: check-pop 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
 }
 
 .wp-card .wp-check svg {
@@ -2762,6 +2808,12 @@ body {
   flex-direction: column;
   gap: 12px;
   text-align: center;
+  animation: modal-pop 0.26s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes modal-pop {
+  from { opacity: 0; transform: scale(0.94) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
 }
 .popup-modal-close {
   position: absolute;

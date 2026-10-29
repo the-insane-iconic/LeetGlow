@@ -58,6 +58,7 @@
       backdrop-filter: blur(22px) saturate(140%);
       -webkit-backdrop-filter: blur(22px) saturate(140%);
       animation: w-in .28s cubic-bezier(.2,.9,.3,1.2) both;
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
     }
     @keyframes w-in { from { opacity: 0; transform: translateY(10px) scale(.97); } to { opacity: 1; transform: none; } }
     .hidden { display: none !important; }
@@ -100,9 +101,10 @@
       display: inline-flex; align-items: center; justify-content: center;
       width: 27px; height: 27px; padding: 0;
       border: 0; border-radius: 9px; background: transparent; color: var(--w-muted);
-      cursor: pointer; transition: background .15s ease, color .15s ease;
+      cursor: pointer; transition: background .15s ease, color .15s ease, transform .14s ease;
     }
-    .icon-btn:hover { background: color-mix(in srgb, var(--w-text) 8%, transparent); color: var(--w-text); }
+    .icon-btn:hover { background: color-mix(in srgb, var(--w-text) 8%, transparent); color: var(--w-text); transform: scale(1.08); }
+    .icon-btn:active { transform: scale(0.92); }
     .icon-btn:focus-visible { outline: 2px solid var(--w-accent); outline-offset: 1px; }
     .icon-btn svg { width: 15px; height: 15px; }
     .timer-body { display: flex; align-items: center; gap: clamp(10px, 3.8cqw, 18px); margin-top: 10px; position: relative; flex: 1; }
@@ -150,17 +152,18 @@
       border: 0; border-radius: 10px; cursor: pointer;
       background: var(--w-accent);
       color: var(--w-on-accent); font-size: 12px; font-weight: 750;
-      transition: transform .14s ease, filter .14s ease;
+      transition: transform .16s cubic-bezier(0.16, 1, 0.3, 1), filter .16s ease, box-shadow .16s ease;
     }
-    .primary-btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
-    .primary-btn:active { transform: translateY(0); }
+    .primary-btn:hover { filter: brightness(1.08); transform: translateY(-1px) scale(1.02); }
+    .primary-btn:active { transform: translateY(0) scale(0.97); }
     .primary-btn svg { width: 14px; height: 14px; }
     .ghost-btn {
       height: 32px; padding: 0 10px; border-radius: 10px; cursor: pointer;
       border: 1px solid var(--w-border); background: transparent; color: var(--w-muted);
-      font-size: 11px; transition: color .15s, background .15s;
+      font-size: 11px; transition: color .15s, background .15s, transform .14s ease;
     }
-    .ghost-btn:hover { color: var(--w-text); background: color-mix(in srgb, var(--w-text) 6%, transparent); }
+    .ghost-btn:hover { color: var(--w-text); background: color-mix(in srgb, var(--w-text) 6%, transparent); transform: translateY(-0.5px); }
+    .ghost-btn:active { transform: translateY(0) scale(0.97); }
     .timer-dots { display: flex; gap: 4px; align-items: center; margin-left: 2px; }
     .timer-dots i { width: 5px; height: 5px; border-radius: 50%; background: color-mix(in srgb, var(--w-text) 16%, transparent); }
     .timer-dots i.on { background: var(--w-accent); box-shadow: 0 0 6px var(--w-accent); }
@@ -174,7 +177,10 @@
       display: grid; place-items: center;
       background: var(--w-accent);
       color: var(--w-on-accent); box-shadow: 0 4px 14px -4px var(--w-accent);
+      transition: transform .16s cubic-bezier(0.16, 1, 0.3, 1), box-shadow .16s ease, filter .16s ease;
     }
+    .play-btn:hover { transform: scale(1.06); filter: brightness(1.08); }
+    .play-btn:active { transform: scale(0.95); }
     .play-btn svg { width: 15px; height: 15px; }
     .play-btn:focus-visible { outline: 2px solid var(--w-text); outline-offset: 2px; }
     .eq { display: flex; align-items: flex-end; gap: 2px; height: 15px; width: 19px; flex: none; }
@@ -191,8 +197,10 @@
       flex: none;
       border: 0; background: transparent; color: var(--w-muted); cursor: pointer;
       padding: 4px 6px; border-radius: 7px; font-size: 10px; margin-left: 1px;
+      transition: background .15s ease, color .15s ease, transform .14s ease;
     }
-    .preset-btn:hover { background: color-mix(in srgb, var(--w-text) 8%, transparent); color: var(--w-text); }
+    .preset-btn:hover { background: color-mix(in srgb, var(--w-text) 8%, transparent); color: var(--w-text); transform: translateY(-0.5px); }
+    .preset-btn:active { transform: scale(0.95); }
     .volume-wrap { display: flex; align-items: center; gap: 5px; color: var(--w-muted); flex: none; }
     .volume-wrap svg { width: 13px; height: 13px; flex: none; }
     .volume {
@@ -202,6 +210,10 @@
     .volume::-webkit-slider-thumb {
       -webkit-appearance: none; width: 10px; height: 10px; border-radius: 50%;
       background: var(--w-accent); border: 2px solid var(--w-surface); box-shadow: 0 0 0 1px var(--w-accent);
+      transition: transform .14s ease, box-shadow .14s ease;
+    }
+    .volume::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
     }
     .volume::-moz-range-thumb { width: 8px; height: 8px; border-radius: 50%; background: var(--w-accent); border: 0; }
     .audio .icon-btn { width: 24px; height: 24px; }
@@ -217,8 +229,10 @@
       margin-left: 2px; width: 22px; height: 22px; border: 0; border-radius: 50%; cursor: pointer;
       background: color-mix(in srgb, var(--w-text) 8%, transparent); color: var(--w-text);
       display: grid; place-items: center;
+      transition: background .15s ease, transform .14s ease;
     }
-    .focus-chip button:hover { background: color-mix(in srgb, var(--w-text) 15%, transparent); }
+    .focus-chip button:hover { background: color-mix(in srgb, var(--w-text) 15%, transparent); transform: scale(1.1); }
+    .focus-chip button:active { transform: scale(0.92); }
     .focus-chip button svg { width: 12px; height: 12px; color: inherit; }
 
     .toasts {
