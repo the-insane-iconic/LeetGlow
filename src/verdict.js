@@ -27,7 +27,6 @@
   if (globalThis.LCTSVerdict) return;
 
   const subs = [];
-  const armSubs = [];
   let netWorks = false;
   const recent = [];            // [time, kind, action] of recent emits, for de-duplication
 
@@ -143,8 +142,6 @@
   }
 
   function arm(action) {
-    armSubs.forEach((fn) => { try { fn(action); } catch (e) {} });
-    document.dispatchEvent(new CustomEvent('lcts:arm', { detail: { action } }));
     if (netWorks) return;           // the network path is live on this page
     cancelFallback();
     const before = new Map();
@@ -207,7 +204,6 @@
 
   globalThis.LCTSVerdict = {
     subscribe(fn) { subs.push(fn); },
-    onArm(fn) { armSubs.push(fn); },
     /* for tests and the Studio: pretend a verdict arrived */
     simulate(v) { emit(Object.assign({ action: 'submit', label: null, beats: null, source: 'sim' }, v)); }
   };

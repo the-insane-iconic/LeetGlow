@@ -149,33 +149,6 @@
         'input.background':'#07070a','editor.findMatchBackground':'#e0223f55',
         'editor.findMatchHighlightBackground':'#e0223f2e'
       }
-    },
-    /* Time Stone — kept in sync with INK.timestone in monaco-ink.js. */
-    timestone: {
-      base: 'vs-dark', fg: 'e2e8f0',
-      syn: { comment:'64748bi', keyword:'10b981', control:'34d399', string:'6ee7b7',
-             number:'f59e0b', func:'38bdf8', type:'a78bfa', variable:'e2e8f0',
-             param:'94a3b8', constant:'f59e0b', operator:'2dd4bf', regexp:'6ee7b7',
-             tag:'38bdf8', attr:'a78bfa', escape:'f59e0b' },
-      colors: {
-        'editor.background':'#00000000','editor.foreground':'#e2e8f0',
-        'editorGutter.background':'#00000000',
-        'editorLineNumber.foreground':'#475569','editorLineNumber.activeForeground':'#10b981',
-        'editor.lineHighlightBackground':'#10b9810a','editor.lineHighlightBorder':'#00000000',
-        'editorCursor.foreground':'#10b981',
-        'editor.selectionBackground':'#10b98144','editor.selectionHighlightBackground':'#10b98122',
-        'editor.inactiveSelectionBackground':'#10b98118','editorWhitespace.foreground':'#1e293b',
-        'editorIndentGuide.background':'#1e293b','editorIndentGuide.activeBackground':'#334155',
-        'editorBracketMatch.background':'#10b98122','editorBracketMatch.border':'#10b981',
-        'editorError.foreground':'#f43f5e','editorWarning.foreground':'#f59e0b',
-        'scrollbarSlider.background':'#33415588','scrollbarSlider.hoverBackground':'#334155cc',
-        'editorWidget.background':'#121620','editorWidget.border':'#1f2737',
-        'editorSuggestWidget.background':'#121620','editorSuggestWidget.border':'#1f2737',
-        'editorSuggestWidget.selectedBackground':'#1c2331',
-        'editorHoverWidget.background':'#121620','editorHoverWidget.border':'#1f2737',
-        'input.background':'#0f131a','input.border':'#1f2737',
-        'editor.findMatchBackground':'#10b98155','editor.findMatchHighlightBackground':'#10b9812a'
-      }
     }
   };
 

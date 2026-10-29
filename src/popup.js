@@ -49,14 +49,6 @@ const THEMES = {
     },
     tex: 'grid'
   },
-  bloom: {
-    name: 'Orchid', desc: 'silk velvet, rose-gold trim', accent: '#e3a88f',
-    pv: {
-      bg: '#221730', text: '#f4ecf7', line: '#5b4272', kw: '#ff9ec9',
-      fn: '#7fe3c0', num: '#d89bff', var: '#f4ecf7', com: '#9b86a9', pn: '#e3a88f'
-    },
-    tex: 'nap'
-  },
   crawler: {
     name: 'Web Crawler', desc: 'charcoal web, crimson thread', accent: '#e0223f',
     pv: {
@@ -103,15 +95,6 @@ const THEMES = {
     },
     tex: 'pixel'
   },
-  /* Time Stone: Quantum titanium, emerald Time Stone runes, The Blip rewind */
-  timestone: {
-    name: 'Time Stone', desc: 'The Blip, snap & time rewind', accent: '#10b981',
-    pv: {
-      bg: '#0c0f14', text: '#e2e8f0', line: '#475569', kw: '#10b981',
-      fn: '#38bdf8', num: '#f59e0b', var: '#e2e8f0', com: '#64748b', pn: '#94a3b8'
-    },
-    tex: 'none'
-  },
   off: {
     name: 'Off', desc: 'hand the page back to LeetCode', accent: '#8a8f98',
     pv: {
@@ -121,7 +104,7 @@ const THEMES = {
     tex: 'none'
   }
 };
-const ORDER = ['anime', 'grid', 'game', 'pixel', 'timestone', 'crawler', 'paper', 'sakura', 'off'];
+const ORDER = ['anime', 'grid', 'game', 'pixel', 'crawler', 'paper', 'sakura', 'off'];
 /* the Open Anime Studio button lives directly under the Anime card, so it
    reads as belonging to that theme; render() re-seats it after each redraw */
 const studioButton = document.getElementById('studio');
@@ -400,6 +383,7 @@ async function selectWallpaper(item, isLocked) {
     });
   }
 
+  cfg.arcs = false;
   animeCfgCache = cfg;
 
   await chrome.storage.local.set({
@@ -479,11 +463,9 @@ function render(selected) {
         const meta = card.querySelector('.meta');
         if (meta) {
           meta.innerHTML = `
-            <div class="anime-meta-title-row">
-              <span class="name">${t.name}</span>
-              <span class="drawer-toggle-badge" aria-label="Toggle wallpapers">
-                <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l4 4 4-4"/></svg>
-              </span>
+            <div class="anime-meta-title-row" aria-label="Toggle wallpapers">
+              <span class="click-here-text">click here</span>
+              <svg class="anime-down-arrow" viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4.5L6 8l3.5-3.5"/></svg>
             </div>
             <span class="check">${CHECK}</span>
           `;
@@ -499,29 +481,8 @@ function render(selected) {
       card.querySelector('.preview').style.setProperty('--pv-scene', `url("${url}")`);
     }
     if (id === 'pixel') paintPixelCard(card.querySelector('.preview'));
-    if (id === 'timestone') paintTimeStoneCard(card.querySelector('.preview'));
   });
   setAccent(selected);
-}
-
-/* Time Stone's card: glowing emerald Doctor Strange time mandala glyph */
-function paintTimeStoneCard(preview) {
-  const cv = document.createElement('canvas');
-  cv.width = 44; cv.height = 44;
-  const c = cv.getContext('2d');
-  const cx = 22, cy = 22;
-  c.strokeStyle = '#10b981';
-  c.lineWidth = 1.5;
-  c.beginPath(); c.arc(cx, cy, 18, 0, Math.PI * 2); c.stroke();
-  c.beginPath(); c.arc(cx, cy, 12, 0, Math.PI * 2); c.stroke();
-  c.lineWidth = 1.0;
-  c.strokeRect(cx - 7, cy - 7, 14, 14);
-  c.save(); c.translate(cx, cy); c.rotate(Math.PI / 4); c.strokeRect(-7, -7, 14, 14); c.restore();
-  c.fillStyle = '#34d399';
-  c.beginPath(); c.arc(cx, cy, 3.5, 0, Math.PI * 2); c.fill();
-  preview.style.setProperty('--pv-scene', `url("${cv.toDataURL()}")`);
-  preview.style.backgroundPosition = 'right 14px center';
-  preview.style.backgroundRepeat = 'no-repeat';
 }
 
 /* Pixel Art's card: the gunner from src/pixel/sprites.js, mid-shot */
@@ -1483,7 +1444,7 @@ chrome.storage.local.get('leetglowPremium', (data) => {
   }
   // Seamlessly check remote entitlement in the background
   if (globalThis.LeetGlowPremium && typeof LeetGlowPremium.checkServerEntitlement === 'function') {
-    LeetGlowPremium.checkServerEntitlement().catch(() => { });
+    LeetGlowPremium.checkServerEntitlement().catch(() => {});
   }
 });
 
