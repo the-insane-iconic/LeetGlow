@@ -33,13 +33,16 @@ function initFreeBetaEntitlement() {
   });
 }
 
-chrome.runtime.onInstalled.addListener(() => {
+chrome.runtime.onInstalled.addListener((details) => {
   chrome.storage.local.remove('lcAnimeSeen');
   initFreeBetaEntitlement();
   if (chrome.sidePanel && chrome.sidePanel.setPanelBehavior) {
     chrome.sidePanel
       .setPanelBehavior({ openPanelOnActionClick: true })
       .catch((error) => console.error('[LeetGlow] sidePanel.setPanelBehavior error:', error));
+  }
+  if (details && details.reason === 'install') {
+    chrome.tabs.create({ url: 'https://leetcode.com/problemset/' });
   }
 });
 
