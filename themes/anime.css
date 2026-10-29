@@ -515,9 +515,7 @@ html[data-lc-theme="anime"][data-lc-palette="dark"] :not(pre) > code {
 html[data-lc-theme="anime"][data-lc-palette="dark"] .flexlayout__tabset.pane-desc,
 html[data-lc-theme="anime"][data-lc-palette="dark"] .flexlayout__tabset.pane-console,
 html[data-lc-theme="anime"][data-lc-palette="dark"] .flexlayout__tabset:has([data-track-load="description_content"]) {
-  background: rgba(255, 255, 255, 0.82) !important;
-  backdrop-filter: blur(14px) !important;
-  -webkit-backdrop-filter: blur(14px) !important;
+  background: rgba(255, 255, 255, 0.94) !important;
   --color-tab-selected: #0f172a;
   --color-tab-unselected: #334155;
 }

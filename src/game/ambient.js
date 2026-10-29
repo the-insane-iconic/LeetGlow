@@ -156,6 +156,7 @@
   }
 
   function unmount() {
+    if (dialogRaf) { cancelAnimationFrame(dialogRaf); dialogRaf = null; }
     if (wrap) wrap.remove();
     wrap = null; mounted = false;
   }
@@ -174,11 +175,21 @@
     }
   }
 
+  let dialogRaf = null;
+  function scheduleDialogState() {
+    if (!wrap) return;
+    if (dialogRaf) return;
+    dialogRaf = requestAnimationFrame(() => {
+      dialogRaf = null;
+      try { applyDialogState(); } catch (e) {}
+    });
+  }
+
   function safe() {
     if (!on()) { if (mounted) unmount(); return; }
-    if (mounted && wrap && wrap.isConnected) { applyDialogState(); return; }   // already mounted and current
+    if (mounted && wrap && wrap.isConnected) { scheduleDialogState(); return; }   // already mounted and current
     if (mounted) unmount();
-    if (document.body) { mount(); applyDialogState(); }
+    if (document.body) { mount(); scheduleDialogState(); }
   }
 
   /* a modal opening/closing is (almost always) body gaining/losing a direct
@@ -195,7 +206,9 @@
   let bodyWatcher = null;
   function watchBody() {
     if (bodyWatcher || !document.body) return;
-    bodyWatcher = new MutationObserver(() => { try { applyDialogState(); } catch (e) {} });
+    bodyWatcher = new MutationObserver(() => {
+      scheduleDialogState();
+    });
     bodyWatcher.observe(document.body, { childList: true });
   }
 

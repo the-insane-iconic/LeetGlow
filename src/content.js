@@ -45,29 +45,41 @@
   }
 
   let current = null;
+  let applying = false;
 
   function setBaseMode(theme) {
-    const dark = isDark(theme);
-    root.classList.toggle('dark', dark);
-    root.classList.toggle('light', !dark);
-    root.setAttribute('data-theme', dark ? 'dark' : 'light');
-    if (document.body) {
-      captureBody();
-      document.body.classList.toggle('dark', dark);
-      document.body.classList.toggle('light', !dark);
+    if (!theme || theme === 'off') return;
+    applying = true;
+    try {
+      const dark = isDark(theme);
+      root.classList.toggle('dark', dark);
+      root.classList.toggle('light', !dark);
+      root.setAttribute('data-theme', dark ? 'dark' : 'light');
+      if (document.body) {
+        captureBody();
+        document.body.classList.toggle('dark', dark);
+        document.body.classList.toggle('light', !dark);
+      }
+      root.style.colorScheme = dark ? 'dark' : 'light';
+    } finally {
+      queueMicrotask(() => { applying = false; });
     }
-    root.style.colorScheme = dark ? 'dark' : 'light';
   }
 
   function restoreBaseMode() {
-    root.classList.toggle('dark', site.dark);
-    root.classList.toggle('light', site.light);
-    if (site.dataTheme === null) root.removeAttribute('data-theme');
-    else root.setAttribute('data-theme', site.dataTheme);
-    root.style.colorScheme = site.scheme;
-    if (document.body && site.bodySeen) {
-      document.body.classList.toggle('dark', site.bodyDark);
-      document.body.classList.toggle('light', site.bodyLight);
+    applying = true;
+    try {
+      root.classList.toggle('dark', site.dark);
+      root.classList.toggle('light', site.light);
+      if (site.dataTheme === null) root.removeAttribute('data-theme');
+      else root.setAttribute('data-theme', site.dataTheme);
+      root.style.colorScheme = site.scheme;
+      if (document.body && site.bodySeen) {
+        document.body.classList.toggle('dark', site.bodyDark);
+        document.body.classList.toggle('light', site.bodyLight);
+      }
+    } finally {
+      queueMicrotask(() => { applying = false; });
     }
   }
 
@@ -93,12 +105,22 @@
     if (theme === 'off') {
       /* themes/*.css is scoped entirely to [data-lc-theme], so removing the
          attribute switches every rule off at once */
-      root.removeAttribute('data-lc-theme');
-      if (was !== null) restoreBaseMode();
+      applying = true;
+      try {
+        root.removeAttribute('data-lc-theme');
+        if (was !== null) restoreBaseMode();
+      } finally {
+        queueMicrotask(() => { applying = false; });
+      }
       return;
     }
-    root.setAttribute('data-lc-theme', theme);
-    setBaseMode(theme);
+    applying = true;
+    try {
+      root.setAttribute('data-lc-theme', theme);
+      setBaseMode(theme);
+    } finally {
+      queueMicrotask(() => { applying = false; });
+    }
     try { sessionStorage.setItem('__lcts_active_theme', theme); } catch (e) {}
   }
 
@@ -127,6 +149,17 @@
     if (cached && VALID.has(cached)) initialTheme = cached;
   } catch (e) {}
 
+  current = initialTheme;
+  if (initialTheme !== 'off') {
+    applying = true;
+    try {
+      root.setAttribute('data-lc-theme', initialTheme);
+      setBaseMode(initialTheme);
+    } finally {
+      queueMicrotask(() => { applying = false; });
+    }
+  }
+
   apply(initialTheme);
   chrome.storage.local.get(KEY, (res) => apply((res && res[KEY]) || DEFAULT));
 
@@ -147,22 +180,52 @@
     new MutationObserver((_, obs) => {
       if (!document.body) return;
       obs.disconnect();
-      if (current !== 'off') setBaseMode(current);
+      if (current && current !== 'off') setBaseMode(current);
     }).observe(root, { childList: true });
   }
 
   // Re-assert if LeetCode's SPA / its own theme switch overrides us.
+  let guardRaf = null;
+  let reassertStreak = 0;
+  let lastReassert = 0;
+
   const guard = new MutationObserver(() => {
-    if (current === 'off') return;                       // off means off
-    if (root.getAttribute('data-lc-theme') !== current) root.setAttribute('data-lc-theme', current);
+    if (applying) return;
+    if (!current || current === 'off') return;
+
     const dark = isDark(current);
-    if (root.classList.contains('dark') !== dark) {
-      /* LeetCode switched its own mode: remember what it wanted before
-         re-asserting ours, so 'off' restores that */
-      site.dark = root.classList.contains('dark');
-      site.light = root.classList.contains('light');
-      setBaseMode(current);
-    }
+    const needTheme = root.getAttribute('data-lc-theme') !== current;
+    const needDark = root.classList.contains('dark') !== dark;
+    if (!needTheme && !needDark) return;
+
+    if (guardRaf) return;
+    guardRaf = requestAnimationFrame(() => {
+      guardRaf = null;
+      if (applying || !current || current === 'off') return;
+
+      const now = performance.now();
+      if (now - lastReassert < 800) {
+        reassertStreak++;
+        if (reassertStreak > 8) {
+          // Break ping-pong if host site repeatedly overrides
+          return;
+        }
+      } else {
+        reassertStreak = 0;
+      }
+      lastReassert = now;
+
+      const expectedDark = isDark(current);
+      if (root.getAttribute('data-lc-theme') !== current) {
+        applying = true;
+        try { root.setAttribute('data-lc-theme', current); } finally { queueMicrotask(() => { applying = false; }); }
+      }
+      if (root.classList.contains('dark') !== expectedDark) {
+        site.dark = root.classList.contains('dark');
+        site.light = root.classList.contains('light');
+        setBaseMode(current);
+      }
+    });
   });
   guard.observe(root, { attributes: true, attributeFilter: ['class', 'data-lc-theme', 'data-theme'] });
 })();
