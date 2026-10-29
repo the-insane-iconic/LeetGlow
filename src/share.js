@@ -178,7 +178,7 @@
     /* signature */
     c.textBaseline = 'alphabetic';
     c.font = '600 22px ' + SANS; c.fillStyle = 'rgba(255,255,255,.92)';
-    c.fillText('LeetGlow - Custom Themes, Sound Effects & Backgrounds', X, H - 36);
+    c.fillText('LeetGlow - Mindful Workspace & Aesthetic Themes & After Effects', X, H - 36);
     c.font = '20px ' + SANS; c.fillStyle = 'rgba(255,255,255,.62)';
     c.textAlign = 'right';
     c.fillText(new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }), W - 40, H - 36);
@@ -193,7 +193,7 @@
       (d.difficulty ? ' (' + d.difficulty[0].toUpperCase() + d.difficulty.slice(1) + ')' : '') + ' on LeetCode' +
       (d.beats ? ', beats ' + d.beats + '%' : '') + (d.lang ? ' in ' + d.lang : '') + '.');
     if (d.streak >= 2) parts.push('Day ' + d.streak + ' of my streak.');
-    parts.push('\nCoding in style with LeetGlow - Custom Themes, Sound Effects & Backgrounds by AnshYadav → ' + SHARE_URL);
+    parts.push('\nCoding in style with LeetGlow - Mindful Workspace & Aesthetic Themes & After Effects by AnshYadav → ' + SHARE_URL);
     parts.push('\n#LeetCode #100DaysOfCode #DSA');
     return parts.join(' ').replace(/ \n/g, '\n');
   }
