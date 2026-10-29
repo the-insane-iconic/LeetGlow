@@ -193,7 +193,7 @@
       (d.difficulty ? ' (' + d.difficulty[0].toUpperCase() + d.difficulty.slice(1) + ')' : '') + ' on LeetCode' +
       (d.beats ? ', beats ' + d.beats + '%' : '') + (d.lang ? ' in ' + d.lang : '') + '.');
     if (d.streak >= 2) parts.push('Day ' + d.streak + ' of my streak.');
-    parts.push('\nCoding in style with LeetGlow – Aesthetic LeetCode Themes, Clean Animations & Focus Tools by AnshYadav → ' + SHARE_URL);
+    parts.push('\nCoding in style with LeetGlow – Aesthetic LeetCode Themes, Clean Animations & Focus Tools → ' + SHARE_URL);
     parts.push('\n#LeetCode #100DaysOfCode #DSA');
     return parts.join(' ').replace(/ \n/g, '\n');
   }
