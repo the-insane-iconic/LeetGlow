@@ -11,7 +11,7 @@
 ============================================================================= */
 (() => {
   const KEY = 'lcThemeStudio';
-  const DEFAULT = 'anime';
+  const DEFAULT = 'sakura-dream';
   const DARK_THEMES = new Set(['grid', 'crawler', 'pixel']);
   const LCT_THEMES = new Set([
     'sakura-dream', 'forest-mist', 'midnight-ink', 'lofi-cafe',
@@ -170,7 +170,7 @@
   } catch (e) {}
 
   current = initialTheme;
-  if (initialTheme !== 'off') {
+  if (initialTheme !== 'off' && !LCT_THEMES.has(initialTheme)) {
     applying = true;
     try {
       root.setAttribute('data-lc-theme', initialTheme);
