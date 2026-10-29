@@ -48,6 +48,16 @@ html[data-lc-theme="timestone"] {
   --lc-selection: rgba(16, 185, 129, 0.26);
   --lc-scroll: #334155;
 
+  /* HSL Roles for Shadcn and Modern LeetCode Token Resolution */
+  --lc-hsl-bg: 218 27% 8%;
+  --lc-hsl-desk: 214 28% 5%;
+  --lc-hsl-raised: 220 27% 11%;
+  --lc-hsl-text: 210 40% 91%;
+  --lc-hsl-text3: 215 20% 65%;
+  --lc-hsl-accent: 160 84% 39%;
+  --lc-hsl-accent2: 158 64% 52%;
+  --lc-hsla-hairline: 215, 20%, 65%, 0.1;
+
   /* Geometry & Typography */
   --lc-radius: 10px;
   --lc-radius-sm: 6px;
@@ -163,8 +173,21 @@ html[data-lc-theme="timestone"] :not(pre) > code {
   border-radius: 4px !important;
 }
 
-/* Elements dissolved during the Blip moment */
+/* Full Page & Element Disintegration during the Blip Moment */
 html[data-lc-theme="timestone"] .lcts-blip-hidden {
   visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Time Stone Canvas Overlay */
+#lcts-timestone-canvas {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  pointer-events: none !important;
+  z-index: 2147483640 !important;
+  display: block !important;
 }
 

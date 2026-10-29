@@ -52,7 +52,7 @@
    "side_panel": {
       "default_path": "src/popup.html"
    },
-   "version": "3.6.7",
+   "version": "3.6.8",
    "web_accessible_resources": [ {
       "matches": [ "https://leetcode.com/*", "https://leetcode.cn/*" ],
       "resources": [ "fonts/*.woff2", "audio/anime/*", "audio/crawler/*", "textures/*", "textures/anime/*", "textures/game/*", "textures/game/icon/*", "sounds/game/*", "sounds/timestone/*" ]

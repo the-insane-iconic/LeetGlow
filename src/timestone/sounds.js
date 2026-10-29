@@ -16,11 +16,15 @@
   const DIR = 'sounds/timestone/';
 
   const CUES = {
-    snap:      { file: 'snap.mp3',      volume: 0.70, delay: 0   },
-    whoosh:    { file: 'whoosh.mp3',    volume: 0.60, delay: 280 },
-    timestone: { file: 'timestone.mp3', volume: 0.75, delay: 1750 },
-    run:       { file: 'run.mp3',       volume: 0.55, delay: 80  },
-    error:     { file: 'error.mp3',     volume: 0.50, delay: 100 }
+    snap:        { file: 'snap.mp3',        volume: 0.75, delay: 0 },
+    whoosh:      { file: 'whoosh.mp3',      volume: 0.65, delay: 0 },
+    timerewind:  { file: 'timerewind.mp3',  volume: 0.85, delay: 0 },
+    timestone:   { file: 'timestone.mp3',   volume: 0.75, delay: 0 },
+    drone:       { file: 'drone.mp3',       volume: 0.35, delay: 0 },
+    tick:        { file: 'tick.mp3',        volume: 0.30, delay: 0 },
+    run:         { file: 'run.mp3',         volume: 0.55, delay: 0 },
+    prune:       { file: 'prune.mp3',       volume: 0.60, delay: 0 },
+    error:       { file: 'error.mp3',       volume: 0.50, delay: 0 }
   };
 
   const audioCache = {};
@@ -168,7 +172,121 @@
     });
   }
 
-  // 4. Emerald Pass Chime (Run)
+  // 4. Reverse Time Vortex (Reverse Suction Whoosh + Time Stone Harmonic Chord)
+  function synthTimeRewind(ac, vol) {
+    const t = ac.currentTime;
+    const dur = 0.85;
+
+    // Reverse suction: noise swept upwards in pitch and volume
+    const bufferSize = Math.floor(ac.sampleRate * dur);
+    const noiseBuffer = ac.createBuffer(1, bufferSize, ac.sampleRate);
+    const data = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+
+    const noise = ac.createBufferSource();
+    noise.buffer = noiseBuffer;
+
+    const filter = ac.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(180, t);
+    filter.frequency.exponentialRampToValueAtTime(2600, t + dur);
+    filter.Q.value = 3.5;
+
+    const gain = ac.createGain();
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(vol * 0.65, t + dur * 0.85);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(ac.destination);
+
+    noise.start(t);
+    noise.stop(t + dur + 0.02);
+
+    // Followed immediately by the mystical crystalline Time Stone chord
+    setTimeout(() => {
+      synthTimeStone(ac, vol);
+    }, Math.floor(dur * 700));
+  }
+
+  // 5. Cosmic Ambient Judgment Drone
+  let activeDrone = null;
+  function synthDrone(ac, vol) {
+    if (activeDrone) return;
+    const t = ac.currentTime;
+    const osc1 = ac.createOscillator();
+    const osc2 = ac.createOscillator();
+    const gain = ac.createGain();
+
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(55, t); // A1 sub-bass
+    osc2.type = 'triangle';
+    osc2.frequency.setValueAtTime(110, t); // A2 harmonic
+
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.linearRampToValueAtTime(vol * 0.28, t + 0.4);
+
+    osc1.connect(gain);
+    osc2.connect(gain);
+    gain.connect(ac.destination);
+
+    osc1.start(t);
+    osc2.start(t);
+    activeDrone = { osc1, osc2, gain, ac };
+  }
+
+  function stopDrone() {
+    if (!activeDrone) return;
+    try {
+      const { osc1, osc2, gain, ac } = activeDrone;
+      const t = ac.currentTime;
+      gain.gain.linearRampToValueAtTime(0.0001, t + 0.2);
+      osc1.stop(t + 0.25);
+      osc2.stop(t + 0.25);
+    } catch (e) {}
+    activeDrone = null;
+  }
+
+  // 6. Time Stone / TVA Loom Ticking Pulse
+  function synthTick(ac, vol) {
+    const t = ac.currentTime;
+    const osc = ac.createOscillator();
+    const gain = ac.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(1200, t);
+    osc.frequency.exponentialRampToValueAtTime(300, t + 0.025);
+
+    gain.gain.setValueAtTime(vol * 0.45, t);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.03);
+
+    osc.connect(gain);
+    gain.connect(ac.destination);
+    osc.start(t);
+    osc.stop(t + 0.035);
+  }
+
+  // 7. Nexus Event Prune Zap (Wrong Answer / Error)
+  function synthPrune(ac, vol) {
+    const t = ac.currentTime;
+    const osc = ac.createOscillator();
+    const gain = ac.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(440, t);
+    osc.frequency.exponentialRampToValueAtTime(65, t + 0.35);
+
+    gain.gain.setValueAtTime(vol * 0.5, t);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.38);
+
+    osc.connect(gain);
+    gain.connect(ac.destination);
+    osc.start(t);
+    osc.stop(t + 0.4);
+  }
+
+  // 8. Emerald Pass Chime (Run)
   function synthRun(ac, vol) {
     const t = ac.currentTime;
     [523.25, 659.25, 783.99].forEach((freq, i) => {
@@ -189,22 +307,9 @@
     });
   }
 
-  // 5. Temporal Divergence Ping (Error / WA)
+  // 9. Temporal Divergence Ping (Error / WA)
   function synthError(ac, vol) {
-    const t = ac.currentTime;
-    const osc = ac.createOscillator();
-    const gain = ac.createGain();
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(220, t);
-    osc.frequency.exponentialRampToValueAtTime(110, t + 0.35);
-
-    gain.gain.setValueAtTime(vol * 0.25, t);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.4);
-
-    osc.connect(gain);
-    gain.connect(ac.destination);
-    osc.start(t);
-    osc.stop(t + 0.45);
+    synthPrune(ac, vol);
   }
 
   function playSynth(name, vol) {
@@ -212,7 +317,11 @@
     if (!ac) return;
     if (name === 'snap') synthSnap(ac, vol);
     else if (name === 'whoosh') synthWhoosh(ac, vol);
+    else if (name === 'timerewind') synthTimeRewind(ac, vol);
     else if (name === 'timestone') synthTimeStone(ac, vol);
+    else if (name === 'drone') synthDrone(ac, vol);
+    else if (name === 'tick') synthTick(ac, vol);
+    else if (name === 'prune') synthPrune(ac, vol);
     else if (name === 'run') synthRun(ac, vol);
     else if (name === 'error') synthError(ac, vol);
   }
@@ -262,6 +371,13 @@
     }, Math.max(0, delay));
   }
 
-  root.LCTSTimeStoneSounds = { play, CUES, DIR };
+  function stop() {
+    stopDrone();
+    Object.values(audioCache).forEach((a) => {
+      try { a.pause(); a.currentTime = 0; } catch (e) {}
+    });
+  }
+
+  root.LCTSTimeStoneSounds = { play, stop, stopDrone, CUES, DIR };
 })(globalThis);
 
