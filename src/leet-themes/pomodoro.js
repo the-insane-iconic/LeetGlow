@@ -61,7 +61,8 @@
       this.lastAlarmEnd = this.running ? this.endAt : 0; // the writing tab already scheduled it
       if (!this.enabled) return;
       this.render();
-      this._startInterval();
+      if (this.running) this._startInterval();
+      else this._stopInterval();
     }
 
     async init(options) {
@@ -121,7 +122,8 @@
       }
       if (this.initialised) {
         this.render();
-        this._startInterval();
+        if (this.running) this._startInterval();
+        else this._stopInterval();
       }
     }
 
@@ -214,7 +216,8 @@
         // A restored session should not depend on an alarm that may have been lost.
         if (this.enabled) this._syncAlarm();
       }
-      if (this.enabled) this._startInterval();
+      if (this.enabled && this.running) this._startInterval();
+      else this._stopInterval();
     }
 
     persist() {
@@ -238,14 +241,18 @@
 
     tick() {
       if (!this.enabled) return;
+      if (!this.running) {
+        this._stopInterval();
+        return;
+      }
       const remaining = this._currentRemaining();
-      if (this.running && remaining <= 0) {
+      if (remaining <= 0) {
         this.complete();
         return;
       }
       this.render();
       const now = Date.now();
-      if (this.running && now - this.lastSave > 12000) {
+      if (now - this.lastSave > 12000) {
         this.lastSave = now;
         this.persist();
       }
@@ -302,6 +309,7 @@
       this.remaining = this._currentRemaining();
       this.running = false;
       this.endAt = 0;
+      this._stopInterval();
       this.render();
       this.persist();
     }
@@ -315,6 +323,7 @@
       this.running = false;
       this.endAt = 0;
       this.remaining = this._durationFor(this.mode);
+      this._stopInterval();
       this.render();
       this.persist();
     }
@@ -322,6 +331,7 @@
     skip() {
       this.running = false;
       this.endAt = 0;
+      this._stopInterval();
       this.mode = this._modeAfter(this.mode);
       this.remaining = this._durationFor(this.mode);
       if (this.settings && this.settings.pomodoro.autoStart) this.start();
@@ -352,6 +362,7 @@
       if (!this._restoring && this.settings && this.settings.pomodoro.autoStart) {
         this.start();
       } else {
+        this._stopInterval();
         this.render();
       }
       this.persist();

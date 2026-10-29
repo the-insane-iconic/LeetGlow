@@ -34,6 +34,8 @@
       } else if (m.op === 'file' && /^[\w\/.-]+\.(mp3|ogg|wav|m4a)$/.test(m.path || '')) {
         const a = new Audio(chrome.runtime.getURL(m.path));
         a.volume = Math.max(0, Math.min(1, +m.volume || 0));
+        a.onended = () => { a.src = ''; };
+        a.onerror = () => { a.src = ''; };
         a.play().catch(() => {});
       }
     } catch (e) {}
