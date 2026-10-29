@@ -9,3 +9,4 @@ Drop your custom MP3 files into this directory (`sounds/timestone/`):
 - `error.mp3` — Reality distortion ping on Wrong Answer / Error
 
 Note: If any of these files are missing, LeetGlow's built-in Web Audio synthesizer will automatically synthesize crisp metallic snaps, cinematic vacuum whooshes, and glowing crystal time-stone harmonics in real time, so sound effects work out of the box!
+
