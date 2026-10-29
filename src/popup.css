@@ -561,6 +561,25 @@ body {
   margin-top: 2px;
 }
 
+.slider-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: -2px;
+  font-size: 11px;
+  line-height: 1.35;
+  color: #64748b;
+  font-family: var(--font-ui);
+  user-select: none;
+}
+
+.slider-hint-icon {
+  width: 12.5px;
+  height: 12.5px;
+  stroke: #94a3b8;
+  flex-shrink: 0;
+}
+
 /* Test Sound inline pill next to Sound Effects Volume */
 .title-with-pill {
   display: flex;
