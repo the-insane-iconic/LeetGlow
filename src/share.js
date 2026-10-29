@@ -436,7 +436,7 @@ html[data-lc-theme] .lcts-share-box textarea:focus,
 
   /* ---- trigger ------------------------------------------------------------------ */
   /* ms to wait for each theme's Accepted moment; Pixel Art's squad takes longer */
-  const MOMENT_THEMES = { anime: 2100, crawler: 2100, game: 2100, pixel: 4300 };
+  const MOMENT_THEMES = { anime: 2100, crawler: 2100, game: 2100, pixel: 4300, grid: 2100 };
   async function onAccepted(v) {
     if (!themeId()) return;                       // "Off" means off
     const { streak } = await recordClear();

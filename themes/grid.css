@@ -25,6 +25,9 @@ html[data-lc-theme="grid"] {
   --lc-radius:0px; --lc-radius-sm:0px;
   --lc-font-ui:ui-monospace,"SF Mono","Cascadia Mono","Roboto Mono",Menlo,Consolas,monospace;
   --lc-font-prose:ui-monospace,"SF Mono","Cascadia Mono","Roboto Mono",Menlo,Consolas,monospace;
+  --lc-font-display: "Dela Gothic One", ui-monospace, "SF Mono", monospace;
+  --lc-anime-scrim: #000;
+  --lc-glow: rgba(53, 224, 161, .45);
   --lc-prose-size:13.5px; --lc-prose-leading:1.78; --lc-prose-measure:76ch;
 
   --lc-tex-body:

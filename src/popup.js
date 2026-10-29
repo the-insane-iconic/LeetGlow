@@ -25,22 +25,6 @@ function openStudioCheckout() {
 
 /* Per-theme preview palette (mirrors the real editor colors). */
 const THEMES = {
-  paper: {
-    name: 'Vintage Paper', desc: 'kraft paper, iron-gall ink', accent: '#6d190e',
-    pv: {
-      bg: '#ad9362', text: '#241d14', line: '#483c25', kw: '#650500',
-      fn: '#00208a', num: '#00343f', var: '#1a2d5a', com: '#332e25', pn: '#3a2d1d'
-    },
-    tex: 'grain'
-  },
-  sakura: {
-    name: 'Sakura Night', desc: 'petal pink on plum indigo', accent: '#ff7eb6',
-    pv: {
-      bg: '#211d3c', text: '#ece9ff', line: '#4a3f80', kw: '#ff7eb6',
-      fn: '#6ee7f0', num: '#b98cff', var: '#ece9ff', com: '#6b6395', pn: '#ff9ec8'
-    },
-    tex: 'stars'
-  },
   grid: {
     name: 'Grid', desc: 'drafting table, hard edges', accent: '#35e0a1',
     pv: {
@@ -104,7 +88,7 @@ const THEMES = {
     tex: 'none'
   }
 };
-const ORDER = ['anime', 'grid', 'game', 'pixel', 'crawler', 'paper', 'sakura', 'off'];
+const ORDER = ['anime', 'grid', 'game', 'pixel', 'crawler', 'off'];
 /* the Open Anime Studio button lives directly under the Anime card, so it
    reads as belonging to that theme; render() re-seats it after each redraw */
 const studioButton = document.getElementById('studio');

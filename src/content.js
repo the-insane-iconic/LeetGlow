@@ -12,8 +12,8 @@
 (() => {
   const KEY = 'lcThemeStudio';
   const DEFAULT = 'anime';
-  const DARK_THEMES = new Set(['sakura', 'grid', 'crawler', 'pixel']);   // paper is the only light one
-  const VALID = new Set(['paper', 'sakura', 'grid', 'anime', 'crawler', 'game', 'pixel', 'off']);
+  const DARK_THEMES = new Set(['grid', 'crawler', 'pixel']);
+  const VALID = new Set(['grid', 'anime', 'crawler', 'game', 'pixel', 'off']);
   /* the anime theme is light or dark depending on the scene it was solved
      from; anime.js publishes that and asks for a re-assert when it changes.
      The game theme is the same idea with two known states instead of an
@@ -93,7 +93,7 @@
     } catch (e) {
       return theme;
     }
-    return 'sakura';
+    return 'anime';
   }
 
   async function apply(theme) {

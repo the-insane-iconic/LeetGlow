@@ -164,22 +164,22 @@ html[data-lc-theme="anime"][data-lc-focus] {
   --lc-nav-bg: var(--lc-bg2);
 }
 html[data-lc-theme="anime"][data-lc-focus] body::before { display: none; }
-html[data-lc-theme="anime"][data-lc-focus] .lcts-moment,
-html[data-lc-theme="anime"][data-lc-focus] .lcts-card { display: none !important; }
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"])[data-lc-focus] .lcts-moment,
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"])[data-lc-focus] .lcts-card { display: none !important; }
 
 
 /* =========================== MOMENTS ======================================= */
 /* Shared pieces. Every overlay is pointer-events:none except the title card,
    which a click dismisses. */
-html[data-lc-theme="anime"] .lcts-moment,
-html[data-lc-theme="anime"] .lcts-card {
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment,
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-card {
   position: fixed; inset: 0; z-index: 2147483000;
   pointer-events: none;
   font-family: var(--lc-font-display);
   color: var(--lc-text);
   contain: strict;
 }
-html[data-lc-theme="anime"] .lcts-jp { font-family: var(--lc-font-display); font-weight: 400; }
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-jp { font-family: var(--lc-font-display); font-weight: 400; }
 
 /* -- Accepted: the finisher ------------------------------------------------- */
 .lcts-moment[data-kind="ac"] { animation: lcts-out 1700ms linear forwards; }
@@ -294,34 +294,34 @@ html[data-lc-theme="anime"] .lcts-jp { font-family: var(--lc-font-display); font
    upright star while it travels round.
    Keyframe names are global across every theme's stylesheet (crawler.css has
    its own lcts-spin), so these all carry the lcts-dz- prefix. */
-html[data-lc-theme="anime"] .lcts-moment.is-dizzy { animation: lcts-out 1750ms linear forwards; }
-html[data-lc-theme="anime"] .lcts-moment.is-dizzy .lcts-stack {
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-dizzy { animation: lcts-out 1750ms linear forwards; }
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-dizzy .lcts-stack {
   top: 50%; bottom: auto; transform: translateY(-50%);
 }
-html[data-lc-theme="anime"] .lcts-moment.is-dizzy .lcts-dz-swirl {
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-dizzy .lcts-dz-swirl {
   position: absolute; left: 50%; top: 50%;
   width: min(78vh, 62vw); aspect-ratio: 1;
   opacity: 0;
   animation: lcts-dz-swirl 1650ms cubic-bezier(.25,.6,.4,1) forwards;
 }
-html[data-lc-theme="anime"] .lcts-moment.is-dizzy .lcts-dz-swirl svg { width: 100%; height: 100%; display: block; }
-html[data-lc-theme="anime"] .lcts-moment.is-dizzy .lcts-dz-swirl path {
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-dizzy .lcts-dz-swirl svg { width: 100%; height: 100%; display: block; }
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-dizzy .lcts-dz-swirl path {
   fill: none; stroke: var(--lcts-tone); stroke-width: 2.6; stroke-linecap: round; opacity: .55;
 }
-html[data-lc-theme="anime"] .lcts-moment.is-dizzy .lcts-big {
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-dizzy .lcts-big {
   position: relative;
   transform-origin: 50% 90%;
   animation:
     lcts-thud 520ms cubic-bezier(.3,1.4,.5,1) forwards,
     lcts-dz-woozy 1150ms ease-in-out 520ms forwards;
 }
-html[data-lc-theme="anime"] .lcts-moment.is-dizzy .lcts-sub {
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-dizzy .lcts-sub {
   animation:
     lcts-rise 320ms ease-out 200ms forwards,
     lcts-dz-woozy-soft 1100ms ease-in-out 560ms forwards;
 }
 /* the stars: an ellipse over the stamp, sized from its font */
-html[data-lc-theme="anime"] .lcts-moment.is-dizzy .lcts-orbit {
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-dizzy .lcts-orbit {
   position: absolute; left: 50%; top: -.12em;
   width: 3.6em; height: 3.6em; margin: -1.8em 0 0 -1.8em;
   transform: scaleY(.3);
@@ -329,23 +329,23 @@ html[data-lc-theme="anime"] .lcts-moment.is-dizzy .lcts-orbit {
   opacity: 0;
   animation: lcts-dz-stars 1750ms linear forwards;
 }
-html[data-lc-theme="anime"] .lcts-moment.is-dizzy .lcts-ring {
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-dizzy .lcts-ring {
   position: absolute; inset: 0;
   animation: lcts-dz-spin 620ms linear infinite;
 }
-html[data-lc-theme="anime"] .lcts-moment.is-dizzy .lcts-star-at {
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-dizzy .lcts-star-at {
   position: absolute; left: 50%; top: 50%; width: 0; height: 0;
   transform: rotate(var(--a)) translateX(1.8em) rotate(calc(-1 * var(--a)));
 }
-html[data-lc-theme="anime"] .lcts-moment.is-dizzy .lcts-star {
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-dizzy .lcts-star {
   position: absolute; left: -.21em; top: -.21em; width: .42em; height: .42em;
   animation: lcts-dz-unspin 620ms linear infinite;
 }
-html[data-lc-theme="anime"] .lcts-moment.is-dizzy .lcts-star svg { width: 100%; height: 100%; display: block; overflow: visible; }
-html[data-lc-theme="anime"] .lcts-moment.is-dizzy .lcts-star path {
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-dizzy .lcts-star svg { width: 100%; height: 100%; display: block; overflow: visible; }
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-dizzy .lcts-star path {
   fill: var(--lc-yellow); stroke: var(--lc-anime-scrim); stroke-width: 1.6; paint-order: stroke;
 }
-html[data-lc-theme="anime"] .lcts-moment.is-dizzy .lcts-star.is-alt path { fill: var(--lc-accent); }
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-dizzy .lcts-star.is-alt path { fill: var(--lc-accent); }
 
 @keyframes lcts-dz-swirl {
   0%   { opacity: 0;   transform: translate(-50%, -50%) scale(.35) rotate(0deg); }
@@ -373,7 +373,7 @@ html[data-lc-theme="anime"] .lcts-moment.is-dizzy .lcts-star.is-alt path { fill:
 @keyframes lcts-dz-unspin { from { transform: rotate(0deg) scaleY(3.333); } to { transform: rotate(-360deg) scaleY(3.333); } }
 
 /* -- the episode title card ------------------------------------------------- */
-html[data-lc-theme="anime"] .lcts-card { pointer-events: auto; cursor: pointer; }
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-card { pointer-events: auto; cursor: pointer; }
 .lcts-card { animation: lcts-out 2300ms linear forwards; }
 .lcts-card.is-leaving { animation: lcts-leave 220ms ease-in forwards; }
 .lcts-card .lcts-shade {

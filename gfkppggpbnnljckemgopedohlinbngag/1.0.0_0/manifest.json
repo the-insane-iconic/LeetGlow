@@ -1,0 +1,70 @@
+{
+   "action": {
+      "default_icon": {
+         "128": "assets/icons/icon128.png",
+         "16": "assets/icons/icon16.png",
+         "32": "assets/icons/icon32.png",
+         "48": "assets/icons/icon48.png"
+      },
+      "default_popup": "popup/popup.html",
+      "default_title": "LeetThemes"
+   },
+   "background": {
+      "service_worker": "background/service-worker.js"
+   },
+   "commands": {
+      "cycle-theme": {
+         "description": "Cycle to the next LeetTheme",
+         "suggested_key": {
+            "default": "Alt+Shift+L"
+         }
+      },
+      "toggle-audio": {
+         "description": "Toggle lofi audio",
+         "suggested_key": {
+            "default": "Alt+Shift+M"
+         }
+      },
+      "toggle-focus": {
+         "description": "Toggle focus mode",
+         "suggested_key": {
+            "default": "Alt+Shift+F"
+         }
+      },
+      "toggle-timer": {
+         "description": "Toggle the pomodoro timer",
+         "suggested_key": {
+            "default": "Alt+Shift+D"
+         }
+      }
+   },
+   "content_scripts": [ {
+      "css": [ "styles/fonts-content.css", "styles/base.css", "styles/themes.css", "styles/effects.css" ],
+      "js": [ "shared/config.js", "shared/themes.js", "shared/media.js", "shared/utils.js", "shared/engine.js", "content/audio.js", "content/widgets.js", "content/pomodoro.js", "content/focus.js", "content/content.js" ],
+      "matches": [ "https://*.leetcode.com/*", "https://*.leetcode.cn/*" ],
+      "run_at": "document_start"
+   } ],
+   "description": "Cinematic, lofi, anime and custom themes for LeetCode, with focus mode, generative lofi audio and a pomodoro timer.",
+   "host_permissions": [ "https://*.leetcode.com/*", "https://*.leetcode.cn/*" ],
+   "icons": {
+      "128": "assets/icons/icon128.png",
+      "16": "assets/icons/icon16.png",
+      "32": "assets/icons/icon32.png",
+      "48": "assets/icons/icon48.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtAUTHwpaK+8MjpYSpgDt+/3IrBXJKocUK5Ne+ZA9r7H0+F0QXyOrbApNnXUiN5iMRu5bGJcP556qMAxap9Ws0QQe3GrClQQ96BhCH13i9uRUt93fBij3s//ulw20gzY5+4EV+kNQvScQU6v/h3DoNpwXqy8M04C4W2nnDtTBSAA+in1SPTS+UKnqD2GkR2fRJBNGszOMlye7KNnSbTF7B8Hltwm6YT86FCTjckIyjPKlLdIVErXVToBOEBnhbSbD+f+9qNU6lCHS7zQaZhX8KXrUyk0kJR/oixh6YmJTY1cleyAYAIHv9jMZfQSoqB3O2qNe/UQSjc0f0zuq4v0jpwIDAQAB",
+   "manifest_version": 3,
+   "minimum_chrome_version": "114",
+   "name": "LeetThemes – Themes for LeetCode",
+   "options_ui": {
+      "open_in_tab": true,
+      "page": "options/options.html"
+   },
+   "permissions": [ "storage", "notifications", "alarms", "unlimitedStorage" ],
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "1.0.0",
+   "web_accessible_resources": [ {
+      "matches": [ "https://*.leetcode.com/*", "https://*.leetcode.cn/*" ],
+      "resources": [ "assets/fonts/*", "assets/icons/*" ]
+   } ]
+}

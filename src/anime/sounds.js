@@ -340,7 +340,7 @@
     'wa-submit': 'wrong_answer.mp3'     // Wrong Answer on Submit only; Run keeps the synth
   };
 
-  const FILES = { anime: ANIME_FILES, crawler: CRAWLER_FILES };
+  const FILES = { anime: ANIME_FILES, crawler: CRAWLER_FILES, grid: ANIME_FILES };
 
   /* A recording is never allowed to outlast its moment: it is cut at the
      moment's own length (the --dur values in themes/crawler.css, i.e. how long
@@ -369,7 +369,7 @@
     } catch (e) { /* already stopped */ }
   }
 
-  const recorded = { anime: {}, crawler: {} };   // theme -> kind -> AudioBuffer
+  const recorded = { anime: {}, crawler: {}, grid: {} };   // theme -> kind -> AudioBuffer
   const warmed = {};
   /* fetch and decode one theme's recordings, once */
   function warm(themeId) {
@@ -522,7 +522,7 @@
 
   /* the first real interaction unlocks audio for the rest of the page's life */
   function unlock() {
-    if (!/^(anime|crawler|pixel)$/.test(currentTheme())) return;
+    if (!/^(anime|crawler|pixel|grid)$/.test(currentTheme())) return;
     try { ensureContext(0.6); running().then(sleepSoon); } catch (e) {}
     removeEventListener('pointerdown', unlock, true);
     removeEventListener('keydown', unlock, true);

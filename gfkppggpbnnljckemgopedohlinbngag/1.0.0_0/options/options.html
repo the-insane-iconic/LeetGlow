@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LeetThemes — Studio & Settings</title>
+  <link rel="stylesheet" href="../styles/fonts.css">
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="bg-orb orb-a" aria-hidden="true"></div>
+  <div class="bg-orb orb-b" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="../assets/icons/icon48.png" alt="" width="38" height="38">
+        <div>
+          <div class="brand-name">Leet<span>Themes</span></div>
+          <div class="brand-sub">theme your grind</div>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Settings sections">
+        <button class="nav-item active" data-panel="appearance">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0 0 18c1.3 0 2-.8 2-2 0-.6-.2-1.1-.6-1.5-.3-.4-.4-.7-.4-1 0-.7.5-1.2 1.3-1.2H16a5 5 0 0 0 5-5.1C21 6.6 17 3 12 3Zm-4.5 9a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Zm2.8-4.2a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Zm4.4 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Zm3.3 3.2a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Z" fill="currentColor"/></svg>
+          <span>Appearance</span>
+        </button>
+        <button class="nav-item" data-panel="focus">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5v2H6v3H4Zm11-5h5v5h-2V6h-3V4ZM4 15h2v3h3v2H4v-5Zm14 0h2v5h-5v-2h3v-3Z" fill="currentColor"/></svg>
+          <span>Focus mode</span>
+        </button>
+        <button class="nav-item" data-panel="sound">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6Z" fill="currentColor"/></svg>
+          <span>Lofi sound</span>
+        </button>
+        <button class="nav-item" data-panel="timer">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 2h6v2H9V2Zm3 4a8 8 0 1 1 0 16 8 8 0 0 1 0-16Zm1 3h-2v6l4.2 2.5 1-1.7-3.2-1.9V9Z" fill="currentColor"/></svg>
+          <span>Pomodoro</span>
+        </button>
+        <button class="nav-item" data-panel="studio">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.2 5.3L20 10.5l-5.8 2.2L12 18l-2.2-5.3L4 10.5l5.8-2.2L12 3Zm7 12 1 2.4 2.4 1-2.4 1-1 2.4-1-2.4-2.4-1 2.4-1 1-2.4Z" fill="currentColor"/></svg>
+          <span>Theme Studio</span>
+          <em class="nav-new">new</em>
+        </button>
+        <button class="nav-item" data-panel="about">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 15h-2v-6h2v6Zm0-8h-2V7h2v2Z" fill="currentColor"/></svg>
+          <span>About</span>
+        </button>
+      </nav>
+
+      <div class="side-theme" id="sideTheme">
+        <div class="side-theme-preview" id="sideThemePreview">
+          <div class="mini-code"><i></i><i></i><i></i></div>
+        </div>
+        <div class="side-theme-info">
+          <strong id="sideThemeName">Neon Tokyo</strong>
+          <span id="sideThemeCat">Anime · dark</span>
+        </div>
+        <div class="palette-dots" id="paletteDots"></div>
+      </div>
+
+      <div class="sidebar-foot">
+        <button class="text-btn" id="resetAll">Reset all settings</button>
+        <span>v1.0.0 · no tracking, ever</span>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="page-head">
+        <div>
+          <p class="eyebrow" id="pageEyebrow">make it yours</p>
+          <h1 id="pageTitle">Appearance</h1>
+          <p class="page-sub" id="pageSub">Pick a scene. Change the whole mood of your grind.</p>
+        </div>
+        <div class="head-actions">
+          <span class="live-pill"><i></i> Syncs instantly</span>
+          <button class="btn primary" id="openLeetcodeBtn">Open LeetCode</button>
+        </div>
+      </header>
+
+      <div class="welcome hidden" id="welcomeBanner">
+        <div class="welcome-copy">
+          <span class="welcome-emoji">✨</span>
+          <div>
+            <strong>Welcome to LeetThemes</strong>
+            <p>Pick a vibe, pin the extension to your toolbar, then open any LeetCode problem. Everything below updates instantly.</p>
+          </div>
+        </div>
+        <div class="welcome-actions">
+          <button class="btn primary" id="welcomeLeetcode">Open LeetCode</button>
+          <button class="icon-close" id="welcomeClose" aria-label="Dismiss welcome">×</button>
+        </div>
+      </div>
+
+      <!-- APPEARANCE -->
+      <section class="panel active" data-panel-view="appearance">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <h2>Theme gallery</h2>
+              <p>16 hand-tuned scenes. Built-in themes animate with CSS — no external assets.</p>
+            </div>
+            <label class="search compact">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 4a6.5 6.5 0 1 0 4.1 11.6l4.2 4.2 1.4-1.4-4.2-4.2A6.5 6.5 0 0 0 10.5 4Zm0 2a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Z" fill="currentColor"/></svg>
+              <input type="search" id="gallerySearch" placeholder="Search themes" aria-label="Search themes">
+            </label>
+          </div>
+          <div class="theme-grid" id="galleryGrid"></div>
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <h2>Atmosphere</h2>
+                <p>Dial the ambience up or keep it quiet.</p>
+              </div>
+              <span class="value-pill" id="intensityValue">75%</span>
+            </div>
+            <div class="option-row">
+              <div class="option-copy">
+                <strong>Enable LeetThemes</strong>
+                <span>Master switch for themes, widgets and audio on LeetCode.</span>
+              </div>
+              <label class="switch"><input type="checkbox" id="enabledToggle"><span class="track"><span class="thumb"></span></span></label>
+            </div>
+            <label class="range-row">
+              <span>Effect intensity</span>
+              <input type="range" id="intensity" min="0" max="100" step="1" value="75">
+              <div class="range-legend"><span>subtle</span><span>vivid</span></div>
+            </label>
+            <div class="option-row">
+              <div class="option-copy">
+                <strong>Theme fonts</strong>
+                <span>Cinzel, Space Grotesk and friends on headings and code.</span>
+              </div>
+              <label class="switch"><input type="checkbox" id="fontsToggle"><span class="track"><span class="thumb"></span></span></label>
+            </div>
+            <div class="option-row">
+              <div class="option-copy">
+                <strong>Reduce motion</strong>
+                <span>Pause particles and ambient movement.</span>
+              </div>
+              <label class="switch"><input type="checkbox" id="motionToggle"><span class="track"><span class="thumb"></span></span></label>
+            </div>
+          </div>
+
+          <div class="card shortcut-card">
+            <div class="card-head">
+              <div>
+                <h2>Shortcuts</h2>
+                <p>Keyboard-first, because mouse trips are expensive.</p>
+              </div>
+            </div>
+            <div class="shortcut-list">
+              <div><span>Cycle theme</span><kbd>Alt</kbd><kbd>Shift</kbd><kbd>L</kbd></div>
+              <div><span>Focus mode</span><kbd>Alt</kbd><kbd>Shift</kbd><kbd>F</kbd></div>
+              <div><span>Lofi audio</span><kbd>Alt</kbd><kbd>Shift</kbd><kbd>M</kbd></div>
+              <div><span>Pomodoro</span><kbd>Alt</kbd><kbd>Shift</kbd><kbd>D</kbd></div>
+            </div>
+            <p class="hint">Shortcuts can be rebound at <code>chrome://extensions/shortcuts</code>.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- FOCUS -->
+      <section class="panel" data-panel-view="focus">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <h2>Focus mode</h2>
+              <p>Strip away the noise. Exit any time with the floating chip or Alt+Shift+F.</p>
+            </div>
+            <label class="switch"><input type="checkbox" id="focusEnabled"><span class="track"><span class="thumb"></span></span></label>
+          </div>
+          <div class="growth-list">
+            <label class="check-row"><input type="checkbox" id="focusHeader"><span><strong>Hide the site header</strong><small>Maximum screen real estate. Re-enable from settings.</small></span></label>
+            <label class="check-row"><input type="checkbox" id="focusPromos"><span><strong>Hide promos & banners</strong><small>Premium prompts, announcements and upsells.</small></span></label>
+            <label class="check-row"><input type="checkbox" id="focusSidebar"><span><strong>Hide sidebars</strong><small>Related lists and right-hand suggestion rails.</small></span></label>
+            <label class="check-row"><input type="checkbox" id="focusDiscussion"><span><strong>Hide discussion & company tags</strong><small>Keep your eyes on the problem and the editor.</small></span></label>
+            <label class="check-row"><input type="checkbox" id="focusFooter"><span><strong>Hide the footer</strong><small>No doom-scrolling below the fold.</small></span></label>
+          </div>
+        </div>
+        <div class="callout">
+          <span class="callout-icon">🧘</span>
+          <div><strong>What focus mode doesn't hide</strong><p>Your problem, editor, tests and submissions stay untouched. This is a nudge, not a punishment.</p></div>
+        </div>
+      </section>
+
+      <!-- SOUND -->
+      <section class="panel" data-panel-view="sound">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <h2>Lofi soundscapes</h2>
+              <p>Generated live in your browser with Web Audio. No tracks, no streaming, no copyright drama.</p>
+            </div>
+            <button class="btn ghost" id="testSound">▶ Preview</button>
+          </div>
+          <div class="sound-grid" id="soundPresets">
+            <button class="sound-card" data-preset="cafe">
+              <span class="sound-art cafe">☕<i></i><i></i><i></i></span>
+              <strong>Lofi Café</strong>
+              <small>warm pads · vinyl crackle · soft room</small>
+            </button>
+            <button class="sound-card" data-preset="rain">
+              <span class="sound-art rain">☂<i></i><i></i><i></i></span>
+              <strong>Rainy Window</strong>
+              <small>rain · deep low end · slow chords</small>
+            </button>
+            <button class="sound-card" data-preset="night">
+              <span class="sound-art night">☾<i></i><i></i><i></i></span>
+              <strong>Night Drive</strong>
+              <small>minor pads · wind · late-night bells</small>
+            </button>
+          </div>
+          <div class="option-row">
+            <div class="option-copy"><strong>Volume</strong><span>Applies everywhere lofi plays.</span></div>
+            <div class="inline-range">
+              <input type="range" id="soundVolume" min="0" max="100" value="32">
+              <span class="value-pill" id="soundVolumeValue">32%</span>
+            </div>
+          </div>
+          <div class="option-row">
+            <div class="option-copy"><strong>Pause when tab is hidden</strong><span>Save battery and keep the vibes intentional.</span></div>
+            <label class="switch"><input type="checkbox" id="pauseOnHide"><span class="track"><span class="thumb"></span></span></label>
+          </div>
+          <p class="hint">Browsers block autoplay. If audio doesn't start, press play on the mini-player on LeetCode.</p>
+        </div>
+      </section>
+
+      <!-- TIMER -->
+      <section class="panel" data-panel-view="timer">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <h2>Pomodoro</h2>
+              <p>A tiny timer in the corner. State survives reloads and SPA navigation.</p>
+            </div>
+            <label class="switch"><input type="checkbox" id="pomodoroEnabled"><span class="track"><span class="thumb"></span></span></label>
+          </div>
+          <div class="timer-grid">
+            <label class="field"><span>Focus length</span><div class="input-suffix"><input type="number" id="workMin" min="1" max="180"><em>min</em></div></label>
+            <label class="field"><span>Short break</span><div class="input-suffix"><input type="number" id="breakMin" min="1" max="60"><em>min</em></div></label>
+            <label class="field"><span>Long break</span><div class="input-suffix"><input type="number" id="longBreakMin" min="1" max="120"><em>min</em></div></label>
+            <label class="field"><span>Long break every</span><div class="input-suffix"><input type="number" id="longEvery" min="2" max="12"><em>sessions</em></div></label>
+          </div>
+          <div class="option-row">
+            <div class="option-copy"><strong>Auto-start next phase</strong><span>Flow state mode. Breaks are part of the algorithm.</span></div>
+            <label class="switch"><input type="checkbox" id="autoStart"><span class="track"><span class="thumb"></span></span></label>
+          </div>
+          <div class="option-row">
+            <div class="option-copy"><strong>Completion chime</strong><span>Soft two-note bell and a desktop notification.</span></div>
+            <label class="switch"><input type="checkbox" id="timerSound"><span class="track"><span class="thumb"></span></span></label>
+          </div>
+          <p class="hint">Timer progress is also shown as a toolbar badge while it runs.</p>
+        </div>
+      </section>
+
+      <!-- STUDIO -->
+      <section class="panel studio-panel" data-panel-view="studio">
+        <div class="studio">
+          <aside class="studio-list card">
+            <div class="studio-list-head">
+              <h2>Your themes</h2>
+              <button class="mini-btn" id="newThemeBtn" title="New custom theme">+</button>
+            </div>
+            <div class="custom-list" id="customThemeList"></div>
+            <div class="studio-list-actions">
+              <label class="field tiny">
+                <span>Start from a built-in</span>
+                <select id="duplicateSelect"></select>
+              </label>
+              <button class="mini-btn wide" id="duplicateBtn">Duplicate</button>
+              <label class="mini-btn wide import-label">
+                Import theme pack
+                <input type="file" id="importInput" accept="application/json,.json">
+              </label>
+              <button class="mini-btn wide" id="exportAllBtn">Export all customs</button>
+            </div>
+          </aside>
+
+          <div class="studio-editor card">
+            <div class="card-head tight">
+              <div>
+                <h2 id="editorTitle">New theme</h2>
+                <p>Saved locally. Nothing is uploaded anywhere.</p>
+              </div>
+              <span class="draft-pill" id="draftPill">draft</span>
+            </div>
+
+            <div class="field-row">
+              <label class="field"><span>Name</span><input type="text" id="themeName" maxlength="32" placeholder="After Hours"></label>
+              <label class="field"><span>Tagline</span><input type="text" id="themeTagline" maxlength="48" placeholder="one of one"></label>
+            </div>
+            <div class="field-row">
+              <label class="field"><span>Mode</span>
+                <select id="themeMode"><option value="dark">Dark</option><option value="light">Light</option></select>
+              </label>
+              <div class="field"><span>Category</span><div class="static-pill">Custom</div></div>
+            </div>
+
+            <h3 class="section-label">Palette</h3>
+            <div class="color-grid">
+              <label class="color-field"><span>Background</span><input type="color" data-color="bg"><code data-hex="bg"></code></label>
+              <label class="color-field"><span>Surface</span><input type="color" data-color="surface"><code data-hex="surface"></code></label>
+              <label class="color-field"><span>Nested surface</span><input type="color" data-color="surface2"><code data-hex="surface2"></code></label>
+              <label class="color-field"><span>Elevated</span><input type="color" data-color="elevated"><code data-hex="elevated"></code></label>
+              <label class="color-field"><span>Text</span><input type="color" data-color="text"><code data-hex="text"></code></label>
+              <label class="color-field"><span>Muted text</span><input type="color" data-color="muted"><code data-hex="muted"></code></label>
+              <label class="color-field"><span>Accent</span><input type="color" data-color="accent"><code data-hex="accent"></code></label>
+              <label class="color-field"><span>Secondary accent</span><input type="color" data-color="accent2"><code data-hex="accent2"></code></label>
+              <label class="color-field"><span>Code</span><input type="color" data-color="code"><code data-hex="code"></code></label>
+              <label class="color-field"><span>Border</span><input type="text" id="borderColor" placeholder="rgba(255,255,255,.12)"></label>
+            </div>
+
+            <h3 class="section-label">Typography</h3>
+            <div class="field-row triple">
+              <label class="field"><span>UI font</span><select id="fontUI"></select></label>
+              <label class="field"><span>Display font</span><select id="fontDisplay"></select></label>
+              <label class="field"><span>Mono font</span><select id="fontMono"></select></label>
+            </div>
+
+            <h3 class="section-label">Background</h3>
+            <div class="field-row">
+              <label class="field"><span>Type</span>
+                <select id="bgType">
+                  <option value="gradient">CSS gradient</option>
+                  <option value="media">Upload image / video</option>
+                  <option value="url">Image / video URL</option>
+                </select>
+              </label>
+              <label class="field"><span>Fit</span>
+                <select id="bgFit"><option value="cover">Cover</option><option value="contain">Contain</option><option value="fill">Stretch</option></select>
+              </label>
+            </div>
+            <div class="field hidden" id="bgGradientWrap">
+              <span>Gradient CSS</span>
+              <textarea id="bgGradient" rows="2" spellcheck="false"></textarea>
+              <div class="field-actions"><button class="mini-btn" id="regenGradient">Regenerate from palette</button></div>
+            </div>
+            <div class="field hidden" id="bgUrlWrap">
+              <span>Media URL</span>
+              <input type="url" id="bgUrl" placeholder="https://…/wallpaper.jpg">
+            </div>
+            <div class="field hidden" id="bgUploadWrap">
+              <span>Upload</span>
+              <div class="upload-row">
+                <label class="upload-drop" id="bgUploadLabel">
+                  <input type="file" id="bgFile" accept="image/*,video/mp4,video/webm">
+                  <strong>Drop a file or click to browse</strong>
+                  <small>Images (≤ 25 MB, auto-optimized) & short videos (≤ 15 MB). Stored locally in extension storage.</small>
+                </label>
+                <div class="media-status hidden" id="bgMediaStatus">
+                  <span id="bgMediaName">wallpaper.jpg</span>
+                  <button class="mini-btn danger" id="bgRemove">Remove</button>
+                </div>
+              </div>
+            </div>
+            <div class="range-grid">
+              <label class="range-row slim"><span>Blur</span><input type="range" id="bgBlur" min="0" max="40" value="0"><span class="range-val" id="bgBlurValue">0px</span></label>
+              <label class="range-row slim"><span>Dim</span><input type="range" id="bgDim" min="0" max="100" value="35"><span class="range-val" id="bgDimValue">35%</span></label>
+            </div>
+
+            <h3 class="section-label">Effects</h3>
+            <div class="field-row triple">
+              <label class="field"><span>Particles</span>
+                <select id="particles">
+                  <option value="none">None</option>
+                  <option value="dust">Dust motes</option>
+                  <option value="petals">Sakura petals</option>
+                  <option value="rain">Rain</option>
+                  <option value="stars">Stars</option>
+                  <option value="bubbles">Bubbles</option>
+                  <option value="leaves">Leaves</option>
+                  <option value="fireflies">Fireflies</option>
+                  <option value="snow">Snow</option>
+                </select>
+              </label>
+              <label class="field"><span>Particle count</span><input type="number" id="particleCount" min="0" max="80" step="1"></label>
+              <label class="field"><span>Grain</span><input type="number" id="grain" min="0" max="30" step="1"></label>
+            </div>
+            <div class="fx-toggles">
+              <label class="check-chip"><input type="checkbox" id="fxAurora"><span>Aurora blobs</span></label>
+              <label class="check-chip"><input type="checkbox" id="fxGrid"><span>Perspective grid</span></label>
+              <label class="check-chip"><input type="checkbox" id="fxScanlines"><span>Scanlines</span></label>
+              <label class="range-row slim vignette-row"><span>Vignette</span><input type="range" id="vignette" min="0" max="100" value="35"><span class="range-val" id="vignetteValue">35%</span></label>
+            </div>
+
+            <div class="editor-actions">
+              <button class="btn primary" id="saveThemeBtn">Save theme</button>
+              <button class="btn ghost" id="applyThemeBtn">Save & apply</button>
+              <button class="btn ghost" id="exportThemeBtn">Export</button>
+              <button class="btn danger-ghost hidden" id="deleteThemeBtn">Delete</button>
+            </div>
+          </div>
+
+          <aside class="studio-preview card">
+            <div class="preview-head">
+              <div><h2>Live preview</h2><span>Mock LeetCode problem</span></div>
+              <span class="live-pill mini"><i></i> live</span>
+            </div>
+            <div class="preview-frame-wrap">
+              <iframe id="previewFrame" src="../demo/index.html?embed=1" title="Theme preview"></iframe>
+            </div>
+            <p class="hint">The preview mirrors your LeetCode problem page. Uploaded media also previews here.</p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ABOUT -->
+      <section class="panel" data-panel-view="about">
+        <div class="two-col">
+          <div class="card">
+            <div class="card-head"><div><h2>LeetThemes</h2><p>Made for people who spend too long in the editor — in the best way.</p></div></div>
+            <ul class="feature-list">
+              <li><strong>16 animated scenes</strong><span>Movie, lofi, anime, retro, nature, space and minimalist palettes.</span></li>
+              <li><strong>Yours to remix</strong><span>Custom palettes, fonts, particles, gradients and local backgrounds.</span></li>
+              <li><strong>Focus tools</strong><span>Distraction hiding, generative lofi audio and a persistent pomodoro.</span></li>
+              <li><strong>Nothing tracked</strong><span>No analytics, no accounts, no network calls. Media stays on your device.</span></li>
+            </ul>
+            <div class="about-links">
+              <button class="btn ghost" id="aboutLeetcode">Open LeetCode</button>
+              <a class="btn ghost" href="https://leetcode.com/problemset/" target="_blank" rel="noreferrer">Problem set ↗</a>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head"><div><h2>Credits & privacy</h2><p>Small print, zero fine print.</p></div></div>
+            <p class="body-copy">Theme scenes, particles and the lofi engine are original and built with CSS and Web Audio. No movie stills, anime art or commercial music are bundled. User-uploaded media never leaves this device.</p>
+            <p class="body-copy">Bundled fonts are licensed under the SIL Open Font License: Inter, JetBrains Mono, Space Grotesk, Cinzel, Caveat and Orbitron. License files live in <code>assets/fonts/licenses/</code>.</p>
+            <p class="body-copy">LeetThemes is an independent project and is not affiliated with LeetCode.</p>
+            <div class="legal-links">
+              <a href="https://openfontlicense.org/" target="_blank" rel="noreferrer">OFL ↗</a>
+              <a href="https://developer.chrome.com/docs/extensions/" target="_blank" rel="noreferrer">Chrome extensions docs ↗</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="../shared/themes.js"></script>
+  <script src="../shared/config.js"></script>
+  <script src="../shared/media.js"></script>
+  <script src="../shared/utils.js"></script>
+  <script src="../content/audio.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

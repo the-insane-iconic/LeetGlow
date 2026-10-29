@@ -30,28 +30,8 @@
 (() => {
   const STYLE_ID = 'lcts-monaco-ink';
 
-  /* Paper inks are solved against the editor's own stock, which sits one shade
-     deeper than the other panels (--lc-editor-bg in themes/paper.css). Each one
-     is the LIGHTEST colour at its hue that still clears 4.5:1 on that sheet as
-     it actually renders (sampled from a screenshot, not from the flat swatch),
-     which is what makes them read as separate inks rather than as one brown:
-     on a mid-tone kraft, contrast is the whole chroma budget, so leaving any of
-     it unspent costs visible colour. Ten roles, eight distinguishable hues.
-     They are drawn at full opacity because alpha would spend that margin too.
-     Keep in sync with PALETTES.paper in inject.js and the card in popup.js. */
+  /* Syntax ink palettes for custom themes (grid, crawler, game, pixel). */
   const INK = {
-    paper: {
-      a: 1,
-      variable:'#241d14', comment:'#332e25', keyword:'#650500', control:'#5f0043',
-      string:'#003804',   number:'#00343f',  func:'#00208a',    type:'#4a007b',
-      param:'#1a2d5a',    operator:'#3a2d1d', regexp:'#003804', invalid:'#650500'
-    },
-    sakura: {
-      a: 1,
-      variable:'#ece9ff', comment:'#6b6395', keyword:'#ff7eb6', control:'#ff7eb6',
-      string:'#ffd479',   number:'#b98cff',  func:'#6ee7f0',    type:'#7ee8a5',
-      param:'#c9a6ff',    operator:'#ff9ec8', regexp:'#ffd479', invalid:'#ff6b8b'
-    },
     grid: {
       a: 1,
       variable:'#d7e0ec', comment:'#56687f', keyword:'#58a6ff', control:'#58a6ff',
@@ -246,7 +226,6 @@
       rules.push('.mtk' + cls + '{color:' + rgba(ink[role] || ink.variable, ink.a) + '!important}');
     }
     if (!rules.length) return false;
-    if (theme === 'paper') rules.push('.monaco-editor .mtkb{font-weight:700!important}');
 
     let el = document.getElementById(STYLE_ID);
     if (!el) {

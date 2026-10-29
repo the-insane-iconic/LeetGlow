@@ -17,9 +17,13 @@
      storage key, so enabling/muting one never touches the other. Web Crawler
      has no settings UI yet, so it simply runs on DEFAULTS until one exists. */
   const DEFAULTS = { titleCard: true, moments: true, sound: true, volume: 1 };
-  let settings = { anime: Object.assign({}, DEFAULTS), crawler: Object.assign({}, DEFAULTS) };
+  let settings = {
+    anime: Object.assign({}, DEFAULTS),
+    crawler: Object.assign({}, DEFAULTS),
+    grid: Object.assign({}, DEFAULTS)
+  };
 
-  const MOMENT_THEMES = new Set(['anime', 'crawler']);
+  const MOMENT_THEMES = new Set(['anime', 'crawler', 'grid']);
   const theme = () => root.getAttribute('data-lc-theme');
   const activeSettings = () => settings[theme()] || DEFAULTS;
   /* a tab not clicked yet plays through the offscreen page: open it early */
@@ -27,9 +31,10 @@
     if (SFX && MOMENT_THEMES.has(theme()) && activeSettings().sound && activeSettings().titleCard) SFX.prime(theme());
   }
 
-  chrome.storage.local.get(['lcAnime', 'lcCrawler'], (res) => {
+  chrome.storage.local.get(['lcAnime', 'lcCrawler', 'lcGrid'], (res) => {
     if (res.lcAnime) settings.anime = Object.assign({}, DEFAULTS, res.lcAnime);
     if (res.lcCrawler) settings.crawler = Object.assign({}, DEFAULTS, res.lcCrawler);
+    if (res.lcGrid) settings.grid = Object.assign({}, DEFAULTS, res.lcGrid);
     if (UI && UI.setJapanese) UI.setJapanese(settings.anime.japanese);
     primeSound();
   });
@@ -38,6 +43,7 @@
     if (ch.lcAnime) settings.anime = Object.assign({}, DEFAULTS, ch.lcAnime.newValue || {});
     if (ch.lcAnime && UI && UI.setJapanese) UI.setJapanese(settings.anime.japanese);
     if (ch.lcCrawler) settings.crawler = Object.assign({}, DEFAULTS, ch.lcCrawler.newValue || {});
+    if (ch.lcGrid) settings.grid = Object.assign({}, DEFAULTS, ch.lcGrid.newValue || {});
   });
 
   /* the overlay and its sound always start together */
