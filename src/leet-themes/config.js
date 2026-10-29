@@ -107,18 +107,18 @@
   }
 
   async function getSettings() {
-    const stored = await areaGet('sync', KEYS.settings);
+    const stored = await areaGet('local', KEYS.settings);
     return deepMerge(DEFAULTS, stored[KEYS.settings] || {});
   }
 
   async function replaceSettings(settings) {
     const next = deepMerge(DEFAULTS, settings || {});
-    await areaSet('sync', { [KEYS.settings]: next });
+    await areaSet('local', { [KEYS.settings]: next });
     return next;
   }
 
   // Serialize read-modify-write so rapid patches don't overwrite each other. On extension pages
-  // and content scripts, patches are routed through the service worker so two tabs can't race.
+  // and content scripts, patches are routed through local storage queue.
   let settingsQueue = Promise.resolve();
   const isServiceWorker = typeof self !== 'undefined' && typeof window === 'undefined' && typeof importScripts === 'function';
 
@@ -126,7 +126,7 @@
     const run = settingsQueue.then(async function () {
       const current = await getSettings();
       const next = deepMerge(current, patch || {});
-      await areaSet('sync', { [KEYS.settings]: next });
+      await areaSet('local', { [KEYS.settings]: next });
       return next;
     });
     settingsQueue = run.catch(function () {});
@@ -134,22 +134,7 @@
   }
 
   function setSettings(patch) {
-    if (!hasChromeStorage || isServiceWorker || !chrome.runtime || !chrome.runtime.sendMessage) {
-      return queueSetSettings(patch);
-    }
-    return new Promise(function (resolve, reject) {
-      try {
-        chrome.runtime.sendMessage({ type: 'lct:patch-settings', patch: patch || {} }, function (response) {
-          if (chrome.runtime.lastError || !response || !response.ok) {
-            queueSetSettings(patch).then(resolve, reject);
-          } else {
-            resolve(response.settings);
-          }
-        });
-      } catch (error) {
-        queueSetSettings(patch).then(resolve, reject);
-      }
-    });
+    return queueSetSettings(patch);
   }
 
   async function getCustomThemes() {
@@ -211,7 +196,7 @@
       return function () {};
     }
     const listener = function (changes, area) {
-      if (area === 'sync' && changes[KEYS.settings]) {
+      if (area === 'local' && changes[KEYS.settings]) {
         callback(deepMerge(DEFAULTS, changes[KEYS.settings].newValue || {}));
       }
     };

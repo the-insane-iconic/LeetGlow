@@ -114,15 +114,19 @@
     });
     if (found.length) return found;
 
-    document.querySelectorAll('.flexlayout__tab').forEach((tab) => {
-      if (tab.querySelector('#editor, [data-track-load="description_content"]')) return;
-      const isConsole = !!tab.querySelector(RUN_LOC + ', [data-e2e-locator="console-testcase-input"]');
+    const tabs = document.querySelectorAll('.flexlayout__tab, div[data-layout-path], div[class*="tab-pane"], div[class*="result"]');
+    const scope = tabs.length > 0 ? tabs : [document.body || document.documentElement];
+
+    scope.forEach((tab) => {
+      if (tab.querySelector && tab.querySelector('#editor, [data-track-load="description_content"]')) return;
+      const isConsole = !!(tab.querySelector && tab.querySelector(RUN_LOC + ', [data-e2e-locator="console-testcase-input"]'));
       if ((action === 'submit') === isConsole) return;
 
       const candidates = tab.querySelectorAll(SCOPED_RESULT_LOC);
       for (const el of candidates) {
+        if (el.closest('#editor, [data-track-load="description_content"]')) continue;
         const t = el.textContent ? el.textContent.trim() : '';
-        if (t.length >= 8 && t.length <= 40) {
+        if (t.length >= 6 && t.length <= 100) {
           const m = VERDICT.exec(t);
           if (m) {
             found.push([el, m[1]]);
@@ -181,17 +185,19 @@
   document.addEventListener('click', (e) => {
     const t = e.target;
     if (!t || !t.closest) return;
-    if (t.closest('[data-e2e-locator="console-submit-button"], [data-e2e-locator="submit-button"], button[data-cypress="SubmitCode"], [data-track-load="description_submit_btn"]')) {
+    const btn = t.closest('button, [role="button"]');
+    if (!btn) return;
+    const text = (btn.textContent || '').trim().toLowerCase();
+    const aria = (btn.getAttribute('aria-label') || '').trim().toLowerCase();
+    const title = (btn.getAttribute('title') || '').trim().toLowerCase();
+    const isSubmit = btn.matches('[data-e2e-locator="console-submit-button"], [data-e2e-locator="submit-button"], button[data-cypress="SubmitCode"], [data-track-load="description_submit_btn"]') ||
+      text === 'submit' || text.startsWith('submit') || aria.includes('submit') || title.includes('submit');
+    const isRun = btn.matches('[data-e2e-locator="console-run-button"], [data-e2e-locator="run-code-btn"], button[data-cypress="RunCode"], [data-track-load="description_run_btn"]') ||
+      text === 'run' || text.startsWith('run') || aria.includes('run') || title.includes('run');
+    if (isSubmit) {
       arm('submit');
-    } else if (t.closest('[data-e2e-locator="console-run-button"], [data-e2e-locator="run-code-btn"], button[data-cypress="RunCode"], [data-track-load="description_run_btn"]')) {
+    } else if (isRun) {
       arm('run');
-    } else {
-      const btn = t.closest('button');
-      if (btn) {
-        const text = (btn.textContent || '').trim().toLowerCase();
-        if (text === 'submit' || text.startsWith('submit')) arm('submit');
-        else if (text === 'run' || text.startsWith('run')) arm('run');
-      }
     }
   }, true);
 

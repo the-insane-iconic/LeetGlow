@@ -725,20 +725,23 @@
         return;
       }
       this.host.style.display = '';
-      this.refs.audio.style.display = 'none';
-      this.refs.timer.style.display = 'none';
-      this.refs.focusChip.style.display = 'none';
-      if (this.audioData && this.audioData.visible) this.refs.audio.style.display = '';
-      if (this.timerData && this.timerData.visible) this.refs.timer.style.display = '';
-      if (this.focusVisible) this.refs.focusChip.style.display = '';
+      const showAudio = Boolean(this.audioData && this.audioData.visible);
+      const showTimer = Boolean(this.timerData && this.timerData.visible);
+      const showFocus = Boolean(this.focusVisible);
+      this.refs.audio.style.display = showAudio ? '' : 'none';
+      this.refs.audio.classList.toggle('hidden', !showAudio);
+      this.refs.timer.style.display = showTimer ? '' : 'none';
+      this.refs.timer.classList.toggle('hidden', !showTimer);
+      this.refs.focusChip.style.display = showFocus ? '' : 'none';
+      this.refs.focusChip.classList.toggle('hidden', !showFocus);
     }
 
     updateTimer(data) {
       if (!this.mounted) return;
       this.timerData = Object.assign({ visible: true }, data);
-      const refs = this.refs;
-      refs.timer.classList.toggle('hidden', !this.timerData.visible);
+      this._refreshVisibility();
       if (!this.timerData.visible) return;
+      const refs = this.refs;
       refs.timerTime.textContent = this.timerData.time || '25:00';
       refs.timerLabel.textContent = this.timerData.label || 'Focus';
       refs.timerSub.textContent = this.timerData.sub || '';
@@ -758,23 +761,21 @@
         dots.appendChild(dot);
       }
       refs.timer.classList.toggle('warn', Boolean(this.timerData.warn));
-      this._refreshVisibility();
       this._applyStoredTimerPosition();
     }
 
     updateAudio(data) {
       if (!this.mounted) return;
       this.audioData = Object.assign({ visible: true }, data);
-      const refs = this.refs;
-      refs.audio.classList.toggle('hidden', !this.audioData.visible);
+      this._refreshVisibility();
       if (!this.audioData.visible) return;
+      const refs = this.refs;
       refs.audio.classList.toggle('playing', Boolean(this.audioData.playing));
       refs.audioToggle.innerHTML = this.audioData.playing ? ICONS.pause : ICONS.play;
       refs.audioToggle.setAttribute('aria-label', this.audioData.playing ? 'Pause lofi' : 'Play lofi');
       refs.audioTitle.textContent = this.audioData.title || 'Lofi Café';
       refs.audioSub.textContent = this.audioData.playing ? 'playing' : (this.audioData.pending ? 'tap to start' : 'paused');
       refs.audioVolume.value = Math.round((this.audioData.volume == null ? 0.32 : this.audioData.volume) * 100);
-      this._refreshVisibility();
     }
 
     setFocus(visible) {

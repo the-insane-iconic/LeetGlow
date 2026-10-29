@@ -38,13 +38,15 @@
     return el;
   }
 
-  function presetUrls(id) {
+  function presetUrls(id, cfg) {
     const s = SCENES[id];
     if (s) {
       return { wall: chrome.runtime.getURL(s.wall), blur: chrome.runtime.getURL(s.blur) };
     }
-    if (cfgNow && cfgNow.staticWallpaper && cfgNow.staticWallpaper.imageUrl) {
-      return { wall: cfgNow.staticWallpaper.imageUrl, blur: cfgNow.staticWallpaper.imageUrl };
+    const c = cfg || cfgNow;
+    if (c && c.staticWallpaper) {
+      const url = c.staticWallpaper.imageUrl || c.staticWallpaper.url || c.staticWallpaper.thumbUrl;
+      if (url) return { wall: url, blur: url };
     }
     const def = SCENES[DEF];
     return { wall: chrome.runtime.getURL(def.wall), blur: chrome.runtime.getURL(def.blur) };
@@ -194,7 +196,7 @@ html[data-lc-focus] .lc-anime-live-video {
     shownId = id;
     lastAlpha = alpha;
     releaseObjectUrls();
-    let urls = presetUrls(id);
+    let urls = presetUrls(id, cfg);
     // If wallpaper URL is an external HTTPS URL (e.g. Supabase), fetch as a blob URL to bypass CSP restrictions
     if (urls && urls.wall && /^https?:\/\//i.test(urls.wall)) {
       try {

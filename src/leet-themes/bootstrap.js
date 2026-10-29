@@ -270,10 +270,13 @@
       }
     });
 
-    // 7. Message bus for popup quick actions (Focus, Lofi, Timer)
+    // 7. Message bus for popup quick actions (Focus, Lofi, Timer, Theme)
     chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       if (!msg) return;
-      if (msg.type === 'lct:toggle-audio') {
+      if (msg.type === 'lct:set-theme') {
+        syncActiveTheme(msg.theme);
+        sendResponse({ ok: true });
+      } else if (msg.type === 'lct:toggle-audio') {
         const on = toggleAudio();
         sendResponse({ ok: true, playing: on });
       } else if (msg.type === 'lct:toggle-pomodoro') {

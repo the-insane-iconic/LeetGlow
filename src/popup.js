@@ -579,14 +579,27 @@ function makeMatrixCard() {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs && tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, { type: 'lct:toggle-audio' }, (resp) => {
-          const playing = resp && resp.playing;
-          audioBtn.classList.toggle('active', !!playing);
+          if (resp && typeof resp.playing === 'boolean') {
+            audioBtn.classList.toggle('active', resp.playing);
+            return;
+          }
           chrome.storage.local.get(['lctSettings'], (res) => {
             const cfg = res.lctSettings || {};
             cfg.audio = cfg.audio || {};
-            cfg.audio.enabled = !!playing;
+            const next = !cfg.audio.enabled;
+            cfg.audio.enabled = next;
             chrome.storage.local.set({ lctSettings: cfg });
+            audioBtn.classList.toggle('active', next);
           });
+        });
+      } else {
+        chrome.storage.local.get(['lctSettings'], (res) => {
+          const cfg = res.lctSettings || {};
+          cfg.audio = cfg.audio || {};
+          const next = !cfg.audio.enabled;
+          cfg.audio.enabled = next;
+          chrome.storage.local.set({ lctSettings: cfg });
+          audioBtn.classList.toggle('active', next);
         });
       }
     });
@@ -595,7 +608,11 @@ function makeMatrixCard() {
   timerBtn.addEventListener('click', () => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs && tabs[0]) {
-        chrome.tabs.sendMessage(tabs[0].id, { type: 'lct:toggle-pomodoro' }, () => {
+        chrome.tabs.sendMessage(tabs[0].id, { type: 'lct:toggle-pomodoro' }, (resp) => {
+          if (resp && typeof resp.enabled === 'boolean') {
+            timerBtn.classList.toggle('active', resp.enabled);
+            return;
+          }
           chrome.storage.local.get(['lctSettings'], (res) => {
             const cfg = res.lctSettings || {};
             cfg.pomodoro = cfg.pomodoro || {};
@@ -604,6 +621,15 @@ function makeMatrixCard() {
             chrome.storage.local.set({ lctSettings: cfg });
             timerBtn.classList.toggle('active', next);
           });
+        });
+      } else {
+        chrome.storage.local.get(['lctSettings'], (res) => {
+          const cfg = res.lctSettings || {};
+          cfg.pomodoro = cfg.pomodoro || {};
+          const next = !cfg.pomodoro.enabled;
+          cfg.pomodoro.enabled = next;
+          chrome.storage.local.set({ lctSettings: cfg });
+          timerBtn.classList.toggle('active', next);
         });
       }
     });
@@ -851,15 +877,19 @@ function choose(id) {
     chrome.tabs.query({ url: ['https://*.leetcode.com/*', 'https://*.leetcode.cn/*'] }, (tabs) => {
       (tabs || []).forEach(t => {
         chrome.tabs.sendMessage(t.id, { type: 'theme-change', theme: id });
+        chrome.tabs.sendMessage(t.id, { type: 'lct:set-theme', theme: id });
       });
     });
   } catch (e) { }
   if (studioButton) studioButton.classList.toggle('lit', id === 'anime');
   const status = document.getElementById('status');
-  if (status && THEMES[id]) {
+  if (status) {
+    const tName = (THEMES[id] && THEMES[id].name) ||
+      (globalThis.LCT && globalThis.LCT.themeById && globalThis.LCT.themeById(id) && globalThis.LCT.themeById(id).name) ||
+      id;
     status.textContent = id === 'off'
       ? 'Theme off. LeetCode is back to its own look.'
-      : `${THEMES[id].name} applied to your open problem tabs.`;
+      : `${tName} applied to your open problem tabs.`;
   }
 }
 

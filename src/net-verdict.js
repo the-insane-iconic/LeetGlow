@@ -31,37 +31,38 @@
   window.__lctsNetVerdict = true;
 
   /* LeetCode versions this path: it is /submissions/detail/<id>/v2/check/ or /submissions/<id>/check/ */
-  const CHECK = /\/submissions\/(?:detail\/)?([^/?#]+)\/(?:v\d+\/)?check\/?(?:[?#]|$)/;
+  const CHECK = /\/submissions\/(?:detail\/)?([^/?#]+)\/(?:v\d+\/)?check\/?(?:[?#]|$)|check\/([^/?#]+)/;
   const RUN = /\/(?:problems\/[^/]+\/)?interpret_solution\/?(?:[?#]|$)/;
   const SUBMIT = /\/(?:problems\/[^/]+\/)?submit\/?(?:[?#]|$)/;
-  const interesting = (u) => CHECK.test(u) || RUN.test(u) || SUBMIT.test(u);
+  const interesting = (u) => /check\/?(?:[?#]|$)/.test(u) || /interpret_solution/.test(u) || /\/submit\/?(?:[?#]|$)/.test(u) || CHECK.test(u) || RUN.test(u) || SUBMIT.test(u);
 
   const actionOf = new Map();   // id -> 'run' | 'submit', learned from the POST responses
   const sent = new Set();       // ids already reported (the check URL is polled repeatedly)
 
   function inspect(url, d) {
     if (!d || typeof d !== 'object') return;
-    if (RUN.test(url) && (d.interpret_id || d.interpret_expected_id)) {
+    if ((RUN.test(url) || /interpret_solution/.test(url)) && (d.interpret_id || d.interpret_expected_id)) {
       const id = String(d.interpret_id || d.interpret_expected_id);
       actionOf.set(id, 'run');
       return;
     }
-    if (SUBMIT.test(url) && d.submission_id != null) {
+    if ((SUBMIT.test(url) || /\/submit/.test(url)) && d.submission_id != null) {
       actionOf.set(String(d.submission_id), 'submit');
       return;
     }
+
+    const hasVerdict = d.status_msg || d.state === 'SUCCESS' || typeof d.total_correct === 'number' || typeof d.runtime_percentile === 'number';
+    if (!hasVerdict) return;
+
     const m = CHECK.exec(url);
-    if (!m) return;
-    // Verdict is ready when state is SUCCESS or status_msg is populated
-    if (d.state !== 'SUCCESS' && !d.status_msg) return;
-    const id = m[1];
+    const id = (m && (m[1] || m[2])) || String(d.submission_id || d.interpret_id || Date.now());
     if (sent.has(id)) return;
     sent.add(id);
     const action = actionOf.get(id) ||
       (/^runcode/.test(id) || 'correct_answer' in d || 'expected_code_answer' in d ? 'run' : 'submit');
     const out = {
       id, action,
-      status: String(d.status_msg || ''),
+      status: String(d.status_msg || (d.correct_answer === true ? 'Accepted' : (d.correct_answer === false ? 'Wrong Answer' : 'Accepted'))),
       correct: typeof d.correct_answer === 'boolean' ? d.correct_answer : null,
       beats: typeof d.runtime_percentile === 'number' ? d.runtime_percentile : null,
       memBeats: typeof d.memory_percentile === 'number' ? d.memory_percentile : null,
