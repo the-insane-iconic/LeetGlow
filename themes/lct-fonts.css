@@ -1,0 +1,43 @@
+/* Self-hosted OFL fonts for LeetCode pages. Namespaced ('LCT …') to avoid conflicts. */
+@font-face {
+  font-family: 'LCT Inter';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('chrome-extension://__MSG_@@extension_id__/fonts/inter.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'LCT JetBrains Mono';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('chrome-extension://__MSG_@@extension_id__/fonts/jetbrainsmono.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'LCT Space Grotesk';
+  font-style: normal;
+  font-weight: 500 700;
+  font-display: swap;
+  src: url('chrome-extension://__MSG_@@extension_id__/fonts/spacegrotesk.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'LCT Cinzel';
+  font-style: normal;
+  font-weight: 500 700;
+  font-display: swap;
+  src: url('chrome-extension://__MSG_@@extension_id__/fonts/cinzel.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'LCT Caveat';
+  font-style: normal;
+  font-weight: 500 700;
+  font-display: swap;
+  src: url('chrome-extension://__MSG_@@extension_id__/fonts/caveat.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'LCT Orbitron';
+  font-style: normal;
+  font-weight: 500 700;
+  font-display: swap;
+  src: url('chrome-extension://__MSG_@@extension_id__/fonts/orbitron.woff2') format('woff2');
+}

@@ -13,7 +13,11 @@
   const KEY = 'lcThemeStudio';
   const DEFAULT = 'anime';
   const DARK_THEMES = new Set(['grid', 'crawler', 'pixel']);
-  const VALID = new Set(['grid', 'anime', 'crawler', 'game', 'pixel', 'off']);
+  const LCT_THEMES = new Set([
+    'sakura-dream', 'forest-mist', 'midnight-ink', 'lofi-cafe',
+    'rainy-window', 'meadow-breeze', 'ocean-deep', 'paper', 'nord'
+  ]);
+  const VALID = new Set(['grid', 'anime', 'crawler', 'game', 'pixel', 'off', ...LCT_THEMES]);
   /* the anime theme is light or dark depending on the scene it was solved
      from; anime.js publishes that and asks for a re-assert when it changes.
      The game theme is the same idea with two known states instead of an
@@ -102,6 +106,21 @@
     if (theme === current) return;
     const was = current;
     current = theme;
+
+    if (LCT_THEMES.has(theme)) {
+      applying = true;
+      try {
+        root.removeAttribute('data-lc-theme');
+        if (globalThis.LCTBootstrap) globalThis.LCTBootstrap.syncActiveTheme(theme);
+      } finally {
+        queueMicrotask(() => { applying = false; });
+      }
+      try { sessionStorage.setItem('__lcts_active_theme', theme); } catch (e) {}
+      return;
+    }
+
+    if (globalThis.LCTBootstrap) globalThis.LCTBootstrap.syncActiveTheme(theme);
+
     if (theme === 'off') {
       /* themes/*.css is scoped entirely to [data-lc-theme], so removing the
          attribute switches every rule off at once */

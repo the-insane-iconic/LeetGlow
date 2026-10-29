@@ -2,7 +2,7 @@
    choice to storage (the content script applies it live to open LeetCode tabs). */
 
 const KEY = 'lcThemeStudio';
-const DEFAULT = 'anime';
+const DEFAULT = 'sakura-dream';
 
 let isPremium = true;
 let isFreeBeta = true;
@@ -89,6 +89,30 @@ const THEMES = {
   }
 };
 const ORDER = ['anime', 'grid', 'game', 'pixel', 'crawler', 'off'];
+const LCT_ORDER = [
+  'sakura-dream',
+  'forest-mist',
+  'midnight-ink',
+  'lofi-cafe',
+  'rainy-window',
+  'meadow-breeze',
+  'ocean-deep',
+  'paper',
+  'nord'
+];
+
+if (globalThis.LCT && globalThis.LCT.THEMES) {
+  globalThis.LCT.THEMES.forEach((t) => {
+    THEMES[t.id] = {
+      name: t.name,
+      desc: t.tagline || t.category,
+      accent: t.palette && t.palette.accent ? t.palette.accent : '#dd5e95',
+      accent2: t.palette && t.palette.accent2 ? t.palette.accent2 : '#8f7be8',
+      category: t.category,
+      raw: t
+    };
+  });
+}
 /* the Open Anime Studio button lives directly under the Anime card, so it
    reads as belonging to that theme; render() re-seats it after each redraw */
 const studioButton = document.getElementById('studio');
@@ -393,79 +417,223 @@ async function selectWallpaper(item, isLocked) {
   }
 }
 
-function render(selected) {
-  const grid = document.getElementById('grid');
-  grid.innerHTML = '';
-  const preview = previewHTML();
-  ORDER.forEach((id) => {
-    const t = THEMES[id];
-    const isLocked = !isPremium && !isFreeBeta && id === 'crawler';
-    const card = document.createElement('button');
-    card.className = 'card' + (isLocked ? ' is-locked' : '');
-    card.type = 'button';
-    card.setAttribute('role', 'radio');
-    card.setAttribute('aria-checked', String(id === selected));
-    card.setAttribute('aria-label', isLocked ? `${t.name} theme (PRO — Click to unlock)` : `${t.name} theme`);
-    card.dataset.id = id;
-    if (isLocked) {
-      card.title = `${t.name} (PRO Theme — Click to unlock in Anime Studio)`;
+const FX_CLASSES = {
+  petals: 'fx-petals',
+  dust: 'fx-dust',
+  rain: 'fx-rain',
+  stars: 'fx-stars',
+  bubbles: 'fx-bubbles',
+  leaves: 'fx-leaves',
+  fireflies: 'fx-fireflies',
+  snow: 'fx-snow'
+};
+
+function makeThemePreview(theme) {
+  const preview = document.createElement('span');
+  const particles = theme.effects && theme.effects.particles;
+  preview.className = 'preview ' + (FX_CLASSES[particles] || '');
+  const palette = theme.palette || {};
+  preview.style.setProperty('--pv-bg', palette.bg || '#0b0b12');
+  preview.style.setProperty('--pv-surface', palette.surface || '#16161f');
+  preview.style.setProperty('--pv-text', palette.text || '#f4f4fa');
+  preview.style.setProperty('--pv-accent', palette.accent || '#c4a6ff');
+  preview.style.setProperty('--pv-accent2', palette.accent2 || '#22d3ee');
+  preview.style.setProperty('--pv-border', palette.border || 'rgba(255,255,255,.12)');
+
+  preview.innerHTML = [
+    '<span class="scene"></span>',
+    '<span class="veil"></span>',
+    '<span class="mini-nav"><span class="logo"></span><span class="bar"></span><span class="bar"></span><span class="avatar"></span></span>',
+    '<span class="mini-body">',
+    '  <span class="mini-title">Two Sum</span>',
+    '  <span class="mini-tags"><b class="easy">Easy</b><b class="soft">array</b><b class="soft">hash</b></span>',
+    '  <span class="mini-code"><i></i><i></i><i></i></span>',
+    '  <span class="mini-run">Run</span>',
+    '</span>',
+    '<span class="grain"></span>'
+  ].join('');
+
+  if (particles && particles !== 'none') {
+    for (let i = 0; i < 5; i += 1) {
+      const dot = document.createElement('i');
+      dot.className = 'p-dot';
+      dot.style.setProperty('--x', (8 + Math.random() * 84).toFixed(1) + '%');
+      dot.style.setProperty('--y', (12 + Math.random() * 76).toFixed(1) + '%');
+      dot.style.setProperty('--s', (2 + Math.random() * 3).toFixed(1) + 'px');
+      dot.style.setProperty('--d', (5 + Math.random() * 7).toFixed(1) + 's');
+      dot.style.setProperty('--delay', (-Math.random() * 8).toFixed(1) + 's');
+      preview.appendChild(dot);
     }
-    card.style.setProperty('--card-accent', t.accent);
-    card.innerHTML =
-      `<div class="preview tex-${t.tex}" style="${pvVars(t.pv)}">${preview}</div>` +
-      `<div class="meta">` +
-      `<span class="name">${t.name}</span>` +
-      `<span class="desc">${t.desc}</span>` +
-      `<span class="spacer"></span>` +
-      `<span class="check">${CHECK}</span>` +
-      `</div>`;
-    card.addEventListener('click', () => {
-      if (id === 'crawler' && !isPremium && !isFreeBeta) {
-        openStudioCheckout();
-        return;
-      }
-      if (id === 'anime') {
-        choose(id);
-        toggleWallpaperDrawer();
-      } else {
-        toggleWallpaperDrawer(false);
-        choose(id);
+  }
+  return preview;
+}
+
+function makeThemeCard(theme, selectedId) {
+  const isSelected = theme.id === selectedId;
+  const button = document.createElement('button');
+  button.className = 'theme-card' + (isSelected ? ' active' : '');
+  button.type = 'button';
+  button.dataset.id = theme.id;
+  button.setAttribute('role', 'radio');
+  button.setAttribute('aria-checked', String(isSelected));
+  button.title = theme.name + (theme.tagline ? ' — ' + theme.tagline : '');
+
+  const palette = theme.palette || {};
+  button.style.setProperty('--pv-accent', palette.accent || '#c4a6ff');
+  button.style.setProperty('--pv-accent2', palette.accent2 || '#22d3ee');
+
+  const preview = makeThemePreview(theme);
+  if (isSelected) {
+    const check = document.createElement('span');
+    check.className = 'active-check';
+    check.textContent = '✓';
+    preview.appendChild(check);
+  }
+
+  const meta = document.createElement('span');
+  meta.className = 'theme-meta';
+
+  const name = document.createElement('span');
+  name.className = 'theme-name';
+  name.textContent = theme.name;
+
+  const cat = document.createElement('span');
+  cat.className = 'theme-cat';
+  cat.textContent = theme.category || 'Theme';
+
+  meta.appendChild(name);
+  meta.appendChild(cat);
+
+  button.appendChild(preview);
+  button.appendChild(meta);
+
+  button.addEventListener('click', () => {
+    choose(theme.id);
+  });
+
+  return button;
+}
+
+function makeMatrixCard() {
+  const card = document.createElement('div');
+  card.className = 'quick-matrix-card';
+  card.innerHTML = `
+    <div class="quick-matrix-grid">
+      <button class="quick-action-btn" data-action="focus" type="button" title="Toggle focus mode">
+        <span class="q-icon">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 9V4h5v2H6v3H4Zm11-5h5v5h-2V6h-3V4ZM4 15h2v3h3v2H4v-5Zm14 0h2v5h-5v-2h3v-3Z"/></svg>
+        </span>
+        <span class="q-label">Focus</span>
+      </button>
+      <button class="quick-action-btn" data-action="audio" type="button" title="Toggle lofi audio">
+        <span class="q-icon">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6Z"/></svg>
+        </span>
+        <span class="q-label">Lofi</span>
+      </button>
+      <button class="quick-action-btn" data-action="timer" type="button" title="Toggle pomodoro timer">
+        <span class="q-icon">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 2h6v2H9V2Zm3 4a8 8 0 1 1 0 16 8 8 0 0 1 0-16Zm1 3h-2v6l4.2 2.5 1-1.7-3.2-1.9V9Z"/></svg>
+        </span>
+        <span class="q-label">Timer</span>
+      </button>
+      <button class="quick-action-btn" data-action="studio" type="button" title="Custom themes, studio and settings">
+        <span class="q-icon">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3a9 9 0 0 0 0 18c1.3 0 2-.8 2-2 0-.6-.2-1.1-.6-1.5-.3-.4-.4-.7-.4-1 0-.7.5-1.2 1.3-1.2H16a5 5 0 0 0 5-5.1C21 6.6 17 3 12 3Zm-4.5 9a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Zm2.8-4.2a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Zm4.4 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Zm3.3 3.2a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Z"/></svg>
+        </span>
+        <span class="q-label">Studio</span>
+      </button>
+    </div>
+  `;
+
+  const focusBtn = card.querySelector('[data-action="focus"]');
+  const audioBtn = card.querySelector('[data-action="audio"]');
+  const timerBtn = card.querySelector('[data-action="timer"]');
+  const studioBtn = card.querySelector('[data-action="studio"]');
+
+  chrome.storage.local.get(['lcFocus', 'lctSettings'], (res) => {
+    if (res && res.lcFocus) focusBtn.classList.add('active');
+    if (res && res.lctSettings && res.lctSettings.audio && res.lctSettings.audio.enabled) {
+      audioBtn.classList.add('active');
+    }
+    if (res && res.lctSettings && res.lctSettings.pomodoro && res.lctSettings.pomodoro.enabled) {
+      timerBtn.classList.add('active');
+    }
+  });
+
+  focusBtn.addEventListener('click', () => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs && tabs[0]) {
+        chrome.tabs.sendMessage(tabs[0].id, { type: 'lct:toggle-focus' }, (resp) => {
+          const active = resp && resp.focus;
+          focusBtn.classList.toggle('active', !!active);
+          chrome.storage.local.set({ lcFocus: !!active });
+        });
       }
     });
-    grid.appendChild(card);
-    if (id === 'anime' || id === 'crawler') {
-      if (id === 'anime') paintAnimeCard(card.querySelector('.preview'));
-      if (!isFreeBeta) {
-        const ribbon = document.createElement('div');
-        ribbon.className = 'corner-ribbon-wrap';
-        ribbon.setAttribute('aria-hidden', 'true');
-        ribbon.innerHTML = '<span class="corner-ribbon">Premium</span>';
-        card.appendChild(ribbon);
-      }
-
-      if (id === 'anime') {
-        const meta = card.querySelector('.meta');
-        if (meta) {
-          meta.innerHTML = `
-            <div class="anime-meta-title-row" aria-label="Toggle wallpapers">
-              <span class="click-here-text">click here</span>
-              <svg class="anime-down-arrow" viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4.5L6 8l3.5-3.5"/></svg>
-            </div>
-            <span class="check">${CHECK}</span>
-          `;
-        }
-
-        grid.appendChild(studioButton);
-        grid.appendChild(wallpaperDrawer);
-      }
-    }
-    if (id === 'game') {
-      /* a baked card: the night realm with an RPG HUD (scripts/build-game-card.py) */
-      const url = chrome.runtime.getURL('textures/game/card.webp');
-      card.querySelector('.preview').style.setProperty('--pv-scene', `url("${url}")`);
-    }
-    if (id === 'pixel') paintPixelCard(card.querySelector('.preview'));
   });
+
+  audioBtn.addEventListener('click', () => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs && tabs[0]) {
+        chrome.tabs.sendMessage(tabs[0].id, { type: 'lct:toggle-audio' }, (resp) => {
+          const playing = resp && resp.playing;
+          audioBtn.classList.toggle('active', !!playing);
+          chrome.storage.local.get(['lctSettings'], (res) => {
+            const cfg = res.lctSettings || {};
+            cfg.audio = cfg.audio || {};
+            cfg.audio.enabled = !!playing;
+            chrome.storage.local.set({ lctSettings: cfg });
+          });
+        });
+      }
+    });
+  });
+
+  timerBtn.addEventListener('click', () => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs && tabs[0]) {
+        chrome.tabs.sendMessage(tabs[0].id, { type: 'lct:toggle-pomodoro' }, () => {
+          chrome.storage.local.get(['lctSettings'], (res) => {
+            const cfg = res.lctSettings || {};
+            cfg.pomodoro = cfg.pomodoro || {};
+            const next = !cfg.pomodoro.enabled;
+            cfg.pomodoro.enabled = next;
+            chrome.storage.local.set({ lctSettings: cfg });
+            timerBtn.classList.toggle('active', next);
+          });
+        });
+      }
+    });
+  });
+
+  studioBtn.addEventListener('click', () => {
+    chrome.tabs.create({ url: chrome.runtime.getURL('src/studio.html') });
+  });
+
+  return card;
+}
+
+function render(selected) {
+  const grid = document.getElementById('grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  // Row 1, Column 1: 2x2 Matrix Card
+  const matrixCard = makeMatrixCard();
+  grid.appendChild(matrixCard);
+
+  // Row 1 Col 2 onwards: Curated 9 themes in exact specified order
+  const themesList = LCT_ORDER.map((id) => {
+    return (globalThis.LCT && globalThis.LCT.themeById ? globalThis.LCT.themeById(id) : null)
+      || (THEMES[id] && THEMES[id].raw);
+  }).filter(Boolean);
+
+  themesList.forEach((theme) => {
+    const card = makeThemeCard(theme, selected);
+    grid.appendChild(card);
+  });
+
   setAccent(selected);
 }
 
@@ -553,12 +721,27 @@ function paintAnimeCard(preview) {
 }
 
 function setAccent(id) {
-  document.documentElement.style.setProperty('--pop-accent', THEMES[id].accent);
+  const t = THEMES[id];
+  if (t && t.accent) {
+    document.documentElement.style.setProperty('--pop-accent', t.accent);
+  }
 }
 
 function markSelected(id) {
-  document.querySelectorAll('.card').forEach((c) =>
-    c.setAttribute('aria-checked', String(c.dataset.id === id)));
+  document.querySelectorAll('.theme-card, .card').forEach((c) => {
+    const isThis = c.dataset.id === id;
+    c.classList.toggle('active', isThis);
+    c.setAttribute('aria-checked', String(isThis));
+    const oldCheck = c.querySelector('.active-check');
+    if (oldCheck) oldCheck.remove();
+    if (isThis && c.classList.contains('theme-card')) {
+      const check = document.createElement('span');
+      check.className = 'active-check';
+      check.textContent = '✓';
+      const pv = c.querySelector('.preview');
+      if (pv) pv.appendChild(check);
+    }
+  });
   setAccent(id);
 }
 
@@ -571,9 +754,16 @@ function choose(id) {
   chrome.storage.local.set({ [KEY]: id });
   /* content.js hears the storage change and applies it live in every open
      problem tab, so there is nothing to refresh */
+  try {
+    chrome.tabs.query({ url: ['https://*.leetcode.com/*', 'https://*.leetcode.cn/*'] }, (tabs) => {
+      (tabs || []).forEach(t => {
+        chrome.tabs.sendMessage(t.id, { type: 'theme-change', theme: id });
+      });
+    });
+  } catch (e) { }
   if (studioButton) studioButton.classList.toggle('lit', id === 'anime');
   const status = document.getElementById('status');
-  if (status) {
+  if (status && THEMES[id]) {
     status.textContent = id === 'off'
       ? 'Theme off. LeetCode is back to its own look.'
       : `${THEMES[id].name} applied to your open problem tabs.`;
@@ -593,14 +783,10 @@ try {
 chrome.storage.local.get([KEY, 'leetglowPremium'], (res) => {
   isPremium = res?.leetglowPremium ? !!res.leetglowPremium.active : true;
   isFreeBeta = res?.leetglowPremium ? res.leetglowPremium.is_free_beta !== false : true;
-  let selected = (res && res[KEY]) || DEFAULT;
-  if (!THEMES[selected]) {
-    selected = DEFAULT;
-    chrome.storage.local.set({ [KEY]: DEFAULT });
-  }
-  if (selected === 'crawler' && !isPremium && !isFreeBeta) {
-    selected = DEFAULT;
-    chrome.storage.local.set({ [KEY]: DEFAULT });
+  let selected = (res && res[KEY]);
+  if (!selected || !THEMES[selected]) {
+    selected = 'sakura-dream';
+    chrome.storage.local.set({ [KEY]: 'sakura-dream' });
   }
   render(selected);
   if (studioButton) studioButton.classList.toggle('lit', selected === 'anime');
@@ -615,7 +801,7 @@ if (studioButton) {
 /* keyboard: arrow keys move between radio cards and select, as a radio group does */
 document.addEventListener('keydown', (e) => {
   if (!['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft'].includes(e.key)) return;
-  const cards = [...document.querySelectorAll('.card')];
+  const cards = [...document.querySelectorAll('.theme-card, .card')];
   const idx = cards.findIndex((c) => c === document.activeElement);
   if (idx === -1) return;
   e.preventDefault();
