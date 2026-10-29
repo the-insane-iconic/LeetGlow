@@ -64,12 +64,12 @@
       video.addEventListener('seeked', () => {
         try {
           const canvas = document.createElement('canvas');
-          canvas.width = 320;
-          canvas.height = 180;
+          canvas.width = 240;
+          canvas.height = 135;
           const ctx = canvas.getContext('2d');
 
-          const vw = video.videoWidth || 320;
-          const vh = video.videoHeight || 180;
+          const vw = video.videoWidth || 240;
+          const vh = video.videoHeight || 135;
           const hRatio = canvas.width / vw;
           const vRatio = canvas.height / vh;
           const ratio = Math.max(hRatio, vRatio);
@@ -78,7 +78,7 @@
 
           ctx.drawImage(video, 0, 0, vw, vh, shiftX, shiftY, vw * ratio, vh * ratio);
 
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.65);
           cleanup();
           resolve(dataUrl);
         } catch (err) {
@@ -96,6 +96,8 @@
     });
   }
 
+  const snapshotMemoryCache = new Map();
+
   /**
    * Retrieves or generates a video snapshot thumbnail with persistent local caching
    */
@@ -103,11 +105,17 @@
     if (!wallpaper) return null;
     if (wallpaper.thumbUrl) return wallpaper.thumbUrl;
 
+    if (snapshotMemoryCache.has(wallpaper.id)) {
+      wallpaper.thumbUrl = snapshotMemoryCache.get(wallpaper.id);
+      return wallpaper.thumbUrl;
+    }
+
     // 1. Check local storage cache
     try {
       if (root.chrome && root.chrome.storage && root.chrome.storage.local) {
         const stored = (await root.chrome.storage.local.get(THUMB_CACHE_KEY))[THUMB_CACHE_KEY] || {};
         if (stored[wallpaper.id]) {
+          snapshotMemoryCache.set(wallpaper.id, stored[wallpaper.id]);
           wallpaper.thumbUrl = stored[wallpaper.id];
           return wallpaper.thumbUrl;
         }
@@ -118,12 +126,18 @@
     try {
       const dataUrl = await captureVideoSnapshot(wallpaper.videoUrl);
       if (dataUrl) {
+        snapshotMemoryCache.set(wallpaper.id, dataUrl);
         wallpaper.thumbUrl = dataUrl;
-        // Save to cache asynchronously
+        // Save to cache asynchronously, keeping at most 10 recent snapshots to prevent storage bloat
         if (root.chrome && root.chrome.storage && root.chrome.storage.local) {
           root.chrome.storage.local.get(THUMB_CACHE_KEY, (res) => {
             const cache = res[THUMB_CACHE_KEY] || {};
             cache[wallpaper.id] = dataUrl;
+            const keys = Object.keys(cache);
+            if (keys.length > 10) {
+              // Delete oldest entry
+              delete cache[keys[0]];
+            }
             root.chrome.storage.local.set({ [THUMB_CACHE_KEY]: cache });
           });
         }
@@ -340,26 +354,41 @@
     return [];
   }
 
+  let wallpapersCache = null;
+  let wallpapersCacheTimestamp = 0;
+  const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes in-memory TTL
+
   /**
    * Retrieves all available live wallpapers
-   * Shows user's Supabase videos directly and pre-attaches cached snapshots
+   * Shows user's Supabase videos directly and pre-attaches cached snapshots.
+   * Uses an in-memory cache with 5-minute TTL so drawer openings and tab switches are 0 ms.
    */
-  async function getAllLiveWallpapers() {
+  async function getAllLiveWallpapers(forceRefresh = false) {
+    const now = Date.now();
+    if (!forceRefresh && wallpapersCache && (now - wallpapersCacheTimestamp < CACHE_TTL_MS)) {
+      return wallpapersCache;
+    }
+
     const supabaseWallpapers = await fetchSupabaseLiveWallpapers();
-    if (!supabaseWallpapers.length) return [];
+    if (!supabaseWallpapers.length) {
+      if (wallpapersCache) return wallpapersCache; // Return cached data if offline or temporary network hitch
+      return [];
+    }
 
     // Pre-populate any existing cached thumbnails
     try {
       if (root.chrome && root.chrome.storage && root.chrome.storage.local) {
         const stored = (await root.chrome.storage.local.get(THUMB_CACHE_KEY))[THUMB_CACHE_KEY] || {};
         supabaseWallpapers.forEach(w => {
-          if (!w.thumbUrl && stored[w.id]) {
-            w.thumbUrl = stored[w.id];
+          if (!w.thumbUrl && (snapshotMemoryCache.get(w.id) || stored[w.id])) {
+            w.thumbUrl = snapshotMemoryCache.get(w.id) || stored[w.id];
           }
         });
       }
-    } catch (e) {}
+    } catch (e) { }
 
+    wallpapersCache = supabaseWallpapers;
+    wallpapersCacheTimestamp = Date.now();
     return supabaseWallpapers;
   }
 
@@ -398,11 +427,12 @@
 
   root.LCTSLiveWallpapers = {
     getAll: getAllLiveWallpapers,
-    getDynamic: async () => (await getAllLiveWallpapers()).filter(w => w.isLive),
-    getStatic: async () => (await getAllLiveWallpapers()).filter(w => !w.isLive),
+    getDynamic: async (forceRefresh) => (await getAllLiveWallpapers(forceRefresh)).filter(w => w.isLive),
+    getStatic: async (forceRefresh) => (await getAllLiveWallpapers(forceRefresh)).filter(w => !w.isLive),
     getThumbnail: getVideoThumbnail,
     downloadAndCache: downloadAndCacheVideo,
-    cleanTitle: cleanWallpaperTitle
+    cleanTitle: cleanWallpaperTitle,
+    clearCache: () => { wallpapersCache = null; wallpapersCacheTimestamp = 0; }
   };
 
 })(globalThis);

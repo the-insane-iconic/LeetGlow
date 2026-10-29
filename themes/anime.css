@@ -454,3 +454,39 @@ html[data-lc-theme="anime"] .lcts-card { pointer-events: auto; cursor: pointer; 
   .lcts-moment .lcts-ghost, .lcts-card .lcts-bar,
   .lcts-moment .lcts-dz-swirl, .lcts-moment .lcts-orbit { display: none !important; }
 }
+
+/* ---- High-Contrast Dark Palette for White/Bright Wallpapers ------------------
+   When the Dark palette is chosen in Customize, ensure the problem description,
+   titles, worked examples, and constraints render with deep, readable dark ink
+   even on bright or white-dominated wallpapers (e.g. Clean White). */
+html[data-lc-theme="anime"][data-lc-palette="dark"] [data-track-load="description_content"] {
+  color: #0f172a !important;
+}
+html[data-lc-theme="anime"][data-lc-palette="dark"] [data-track-load="description_content"] :is(p, li, dd, dt, blockquote) {
+  color: #1e293b !important;
+}
+html[data-lc-theme="anime"][data-lc-palette="dark"] [data-track-load="description_content"] :is(h1, h2, h3, h4, h5, h6, strong, b) {
+  color: #0f172a !important;
+}
+html[data-lc-theme="anime"][data-lc-palette="dark"] :is([class*="text-title"], [class*="text-heading"], .text-title-large, .text-title-large a) {
+  color: #0f172a !important;
+}
+html[data-lc-theme="anime"][data-lc-palette="dark"] pre,
+html[data-lc-theme="anime"][data-lc-palette="dark"] .example-block {
+  background-color: rgba(15, 23, 42, 0.07) !important;
+  color: #0f172a !important;
+  border: 1px solid rgba(15, 23, 42, 0.16) !important;
+}
+html[data-lc-theme="anime"][data-lc-palette="dark"] pre :is(code, strong, span) {
+  color: #0f172a !important;
+}
+html[data-lc-theme="anime"][data-lc-palette="dark"] :not(pre) > code {
+  background-color: rgba(15, 23, 42, 0.08) !important;
+  color: #0369a1 !important;
+  border: 1px solid rgba(15, 23, 42, 0.16) !important;
+}
+html[data-lc-theme="anime"][data-lc-palette="dark"] .flexlayout__tabset.pane-desc,
+html[data-lc-theme="anime"][data-lc-palette="dark"] .flexlayout__tabset:not(:has(#editor)):not(.pane-code) {
+  --color-tab-selected: #0f172a;
+  --color-tab-unselected: #334155;
+}

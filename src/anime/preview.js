@@ -40,10 +40,10 @@
   }
 
   let inkStyle = null, roleStyle = null;
-  function apply(theme, urls, customAlpha) {
+  function apply(theme, urls, customAlpha, paletteId) {
     if (!roleStyle) { roleStyle = document.createElement('style'); document.head.appendChild(roleStyle); }
     if (!inkStyle) { inkStyle = document.createElement('style'); document.head.appendChild(inkStyle); }
-    roleStyle.textContent = globalThis.LCTSAnimeCss.build(theme, urls, customAlpha);
+    roleStyle.textContent = globalThis.LCTSAnimeCss.build(theme, urls, customAlpha, paletteId);
     inkStyle.textContent = Object.keys(theme.ink).filter((k) => k !== 'a')
       .map((k) => `.monaco-editor .tok-${k}{color:${theme.ink[k]}}`).join('\n')
       + '\n.monaco-editor .tok-comment{font-style:italic}';
@@ -51,6 +51,11 @@
     document.documentElement.classList.toggle('dark', dark);
     document.body.classList.toggle('dark', dark);
     document.documentElement.setAttribute('data-theme', theme.mode);
+    if (paletteId && paletteId !== 'auto') {
+      document.documentElement.setAttribute('data-lc-palette', paletteId);
+    } else {
+      document.documentElement.removeAttribute('data-lc-palette');
+    }
   }
 
   function setLiveVideo(url) {

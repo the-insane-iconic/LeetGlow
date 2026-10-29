@@ -92,6 +92,7 @@ html[data-lc-focus] .lc-anime-live-video {
     if (urls) currentUrls = urls;
     lastAlpha = customAlpha;
     if (paletteId !== undefined && paletteId !== null) currentPalette = paletteId;
+    root.setAttribute('data-lc-palette', currentPalette || 'auto');
     const u = currentUrls || urls;
     globalThis.__lctsAnimeScene = { wall: u ? u.wall : '' };     // read by src/share.js
     let css = globalThis.LCTSAnimeCss.build(theme, u, customAlpha, currentPalette) + LIVE_OVERRIDE_CSS;
@@ -186,6 +187,42 @@ html[data-lc-focus] .lc-anime-live-video {
   }
 
   let liveVideoEl = null;
+  const VIDEO_CACHE_NAME = 'leetglow-live-wallpapers-v1';
+
+  async function getCachedOrFetchVideoUrl(url) {
+    if (!url || url.startsWith('blob:') || url.startsWith('data:')) return url;
+    if (typeof caches !== 'undefined') {
+      try {
+        const cache = await caches.open(VIDEO_CACHE_NAME);
+        const match = await cache.match(url);
+        if (match) {
+          const blob = await match.blob();
+          return URL.createObjectURL(blob);
+        }
+        // Cache in background so future tabs/sessions load offline with 0 CDN latency
+        fetch(url, { mode: 'cors' }).then(async (res) => {
+          if (res.ok) {
+            await cache.put(url, res.clone());
+          }
+        }).catch(() => { });
+      } catch (e) { }
+    }
+    return url;
+  }
+
+  // Pause video decoding immediately when tab is hidden to eliminate GPU/battery usage
+  document.addEventListener('visibilitychange', () => {
+    if (!liveVideoEl) return;
+    if (document.hidden) {
+      if (!liveVideoEl.paused) {
+        liveVideoEl.pause();
+      }
+    } else {
+      if (liveVideoEl.paused && liveVideoEl.dataset.currentUrl && root.getAttribute('data-lc-theme') === 'anime' && !root.hasAttribute('data-lc-focus')) {
+        liveVideoEl.play().catch(() => { });
+      }
+    }
+  });
 
   function ensureVideoAttached() {
     if (!liveVideoEl) return;
@@ -257,29 +294,36 @@ html[data-lc-focus] .lc-anime-live-video {
       if (document.body) document.body.classList.remove('live-ready');
 
       liveVideoEl.dataset.currentUrl = url;
-      liveVideoEl.innerHTML = `
-        <source src="${url}" type="video/mp4">
-        <source src="${url}" type="video/quicktime">
-        <source src="${url}" type="video/webm">
-      `;
-      liveVideoEl.src = url;
-      liveVideoEl.load();
 
-      const playPromise = liveVideoEl.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(() => {
-          // Autoplay policy delayed playback - resume upon user's first click or keypress
-          const resume = () => {
-            if (liveVideoEl && liveVideoEl.paused) {
-              liveVideoEl.play().catch(() => { });
-            }
-            window.removeEventListener('click', resume);
-            window.removeEventListener('keydown', resume);
-          };
-          window.addEventListener('click', resume, { once: true });
-          window.addEventListener('keydown', resume, { once: true });
-        });
-      }
+      getCachedOrFetchVideoUrl(url).then((playableUrl) => {
+        if (!liveVideoEl || liveVideoEl.dataset.currentUrl !== url) return;
+
+        liveVideoEl.innerHTML = `
+          <source src="${playableUrl}" type="video/mp4">
+          <source src="${playableUrl}" type="video/quicktime">
+          <source src="${playableUrl}" type="video/webm">
+        `;
+        liveVideoEl.src = playableUrl;
+        liveVideoEl.load();
+
+        if (!document.hidden) {
+          const playPromise = liveVideoEl.play();
+          if (playPromise !== undefined) {
+            playPromise.catch(() => {
+              // Autoplay policy delayed playback - resume upon user's first click or keypress
+              const resume = () => {
+                if (liveVideoEl && liveVideoEl.paused && !document.hidden) {
+                  liveVideoEl.play().catch(() => { });
+                }
+                window.removeEventListener('click', resume);
+                window.removeEventListener('keydown', resume);
+              };
+              window.addEventListener('click', resume, { once: true });
+              window.addEventListener('keydown', resume, { once: true });
+            });
+          }
+        }
+      });
     }
     root.classList.add('has-live-wallpaper');
     if (document.body) document.body.classList.add('has-live-wallpaper');
@@ -315,6 +359,7 @@ html[data-lc-focus] .lc-anime-live-video {
     chrome.storage.local.get([THEME_KEY, 'lcAnime', 'lcFocus', 'lcContainerTrans', 'lcEditorTrans', 'lcPalette'], async (res) => {
       if (ticket !== loading) return;
       currentPalette = res.lcPalette || 'auto';
+      root.setAttribute('data-lc-palette', currentPalette);
       root.toggleAttribute('data-lc-focus', !!res.lcFocus);
       /* nothing saved = a fresh install, which content.js runs as anime (its DEFAULT) */
       if ((res[THEME_KEY] || 'anime') !== 'anime') {

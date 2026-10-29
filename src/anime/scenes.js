@@ -151,14 +151,25 @@ globalThis.LCTS_PALETTES = {
     roles: {
       '--lc-desk': '#0b0f17',
       '--lc-bg0': '#0b0f17',
-      '--lc-accent': '#94a3b8',
-      '--lc-accent-2': '#cbd5e1',
-      '--lc-rule': '#64748b',
-      '--lc-submit-bg': '#334155',
-      '--lc-submit-bg-hover': '#475569',
-      '--lc-submit-text': '#f8fafc',
-      '--lc-glow': 'rgba(148, 163, 184, 0.5)',
-      '--lc-selection': 'rgba(148, 163, 184, 0.3)'
+      '--lc-text': '#0f172a',
+      '--lc-text2': '#1e293b',
+      '--lc-text3': '#334155',
+      '--lc-accent': '#0284c7',
+      '--lc-accent-2': '#0369a1',
+      '--lc-rule': '#1e293b',
+      '--lc-border': 'rgba(15, 23, 42, 0.18)',
+      '--lc-border-strong': 'rgba(15, 23, 42, 0.35)',
+      '--lc-hairline': 'rgba(15, 23, 42, 0.12)',
+      '--lc-inset': 'rgba(15, 23, 42, 0.08)',
+      '--lc-fill-1': 'rgba(15, 23, 42, 0.14)',
+      '--lc-fill-2': 'rgba(15, 23, 42, 0.10)',
+      '--lc-fill-3': 'rgba(15, 23, 42, 0.06)',
+      '--lc-fill-4': 'rgba(15, 23, 42, 0.03)',
+      '--lc-submit-bg': '#0f172a',
+      '--lc-submit-bg-hover': '#1e293b',
+      '--lc-submit-text': '#ffffff',
+      '--lc-glow': 'rgba(15, 23, 42, 0.4)',
+      '--lc-selection': 'rgba(2, 132, 199, 0.22)'
     }
   }
 };

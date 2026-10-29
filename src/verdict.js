@@ -79,25 +79,42 @@
 
   /* Where each action's verdict can appear. A Submit's result opens in its
      own panel; a Run's in the console. The main code panel (#editor) and the
-     description (whose statistics say "Accepted") are never read. */
+     description (whose statistics say "Accepted") are never read.
+     Uses direct scoped querySelector lookups to eliminate expensive DOM traversal. */
+  const SCOPED_RESULT_LOC = [
+    SUBMIT_LOC,
+    RUN_LOC,
+    '[data-e2e-locator*="result"]',
+    '[class*="result-state"]',
+    '[class*="verdict"]',
+    'div[class*="text-title"]',
+    'span[class*="text-title"]'
+  ].join(',');
+
   function scan(action) {
     const found = [];
-    document.querySelectorAll(action === 'submit' ? SUBMIT_LOC : RUN_LOC).forEach((n) => {
+    const directLoc = action === 'submit' ? SUBMIT_LOC : RUN_LOC;
+    document.querySelectorAll(directLoc).forEach((n) => {
       const m = VERDICT.exec(n.textContent.trim());
       if (m) found.push([n, m[1]]);
     });
     if (found.length) return found;
+
     document.querySelectorAll('.flexlayout__tab').forEach((tab) => {
       if (tab.querySelector('#editor, [data-track-load="description_content"]')) return;
       const isConsole = !!tab.querySelector(RUN_LOC + ', [data-e2e-locator="console-testcase-input"]');
       if ((action === 'submit') === isConsole) return;
-      const walk = document.createTreeWalker(tab, NodeFilter.SHOW_TEXT);
-      let n, budget = 4000;
-      while ((n = walk.nextNode()) && budget-- > 0) {
-        const t = n.nodeValue;
-        if (t.length < 8 || t.length > 40) continue;
-        const m = VERDICT.exec(t.trim());
-        if (m && n.parentElement) found.push([n.parentElement, m[1]]);
+
+      const candidates = tab.querySelectorAll(SCOPED_RESULT_LOC);
+      for (const el of candidates) {
+        const t = el.textContent ? el.textContent.trim() : '';
+        if (t.length >= 8 && t.length <= 40) {
+          const m = VERDICT.exec(t);
+          if (m) {
+            found.push([el, m[1]]);
+            break;
+          }
+        }
       }
     });
     return found;

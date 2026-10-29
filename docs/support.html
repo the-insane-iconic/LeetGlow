@@ -35,8 +35,7 @@
     }
 
     html, body {
-      height: 100%;
-      max-height: 100vh;
+      min-height: 100%;
       overflow-x: hidden;
     }
 
@@ -46,6 +45,7 @@
       color: var(--text-main);
       display: flex;
       flex-direction: column;
+      min-height: 100vh;
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
       position: relative;
@@ -67,7 +67,7 @@
     .top-bar {
       position: relative;
       z-index: 10;
-      padding: 12px 32px;
+      padding: 14px 36px;
       background: rgba(255, 255, 255, 0.94);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
@@ -84,13 +84,13 @@
       text-decoration: none;
       color: var(--text-main);
       font-weight: 800;
-      font-size: 17px;
+      font-size: 18px;
       letter-spacing: -0.02em;
     }
     .brand-logo {
-      width: 28px;
-      height: 28px;
-      border-radius: 7px;
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
     }
     .top-bar-right {
       display: flex;
@@ -103,10 +103,10 @@
       gap: 6px;
       color: var(--text-muted);
       text-decoration: none;
-      font-size: 12.5px;
+      font-size: 13.5px;
       font-weight: 600;
-      padding: 6px 14px;
-      border-radius: 8px;
+      padding: 7px 16px;
+      border-radius: 9px;
       border: 1px solid var(--border-subtle);
       background: var(--bg-surface);
       transition: all 0.15s ease;
@@ -123,21 +123,21 @@
       position: relative;
       z-index: 1;
       flex: 1;
-      max-width: 1120px;
+      max-width: 1260px;
       width: 100%;
       margin: 0 auto;
-      padding: clamp(20px, 3.5vh, 36px) 24px 24px;
+      padding: clamp(32px, 4.5vh, 56px) 36px 48px;
       display: grid;
-      grid-template-columns: 1.25fr 0.85fr;
-      gap: 36px;
-      align-items: start;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 56px;
+      align-items: center;
     }
 
     /* Left Column: Mission, Deliverables & Gratitude */
     .support-story {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 16px;
     }
 
     /* Pink theme badge for Independent & Open Source */
@@ -145,27 +145,27 @@
       align-self: flex-start;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 7px;
       background: var(--pink-soft);
       color: var(--pink-accent);
       border: 1px solid var(--pink-border);
-      padding: 4px 12px;
+      padding: 6px 14px;
       border-radius: 9999px;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 650;
       letter-spacing: 0.01em;
     }
     .story-badge svg {
-      width: 12px;
-      height: 12px;
+      width: 13px;
+      height: 13px;
       fill: var(--pink-accent);
     }
 
     .story-title {
-      font-size: 32px;
+      font-size: clamp(38px, 3.5vw, 48px);
       font-weight: 850;
       line-height: 1.15;
-      letter-spacing: -0.025em;
+      letter-spacing: -0.03em;
       color: var(--text-main);
     }
 
@@ -180,55 +180,56 @@
     }
 
     .story-intro {
-      font-size: 13.5px;
+      font-size: 16px;
       color: var(--text-muted);
-      line-height: 1.5;
-      max-width: 520px;
+      line-height: 1.6;
+      max-width: 580px;
     }
 
     /* Creator Quote Card: Consistent pink/purple accent */
     .creator-quote-card {
       background: #fff8fc;
       border: 1px solid #fce7f3;
-      border-left: 3.5px solid #ec4899;
-      border-radius: 12px;
-      padding: 12px 16px;
-      box-shadow: 0 2px 8px -2px rgba(236, 72, 153, 0.06);
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .quote-icon-wrap {
-      color: #ec4899;
-      margin-bottom: -2px;
-    }
-    .quote-icon-wrap svg {
-      width: 18px;
-      height: 18px;
-    }
-    .quote-text {
-      font-size: 12.5px;
-      color: #334155;
-      font-style: italic;
-      line-height: 1.5;
-    }
-    .quote-author {
-      font-size: 11.5px;
-      font-weight: 600;
-      color: var(--text-muted);
-      font-style: normal;
-    }
-
-    /* Deliverables Section: Compact 2x2 Grid with Clean SVGs */
-    .deliverables-section {
-      margin-top: 2px;
+      border-left: 4px solid #ec4899;
+      border-radius: 16px;
+      padding: 18px 22px;
+      box-shadow: 0 4px 14px -3px rgba(236, 72, 153, 0.07);
       display: flex;
       flex-direction: column;
       gap: 8px;
     }
+    .quote-icon-wrap {
+      color: #ec4899;
+      margin-bottom: -1px;
+    }
+    .quote-icon-wrap svg {
+      width: 22px;
+      height: 22px;
+    }
+    .quote-text {
+      font-size: 14.5px;
+      color: #334155;
+      font-style: italic;
+      line-height: 1.6;
+    }
+    .quote-author {
+      font-size: 13px;
+      font-weight: 650;
+      color: var(--text-muted);
+      font-style: normal;
+      margin-top: 2px;
+    }
+
+    /* Deliverables Section: 2x2 Grid with Clean SVGs */
+    .deliverables-section {
+      margin-top: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
     .deliverables-heading {
-      font-size: 16px;
-      font-weight: 750;
+      font-size: 20px;
+      font-weight: 800;
       color: var(--text-main);
       letter-spacing: -0.015em;
     }
@@ -236,37 +237,37 @@
     .deliverables-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
+      gap: 14px;
     }
     .deliverable-card {
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
-      border-radius: 12px;
-      padding: 10px 12px;
+      border-radius: 14px;
+      padding: 14px 16px;
       display: flex;
       align-items: flex-start;
-      gap: 10px;
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.02);
+      gap: 14px;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.025);
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .deliverable-card:hover {
       border-color: #cbd5e1;
       transform: translateY(-1.5px);
-      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
     }
 
     .del-icon-box {
-      width: 30px;
-      height: 30px;
-      border-radius: 8px;
+      width: 44px;
+      height: 44px;
+      border-radius: 11px;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
     }
     .del-icon-box svg {
-      width: 15px;
-      height: 15px;
+      width: 22px;
+      height: 22px;
     }
     .del-icon-box.purple {
       background: #fdf2f8;
@@ -290,61 +291,61 @@
       min-width: 0;
     }
     .del-title {
-      font-size: 12px;
-      font-weight: 700;
+      font-size: 14px;
+      font-weight: 750;
       color: var(--text-main);
-      margin-bottom: 2px;
-      line-height: 1.3;
-    }
-    .del-desc {
-      font-size: 11px;
-      color: var(--text-muted);
+      margin-bottom: 3px;
       line-height: 1.35;
     }
+    .del-desc {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
 
-    /* Right Column: Support Our Work Container (Shrunk by 10-15% for perfect balance) */
+    /* Right Column: Support Our Work Container */
     .support-checkout-card {
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
-      border-radius: 20px;
-      padding: 20px 20px 18px;
-      box-shadow: 0 12px 32px -6px rgba(15, 23, 42, 0.07), 0 3px 10px -2px rgba(15, 23, 42, 0.03);
-      max-width: 440px;
+      border-radius: 24px;
+      padding: 30px 28px 24px;
+      box-shadow: 0 20px 48px -12px rgba(15, 23, 42, 0.08), 0 4px 16px -2px rgba(15, 23, 42, 0.04);
+      max-width: 500px;
       width: 100%;
       justify-self: end;
     }
 
     .checkout-header {
-      margin-bottom: 12px;
+      margin-bottom: 16px;
     }
     .checkout-title {
-      font-size: 19px;
-      font-weight: 800;
+      font-size: 24px;
+      font-weight: 850;
       color: var(--text-main);
-      letter-spacing: -0.015em;
-      margin-bottom: 4px;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
     }
     .checkout-desc {
-      font-size: 12px;
+      font-size: 14px;
       color: var(--text-muted);
-      line-height: 1.45;
+      line-height: 1.5;
     }
 
     /* Preset amount chips: Green active styling preserved */
     .chips-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
-      margin-bottom: 12px;
+      gap: 10px;
+      margin-bottom: 18px;
     }
     .chip-btn {
-      height: 38px;
+      height: 48px;
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
-      border-radius: 10px;
+      border-radius: 12px;
       font-family: var(--font-sans);
-      font-size: 13.5px;
-      font-weight: 700;
+      font-size: 16px;
+      font-weight: 750;
       color: var(--text-main);
       cursor: pointer;
       transition: all 0.16s ease;
@@ -360,27 +361,27 @@
       background: var(--brand-green);
       color: #ffffff;
       border-color: var(--brand-green);
-      box-shadow: 0 3px 10px rgba(5, 150, 105, 0.28);
+      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.28);
     }
 
     /* Custom amount input */
     .field-label {
       display: block;
-      font-size: 11.5px;
+      font-size: 13px;
       font-weight: 650;
       color: #334155;
-      margin-bottom: 5px;
+      margin-bottom: 7px;
     }
     .custom-input-wrap {
       position: relative;
       display: flex;
       align-items: center;
-      margin-bottom: 12px;
+      margin-bottom: 16px;
     }
     .custom-currency-symbol {
       position: absolute;
-      left: 14px;
-      font-size: 15px;
+      left: 16px;
+      font-size: 18px;
       font-weight: 750;
       color: #475569;
       pointer-events: none;
@@ -388,12 +389,12 @@
     }
     .custom-amount-input {
       width: 100%;
-      height: 40px;
-      padding: 0 14px 0 32px;
+      height: 50px;
+      padding: 0 16px 0 38px;
       border: 1px solid var(--border-subtle);
-      border-radius: 10px;
+      border-radius: 12px;
       font-family: var(--font-sans);
-      font-size: 15px;
+      font-size: 17px;
       font-weight: 750;
       color: var(--text-main);
       background: var(--bg-surface);
@@ -402,12 +403,12 @@
     }
     .custom-amount-input:focus {
       border-color: var(--border-focus);
-      box-shadow: 0 0 0 2.5px rgba(16, 185, 129, 0.15);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
     }
 
     /* Supporter Inputs with vector icons */
     .input-field-group {
-      margin-bottom: 9px;
+      margin-bottom: 13px;
     }
     .input-with-icon-wrap {
       position: relative;
@@ -416,24 +417,28 @@
     }
     .field-vector-icon {
       position: absolute;
-      left: 12px;
+      left: 14px;
       color: var(--text-faint);
       pointer-events: none;
       display: flex;
       align-items: center;
       justify-content: center;
     }
+    .field-vector-icon svg {
+      width: 17px;
+      height: 17px;
+    }
     .field-vector-icon.top-align {
-      top: 10px;
+      top: 13px;
     }
     .supporter-input {
       width: 100%;
-      height: 38px;
-      padding: 0 12px 0 34px;
+      height: 46px;
+      padding: 0 14px 0 42px;
       border: 1px solid var(--border-subtle);
-      border-radius: 9px;
+      border-radius: 11px;
       font-family: var(--font-sans);
-      font-size: 12.5px;
+      font-size: 14px;
       color: var(--text-main);
       background: var(--bg-surface);
       outline: none;
@@ -441,38 +446,38 @@
     }
     .supporter-input:focus {
       border-color: var(--border-focus);
-      box-shadow: 0 0 0 2.5px rgba(16, 185, 129, 0.12);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
     }
     textarea.supporter-input {
-      height: 48px;
-      padding: 8px 12px 8px 34px;
+      height: 72px;
+      padding: 12px 14px 12px 42px;
       resize: vertical;
-      line-height: 1.4;
+      line-height: 1.45;
     }
 
     /* Emerald Green Primary Button (Clean without heart icon) */
     .btn-pay-emerald {
       width: 100%;
-      height: 44px;
+      height: 54px;
       background: linear-gradient(135deg, #10b981 0%, #059669 100%);
       color: #ffffff;
       border: none;
-      border-radius: 10px;
+      border-radius: 14px;
       font-family: var(--font-sans);
-      font-size: 14.5px;
+      font-size: 16.5px;
       font-weight: 750;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-shadow: 0 3px 12px rgba(16, 185, 129, 0.35);
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
       transition: all 0.18s ease;
-      margin-top: 10px;
+      margin-top: 18px;
     }
     .btn-pay-emerald:hover {
       background: linear-gradient(135deg, #059669 0%, #047857 100%);
-      transform: translateY(-0.5px);
-      box-shadow: 0 5px 15px rgba(16, 185, 129, 0.45);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
     }
     .btn-pay-emerald:active {
       transform: translateY(0.5px);
@@ -480,26 +485,26 @@
 
     /* Trust Footer with Secure Shield & Payment Badges */
     .trust-container {
-      margin-top: 12px;
-      padding-top: 10px;
+      margin-top: 18px;
+      padding-top: 16px;
       border-top: 1px solid #f1f5f9;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 10px;
     }
     .trust-security-text {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
-      font-size: 11px;
+      gap: 6px;
+      font-size: 12px;
       font-weight: 600;
       color: var(--text-muted);
     }
     .trust-security-text svg {
-      width: 13px;
-      height: 13px;
+      width: 15px;
+      height: 15px;
       fill: #10b981;
       flex-shrink: 0;
     }
@@ -507,18 +512,18 @@
     .trust-methods-row {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
     }
     .pay-chip {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      height: 20px;
-      padding: 0 6px;
-      border-radius: 4px;
+      height: 24px;
+      padding: 0 8px;
+      border-radius: 5px;
       background: #f8fafc;
       border: 1px solid var(--border-subtle);
-      font-size: 10px;
+      font-size: 11.5px;
       font-weight: 700;
       color: #334155;
       letter-spacing: 0.02em;
@@ -596,14 +601,10 @@
 
     /* Responsive Breakdown */
     @media (max-width: 960px) {
-      html, body {
-        height: auto;
-        max-height: none;
-      }
       .support-wrapper {
         grid-template-columns: 1fr;
-        gap: 32px;
-        padding: 24px 20px 48px;
+        gap: 36px;
+        padding: 28px 24px 48px;
         align-items: start;
       }
       .support-checkout-card {

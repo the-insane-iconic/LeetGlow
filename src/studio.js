@@ -64,6 +64,22 @@
   new ResizeObserver(fitFrame).observe($('frameBox'));
 
   let currentPreviewScene = null;
+  let currentPalette = 'auto';
+  if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+    chrome.storage.local.get(['lcPalette'], (res) => {
+      if (res && res.lcPalette) {
+        currentPalette = res.lcPalette;
+        if (theme && prepared) showPreview();
+      }
+    });
+    chrome.storage.onChanged.addListener((changes, area) => {
+      if (area === 'local' && changes.lcPalette) {
+        currentPalette = changes.lcPalette.newValue || 'auto';
+        if (theme && prepared) showPreview();
+      }
+    });
+  }
+
   async function showPreview() {
     await frameReady;
     if (!theme || !prepared) return;
@@ -73,7 +89,7 @@
       previewUrls = { wall: URL.createObjectURL(prepared.wallBlob), blur: URL.createObjectURL(prepared.blurBlob) };
       currentPreviewScene = sceneId;
     }
-    frame.contentWindow.LCTSPreview.apply(theme, previewUrls, getCustomAlpha());
+    frame.contentWindow.LCTSPreview.apply(theme, previewUrls, getCustomAlpha(), currentPalette);
     if (settings.sceneMode === 'live' && settings.liveWallpaper && settings.liveWallpaper.videoUrl) {
       frame.contentWindow.LCTSPreview.setLiveVideo(settings.liveWallpaper.videoUrl);
     } else {
@@ -474,7 +490,7 @@
     if (frame && frame.contentWindow && frame.contentWindow.LCTSPreview) {
       frame.contentWindow.LCTSPreview.setLiveVideo(null);
       const urls = { wall: wallpaper.imageUrl, blur: wallpaper.imageUrl };
-      frame.contentWindow.LCTSPreview.apply(settings.theme || SCENES[DEF].theme, urls, getCustomAlpha());
+      frame.contentWindow.LCTSPreview.apply(settings.theme || SCENES[DEF].theme, urls, getCustomAlpha(), currentPalette);
     }
 
     await solveAndSave();
@@ -671,21 +687,15 @@
     else if (globalThis.LCTSBugButton) globalThis.LCTSBugButton(helpBtn);
   }
 
-  // Header "Go to LeetCode" button: navigates or switches to LeetCode tab
+  // Header "Go to LeetCode" button: cleanly opens LeetCode problemset in a new tab
   const studioLcBtn = $('studioOpenLeetCodeBtn');
   if (studioLcBtn) {
-    studioLcBtn.addEventListener('click', async () => {
-      try {
-        if (chrome && chrome.tabs && chrome.tabs.query) {
-          const tabs = await chrome.tabs.query({ url: ['https://leetcode.com/*', 'https://leetcode.cn/*'] });
-          if (tabs && tabs.length > 0) {
-            await chrome.tabs.update(tabs[0].id, { active: true });
-            if (tabs[0].windowId) await chrome.windows.update(tabs[0].windowId, { focused: true });
-            return;
-          }
-        }
-      } catch (e) {}
-      window.open('https://leetcode.com/problemset/', '_blank');
+    studioLcBtn.addEventListener('click', () => {
+      if (typeof chrome !== 'undefined' && chrome.tabs && chrome.tabs.create) {
+        chrome.tabs.create({ url: 'https://leetcode.com/problemset/' });
+      } else {
+        window.open('https://leetcode.com/problemset/', '_blank');
+      }
     });
   }
 
@@ -922,6 +932,9 @@
       refreshLiveBtn.addEventListener('click', async (e) => {
         if (e) e.stopPropagation();
         refreshLiveBtn.classList.add('spinning');
+        if (globalThis.LCTSLiveWallpapers && globalThis.LCTSLiveWallpapers.clearCache) {
+          globalThis.LCTSLiveWallpapers.clearCache();
+        }
         liveWallpapersList = [];
         if (settings.sceneMode !== 'live') {
           updateSceneModeUI('live');
