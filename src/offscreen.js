@@ -17,12 +17,24 @@
 (() => {
   const SFX = globalThis.LCTSSounds;
   const seen = new Set();
+  let idleTimer = null;
+
+  function scheduleIdleTeardown() {
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => {
+      try {
+        chrome.runtime.sendMessage({ type: 'lcts-close-offscreen' });
+      } catch (e) {}
+    }, 8000);
+  }
+
   /* a tab's own message (type 'lcts-sound') arrives here directly while this
      page is open; background.js forwards it (target 'lcts-offscreen') only
      when it had to open the page first, so each sound plays once */
   chrome.runtime.onMessage.addListener((raw) => {
     const m = raw && raw.type === 'lcts-sound' ? raw.msg : raw && raw.target === 'lcts-offscreen' ? raw : null;
     if (!m) return;
+    scheduleIdleTeardown();
     /* the same message can arrive both ways while this page is opening */
     if (m.id) { if (seen.has(m.id)) return; seen.add(m.id); if (seen.size > 50) seen.delete(seen.values().next().value); }
     try {

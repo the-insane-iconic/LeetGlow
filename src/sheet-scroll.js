@@ -105,7 +105,7 @@
   document.addEventListener('click', (e) => {
     const t = e.target;
     if (t && t.closest && t.closest('.flexlayout__tab_button')) { nudge(120); nudge(600); }
-  }, true);
+  }, { capture: true, passive: true });
 
   let rz;
   window.addEventListener('resize', () => {
@@ -114,7 +114,7 @@
       for (const tab of document.querySelectorAll('.flexlayout__tab')) tab.removeAttribute('data-lcts-pane');
       beat();
     }, 250);
-  });
+  }, { passive: true });
 
   new MutationObserver(() => nudge(200))
     .observe(document.documentElement, { attributes: true, attributeFilter: ['data-lc-theme'] });

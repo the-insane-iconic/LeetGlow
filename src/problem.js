@@ -45,10 +45,18 @@
 
   function remember(slug, info) {
     const prev = cache[slug];
-    if (prev && prev.d === info.difficulty && prev.n === info.number && prev.t === info.title) return;
+    if (prev && prev.d === info.difficulty && prev.n === info.number && prev.t === info.title) {
+      delete cache[slug];
+      cache[slug] = prev;
+      return;
+    }
+    delete cache[slug];
     cache[slug] = { d: info.difficulty, n: info.number, t: info.title };
     const keys = Object.keys(cache);
-    if (keys.length > 400) keys.slice(0, keys.length - 400).forEach((k) => delete cache[k]);
+    if (keys.length > 300) {
+      const evict = keys.length - 300;
+      for (let i = 0; i < evict; i++) delete cache[keys[i]];
+    }
     try { chrome.storage.local.set({ [KEY]: cache }); } catch (e) {}
   }
 

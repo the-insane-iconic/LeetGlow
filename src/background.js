@@ -92,6 +92,12 @@ function ensureOffscreen() {
 }
 
 chrome.runtime.onMessage.addListener((m, sender) => {
+  if (m && m.type === 'lcts-close-offscreen') {
+    if (chrome.offscreen && chrome.offscreen.closeDocument) {
+      chrome.offscreen.closeDocument().catch(() => {});
+    }
+    return;
+  }
   if (!m || m.type !== 'lcts-sound' || !sender.tab) return;
   const wasOpening = !!opening;
   ensureOffscreen()

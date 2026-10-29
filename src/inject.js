@@ -192,11 +192,14 @@
   /* siteTheme: the last theme LeetCode itself asked for, so 'off' can hand the
      editor back. siteFont: each editor's own face, recorded before we change it. */
   let applying = false, realSetTheme = null, siteTheme = null, oursApplied = false;
+  let lastAppliedFont = undefined;
   const siteFont = new WeakMap();
   function applyFont(id) {
+    const fam = (PALETTES[id] && PALETTES[id].font) || null;
+    if (lastAppliedFont === fam) return;
+    lastAppliedFont = fam;
     /* Monaco measures glyphs itself, so the face has to go through the API —
        setting it in CSS alone would desync the cursor. */
-    const fam = (PALETTES[id] && PALETTES[id].font) || null;
     try {
       const eds = monaco.editor.getEditors ? monaco.editor.getEditors() : [];
       eds.forEach((ed) => {
