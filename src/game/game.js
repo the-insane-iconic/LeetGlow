@@ -71,6 +71,7 @@
     globalThis.__lctsGameMode = mode;
     if (modeChanged && globalThis.__lctsReassertMode) globalThis.__lctsReassertMode();
     if (globalThis.__lctsInkRefresh) globalThis.__lctsInkRefresh();
+    setTimeout(() => { try { window.dispatchEvent(new Event('resize')); } catch (e) {} }, 60);
   }
 
   /* ---- reading the open problem: same hooks as src/anime/moments.js ------- */

@@ -30,11 +30,10 @@
   if (window.__lctsNetVerdict) return;
   window.__lctsNetVerdict = true;
 
-  /* LeetCode versions this path: it is /submissions/detail/<id>/v2/check/ today
-     (the unversioned form stopped being used), so any /vN/ is accepted */
-  const CHECK = /\/submissions\/detail\/([^/?#]+)\/(?:v\d+\/)?check\/?(?:[?#]|$)/;
-  const RUN = /\/interpret_solution\/?(?:[?#]|$)/;
-  const SUBMIT = /\/problems\/[^/]+\/submit\/?(?:[?#]|$)/;
+  /* LeetCode versions this path: it is /submissions/detail/<id>/v2/check/ or /submissions/<id>/check/ */
+  const CHECK = /\/submissions\/(?:detail\/)?([^/?#]+)\/(?:v\d+\/)?check\/?(?:[?#]|$)/;
+  const RUN = /\/(?:problems\/[^/]+\/)?interpret_solution\/?(?:[?#]|$)/;
+  const SUBMIT = /\/(?:problems\/[^/]+\/)?submit\/?(?:[?#]|$)/;
   const interesting = (u) => CHECK.test(u) || RUN.test(u) || SUBMIT.test(u);
 
   const actionOf = new Map();   // id -> 'run' | 'submit', learned from the POST responses
@@ -42,10 +41,19 @@
 
   function inspect(url, d) {
     if (!d || typeof d !== 'object') return;
-    if (RUN.test(url) && d.interpret_id) { actionOf.set(String(d.interpret_id), 'run'); return; }
-    if (SUBMIT.test(url) && d.submission_id != null) { actionOf.set(String(d.submission_id), 'submit'); return; }
+    if (RUN.test(url) && (d.interpret_id || d.interpret_expected_id)) {
+      const id = String(d.interpret_id || d.interpret_expected_id);
+      actionOf.set(id, 'run');
+      return;
+    }
+    if (SUBMIT.test(url) && d.submission_id != null) {
+      actionOf.set(String(d.submission_id), 'submit');
+      return;
+    }
     const m = CHECK.exec(url);
-    if (!m || d.state !== 'SUCCESS') return;
+    if (!m) return;
+    // Verdict is ready when state is SUCCESS or status_msg is populated
+    if (d.state !== 'SUCCESS' && !d.status_msg) return;
     const id = m[1];
     if (sent.has(id)) return;
     sent.add(id);
@@ -62,7 +70,9 @@
       passed: typeof d.total_correct === 'number' ? d.total_correct : null,
       total: typeof d.total_testcases === 'number' ? d.total_testcases : null
     };
-    document.dispatchEvent(new CustomEvent('lcts:net-verdict', { detail: JSON.stringify(out) }));
+    const jsonStr = JSON.stringify(out);
+    try { document.dispatchEvent(new CustomEvent('lcts:net-verdict', { detail: jsonStr })); } catch (e) {}
+    try { window.postMessage({ source: 'lcts:net-verdict', payload: jsonStr }, '*'); } catch (e) {}
   }
 
   /* ---- fetch ---- */

@@ -236,6 +236,9 @@ html[data-lc-theme="game"][data-lc-game-level="easy"] #__next {
 html[data-lc-theme="game"] .flexlayout__layout,
 html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__layout {
   --color-background: transparent;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
 }
 html[data-lc-theme="game"] body,
 html[data-lc-theme="game"][data-lc-game-level="easy"] body {
@@ -310,6 +313,13 @@ html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__tabset {
   background-repeat: no-repeat !important;
   background-position: -60% 0, 0 0, 0 0, 20% 24%, 80% 72%, 0 0, center 32% !important;
   background-attachment: scroll, scroll, scroll, scroll, scroll, scroll, fixed !important;
+  overflow: hidden !important;
+}
+html[data-lc-theme="game"] #editor,
+html[data-lc-theme="game"][data-lc-game-level="easy"] #editor {
+  background-color: transparent !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 html[data-lc-theme="game"] .flexlayout__tabset::before,
 html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__tabset::before {
@@ -318,6 +328,8 @@ html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__tabset::befor
 html[data-lc-theme="game"] .flexlayout__tab,
 html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__tab {
   background-color: transparent !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 html[data-lc-theme="game"] .flexlayout__tab[data-lcts-pane="code"],
 html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__tab[data-lcts-pane="code"] {
@@ -782,7 +794,9 @@ html[data-lc-theme="game"][data-lc-game-level="easy"] [data-e2e-locator="console
 /* Auto's pill: the same restrained crystal glass Run no longer has --
    gold is only Medium's semantic difficulty colour, not a decorative
    accent anywhere in this theme. */
-html[data-lc-theme="game"][data-lc-game-level="easy"] [data-lctg-icon="auto"] {
+html[data-lc-theme="game"][data-lc-game-level="easy"] button[data-lctg-icon="auto"],
+html[data-lc-theme="game"][data-lc-game-level="easy"] [role="button"][data-lctg-icon="auto"],
+html[data-lc-theme="game"][data-lc-game-level="easy"] span[data-lctg-icon="auto"] {
   padding: 3px 9px !important;
   border-radius: var(--lc-radius-sm) !important;
   background: rgba(10,28,42,.32) !important;
@@ -899,7 +913,10 @@ html[data-lc-theme="game"] [data-lctg-icon] svg { display: none !important; }
 html[data-lc-theme="game"] [data-lctg-icon] [class*="before:h-3.5"] {
   display: none !important;
 }
-html[data-lc-theme="game"] [data-lctg-icon] {
+html[data-lc-theme="game"] .flexlayout__tab_button_content[data-lctg-icon],
+html[data-lc-theme="game"] button[data-lctg-icon],
+html[data-lc-theme="game"] [role="button"][data-lctg-icon],
+html[data-lc-theme="game"] span[data-lctg-icon] {
   display: inline-flex !important; align-items: center; gap: 0 !important;
   position: relative;
   font-family: var(--lc-font-ui);

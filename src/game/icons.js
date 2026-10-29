@@ -54,7 +54,7 @@
   function markAuto() {
     const editor = document.getElementById('editor');
     if (!editor) return;
-    const candidates = editor.querySelectorAll('span, div');
+    const candidates = editor.querySelectorAll('button, [role="button"], span, div');
     let found = null;
     for (let i = 0; i < candidates.length; i++) {
       const el = candidates[i];
@@ -62,11 +62,32 @@
       if (el.closest('.monaco-editor')) continue;     // never the code itself
       if (el.textContent.trim() === 'Auto') { found = el; break; }
     }
-    const wantParent = found && found.parentElement;
+    let target = null;
+    if (found) {
+      let cur = found, hops = 0;
+      while (cur && cur !== editor && hops < 3) {
+        if (cur.tagName === 'BUTTON' || cur.getAttribute('role') === 'button') {
+          target = cur;
+          break;
+        }
+        cur = cur.parentElement;
+        hops++;
+      }
+      if (!target && found.parentElement && found.parentElement !== editor) {
+        if (found.parentElement.children.length <= 2 &&
+            !found.parentElement.classList.contains('flex-1') &&
+            !found.parentElement.classList.contains('w-full') &&
+            found.parentElement.id !== 'editor') {
+          target = found.parentElement;
+        } else {
+          target = found;
+        }
+      }
+    }
     document.querySelectorAll('[data-lctg-icon="auto"]').forEach((el) => {
-      if (el !== wantParent) el.removeAttribute('data-lctg-icon');
+      if (el !== target) el.removeAttribute('data-lctg-icon');
     });
-    if (wantParent) wantParent.setAttribute('data-lctg-icon', 'auto');
+    if (target) target.setAttribute('data-lctg-icon', 'auto');
   }
 
   /* "Testcase"/"Test Result" (the small tab pair under the editor) and

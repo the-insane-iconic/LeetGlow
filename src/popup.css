@@ -1037,80 +1037,90 @@ body[data-active-tab="tab-myspace"] .ver {
   display: none !important;
 }
 
-/* Anime card footer: Same dark background as every other card, white font & white downward arrow */
+/* Anime card footer: slim white bar with "click here" and clean downward arrow */
 .card[data-id="anime"] .meta {
   position: relative;
-  background: var(--pop-panel);
-  border-top: 1px solid var(--pop-border);
+  background: #ffffff !important;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  height: 38px;
-  min-height: 38px;
-  padding: 0 14px;
+  height: 19px;
+  min-height: 19px;
+  max-height: 19px;
+  padding: 0 10px;
   box-sizing: border-box;
 }
 .card[data-id="anime"] .anime-meta-title-row {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
+  gap: 5px;
+  cursor: pointer;
+  user-select: none;
 }
-.card[data-id="anime"] .meta .name {
-  color: #ffffff;
-  font-size: 13px;
-  font-weight: 700;
+.card[data-id="anime"] .click-here-text {
+  color: #0f172a;
+  font-size: 10px;
+  font-weight: 600;
   letter-spacing: -0.01em;
+  line-height: 1;
   margin: 0;
 }
+.card[data-id="anime"] .meta .name,
 .card[data-id="anime"] .meta .desc,
-.card[data-id="anime"] .meta .spacer {
+.card[data-id="anime"] .meta .spacer,
+.card[data-id="anime"] .drawer-toggle-badge {
   display: none !important;
 }
-.card[data-id="anime"] .drawer-toggle-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: var(--pop-panel-2);
-  color: #ffffff;
-  border: 1px solid var(--pop-border-2);
-  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.15s ease, color 0.15s ease;
-  flex-shrink: 0;
-  cursor: pointer;
-}
-.card[data-id="anime"] .drawer-toggle-badge svg {
-  width: 11px;
-  height: 11px;
-  stroke: #ffffff;
-  stroke-width: 2.4;
-}
-.card[data-id="anime"]:hover .drawer-toggle-badge {
-  background: var(--pop-border-2);
-  color: #ffffff;
-}
-.grid.wallpapers-expanded .card[data-id="anime"] .drawer-toggle-badge {
-  transform: rotate(180deg);
-  background: #ffffff;
-  color: #0f172a;
-  border-color: #ffffff;
-}
-.grid.wallpapers-expanded .card[data-id="anime"] .drawer-toggle-badge svg {
+.card[data-id="anime"] .anime-down-arrow {
+  width: 9px;
+  height: 9px;
   stroke: #0f172a;
+  stroke-width: 2;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+}
+.card[data-id="anime"]:hover .anime-down-arrow {
+  transform: translateY(1px);
+}
+.grid.wallpapers-expanded .card[data-id="anime"] .anime-down-arrow {
+  transform: rotate(180deg);
 }
 .card[data-id="anime"] .meta .check {
   position: absolute;
-  right: 14px;
+  right: 10px;
   top: 50%;
   transform: translateY(-50%);
-  background: #ffffff;
-  border-color: #ffffff;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(15, 23, 42, 0.28);
+  background: transparent;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
 }
-.card[data-id="anime"] .meta .check svg path {
-  stroke: #0e0f13;
+.card[data-id="anime"] .meta .check svg {
+  width: 8px;
+  height: 8px;
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 0.16s ease, transform 0.16s ease;
+}
+.card[data-id="anime"][aria-checked="true"] .meta .check {
+  background: #0f172a !important;
+  border-color: #0f172a !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+.card[data-id="anime"][aria-checked="true"] .meta .check svg {
+  opacity: 1;
+  transform: scale(1);
+}
+.card[data-id="anime"][aria-checked="true"] .meta .check svg path {
+  stroke: #ffffff !important;
+  stroke-width: 2.5;
 }
 
 .grid.wallpapers-expanded .card[data-id="anime"] {
@@ -1479,14 +1489,13 @@ body[data-active-tab="tab-myspace"] .ver {
 .preview.tex-grain::after,
 .preview.tex-stars::after,
 .preview.tex-grid::after,
-.preview.tex-bloom::after,
 .preview.tex-crawler::after,
 .preview.tex-pixel::after {
   content: ""; position: absolute; inset: 0; pointer-events: none;
 }
 .preview.tex-grain::after {
   background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='k'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.28' numOctaves='2' seed='9' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='discrete' tableValues='0 0 0 1 1 1'/%3E%3CfeFuncG type='discrete' tableValues='0 0 0 1 1 1'/%3E%3CfeFuncB type='discrete' tableValues='0 0 0 1 1 1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23k)' opacity='.16'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='k'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.28' numOctaves='2' seed='9' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='discrete' tableValues='0 0 0 1 1 1'/%3E%3CfeFuncG type='discrete' tableValues='0 0 0 1 1 1'/%3E%3CfeFuncB type='discrete' tableValues='0 0 0 1 1 1'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23k)' opacity='.16'/%3E%3C/svg%3E"),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E"),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='620' height='620'%3E%3Cfilter id='w'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.013 0.030' numOctaves='4' seed='11' stitchTiles='stitch'/%3E%3CfeDiffuseLighting lighting-color='%23ffffff' surfaceScale='2.2'%3E%3CfeDistantLight azimuth='228' elevation='55'/%3E%3C/feDiffuseLighting%3E%3C/filter%3E%3Crect width='620' height='620' filter='url(%23w)'/%3E%3C/svg%3E");
   background-blend-mode: multiply, multiply, soft-light;
@@ -1507,27 +1516,9 @@ body[data-active-tab="tab-myspace"] .ver {
     linear-gradient(to bottom, rgba(120,160,200,.10) 1px, transparent 1px);
   background-size: 16px 16px, 16px 16px;
 }
-.preview.tex-bloom::after {
-  background-image:
-    radial-gradient(160px 100px at 4% -10%, rgba(201,81,138,.16), transparent 62%),
-    radial-gradient(150px 100px at 98% 10%, rgba(139,111,212,.14), transparent 62%),
-    radial-gradient(circle at 1px 1px, rgba(201,81,138,.10) 1px, transparent 0);
-  background-size: auto, auto, 14px 14px;
-}
-/* Grid is square by nature; Bloom is soft. Let the card echo the theme. */
+/* Grid is square by nature */
 .card[data-id="grid"] .preview { border-radius: 0; }
-.card[data-id="bloom"] .preview { border-radius: 12px; }
 
-
-
-/* ---- Orchid card: the nap, and the two lights in the room ---------------- */
-.preview.tex-nap::after {
-  content: ""; position: absolute; inset: 0; pointer-events: none;
-  background-image:
-    radial-gradient(170px 110px at 6% -14%, rgba(227,168,143,.20), transparent 64%),
-    radial-gradient(150px 100px at 96% 8%, rgba(216,155,255,.15), transparent 62%),
-    repeating-linear-gradient(90deg, rgba(255,255,255,.038) 0 1px, rgba(0,0,0,0) 1px 3px);
-}
 /* the Off card shows LeetCode untouched, so it gets no material at all */
 .preview.tex-none::after { content: none; }
 

@@ -58,15 +58,6 @@
       string:'#a5d6ff',   number:'#ffa657',  func:'#35e0a1',    type:'#d2a8ff',
       param:'#9db0c6',    operator:'#79c0ff', regexp:'#a5d6ff', invalid:'#ff7b72'
     },
-    /* Risograph: fluorescent pink is 2.4:1 on this stock, so type never uses
-       it -- the printable pink carries the hue instead, exactly as a real riso
-       does. Every value clears 4.5:1 on the brightest 10% of the baked stock. */
-    bloom: {
-      a: 1,
-      variable:'#f4ecf7', comment:'#9b86a9', keyword:'#ff9ec9', control:'#ff9ec9',
-      string:'#f0c27b',   number:'#d89bff',  func:'#7fe3c0',    type:'#a8b8ff',
-      param:'#d2c2db',    operator:'#e3a88f', regexp:'#f0c27b', invalid:'#ff9ab0'
-    },
     /* Web Crawler — crimson and electric blue split the two control-flow
        roles (keyword vs control) so the theme's own duality reads inside the
        code, not just around it. Every value clears 4.5:1 on --lc-bg2 (#17171c),

@@ -154,7 +154,18 @@ html[data-lc-focus] .lc-anime-live-video {
       const liveTheme = (cfg.liveWallpaper && cfg.liveWallpaper.themeId) || (cfg.scene && cfg.scene !== 'neon-rain' ? cfg.scene : null) || 'golden-hour';
       return SCENES[liveTheme] ? liveTheme : DEF;
     }
-    if (cfg && cfg.staticWallpaper && cfg.scene === cfg.staticWallpaper.id) {
+    if (cfg && cfg.staticWallpaper && (cfg.scene === cfg.staticWallpaper.id || !cfg.arcs)) {
+      return cfg.scene || cfg.staticWallpaper.id;
+    }
+    // If a specific scene preset was picked, prioritize it
+    if (cfg && cfg.scene && SCENES[cfg.scene] && !cfg.arcs) {
+      return cfg.scene;
+    }
+    if (cfg && cfg.arcScenes && difficulty && cfg.arcScenes[difficulty]) {
+      const dId = cfg.arcScenes[difficulty];
+      if (SCENES[dId] || (cfg.staticWallpaper && dId === cfg.staticWallpaper.id)) return dId;
+    }
+    if (cfg && cfg.scene && SCENES[cfg.scene]) {
       return cfg.scene;
     }
     if (!arcsOn(cfg)) return SCENES[cfg.scene] ? cfg.scene : DEF;
@@ -177,13 +188,26 @@ html[data-lc-focus] .lc-anime-live-video {
     return Object.keys(a).length ? a : null;
   }
 
-  function showPreset(cfg, alpha) {
+  async function showPreset(cfg, alpha) {
     const P = globalThis.LCTSProblem;
     const id = sceneFor(cfg, P ? P.get().difficulty : null);
     shownId = id;
     lastAlpha = alpha;
     releaseObjectUrls();
-    publish(solvedFor(cfg, id), presetUrls(id), alpha);
+    let urls = presetUrls(id);
+    // If wallpaper URL is an external HTTPS URL (e.g. Supabase), fetch as a blob URL to bypass CSP restrictions
+    if (urls && urls.wall && /^https?:\/\//i.test(urls.wall)) {
+      try {
+        const resp = await fetch(urls.wall);
+        if (resp.ok) {
+          const blob = await resp.blob();
+          const bUrl = URL.createObjectURL(blob);
+          objectUrls.push(bUrl);
+          urls = { wall: bUrl, blur: bUrl };
+        }
+      } catch (e) {}
+    }
+    publish(solvedFor(cfg, id), urls, alpha);
   }
 
   let liveVideoEl = null;
@@ -271,30 +295,50 @@ html[data-lc-focus] .lc-anime-live-video {
       if (document.body) document.body.classList.remove('live-ready');
 
       liveVideoEl.dataset.currentUrl = url;
-      liveVideoEl.innerHTML = `
-        <source src="${url}" type="video/mp4">
-        <source src="${url}" type="video/quicktime">
-        <source src="${url}" type="video/webm">
-      `;
-      liveVideoEl.src = url;
-      liveVideoEl.load();
 
-      if (!document.hidden) {
-        const playPromise = liveVideoEl.play();
-        if (playPromise !== undefined) {
-          playPromise.catch(() => {
-            // Autoplay policy delayed playback - resume upon user's first click or keypress
-            const resume = () => {
-              if (liveVideoEl && liveVideoEl.paused && !document.hidden) {
-                liveVideoEl.play().catch(() => { });
-              }
-              window.removeEventListener('click', resume);
-              window.removeEventListener('keydown', resume);
-            };
-            window.addEventListener('click', resume, { once: true });
-            window.addEventListener('keydown', resume, { once: true });
-          });
+      const setAndPlay = (videoSource) => {
+        if (!liveVideoEl) return;
+        liveVideoEl.innerHTML = `
+          <source src="${videoSource}" type="video/mp4">
+          <source src="${videoSource}" type="video/quicktime">
+          <source src="${videoSource}" type="video/webm">
+        `;
+        liveVideoEl.src = videoSource;
+        liveVideoEl.load();
+
+        if (!document.hidden) {
+          const playPromise = liveVideoEl.play();
+          if (playPromise !== undefined) {
+            playPromise.catch(() => {
+              // Autoplay policy delayed playback - resume upon user's first click or keypress
+              const resume = () => {
+                if (liveVideoEl && liveVideoEl.paused && !document.hidden) {
+                  liveVideoEl.play().catch(() => { });
+                }
+                window.removeEventListener('click', resume);
+                window.removeEventListener('keydown', resume);
+              };
+              window.addEventListener('click', resume, { once: true });
+              window.addEventListener('keydown', resume, { once: true });
+            });
+          }
         }
+      };
+
+      setAndPlay(url);
+
+      // If URL is remote HTTPS, fetch as blob so host page CSP never blocks media streaming
+      if (/^https?:\/\//i.test(url)) {
+        fetch(url)
+          .then((r) => r.blob())
+          .then((b) => {
+            if (liveVideoEl && liveVideoEl.dataset.currentUrl === url) {
+              const bUrl = URL.createObjectURL(b);
+              objectUrls.push(bUrl);
+              setAndPlay(bUrl);
+            }
+          })
+          .catch(() => {});
       }
     }
     root.classList.add('has-live-wallpaper');

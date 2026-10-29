@@ -2,7 +2,7 @@
    LeetGlow — core.css
    Scope: the problem-solving page only (leetcode.com/problems/*).
 
-   Shared machinery. Each theme file (paper / sakura / grid / orchid .css)
+   Shared machinery. Each theme file (paper / sakura / grid .css)
    declares ROLE tokens (--lc-*) on html[data-lc-theme="id"]; everything here
    reads those roles, so a theme never needs to know LeetCode's class names.
 
@@ -549,7 +549,7 @@ html[data-lc-theme] pre code {
 
 /* -- the Note tab ------------------------------------------------------------
    Note is EasyMDE (CodeMirror 5), which draws every line as its own
-   <pre class="CodeMirror-line">. The pre rules above (and grid/orchid/paper's)
+   <pre class="CodeMirror-line">. The pre rules above (and grid/paper's)
    boxed each line separately, so an empty note was one black bar. Lines sit
    bare on the panel; this out-specifies every theme's pre rule. */
 html[data-lc-theme] .CodeMirror pre:is(.CodeMirror-line, .CodeMirror-line-like) {

@@ -486,6 +486,12 @@
     settings.scene = wallpaper.id;
     settings.staticWallpaper = wallpaper;
     delete settings.liveWallpaper;
+    settings.arcs = false;
+    settings.arcScenes = Object.assign({}, settings.arcScenes || {}, {
+      easy: wallpaper.id,
+      medium: wallpaper.id,
+      hard: wallpaper.id
+    });
 
     if (frame && frame.contentWindow && frame.contentWindow.LCTSPreview) {
       frame.contentWindow.LCTSPreview.setLiveVideo(null);
@@ -531,11 +537,17 @@
         videoUrl: directVideoUrl,
         originalUrl: directVideoUrl
       });
+      delete settings.staticWallpaper;
+      settings.arcs = false;
       
       // Update theme accent to match if scene exists
-      if (wallpaper.themeId && SCENES[wallpaper.themeId]) {
-        settings.scene = wallpaper.themeId;
-      }
+      const liveThemeId = (wallpaper.themeId && SCENES[wallpaper.themeId]) ? wallpaper.themeId : 'golden-hour';
+      settings.scene = liveThemeId;
+      settings.arcScenes = Object.assign({}, settings.arcScenes || {}, {
+        easy: liveThemeId,
+        medium: liveThemeId,
+        hard: liveThemeId
+      });
 
       await solveAndSave();
       activate();
@@ -574,7 +586,12 @@
       if (id === 'custom') settings.scene = 'custom';
       else {
         settings.scene = id;                        // remembered for "one scene" mode
-        if (settings.arcs) { settings.arcScenes = Object.assign({}, settings.arcScenes, { [slot]: id }); justSet = id; }
+        settings.arcScenes = Object.assign({}, settings.arcScenes || {}, {
+          easy: id,
+          medium: id,
+          hard: id
+        });
+        justSet = id;
       }
       await refresh();
       await solveAndSave();

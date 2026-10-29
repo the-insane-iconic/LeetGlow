@@ -55,9 +55,7 @@
   }
 
   /* ---- primary: the network ---- */
-  document.addEventListener('lcts:net-verdict', (e) => {
-    let d;
-    try { d = JSON.parse(e.detail); } catch (err) { return; }
+  function handleVerdictData(d) {
     if (!d || typeof d !== 'object') return;
     netWorks = true;
     cancelFallback();
@@ -70,6 +68,19 @@
       passed: typeof d.passed === 'number' ? d.passed : null,
       total: typeof d.total === 'number' ? d.total : null
     });
+  }
+
+  document.addEventListener('lcts:net-verdict', (e) => {
+    let d;
+    try { d = typeof e.detail === 'string' ? JSON.parse(e.detail) : e.detail; } catch (err) { return; }
+    handleVerdictData(d);
+  });
+
+  window.addEventListener('message', (e) => {
+    if (e.source !== window || !e.data || e.data.source !== 'lcts:net-verdict') return;
+    let d;
+    try { d = typeof e.data.payload === 'string' ? JSON.parse(e.data.payload) : e.data.payload; } catch (err) { return; }
+    handleVerdictData(d);
   });
 
   /* ---- fallback: the DOM ---- */
@@ -86,7 +97,12 @@
     RUN_LOC,
     '[data-e2e-locator*="result"]',
     '[class*="result-state"]',
-    '[class*="verdict"]'
+    '[class*="verdict"]',
+    '[class*="text-green"]',
+    '[class*="text-red"]',
+    '[class*="text-sd-green"]',
+    '[class*="text-sd-red"]',
+    'h2', 'span', 'div'
   ].join(',');
 
   function scan(action) {
@@ -165,8 +181,18 @@
   document.addEventListener('click', (e) => {
     const t = e.target;
     if (!t || !t.closest) return;
-    if (t.closest('[data-e2e-locator="console-submit-button"]')) arm('submit');
-    else if (t.closest('[data-e2e-locator="console-run-button"]')) arm('run');
+    if (t.closest('[data-e2e-locator="console-submit-button"], [data-e2e-locator="submit-button"], button[data-cypress="SubmitCode"], [data-track-load="description_submit_btn"]')) {
+      arm('submit');
+    } else if (t.closest('[data-e2e-locator="console-run-button"], [data-e2e-locator="run-code-btn"], button[data-cypress="RunCode"], [data-track-load="description_run_btn"]')) {
+      arm('run');
+    } else {
+      const btn = t.closest('button');
+      if (btn) {
+        const text = (btn.textContent || '').trim().toLowerCase();
+        if (text === 'submit' || text.startsWith('submit')) arm('submit');
+        else if (text === 'run' || text.startsWith('run')) arm('run');
+      }
+    }
   }, true);
 
   /* LeetCode's own shortcuts: Ctrl/Cmd+Enter submits, Ctrl/Cmd+' runs */

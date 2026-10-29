@@ -100,36 +100,6 @@
         'editor.findMatchHighlightBackground':'#35e0a12e'
       }
     },
-    /* Orchid (id "bloom") — rose gold and lavender on silk velvet. Kept in
-       sync with INK.bloom in monaco-ink.js; this used to be a light "paper
-       white" palette left over from the riso build, which painted light inks
-       onto the dark velvet wherever window.monaco was actually reachable. */
-    bloom: {
-      base: 'vs-dark', fg: 'f4ecf7',
-      syn: { comment:'9b86a9i', keyword:'ff9ec9', control:'ff9ec9', string:'f0c27b',
-             number:'d89bff', func:'7fe3c0', type:'a8b8ff', variable:'f4ecf7',
-             param:'d2c2db', constant:'d89bff', operator:'e3a88f', regexp:'f0c27b',
-             tag:'ff9ec9', attr:'7fe3c0', escape:'f0c27b' },
-      colors: {
-        'editor.background':'#00000000','editor.foreground':'#f4ecf7',
-        'editorGutter.background':'#00000000',
-        'editorLineNumber.foreground':'#a68fa8','editorLineNumber.activeForeground':'#e9c2ff',
-        'editor.lineHighlightBackground':'#d89bff0e','editor.lineHighlightBorder':'#00000000',
-        'editorCursor.foreground':'#d89bff',
-        'editor.selectionBackground':'#d89bff42','editor.selectionHighlightBackground':'#d89bff22',
-        'editor.inactiveSelectionBackground':'#d89bff19','editorWhitespace.foreground':'#5b4272',
-        'editorIndentGuide.background':'#d89bff29','editorIndentGuide.activeBackground':'#d89bff55',
-        'editorBracketMatch.background':'#d89bff1a','editorBracketMatch.border':'#d89bffb3',
-        'editorError.foreground':'#ff9ab0','editorWarning.foreground':'#f0c27b',
-        'scrollbarSlider.background':'#d89bff42','scrollbarSlider.hoverBackground':'#d89bff70',
-        'editorWidget.background':'#221730','editorWidget.border':'#5b4272',
-        'editorSuggestWidget.background':'#221730','editorSuggestWidget.border':'#5b4272',
-        'editorSuggestWidget.selectedBackground':'#33243f',
-        'editorHoverWidget.background':'#221730','editorHoverWidget.border':'#5b4272',
-        'input.background':'#1a1124','input.border':'#5b4272',
-        'editor.findMatchBackground':'#e3a88f5c','editor.findMatchHighlightBackground':'#e3a88f2e'
-      }
-    },
     /* Pixel Art — kept in sync with INK.pixel in monaco-ink.js. */
     pixel: {
       base: 'vs-dark', fg: 'f4f4f4',

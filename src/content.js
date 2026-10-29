@@ -12,8 +12,8 @@
 (() => {
   const KEY = 'lcThemeStudio';
   const DEFAULT = 'anime';
-  const DARK_THEMES = new Set(['sakura', 'grid', 'bloom', 'crawler', 'pixel']);   // paper is the only light one
-  const VALID = new Set(['paper', 'sakura', 'grid', 'bloom', 'anime', 'crawler', 'game', 'pixel', 'off']);
+  const DARK_THEMES = new Set(['sakura', 'grid', 'crawler', 'pixel']);   // paper is the only light one
+  const VALID = new Set(['paper', 'sakura', 'grid', 'anime', 'crawler', 'game', 'pixel', 'off']);
   /* the anime theme is light or dark depending on the scene it was solved
      from; anime.js publishes that and asks for a re-assert when it changes.
      The game theme is the same idea with two known states instead of an
@@ -122,6 +122,7 @@
       queueMicrotask(() => { applying = false; });
     }
     try { sessionStorage.setItem('__lcts_active_theme', theme); } catch (e) {}
+    setTimeout(() => { try { window.dispatchEvent(new Event('resize')); } catch (e) {} }, 60);
   }
 
   globalThis.__lctsReassertMode = () => { if (current && current !== 'off') setBaseMode(current); };

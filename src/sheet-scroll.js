@@ -33,12 +33,12 @@
   const MAX_NODES = 80, MAX_DEPTH = 5, MIN_OVERFLOW = 48;
 
   /* themes whose panels are a printed sheet that should travel with the words */
-  const SHEET_THEMES = { paper: 1, bloom: 1 };
+  const SHEET_THEMES = { paper: 1 };
   /* the game theme doesn't have a sheet texture, but it needs the SAME walk's
      other job -- labelling each panel code/desc/console -- so its glass can
      give each pane a different opacity (see themes/game.css) without a
      :has() selector on a panel */
-  const PANE_THEMES = { paper: 1, bloom: 1, game: 1 };
+  const PANE_THEMES = { paper: 1, game: 1 };
   const isPaper = () =>
     !!SHEET_THEMES[document.documentElement.getAttribute('data-lc-theme') || ''];
   const needsPaneTag = () =>

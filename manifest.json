@@ -23,7 +23,7 @@
    },
    "content_scripts": [ {
       "all_frames": false,
-      "css": [ "themes/core.css", "themes/paper.css", "themes/sakura.css", "themes/grid.css", "themes/orchid.css", "themes/anime.css", "themes/crawler.css", "themes/game.css", "themes/pixel.css" ],
+      "css": [ "themes/core.css", "themes/paper.css", "themes/sakura.css", "themes/grid.css", "themes/anime.css", "themes/crawler.css", "themes/game.css", "themes/pixel.css" ],
       "js": [ "src/content.js", "src/problem.js", "src/anime/scenes.js", "src/anime/css.js", "src/anime/anime.js", "src/monaco-ink.js", "src/sheet-scroll.js", "src/verdict.js", "src/share.js", "src/anime/moments-ui.js", "src/anime/sounds.js", "src/anime/moments.js", "src/game/petals.js", "src/game/sounds.js", "src/game/title-card.js", "src/game/game.js", "src/game/icons.js", "src/game/ambient.js", "src/game/result.js", "src/pixel/sprites.js", "src/pixel/pixel.js" ],
       "matches": [ "https://leetcode.com/problems/*", "https://leetcode.cn/problems/*" ],
       "run_at": "document_start"
