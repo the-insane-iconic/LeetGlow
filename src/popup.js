@@ -49,6 +49,14 @@ const THEMES = {
     },
     tex: 'grid'
   },
+  bloom: {
+    name: 'Orchid', desc: 'silk velvet, rose-gold trim', accent: '#e3a88f',
+    pv: {
+      bg: '#221730', text: '#f4ecf7', line: '#5b4272', kw: '#ff9ec9',
+      fn: '#7fe3c0', num: '#d89bff', var: '#f4ecf7', com: '#9b86a9', pn: '#e3a88f'
+    },
+    tex: 'nap'
+  },
   crawler: {
     name: 'Web Crawler', desc: 'charcoal web, crimson thread', accent: '#e0223f',
     pv: {
@@ -104,6 +112,7 @@ const THEMES = {
     tex: 'none'
   }
 };
+const ORDER = ['anime', 'grid', 'game', 'crawler', 'pixel', 'paper', 'sakura', 'bloom', 'off'];
 const ORDER = ['anime', 'grid', 'game', 'pixel', 'crawler', 'paper', 'sakura', 'off'];
 /* the Open Anime Studio button lives directly under the Anime card, so it
    reads as belonging to that theme; render() re-seats it after each redraw */
@@ -383,7 +392,6 @@ async function selectWallpaper(item, isLocked) {
     });
   }
 
-  cfg.arcs = false;
   animeCfgCache = cfg;
 
   await chrome.storage.local.set({
@@ -463,9 +471,11 @@ function render(selected) {
         const meta = card.querySelector('.meta');
         if (meta) {
           meta.innerHTML = `
-            <div class="anime-meta-title-row" aria-label="Toggle wallpapers">
-              <span class="click-here-text">click here</span>
-              <svg class="anime-down-arrow" viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4.5L6 8l3.5-3.5"/></svg>
+            <div class="anime-meta-title-row">
+              <span class="name">${t.name}</span>
+              <span class="drawer-toggle-badge" aria-label="Toggle wallpapers">
+                <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l4 4 4-4"/></svg>
+              </span>
             </div>
             <span class="check">${CHECK}</span>
           `;
@@ -1444,7 +1454,7 @@ chrome.storage.local.get('leetglowPremium', (data) => {
   }
   // Seamlessly check remote entitlement in the background
   if (globalThis.LeetGlowPremium && typeof LeetGlowPremium.checkServerEntitlement === 'function') {
-    LeetGlowPremium.checkServerEntitlement().catch(() => {});
+    LeetGlowPremium.checkServerEntitlement().catch(() => { });
   }
 });
 
