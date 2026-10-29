@@ -86,6 +86,14 @@
       variable:'#eef2ea', comment:'#748a76', keyword:'#d4af6a', control:'#d4af6a',
       string:'#9fd88f',   number:'#7fc9c0',  func:'#8fb8e0',    type:'#c9a6ff',
       param:'#cbb08a',    operator:'#d7c9a0', regexp:'#9fd88f', invalid:'#e0715a'
+    },
+    /* Time Stone — Quantum titanium with Time Stone emerald keywords,
+       Soul Stone amber numbers, cosmic cyan functions, and clean starlight silver text. */
+    timestone: {
+      a: 1,
+      variable:'#e2e8f0', comment:'#64748b', keyword:'#10b981', control:'#34d399',
+      string:'#6ee7b7',   number:'#f59e0b',  func:'#38bdf8',    type:'#a78bfa',
+      param:'#94a3b8',    operator:'#2dd4bf', regexp:'#6ee7b7', invalid:'#f43f5e'
     }
   };
 

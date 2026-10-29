@@ -1,0 +1,148 @@
+/* =============================================================================
+   LeetGlow — Time Stone Theme (themes/timestone.css)
+   Inspired by Doctor Strange & the Infinity Stones.
+
+   AESTHETIC
+   - While coding: Pure Quantum charcoal (#0c0f14), starlight silver font,
+     razor-thin titanium panel borders, zero clutter.
+   - Run & Submit: Brushed gunmetal pills with faint emerald Time Stone hairline rings.
+   - The Blip & Time Rewind Moment: Powered by src/timestone/timestone.js.
+   ============================================================================= */
+
+html[data-lc-theme="timestone"] {
+  color-scheme: dark;
+
+  /* Quantum Charcoal Background Layers */
+  --lc-desk: #090c10;
+  --lc-bg0: #090c10;
+  --lc-bg1: #0f131a;
+  --lc-bg2: #141923;
+  --lc-bg3: #1c2331;
+  --lc-inset: #0c0f14;
+  --lc-raised: #1f2737;
+  --lc-editor-bg: transparent;
+
+  /* Titanium Panel Borders & Hairlines */
+  --lc-border: #1f2737;
+  --lc-border-strong: #2e3a50;
+  --lc-hairline: rgba(226, 232, 240, 0.08);
+  --lc-groove: #06080b;
+  --lc-rule: #10b981;
+
+  /* Transparent Fills */
+  --lc-fill-1: rgba(226, 232, 240, 0.12);
+  --lc-fill-2: rgba(226, 232, 240, 0.08);
+  --lc-fill-3: rgba(226, 232, 240, 0.05);
+  --lc-fill-4: rgba(226, 232, 240, 0.03);
+
+  /* Starlight Silver Typography & Emerald Time Stone Accents */
+  --lc-text: #e2e8f0;
+  --lc-text2: #cbd5e1;
+  --lc-text3: #94a3b8;
+  --lc-accent: #10b981;
+  --lc-accent-2: #34d399;
+  --lc-accent-contrast: #042f1a;
+  --lc-green: #10b981;
+  --lc-yellow: #f59e0b;
+  --lc-red: #f43f5e;
+  --lc-selection: rgba(16, 185, 129, 0.26);
+  --lc-scroll: #334155;
+
+  /* Geometry & Typography */
+  --lc-radius: 10px;
+  --lc-radius-sm: 6px;
+  --lc-font-ui: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --lc-font-prose: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --lc-prose-size: 15px;
+  --lc-prose-leading: 1.72;
+  --lc-prose-measure: 72ch;
+
+  /* Top Bar & Submit Button */
+  --lc-nav-bg: #0c0f14;
+  --lc-nav-rule: #1f2737;
+  --lc-nav-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
+
+  --lc-submit-bg: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  --lc-submit-bg-hover: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+  --lc-submit-text: #ffffff;
+  --lc-submit-edge: 0 2px 12px rgba(16, 185, 129, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+
+  --lc-panel-shadow: inset 0 0 0 1px var(--lc-hairline), 0 12px 32px -16px rgba(0, 0, 0, 0.65);
+  --lc-inset-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+/* Background Subtle Gradient */
+html[data-lc-theme="timestone"] body {
+  background-color: #090c10 !important;
+  background-image:
+    radial-gradient(ellipse 60% 40% at 50% 0%, rgba(16, 185, 129, 0.045), transparent 70%),
+    linear-gradient(180deg, #090c10 0%, #0c0f14 100%) !important;
+  background-attachment: fixed !important;
+}
+
+/* Active Tab: Emerald Time Stone Underline */
+html[data-lc-theme="timestone"] .flexlayout__tab_button--selected {
+  color: #ffffff !important;
+  border-bottom: 2px solid var(--lc-accent) !important;
+}
+
+/* Run Button: Gunmetal pill with faint emerald hairline */
+html[data-lc-theme="timestone"] [data-e2e-locator="console-run-button"],
+html[data-lc-theme="timestone"] [data-e2e-locator="run-code-btn"],
+html[data-lc-theme="timestone"] button[data-cypress="RunCode"] {
+  background: #141923 !important;
+  color: #e2e8f0 !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+  border-radius: 9999px !important;
+  padding: 4px 14px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+html[data-lc-theme="timestone"] [data-e2e-locator="console-run-button"]:hover,
+html[data-lc-theme="timestone"] [data-e2e-locator="run-code-btn"]:hover,
+html[data-lc-theme="timestone"] button[data-cypress="RunCode"]:hover {
+  background: #1c2331 !important;
+  border-color: #10b981 !important;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.3) !important;
+  color: #ffffff !important;
+  transform: translateY(-1px);
+}
+
+/* Submit Button: Pill with glowing Time Stone emerald edge */
+html[data-lc-theme="timestone"] [data-e2e-locator="console-submit-button"],
+html[data-lc-theme="timestone"] [data-e2e-locator="submit-button"],
+html[data-lc-theme="timestone"] button[data-cypress="SubmitCode"] {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 9999px !important;
+  padding: 4px 16px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+html[data-lc-theme="timestone"] [data-e2e-locator="console-submit-button"]:hover,
+html[data-lc-theme="timestone"] [data-e2e-locator="submit-button"]:hover,
+html[data-lc-theme="timestone"] button[data-cypress="SubmitCode"]:hover {
+  background: linear-gradient(135deg, #34d399 0%, #10b981 100%) !important;
+  box-shadow: 0 0 18px rgba(16, 185, 129, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+  transform: translateY(-1px);
+}
+
+/* Code Editor Elements */
+html[data-lc-theme="timestone"] :not(pre) > code {
+  background: rgba(16, 185, 129, 0.1) !important;
+  border: 1px solid rgba(16, 185, 129, 0.25) !important;
+  color: #34d399 !important;
+  border-radius: 4px !important;
+}
+
+/* Elements dissolved during the Blip moment */
+html[data-lc-theme="timestone"] .lcts-blip-hidden {
+  visibility: hidden !important;
+}

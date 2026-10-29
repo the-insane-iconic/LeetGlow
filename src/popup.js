@@ -103,6 +103,15 @@ const THEMES = {
     },
     tex: 'pixel'
   },
+  /* Time Stone: Quantum titanium, emerald Time Stone runes, The Blip rewind */
+  timestone: {
+    name: 'Time Stone', desc: 'The Blip, snap & time rewind', accent: '#10b981',
+    pv: {
+      bg: '#0c0f14', text: '#e2e8f0', line: '#475569', kw: '#10b981',
+      fn: '#38bdf8', num: '#f59e0b', var: '#e2e8f0', com: '#64748b', pn: '#94a3b8'
+    },
+    tex: 'none'
+  },
   off: {
     name: 'Off', desc: 'hand the page back to LeetCode', accent: '#8a8f98',
     pv: {
@@ -112,8 +121,7 @@ const THEMES = {
     tex: 'none'
   }
 };
-const ORDER = ['anime', 'grid', 'game', 'crawler', 'pixel', 'paper', 'sakura', 'bloom', 'off'];
-const ORDER = ['anime', 'grid', 'game', 'pixel', 'crawler', 'paper', 'sakura', 'off'];
+const ORDER = ['anime', 'grid', 'game', 'pixel', 'timestone', 'crawler', 'paper', 'sakura', 'off'];
 /* the Open Anime Studio button lives directly under the Anime card, so it
    reads as belonging to that theme; render() re-seats it after each redraw */
 const studioButton = document.getElementById('studio');
@@ -491,8 +499,29 @@ function render(selected) {
       card.querySelector('.preview').style.setProperty('--pv-scene', `url("${url}")`);
     }
     if (id === 'pixel') paintPixelCard(card.querySelector('.preview'));
+    if (id === 'timestone') paintTimeStoneCard(card.querySelector('.preview'));
   });
   setAccent(selected);
+}
+
+/* Time Stone's card: glowing emerald Doctor Strange time mandala glyph */
+function paintTimeStoneCard(preview) {
+  const cv = document.createElement('canvas');
+  cv.width = 44; cv.height = 44;
+  const c = cv.getContext('2d');
+  const cx = 22, cy = 22;
+  c.strokeStyle = '#10b981';
+  c.lineWidth = 1.5;
+  c.beginPath(); c.arc(cx, cy, 18, 0, Math.PI * 2); c.stroke();
+  c.beginPath(); c.arc(cx, cy, 12, 0, Math.PI * 2); c.stroke();
+  c.lineWidth = 1.0;
+  c.strokeRect(cx - 7, cy - 7, 14, 14);
+  c.save(); c.translate(cx, cy); c.rotate(Math.PI / 4); c.strokeRect(-7, -7, 14, 14); c.restore();
+  c.fillStyle = '#34d399';
+  c.beginPath(); c.arc(cx, cy, 3.5, 0, Math.PI * 2); c.fill();
+  preview.style.setProperty('--pv-scene', `url("${cv.toDataURL()}")`);
+  preview.style.backgroundPosition = 'right 14px center';
+  preview.style.backgroundRepeat = 'no-repeat';
 }
 
 /* Pixel Art's card: the gunner from src/pixel/sprites.js, mid-shot */
