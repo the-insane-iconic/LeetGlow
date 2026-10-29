@@ -198,6 +198,76 @@
       </div>
     </div>
 
+    <!-- Pomodoro Timer Settings Card -->
+    <div class="panel-card pomodoro-card">
+      <div class="panel-card-head">
+        <div class="card-icon-title">
+          <div class="card-icon-wrap pomodoro-icon-wrap">
+            <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="13" r="8" />
+              <path d="M12 9v4l2.5 2.5" />
+              <path d="M10 2h4" />
+            </svg>
+          </div>
+          <div>
+            <h3>Pomodoro Timer</h3>
+            <p class="panel-card-sub">Configure focus and break intervals for deep coding sessions.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="pomo-settings-grid">
+        <!-- Focus Duration -->
+        <div class="pomo-setting-row">
+          <div class="pomo-setting-header">
+            <span class="pomo-setting-label">Focus Duration</span>
+            <span id="pomoWorkVal" class="slider-val-badge pomo-val-badge">25 min</span>
+          </div>
+          <div class="slider-group">
+            <input id="pomoWorkSlider" class="range-slider" type="range" min="5" max="60" step="5" value="25"
+              aria-label="Focus interval duration" />
+          </div>
+        </div>
+
+        <!-- Short Break -->
+        <div class="pomo-setting-row">
+          <div class="pomo-setting-header">
+            <span class="pomo-setting-label">Short Break</span>
+            <span id="pomoBreakVal" class="slider-val-badge pomo-val-badge">5 min</span>
+          </div>
+          <div class="slider-group">
+            <input id="pomoBreakSlider" class="range-slider" type="range" min="1" max="15" step="1" value="5"
+              aria-label="Short break duration" />
+          </div>
+        </div>
+
+        <!-- Long Break -->
+        <div class="pomo-setting-row">
+          <div class="pomo-setting-header">
+            <span class="pomo-setting-label">Long Break</span>
+            <span id="pomoLongVal" class="slider-val-badge pomo-val-badge">15 min</span>
+          </div>
+          <div class="slider-group">
+            <input id="pomoLongSlider" class="range-slider" type="range" min="5" max="30" step="5" value="15"
+              aria-label="Long break duration" />
+          </div>
+        </div>
+
+        <!-- Toggles: Sound Chime & Auto Start -->
+        <div class="pomo-toggles-row">
+          <label class="pomo-toggle-item" for="pomoSoundToggle">
+            <input id="pomoSoundToggle" type="checkbox" checked />
+            <span class="pomo-toggle-text">Sound chime on session finish</span>
+          </label>
+          <label class="pomo-toggle-item" for="pomoAutoToggle">
+            <input id="pomoAutoToggle" type="checkbox" />
+            <span class="pomo-toggle-text">Auto-start next session</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
     <!-- Containers Transparency Slider -->
     <div class="panel-card">
       <div class="panel-card-head">

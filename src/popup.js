@@ -1007,7 +1007,7 @@ if (paletteGrid) {
   });
 }
 
-/* Customize sliders: Container Transparency, Editor Transparency, Volume */
+/* Customize sliders: Container Transparency, Editor Transparency, Volume, Pomodoro */
 const containerTransSlider = document.getElementById('containerTransSlider');
 const containerTransVal = document.getElementById('containerTransVal');
 const editorTransSlider = document.getElementById('editorTransSlider');
@@ -1016,10 +1016,19 @@ const volumeSlider = document.getElementById('volumeSlider');
 const volumeVal = document.getElementById('volumeVal');
 const testSoundBtn = document.getElementById('testSoundBtn');
 
+const pomoWorkSlider = document.getElementById('pomoWorkSlider');
+const pomoWorkVal = document.getElementById('pomoWorkVal');
+const pomoBreakSlider = document.getElementById('pomoBreakSlider');
+const pomoBreakVal = document.getElementById('pomoBreakVal');
+const pomoLongSlider = document.getElementById('pomoLongSlider');
+const pomoLongVal = document.getElementById('pomoLongVal');
+const pomoSoundToggle = document.getElementById('pomoSoundToggle');
+const pomoAutoToggle = document.getElementById('pomoAutoToggle');
+
 let animeCfgCache = null;
 let pixelCfgCache = null;
 
-chrome.storage.local.get(['lcContainerTrans', 'lcEditorTrans', 'lcVolume', 'lcAnime', 'lcPixel', 'lcGameVolume'], (res) => {
+chrome.storage.local.get(['lcContainerTrans', 'lcEditorTrans', 'lcVolume', 'lcAnime', 'lcPixel', 'lcGameVolume', 'lctSettings'], (res) => {
   animeCfgCache = res.lcAnime || {};
   pixelCfgCache = res.lcPixel || {};
 
@@ -1050,6 +1059,32 @@ chrome.storage.local.get(['lcContainerTrans', 'lcEditorTrans', 'lcVolume', 'lcAn
     volumeVal.textContent = vVal + '%';
     updateSliderFill(volumeSlider);
   }
+
+  // Pomodoro Settings
+  const pCfg = (res && res.lctSettings && res.lctSettings.pomodoro) || {};
+  const work = typeof pCfg.work === 'number' ? pCfg.work : 25;
+  const brk = typeof pCfg.break === 'number' ? pCfg.break : 5;
+  const longBrk = typeof pCfg.longBreak === 'number' ? pCfg.longBreak : 15;
+  const sound = pCfg.sound !== false;
+  const autoStart = Boolean(pCfg.autoStart);
+
+  if (pomoWorkSlider && pomoWorkVal) {
+    pomoWorkSlider.value = work;
+    pomoWorkVal.textContent = work + ' min';
+    updateSliderFill(pomoWorkSlider);
+  }
+  if (pomoBreakSlider && pomoBreakVal) {
+    pomoBreakSlider.value = brk;
+    pomoBreakVal.textContent = brk + ' min';
+    updateSliderFill(pomoBreakSlider);
+  }
+  if (pomoLongSlider && pomoLongVal) {
+    pomoLongSlider.value = longBrk;
+    pomoLongVal.textContent = longBrk + ' min';
+    updateSliderFill(pomoLongSlider);
+  }
+  if (pomoSoundToggle) pomoSoundToggle.checked = sound;
+  if (pomoAutoToggle) pomoAutoToggle.checked = autoStart;
 });
 
 let debounceAnimeTimer = null;
@@ -1121,6 +1156,65 @@ if (volumeSlider) {
   });
 }
 
+let debouncePomoTimer = null;
+function savePomodoroSettings(patch) {
+  clearTimeout(debouncePomoTimer);
+  debouncePomoTimer = setTimeout(() => {
+    chrome.storage.local.get(['lctSettings'], (res) => {
+      const cfg = res.lctSettings || {};
+      cfg.pomodoro = Object.assign({
+        enabled: false,
+        work: 25,
+        break: 5,
+        longBreak: 15,
+        longEvery: 4,
+        autoStart: false,
+        sound: true
+      }, cfg.pomodoro || {}, patch);
+      chrome.storage.local.set({ lctSettings: cfg });
+    });
+  }, 100);
+}
+
+if (pomoWorkSlider) {
+  pomoWorkSlider.addEventListener('input', () => {
+    const val = Number(pomoWorkSlider.value);
+    if (pomoWorkVal) pomoWorkVal.textContent = val + ' min';
+    updateSliderFill(pomoWorkSlider);
+    savePomodoroSettings({ work: val });
+  });
+}
+
+if (pomoBreakSlider) {
+  pomoBreakSlider.addEventListener('input', () => {
+    const val = Number(pomoBreakSlider.value);
+    if (pomoBreakVal) pomoBreakVal.textContent = val + ' min';
+    updateSliderFill(pomoBreakSlider);
+    savePomodoroSettings({ break: val });
+  });
+}
+
+if (pomoLongSlider) {
+  pomoLongSlider.addEventListener('input', () => {
+    const val = Number(pomoLongSlider.value);
+    if (pomoLongVal) pomoLongVal.textContent = val + ' min';
+    updateSliderFill(pomoLongSlider);
+    savePomodoroSettings({ longBreak: val });
+  });
+}
+
+if (pomoSoundToggle) {
+  pomoSoundToggle.addEventListener('change', () => {
+    savePomodoroSettings({ sound: pomoSoundToggle.checked });
+  });
+}
+
+if (pomoAutoToggle) {
+  pomoAutoToggle.addEventListener('change', () => {
+    savePomodoroSettings({ autoStart: pomoAutoToggle.checked });
+  });
+}
+
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area !== 'local') return;
   if (changes.lcAnime && changes.lcAnime.newValue) {
@@ -1149,6 +1243,32 @@ chrome.storage.onChanged.addListener((changes, area) => {
     volumeSlider.value = v;
     if (volumeVal) volumeVal.textContent = v + '%';
     updateSliderFill(volumeSlider);
+  }
+  if (changes.lctSettings && changes.lctSettings.newValue) {
+    const p = changes.lctSettings.newValue.pomodoro;
+    if (p) {
+      if (typeof p.work === 'number' && pomoWorkSlider && document.activeElement !== pomoWorkSlider) {
+        pomoWorkSlider.value = p.work;
+        if (pomoWorkVal) pomoWorkVal.textContent = p.work + ' min';
+        updateSliderFill(pomoWorkSlider);
+      }
+      if (typeof p.break === 'number' && pomoBreakSlider && document.activeElement !== pomoBreakSlider) {
+        pomoBreakSlider.value = p.break;
+        if (pomoBreakVal) pomoBreakVal.textContent = p.break + ' min';
+        updateSliderFill(pomoBreakSlider);
+      }
+      if (typeof p.longBreak === 'number' && pomoLongSlider && document.activeElement !== pomoLongSlider) {
+        pomoLongSlider.value = p.longBreak;
+        if (pomoLongVal) pomoLongVal.textContent = p.longBreak + ' min';
+        updateSliderFill(pomoLongSlider);
+      }
+      if (typeof p.sound === 'boolean' && pomoSoundToggle) {
+        pomoSoundToggle.checked = p.sound;
+      }
+      if (typeof p.autoStart === 'boolean' && pomoAutoToggle) {
+        pomoAutoToggle.checked = p.autoStart;
+      }
+    }
   }
 });
 
@@ -1207,6 +1327,36 @@ if (resetCustomizeBtn) {
       updateSliderFill(volumeSlider);
     }
     if (volumeVal) volumeVal.textContent = DEFAULT_VOLUME + '%';
+
+    if (pomoWorkSlider) {
+      pomoWorkSlider.value = 25;
+      updateSliderFill(pomoWorkSlider);
+    }
+    if (pomoWorkVal) pomoWorkVal.textContent = '25 min';
+    if (pomoBreakSlider) {
+      pomoBreakSlider.value = 5;
+      updateSliderFill(pomoBreakSlider);
+    }
+    if (pomoBreakVal) pomoBreakVal.textContent = '5 min';
+    if (pomoLongSlider) {
+      pomoLongSlider.value = 15;
+      updateSliderFill(pomoLongSlider);
+    }
+    if (pomoLongVal) pomoLongVal.textContent = '15 min';
+    if (pomoSoundToggle) pomoSoundToggle.checked = true;
+    if (pomoAutoToggle) pomoAutoToggle.checked = false;
+
+    chrome.storage.local.get(['lctSettings'], (lctRes) => {
+      const lctCfg = lctRes.lctSettings || {};
+      lctCfg.pomodoro = Object.assign({}, lctCfg.pomodoro || {}, {
+        work: 25,
+        break: 5,
+        longBreak: 15,
+        sound: true,
+        autoStart: false
+      });
+      chrome.storage.local.set({ lctSettings: lctCfg });
+    });
 
     if (focusSwitch) focusSwitch.checked = false;
     setActivePaletteUI('auto');
