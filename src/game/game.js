@@ -144,7 +144,8 @@
       const s = P && P.ssr(slug);
       const info = s ? { number: s.number, title: s.title, difficulty: s.difficulty || '' } : readTitle(slug);
       if (!info) return;
-      setLevel('easy');
+      const diff = (info.difficulty || '').toLowerCase();
+      setLevel(diff === 'easy' ? 'easy' : 'other');
       /* from the page, give difficulty a moment to settle if not present yet */
       if (!s && !info.difficulty) {
         if (!since) since = performance.now();
@@ -155,7 +156,6 @@
       await whenVisible();
       if (my !== ticket || !on()) return;
 
-      const diff = (info.difficulty || '').toLowerCase();
       let lvl = 1, lvlLabel = 'LEVEL 1', tagline = 'MYSTICAL NIGHT';
       if (diff === 'medium') {
         lvl = 2;

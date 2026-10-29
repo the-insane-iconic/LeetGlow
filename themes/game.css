@@ -229,18 +229,12 @@ html[data-lc-theme="game"][data-lc-game-level="easy"] {
    photo is body's own background-image (core.css's generic structure
    rule), so resetting body's shorthand background would wipe the image out
    along with the colour. */
-html[data-lc-theme="game"] #__next,
 html[data-lc-theme="game"][data-lc-game-level="easy"] #__next {
   background: transparent !important;
 }
-html[data-lc-theme="game"] .flexlayout__layout,
 html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__layout {
   --color-background: transparent;
-  width: 100% !important;
-  height: 100% !important;
-  min-width: 0 !important;
 }
-html[data-lc-theme="game"] body,
 html[data-lc-theme="game"][data-lc-game-level="easy"] body {
   /* multi-layer background-position core.css doesn't expose: centre the
      mountains rather than the default top-left anchor */
@@ -284,7 +278,6 @@ html[data-lc-theme="game"][data-lc-game-level="easy"] body {
    Checked against the actual photo (its brightest stretch of sky/meadow,
    not just the darker mountains), same reasoning core.css's other themes
    use for ink contrast. */
-html[data-lc-theme="game"] .flexlayout__tabset,
 html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__tabset {
   /* hue pulled to match /leet's --glass (8,45,88) exactly; alpha stays at
      the level already tuned through several rounds of transparency
@@ -313,29 +306,44 @@ html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__tabset {
   background-repeat: no-repeat !important;
   background-position: -60% 0, 0 0, 0 0, 20% 24%, 80% 72%, 0 0, center 32% !important;
   background-attachment: scroll, scroll, scroll, scroll, scroll, scroll, fixed !important;
-  overflow: hidden !important;
+  position: relative;
+  overflow: hidden;
 }
-html[data-lc-theme="game"] #editor,
-html[data-lc-theme="game"][data-lc-game-level="easy"] #editor {
-  background-color: transparent !important;
-  width: 100% !important;
-  height: 100% !important;
-}
-html[data-lc-theme="game"] .flexlayout__tabset::before,
+/* a single soft glint, occasionally catching a short stretch of the edge --
+   restrained (low peak opacity, long loop) rather than a permanently lit
+   border. transform-only, so it stays compositor-cheap. */
 html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__tabset::before {
-  display: none !important;
+  content: "";
+  position: absolute; top: 0; left: 0;
+  width: 46px; height: 46px; margin: -10px;
+  background: radial-gradient(circle, rgba(255,255,255,.55), transparent 68%);
+  filter: blur(3px);
+  opacity: 0;
+  pointer-events: none;
+  animation: lctg-edge-glint 30s ease-in-out infinite;
+  z-index: 0;
 }
-html[data-lc-theme="game"] .flexlayout__tab,
+@keyframes lctg-edge-glint {
+  0%             { opacity: 0;   transform: translate(0, 0); }
+  4%, 18%        { opacity: .5; }
+  22%            { opacity: 0; }
+  22.01%         { transform: translate(calc(100% + 20px), 0); }
+  26%, 40%       { opacity: .4; }
+  44%            { opacity: 0; }
+  44.01%         { transform: translate(calc(100% + 20px), calc(100% + 20px)); }
+  48%, 62%       { opacity: .45; }
+  66%            { opacity: 0; }
+  66.01%         { transform: translate(0, calc(100% + 20px)); }
+  70%, 84%       { opacity: .35; }
+  88%, 100%      { opacity: 0; }
+}
 html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__tab {
   background-color: transparent !important;
-  width: 100% !important;
-  height: 100% !important;
+  position: relative; z-index: 1;
 }
-html[data-lc-theme="game"] .flexlayout__tab[data-lcts-pane="code"],
 html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__tab[data-lcts-pane="code"] {
   background-color: rgba(10,17,32,.22) !important;
 }
-html[data-lc-theme="game"] .flexlayout__tab[data-lcts-pane="console"],
 html[data-lc-theme="game"][data-lc-game-level="easy"] .flexlayout__tab[data-lcts-pane="console"] {
   background-color: rgba(10,17,32,.40) !important;
 }
@@ -794,9 +802,7 @@ html[data-lc-theme="game"][data-lc-game-level="easy"] [data-e2e-locator="console
 /* Auto's pill: the same restrained crystal glass Run no longer has --
    gold is only Medium's semantic difficulty colour, not a decorative
    accent anywhere in this theme. */
-html[data-lc-theme="game"][data-lc-game-level="easy"] button[data-lctg-icon="auto"],
-html[data-lc-theme="game"][data-lc-game-level="easy"] [role="button"][data-lctg-icon="auto"],
-html[data-lc-theme="game"][data-lc-game-level="easy"] span[data-lctg-icon="auto"] {
+html[data-lc-theme="game"][data-lc-game-level="easy"] [data-lctg-icon="auto"] {
   padding: 3px 9px !important;
   border-radius: var(--lc-radius-sm) !important;
   background: rgba(10,28,42,.32) !important;
@@ -913,29 +919,25 @@ html[data-lc-theme="game"] [data-lctg-icon] svg { display: none !important; }
 html[data-lc-theme="game"] [data-lctg-icon] [class*="before:h-3.5"] {
   display: none !important;
 }
-html[data-lc-theme="game"] .flexlayout__tab_button_content[data-lctg-icon],
-html[data-lc-theme="game"] button[data-lctg-icon],
-html[data-lc-theme="game"] [role="button"][data-lctg-icon],
-html[data-lc-theme="game"] span[data-lctg-icon] {
+html[data-lc-theme="game"] [data-lctg-icon] {
   display: inline-flex !important; align-items: center; gap: 0 !important;
   position: relative;
-  font-family: var(--lc-font-ui);
-  font-size: 12.5px !important;
-  line-height: 1.2 !important;
+  font-family: "Metamorphous", "Cinzel", "EB Garamond", Georgia, serif;
+  font-size: 19px;
 }
 html[data-lc-theme="game"] [data-lctg-icon]::before {
   content: "";
   display: inline-block; flex: 0 0 auto;
-  width: 16px; height: 16px; margin-right: 5px;
+  width: 29px; height: 29px; margin-right: 8px;
   background-size: contain; background-repeat: no-repeat; background-position: center;
   /* item-card hierarchy: dim at rest, brighter on hover, fully lit + a
      restrained gold glow when its tab is the active one -- same rule for
      all five icons, raster gem art or inline SVG alike */
-  opacity: .75;
+  opacity: .7;
   transition: opacity .16s ease, filter .16s ease;
 }
 html[data-lc-theme="game"] .flexlayout__tab_button:hover [data-lctg-icon]::before {
-  opacity: .95;
+  opacity: .92;
 }
 html[data-lc-theme="game"] .flexlayout__tab_button--selected [data-lctg-icon]::before {
   opacity: 1;
@@ -950,7 +952,7 @@ html[data-lc-theme="game"] .flexlayout__tab_button--selected [data-lctg-icon]::b
 html[data-lc-theme="game"] [data-lctg-icon]::after {
   content: "";
   position: absolute;
-  top: -1px; left: 11px;
+  top: -1px; left: 19px;
   width: 6px; height: 6px;
   pointer-events: none;
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M20 1 L23.5 20 L20 39 L16.5 20 Z' fill='%23cfeaff'/%3E%3Cpath d='M1 20 L20 16.5 L39 20 L20 23.5 Z' fill='%23cfeaff'/%3E%3C/svg%3E") center / contain no-repeat;
@@ -965,26 +967,33 @@ html[data-lc-theme="game"] [data-lctg-icon]::after {
 }
 html[data-lc-theme="game"] [data-lctg-icon="testcase"]::before {
   background-image: url("chrome-extension://__MSG_@@extension_id__/textures/game/icon/console-testcase.png");
-  width: 16px; height: 16px; margin-right: 5px;
 }
 html[data-lc-theme="game"] [data-lctg-icon="solutions"]::before {
   background-image: url("chrome-extension://__MSG_@@extension_id__/textures/game/icon/potion-solutions.png");
-  width: 16px; height: 16px; margin-right: 5px;
 }
 html[data-lc-theme="game"] [data-lctg-icon="solutions"]::after { animation-delay: 1.3s; }
 html[data-lc-theme="game"] [data-lctg-icon="description"]::before {
   background-image: url("chrome-extension://__MSG_@@extension_id__/textures/game/icon/description.png");
-  width: 16px; height: 16px; margin-right: 5px;
+  /* this art is cropped much tighter to its glyph (~85% canvas fill,
+     checked directly against the file) than testcase/solutions (~65-70%
+     fill) -- at the standard 19px box it would read visibly larger than
+     the rest of the row, so the box shrinks to compensate instead. */
+  width: 24px; height: 24px; margin-right: 12px;
 }
-html[data-lc-theme="game"] [data-lctg-icon="description"]::after { left: 11px; animation-delay: 2.6s; }
+html[data-lc-theme="game"] [data-lctg-icon="description"]::after { left: 16px; animation-delay: 2.6s; }
+/* Editorial: real art now (was inline SVG line-art). Same tight-crop
+   compensation as description.png above (~92% canvas fill). */
 html[data-lc-theme="game"] [data-lctg-icon="editorial"]::before {
   background-image: url("chrome-extension://__MSG_@@extension_id__/textures/game/icon/editorial.png");
-  width: 16px; height: 16px; margin-right: 5px;
+  width: 23px; height: 23px; margin-right: 13px;
 }
-html[data-lc-theme="game"] [data-lctg-icon="editorial"]::after { left: 11px; animation-delay: 3.9s; }
+html[data-lc-theme="game"] [data-lctg-icon="editorial"]::after { left: 15px; animation-delay: 3.9s; }
+/* Submissions: crystal hourglass (timework.png), same silhouette as the old
+   inline-SVG line-art it replaces. Glyph fill is looser than description/
+   editorial's tight crop, closer to testcase/solutions, so it uses the
+   standard 19px box with no size compensation. */
 html[data-lc-theme="game"] [data-lctg-icon="submissions"]::before {
   background-image: url("chrome-extension://__MSG_@@extension_id__/textures/game/icon/timework.png");
-  width: 16px; height: 16px; margin-right: 5px;
   filter: drop-shadow(0 0 2px rgba(140,205,255,.4));
 }
 html[data-lc-theme="game"] .flexlayout__tab_button--selected [data-lctg-icon="editorial"]::before,
@@ -992,7 +1001,7 @@ html[data-lc-theme="game"] .flexlayout__tab_button--selected [data-lctg-icon="su
   filter: drop-shadow(0 0 4px rgba(125,211,252,.5));
 }
 html[data-lc-theme="game"] [data-lctg-icon="auto"]::before {
-  width: 12px; height: 12px; margin-right: 4px;
+  width: 13px; height: 13px; margin-right: 4px;
   background-image: url("chrome-extension://__MSG_@@extension_id__/textures/game/icon/lock-auto.png");
 }
 
