@@ -172,10 +172,12 @@ function renderWallpaperSkeletons() {
 }
 
 function toggleWallpaperDrawer(force) {
-  const grid = document.getElementById('grid');
-  if (!grid) return;
+  const container = document.getElementById('majorThemes') || document.getElementById('grid');
+  const curated = document.getElementById('curatedGrid');
+  if (!container) return;
   wallpapersDrawerOpen = typeof force === 'boolean' ? force : !wallpapersDrawerOpen;
-  grid.classList.toggle('wallpapers-expanded', wallpapersDrawerOpen);
+  container.classList.toggle('wallpapers-expanded', wallpapersDrawerOpen);
+  if (curated) curated.classList.toggle('hidden', wallpapersDrawerOpen);
   if (wallpapersDrawerOpen) {
     const box = document.getElementById('wallpaperGrid');
     if (box && !box.children.length) {
@@ -614,25 +616,116 @@ function makeMatrixCard() {
   return card;
 }
 
-function render(selected) {
-  const grid = document.getElementById('grid');
-  if (!grid) return;
-  grid.innerHTML = '';
+function renderOriginalCards(selected, container) {
+  if (!container) return;
+  const preview = previewHTML();
+  ORDER.forEach((id) => {
+    const t = THEMES[id];
+    if (!t) return;
+    const isLocked = !isPremium && !isFreeBeta && id === 'crawler';
+    const card = document.createElement('button');
+    card.className = 'card' + (isLocked ? ' is-locked' : '');
+    card.type = 'button';
+    card.setAttribute('role', 'radio');
+    card.setAttribute('aria-checked', String(id === selected));
+    card.setAttribute('aria-label', isLocked ? `${t.name} theme (PRO — Click to unlock)` : `${t.name} theme`);
+    card.dataset.id = id;
+    if (isLocked) {
+      card.title = `${t.name} (PRO Theme — Click to unlock in Anime Studio)`;
+    }
+    card.style.setProperty('--card-accent', t.accent);
+    card.innerHTML =
+      `<div class="preview tex-${t.tex}" style="${pvVars(t.pv)}">${preview}</div>` +
+      `<div class="meta">` +
+      `<span class="name">${t.name}</span>` +
+      `<span class="desc">${t.desc}</span>` +
+      `<span class="spacer"></span>` +
+      `<span class="check">${CHECK}</span>` +
+      `</div>`;
+    card.addEventListener('click', () => {
+      if (id === 'crawler' && !isPremium && !isFreeBeta) {
+        openStudioCheckout();
+        return;
+      }
+      if (id === 'anime') {
+        choose(id);
+        toggleWallpaperDrawer();
+      } else {
+        toggleWallpaperDrawer(false);
+        choose(id);
+      }
+    });
+    container.appendChild(card);
 
-  // Row 1, Column 1: 2x2 Matrix Card
-  const matrixCard = makeMatrixCard();
-  grid.appendChild(matrixCard);
+    if (id === 'anime') {
+      paintAnimeCard(card.querySelector('.preview'));
+      if (!isFreeBeta) {
+        const ribbon = document.createElement('div');
+        ribbon.className = 'corner-ribbon-wrap';
+        ribbon.setAttribute('aria-hidden', 'true');
+        ribbon.innerHTML = '<span class="corner-ribbon">Premium</span>';
+        card.appendChild(ribbon);
+      }
 
-  // Row 1 Col 2 onwards: Curated 9 themes in exact specified order
-  const themesList = LCT_ORDER.map((id) => {
-    return (globalThis.LCT && globalThis.LCT.themeById ? globalThis.LCT.themeById(id) : null)
-      || (THEMES[id] && THEMES[id].raw);
-  }).filter(Boolean);
+      const meta = card.querySelector('.meta');
+      if (meta) {
+        meta.innerHTML = `
+          <div class="anime-meta-title-row" aria-label="Toggle wallpapers">
+            <span class="click-here-text">click here</span>
+            <svg class="anime-down-arrow" viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4.5L6 8l3.5-3.5"/></svg>
+          </div>
+          <span class="check">${CHECK}</span>
+        `;
+      }
 
-  themesList.forEach((theme) => {
-    const card = makeThemeCard(theme, selected);
-    grid.appendChild(card);
+      if (studioButton) container.appendChild(studioButton);
+      container.appendChild(wallpaperDrawer);
+    }
+    if (id === 'crawler' && !isFreeBeta) {
+      const ribbon = document.createElement('div');
+      ribbon.className = 'corner-ribbon-wrap';
+      ribbon.setAttribute('aria-hidden', 'true');
+      ribbon.innerHTML = '<span class="corner-ribbon">Premium</span>';
+      card.appendChild(ribbon);
+    }
+    if (id === 'game') {
+      const url = chrome.runtime.getURL('textures/game/card.webp');
+      card.querySelector('.preview').style.setProperty('--pv-scene', `url("${url}")`);
+    }
+    if (id === 'pixel') paintPixelCard(card.querySelector('.preview'));
   });
+}
+
+function render(selected) {
+  const curatedBox = document.getElementById('curatedGrid');
+  const majorBox = document.getElementById('majorThemes');
+  const fallbackGrid = document.getElementById('grid');
+
+  if (curatedBox) {
+    curatedBox.innerHTML = '';
+    // Row 1, Column 1: 2x2 Matrix Card
+    const matrixCard = makeMatrixCard();
+    curatedBox.appendChild(matrixCard);
+
+    // Row 1 Col 2 onwards: Curated 9 themes in exact specified order
+    const themesList = LCT_ORDER.map((id) => {
+      return (globalThis.LCT && globalThis.LCT.themeById ? globalThis.LCT.themeById(id) : null)
+        || (THEMES[id] && THEMES[id].raw);
+    }).filter(Boolean);
+
+    themesList.forEach((theme) => {
+      const card = makeThemeCard(theme, selected);
+      curatedBox.appendChild(card);
+    });
+  }
+
+  if (majorBox) {
+    majorBox.innerHTML = '';
+    renderOriginalCards(selected, majorBox);
+  } else if (fallbackGrid && !curatedBox) {
+    fallbackGrid.innerHTML = '';
+    renderOriginalCards(selected, fallbackGrid);
+  }
 
   setAccent(selected);
 }

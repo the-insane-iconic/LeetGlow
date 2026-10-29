@@ -25,49 +25,7 @@
 ============================================================================= */
 
 /* ---- bundled type (OFL, licences ship in /fonts) --------------------------
-   IM Fell English  — Fell types, cut c.1670; the inky, uneven press face.
-   EB Garamond      — book face for the problem prose.
    Courier Prime    — typewriter mono for code and worked examples.        */
-@font-face {
-  font-family: "IM Fell English";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("chrome-extension://__MSG_@@extension_id__/fonts/imfell-400.woff2") format("woff2");
-}
-
-@font-face {
-  font-family: "IM Fell English";
-  font-style: italic;
-  font-weight: 400;
-  font-display: swap;
-  src: url("chrome-extension://__MSG_@@extension_id__/fonts/imfell-400i.woff2") format("woff2");
-}
-
-@font-face {
-  font-family: "EB Garamond";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("chrome-extension://__MSG_@@extension_id__/fonts/garamond-400.woff2") format("woff2");
-}
-
-@font-face {
-  font-family: "EB Garamond";
-  font-style: italic;
-  font-weight: 400;
-  font-display: swap;
-  src: url("chrome-extension://__MSG_@@extension_id__/fonts/garamond-400i.woff2") format("woff2");
-}
-
-@font-face {
-  font-family: "EB Garamond";
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url("chrome-extension://__MSG_@@extension_id__/fonts/garamond-700.woff2") format("woff2");
-}
-
 @font-face {
   font-family: "Courier Prime";
   font-style: normal;

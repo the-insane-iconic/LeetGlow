@@ -88,19 +88,49 @@
   }
 
   function toggleAudio() {
-    if (!state.settings) return;
-    if (!state.settings.audio) state.settings.audio = { enabled: false, preset: 'cafe', volume: 0.4 };
+    if (!state.settings) {
+      state.settings = { enabled: true, audio: { enabled: false, preset: 'cafe', volume: 0.35 } };
+    }
+    if (!state.settings.audio) state.settings.audio = { enabled: false, preset: 'cafe', volume: 0.35 };
     const audio = globalThis.LCT.audio;
+    let nextOn = false;
     if (audio && audio.playing) {
       audio.stop();
       state.settings.audio.enabled = false;
-      globalThis.LCT.setSettings({ audio: { enabled: false } });
       updateAudioWidget();
+      nextOn = false;
     } else {
       state.settings.audio.enabled = true;
-      globalThis.LCT.setSettings({ audio: { enabled: true } });
       startAudio();
+      nextOn = true;
     }
+    chrome.storage.local.get(['lctSettings'], (res) => {
+      const cfg = res.lctSettings || {};
+      cfg.audio = cfg.audio || {};
+      cfg.audio.enabled = nextOn;
+      chrome.storage.local.set({ lctSettings: cfg });
+    });
+    return nextOn;
+  }
+
+  function togglePomodoro() {
+    if (!state.settings) {
+      state.settings = { enabled: true, pomodoro: { enabled: false } };
+    }
+    state.settings.pomodoro = state.settings.pomodoro || {};
+    const nextOn = !state.settings.pomodoro.enabled;
+    state.settings.pomodoro.enabled = nextOn;
+    state.settings.enabled = true;
+    if (globalThis.LCT && globalThis.LCT.pomodoro) {
+      globalThis.LCT.pomodoro.setSettings(state.settings);
+    }
+    chrome.storage.local.get(['lctSettings'], (res) => {
+      const cfg = res.lctSettings || {};
+      cfg.pomodoro = cfg.pomodoro || {};
+      cfg.pomodoro.enabled = nextOn;
+      chrome.storage.local.set({ lctSettings: cfg });
+    });
+    return nextOn;
   }
 
   function nextPresetFromWidget() {
@@ -203,10 +233,18 @@
 
     // 5. Read active theme from LeetGlow storage
     chrome.storage.local.get(['lcThemeStudio', 'lctSettings'], (res) => {
-      const activeTheme = res.lcThemeStudio || 'anime';
+      const activeTheme = res.lcThemeStudio || 'sakura-dream';
       syncActiveTheme(activeTheme);
       if (res.lctSettings && res.lctSettings.audio && res.lctSettings.audio.enabled) {
         startAudio();
+      }
+      if (res.lctSettings && res.lctSettings.pomodoro && res.lctSettings.pomodoro.enabled) {
+        if (globalThis.LCT.pomodoro) {
+          globalThis.LCT.pomodoro.setSettings(Object.assign({}, state.settings, {
+            enabled: true,
+            pomodoro: Object.assign({}, (state.settings && state.settings.pomodoro) || {}, { enabled: true })
+          }));
+        }
       }
     });
 
@@ -226,6 +264,9 @@
           }
           updateAudioWidget();
         }
+        if (state.settings.pomodoro && globalThis.LCT.pomodoro) {
+          globalThis.LCT.pomodoro.setSettings(state.settings);
+        }
       }
     });
 
@@ -233,13 +274,11 @@
     chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       if (!msg) return;
       if (msg.type === 'lct:toggle-audio') {
-        toggleAudio();
-        sendResponse({ ok: true, playing: globalThis.LCT.audio && globalThis.LCT.audio.playing });
+        const on = toggleAudio();
+        sendResponse({ ok: true, playing: on });
       } else if (msg.type === 'lct:toggle-pomodoro') {
-        if (globalThis.LCT.pomodoro) {
-          globalThis.LCT.pomodoro.toggleWidget();
-        }
-        sendResponse({ ok: true });
+        const on = togglePomodoro();
+        sendResponse({ ok: true, enabled: on });
       } else if (msg.type === 'lct:toggle-focus') {
         if (globalThis.LCT.focus) {
           const root = document.documentElement;
@@ -261,6 +300,7 @@
     if (activeTheme && LCT_THEME_IDS.has(activeTheme)) {
       document.documentElement.setAttribute('data-lct-enabled', 'true');
       document.documentElement.setAttribute('data-lct-theme', activeTheme);
+      syncActiveTheme(activeTheme);
     }
   });
 
@@ -272,3 +312,4 @@
 
   globalThis.LCTBootstrap = { syncActiveTheme, toggleAudio };
 })();
+

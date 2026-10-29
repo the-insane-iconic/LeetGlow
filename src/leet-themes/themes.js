@@ -232,3 +232,4 @@
   globalThis.LCT.nextTheme = next;
   globalThis.LCT.registry = registry;
 })();
+

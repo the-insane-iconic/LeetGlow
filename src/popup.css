@@ -989,11 +989,20 @@ body[data-active-tab="tab-myspace"] .ver {
 }
 
 /* ---- grid of theme cards (2*n grid) ------------------------------------ */
+.curated-grid,
 .grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
   align-content: start;
+}
+
+/* Major Themes List (1-column full width cards below the 2*n matrix) */
+.major-themes {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-top: 10px;
 }
 
 /* 2x2 Matrix Card (Row 1, Column 1) */
@@ -1465,11 +1474,18 @@ body[data-active-tab="tab-myspace"] .ver {
 }
 
 /* When expanded: show the drawer and hide all other theme cards */
+.major-themes.wallpapers-expanded .wallpaper-drawer,
 .grid.wallpapers-expanded .wallpaper-drawer {
   display: block;
 }
 
+.major-themes.wallpapers-expanded .card:not([data-id="anime"]),
 .grid.wallpapers-expanded .card:not([data-id="anime"]) {
+  display: none !important;
+}
+
+#view-themes:has(.wallpapers-expanded) .curated-grid,
+.curated-grid.hidden {
   display: none !important;
 }
 
@@ -1521,6 +1537,7 @@ body[data-active-tab="tab-myspace"] .ver {
 .card[data-id="anime"]:hover .anime-down-arrow {
   transform: translateY(1px);
 }
+.major-themes.wallpapers-expanded .card[data-id="anime"] .anime-down-arrow,
 .grid.wallpapers-expanded .card[data-id="anime"] .anime-down-arrow {
   transform: rotate(180deg);
 }
@@ -1559,6 +1576,7 @@ body[data-active-tab="tab-myspace"] .ver {
   stroke-width: 2.5;
 }
 
+.major-themes.wallpapers-expanded .card[data-id="anime"],
 .grid.wallpapers-expanded .card[data-id="anime"] {
   border-color: #ffffff;
   box-shadow: 0 8px 28px -6px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.25);

@@ -211,7 +211,7 @@
 
   const guard = new MutationObserver(() => {
     if (applying) return;
-    if (!current || current === 'off') return;
+    if (!current || current === 'off' || LCT_THEMES.has(current)) return;
 
     const dark = isDark(current);
     const needTheme = root.getAttribute('data-lc-theme') !== current;
@@ -221,7 +221,7 @@
     if (guardRaf) return;
     guardRaf = requestAnimationFrame(() => {
       guardRaf = null;
-      if (applying || !current || current === 'off') return;
+      if (applying || !current || current === 'off' || LCT_THEMES.has(current)) return;
 
       const now = performance.now();
       if (now - lastReassert < 800) {
