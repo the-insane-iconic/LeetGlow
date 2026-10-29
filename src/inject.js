@@ -84,6 +84,48 @@
         'input.background':'#07070a','editor.findMatchBackground':'#e0223f55',
         'editor.findMatchHighlightBackground':'#e0223f2e'
       }
+    },
+    'sakura-dream': {
+      base: 'vs', fg: '2d1527',
+      syn: { comment:'7f6174i', keyword:'c026d3b', control:'9333eab', string:'b91c1c',
+             number:'d97706', func:'0284c7b', type:'7c3aed', variable:'2d1527',
+             param:'4a1d48', constant:'d97706', operator:'db2777', regexp:'c026d3',
+             tag:'0284c7', attr:'7c3aed', escape:'d97706' },
+      colors: {
+        'editor.background':'#fff7fa','editor.foreground':'#2d1527',
+        'editorLineNumber.foreground':'#b088a2','editorLineNumber.activeForeground':'#c026d3',
+        'editor.lineHighlightBackground':'#fbe4ee44','editorCursor.foreground':'#c026d3',
+        'editor.selectionBackground':'#f472b638','editor.selectionHighlightBackground':'#f472b622',
+        'editorBracketMatch.background':'#f472b622','editorBracketMatch.border':'#c026d3'
+      }
+    },
+    'meadow-breeze': {
+      base: 'vs', fg: '14291f',
+      syn: { comment:'587162i', keyword:'047857b', control:'0284c7b', string:'c2410c',
+             number:'d97706', func:'2563ebb', type:'0d9488', variable:'14291f',
+             param:'234233', constant:'d97706', operator:'059669', regexp:'ea580c',
+             tag:'2563eb', attr:'0d9488', escape:'d97706' },
+      colors: {
+        'editor.background':'#f7fcf4','editor.foreground':'#14291f',
+        'editorLineNumber.foreground':'#789e87','editorLineNumber.activeForeground':'#047857',
+        'editor.lineHighlightBackground':'#e1f0dc44','editorCursor.foreground':'#047857',
+        'editor.selectionBackground':'#34d39938','editor.selectionHighlightBackground':'#34d39922',
+        'editorBracketMatch.background':'#34d39922','editorBracketMatch.border':'#047857'
+      }
+    },
+    'paper': {
+      base: 'vs', fg: '1c1917',
+      syn: { comment:'6d685di', keyword:'c2410cb', control:'b91c1cb', string:'15803d',
+             number:'d97706', func:'0369a1b', type:'7c3aed', variable:'1c1917',
+             param:'38302b', constant:'d97706', operator:'ea580c', regexp:'b91c1c',
+             tag:'0369a1', attr:'7c3aed', escape:'d97706' },
+      colors: {
+        'editor.background':'#fbf8f1','editor.foreground':'#1c1917',
+        'editorLineNumber.foreground':'#968a7c','editorLineNumber.activeForeground':'#c2410c',
+        'editor.lineHighlightBackground':'#eee4d044','editorCursor.foreground':'#c2410c',
+        'editor.selectionBackground':'#fb923c38','editor.selectionHighlightBackground':'#fb923c22',
+        'editorBracketMatch.background':'#fb923c22','editorBracketMatch.border':'#c2410c'
+      }
     }
   };
 
@@ -128,7 +170,8 @@
   const definedFor = new Set();
   /* null when the theme is off: content.js removes the attribute */
   const currentId = () => {
-    const id = document.documentElement.getAttribute('data-lc-theme');
+    const id = document.documentElement.getAttribute('data-lct-theme')
+      || document.documentElement.getAttribute('data-lc-theme');
     return PALETTES[id] ? id : null;
   };
 
@@ -201,7 +244,7 @@
   }, 150);
 
   new MutationObserver(() => applyCurrent())
-    .observe(document.documentElement, { attributes: true, attributeFilter: ['data-lc-theme'] });
+    .observe(document.documentElement, { attributes: true, attributeFilter: ['data-lc-theme', 'data-lct-theme'] });
 
   /* This used to be a MutationObserver on document.body with subtree:true that
      ran n.querySelector('.monaco-editor') for EVERY added node. Monaco

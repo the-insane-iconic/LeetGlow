@@ -66,6 +66,24 @@
       variable:'#eef2ea', comment:'#748a76', keyword:'#d4af6a', control:'#d4af6a',
       string:'#9fd88f',   number:'#7fc9c0',  func:'#8fb8e0',    type:'#c9a6ff',
       param:'#cbb08a',    operator:'#d7c9a0', regexp:'#9fd88f', invalid:'#e0715a'
+    },
+    'sakura-dream': {
+      a: 1,
+      variable:'#2d1527', comment:'#7f6174', keyword:'#c026d3', control:'#9333ea',
+      string:'#b91c1c',   number:'#d97706',  func:'#0284c7',    type:'#7c3aed',
+      param:'#4a1d48',    operator:'#db2777', regexp:'#c026d3', invalid:'#dc2626'
+    },
+    'meadow-breeze': {
+      a: 1,
+      variable:'#14291f', comment:'#587162', keyword:'#047857', control:'#0284c7',
+      string:'#c2410c',   number:'#d97706',  func:'#2563eb',    type:'#0d9488',
+      param:'#234233',    operator:'#059669', regexp:'#ea580c', invalid:'#dc2626'
+    },
+    'paper': {
+      a: 1,
+      variable:'#1c1917', comment:'#6d685d', keyword:'#c2410c', control:'#b91c1c',
+      string:'#15803d',   number:'#d97706',  func:'#0369a1',    type:'#7c3aed',
+      param:'#38302b',    operator:'#ea580c', regexp:'#b91c1c', invalid:'#e11d48'
     }
   };
 
@@ -78,7 +96,12 @@
     'd4d4d4':'variable', 'd16969':'regexp',   '4fc1ff':'param',    'c8c8c8':'variable',
     '808080':'comment',  'd7ba7d':'number',   'f44747':'invalid',  'b267e6':'type',
     '000080':'operator', '646695':'operator', 'ffd700':'operator', 'da70d6':'operator',
-    '179fff':'func',     '3794ff':'func',     'cccccc':'variable', 'e6e6e6':'variable'
+    '179fff':'func',     '3794ff':'func',     'cccccc':'variable', 'e6e6e6':'variable',
+    // VS Code Light defaults:
+    '0000ff':'keyword',  'af00db':'control',  '267f99':'type',     '795e26':'func',
+    'a31515':'string',   '098658':'number',   '008000':'comment',  '001080':'variable',
+    '000000':'variable', '811f3f':'regexp',   'e51400':'invalid',  '6e7781':'comment',
+    '333333':'variable', '0451a5':'variable', '09885a':'number',   '800000':'string'
   };
 
   function hsl(hex) {
@@ -186,7 +209,9 @@
   }
 
   function apply(force) {
-    const theme = document.documentElement.getAttribute('data-lc-theme') || '';
+    const theme = document.documentElement.getAttribute('data-lct-theme')
+      || document.documentElement.getAttribute('data-lc-theme')
+      || '';
     /* the anime theme's inks are solved from its scene and published by
        src/anime/anime.js into this shared isolated world. The game theme's
        Easy tier overrides the static dark-fallback ink above the same way,
@@ -256,5 +281,5 @@
 
   /* our own theme switches, and only ours */
   new MutationObserver(function () { safe(true); })
-    .observe(document.documentElement, { attributes: true, attributeFilter: ['data-lc-theme'] });
+    .observe(document.documentElement, { attributes: true, attributeFilter: ['data-lc-theme', 'data-lct-theme'] });
 })();

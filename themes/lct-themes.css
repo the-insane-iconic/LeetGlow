@@ -189,3 +189,101 @@ html[data-lct-theme='nord'] .lct-bg-base {
     linear-gradient(175deg, #2b313d 0%, #242933 55%, #1c2029 100%);
 }
 html[data-lct-theme='nord'] .lct-bg-aurora { opacity: 0.35; }
+
+/* =============================================================================
+   High-Contrast Crisp & Bright Code Editor Font (Light Themes Only)
+   Specifically boosts contrast, weight, and vivid clarity for:
+   - Sakura Dream
+   - Meadow Breeze
+   - Paper
+============================================================================= */
+html[data-lct-theme='sakura-dream'] .monaco-editor,
+html[data-lct-theme='meadow-breeze'] .monaco-editor,
+html[data-lct-theme='paper'] .monaco-editor {
+  -webkit-font-smoothing: antialiased !important;
+  text-rendering: geometricPrecision !important;
+}
+
+html[data-lct-theme='sakura-dream'] .monaco-editor .view-lines,
+html[data-lct-theme='meadow-breeze'] .monaco-editor .view-lines,
+html[data-lct-theme='paper'] .monaco-editor .view-lines {
+  font-weight: 600 !important;
+}
+
+/* Frosted clean high-readability glass backdrop behind editor code */
+html[data-lct-theme='sakura-dream'] .monaco-editor,
+html[data-lct-theme='sakura-dream'] .monaco-editor .monaco-editor-background {
+  background-color: rgba(255, 247, 250, 0.94) !important;
+}
+html[data-lct-theme='meadow-breeze'] .monaco-editor,
+html[data-lct-theme='meadow-breeze'] .monaco-editor .monaco-editor-background {
+  background-color: rgba(247, 252, 244, 0.94) !important;
+}
+html[data-lct-theme='paper'] .monaco-editor,
+html[data-lct-theme='paper'] .monaco-editor .monaco-editor-background {
+  background-color: rgba(251, 248, 241, 0.94) !important;
+}
+
+/* Crisp Line Numbers */
+html[data-lct-theme='sakura-dream'] .monaco-editor .line-numbers {
+  color: #9d738f !important;
+  font-weight: 600 !important;
+}
+html[data-lct-theme='sakura-dream'] .monaco-editor .line-numbers.active-line-number {
+  color: #c026d3 !important;
+  font-weight: 700 !important;
+}
+
+html[data-lct-theme='meadow-breeze'] .monaco-editor .line-numbers {
+  color: #5d816c !important;
+  font-weight: 600 !important;
+}
+html[data-lct-theme='meadow-breeze'] .monaco-editor .line-numbers.active-line-number {
+  color: #047857 !important;
+  font-weight: 700 !important;
+}
+
+html[data-lct-theme='paper'] .monaco-editor .line-numbers {
+  color: #8c7e70 !important;
+  font-weight: 600 !important;
+}
+html[data-lct-theme='paper'] .monaco-editor .line-numbers.active-line-number {
+  color: #c2410c !important;
+  font-weight: 700 !important;
+}
+
+/* Vibrant Cursors & Selection */
+html[data-lct-theme='sakura-dream'] .monaco-editor .cursor {
+  background-color: #c026d3 !important;
+  border-color: #c026d3 !important;
+}
+html[data-lct-theme='sakura-dream'] .monaco-editor .selected-text {
+  background-color: rgba(244, 114, 182, 0.28) !important;
+}
+
+html[data-lct-theme='meadow-breeze'] .monaco-editor .cursor {
+  background-color: #047857 !important;
+  border-color: #047857 !important;
+}
+html[data-lct-theme='meadow-breeze'] .monaco-editor .selected-text {
+  background-color: rgba(52, 211, 153, 0.28) !important;
+}
+
+html[data-lct-theme='paper'] .monaco-editor .cursor {
+  background-color: #c2410c !important;
+  border-color: #c2410c !important;
+}
+html[data-lct-theme='paper'] .monaco-editor .selected-text {
+  background-color: rgba(251, 146, 60, 0.28) !important;
+}
+
+/* High-contrast Base Ink fallbacks for untagged spans */
+html[data-lct-theme='sakura-dream'] .monaco-editor .view-line {
+  color: #2d1527 !important;
+}
+html[data-lct-theme='meadow-breeze'] .monaco-editor .view-line {
+  color: #14291f !important;
+}
+html[data-lct-theme='paper'] .monaco-editor .view-line {
+  color: #1c1917 !important;
+}

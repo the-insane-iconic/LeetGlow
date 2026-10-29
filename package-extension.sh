@@ -20,3 +20,4 @@ zip -r -q "$OUTPUT" \
 
 SIZE=$(du -h "$OUTPUT" | awk '{print $1}')
 echo "✓ Successfully created $OUTPUT ($SIZE)"
+
