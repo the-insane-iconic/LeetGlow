@@ -156,6 +156,9 @@ function toggleWallpaperDrawer(force) {
   wallpapersDrawerOpen = typeof force === 'boolean' ? force : !wallpapersDrawerOpen;
   container.classList.toggle('wallpapers-expanded', wallpapersDrawerOpen);
   if (curated) curated.classList.toggle('hidden', wallpapersDrawerOpen);
+  document.querySelectorAll('.theme-section-divider').forEach((el) => {
+    el.classList.toggle('hidden', wallpapersDrawerOpen);
+  });
   if (wallpapersDrawerOpen) {
     const box = document.getElementById('wallpaperGrid');
     if (box && !box.children.length) {
