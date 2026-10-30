@@ -8,7 +8,7 @@ These Terms and Conditions ("Terms") govern your access to and use of
 wallpapers, live wallpapers, dashboard features, and any related
 services or content.
 
-The Extension is provided by **Anupam Yadav**
+The Extension is provided by **Ansh**
 ("we," "us," or "our"). By installing, accessing, or using the
 Extension, you agree to these Terms. If you do not agree, do not use the
 Extension.
@@ -294,7 +294,7 @@ us concerning the Extension, to the extent permitted by law.
 For questions, support requests, or complaints about these Terms,
 contact:
 
--   **Developer / business name:** Anupam Yadav (LeetGlow)
+-   **Developer / business name:** Ansh (LeetGlow)
 -   **Support email:** anupamyadav6477@gmail.com
 -   **Website:** https://github.com/the-insane-iconic/LeetGlow
 

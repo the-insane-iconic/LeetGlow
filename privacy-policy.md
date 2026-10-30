@@ -79,5 +79,5 @@ You can clear all locally stored theme settings at any time by uninstalling the 
 ## 8. Contact Us
 
 If you have any questions or concerns regarding this Privacy Policy, please contact:
-- **Developer:** Anupam Yadav
+- **Developer:** Ansh (LeetGlow)
 - **Support Email:** [anupamyadav6477@gmail.com](mailto:anupamyadav6477@gmail.com)

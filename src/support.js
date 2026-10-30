@@ -2,7 +2,7 @@
    support.js — the one place the "Support" and "Report bug" links point.
 
    Used by the popup footer and the Anime Studio header. Report bug opens a
-   Gmail draft to AnshYadav with a short template and the version,
+   Gmail draft to Ansh with a short template and the version,
    browser and theme filled in (nothing is sent until the user sends it).
    Connect opens the developer's LinkedIn profile. Support opens YOUR page
    rather than a payment provider directly, so the provider can change
