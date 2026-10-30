@@ -185,40 +185,6 @@ body {
   display: none !important;
 }
 
-/* Subtle difficulty indicator dot */
-.badge-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  display: inline-block;
-  background: #94a3b8;
-  box-shadow: 0 0 6px currentColor;
-  transition: background-color .2s ease, box-shadow .2s ease;
-}
-
-.badge-dot[hidden] {
-  display: none !important;
-}
-
-.badge-dot.easy {
-  background: #10b981;
-  color: #10b981;
-  box-shadow: 0 0 6px rgba(16, 185, 129, 0.7);
-}
-
-.badge-dot.medium {
-  background: #f59e0b;
-  color: #f59e0b;
-  box-shadow: 0 0 6px rgba(245, 158, 11, 0.7);
-}
-
-.badge-dot.hard {
-  background: #f43f5e;
-  color: #f43f5e;
-  box-shadow: 0 0 6px rgba(244, 63, 94, 0.7);
-}
-
 /* ---- navigation tabs (Modern Glass Container with Tactile White Active Pill) ------------ */
 .nav-tabs {
   display: flex;

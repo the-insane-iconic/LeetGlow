@@ -13,57 +13,6 @@ chrome.commands.onCommand.addListener((command) => {
   });
 });
 
-async function refreshDailyProblemCache() {
-  try {
-    const today = new Date().toISOString().slice(0, 10);
-    const res = await chrome.storage.local.get('lcDailyProblemCache');
-    const cached = res && res.lcDailyProblemCache;
-    if (cached && cached.date === today && cached.url) return;
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-    const resp = await fetch('https://leetcode.com/graphql', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query: `query questionOfToday {
-          activeDailyCodingChallengeQuestion {
-            date
-            link
-            question {
-              title
-              difficulty
-              titleSlug
-            }
-          }
-        }`
-      }),
-      signal: controller.signal
-    });
-    clearTimeout(timeoutId);
-    if (!resp.ok) return;
-    const json = await resp.json();
-    const daily = json && json.data && json.data.activeDailyCodingChallengeQuestion;
-    if (!daily || !daily.link) return;
-
-    const fullUrl = daily.link.startsWith('http')
-      ? daily.link
-      : `https://leetcode.com${daily.link}`;
-
-    await chrome.storage.local.set({
-      lcDailyProblemCache: {
-        date: daily.date || today,
-        url: fullUrl,
-        title: (daily.question && daily.question.title) || 'Daily Problem',
-        difficulty: (daily.question && daily.question.difficulty) || '',
-        titleSlug: (daily.question && daily.question.titleSlug) || ''
-      }
-    });
-  } catch (e) {
-    // silently ignore background fetch failures
-  }
-}
-
 chrome.runtime.onInstalled.addListener((details) => {
   chrome.storage.local.remove(['lcAnimeSeen', 'leetglowPremium']);
   if (chrome.sidePanel && chrome.sidePanel.setPanelBehavior) {
@@ -71,23 +20,10 @@ chrome.runtime.onInstalled.addListener((details) => {
       .setPanelBehavior({ openPanelOnActionClick: true })
       .catch((error) => console.error('[LeetGlow] sidePanel.setPanelBehavior error:', error));
   }
-  refreshDailyProblemCache().then(() => {
-    if (details && details.reason === 'install') {
-      chrome.storage.local.get('lcDailyProblemCache', (res) => {
-        const url = (res && res.lcDailyProblemCache && res.lcDailyProblemCache.url) || 'https://leetcode.com/problemset/';
-        chrome.tabs.create({ url });
-      });
-    }
-  });
+  if (details && details.reason === 'install') {
+    chrome.tabs.create({ url: 'https://leetcode.com/problemset/?topicSlugs=daily' });
+  }
 });
-
-// Periodic cache refresh on startup / wake
-if (chrome.runtime.onStartup) {
-  chrome.runtime.onStartup.addListener(() => {
-    refreshDailyProblemCache();
-  });
-}
-refreshDailyProblemCache();
 
 /* Side Panel: Open sidebar on extension icon click (Chrome Side Panel API) */
 if (chrome.sidePanel && chrome.sidePanel.setPanelBehavior) {

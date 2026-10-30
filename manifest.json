@@ -42,8 +42,6 @@
       "48": "icons/icon48.png"
    },
    "host_permissions": [
-      "https://leetcode.com/*",
-      "https://leetcode.cn/*",
       "https://*.supabase.co/*"
    ],
    "manifest_version": 3,
