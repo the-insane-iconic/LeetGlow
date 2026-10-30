@@ -16,39 +16,49 @@
   /* Anime Studio and Web Crawler each get their own moments settings, keyed by
      storage key, so enabling/muting one never touches the other. Web Crawler
      has no settings UI yet, so it simply runs on DEFAULTS until one exists. */
-  const DEFAULTS = { titleCard: true, moments: true, sound: true, volume: 1 };
+  const DEFAULTS = { titleCard: true, moments: true, sound: true, volume: 0.8 };
   let settings = {
     anime: Object.assign({}, DEFAULTS),
-    crawler: Object.assign({}, DEFAULTS),
-    grid: Object.assign({}, DEFAULTS)
+    crawler: Object.assign({}, DEFAULTS)
   };
 
-  const MOMENT_THEMES = new Set(['anime', 'crawler', 'grid']);
-  const theme = () => root.getAttribute('data-lc-theme');
-  const activeSettings = () => settings[theme()] || DEFAULTS;
+  /* game and pixel themes have their own dedicated animation/sfx systems.
+     All other themes (sakura-dream, ocean-deep, paper, midnight-dark, anime, grid, etc.)
+     use the universal moments and SFX. */
+  const HAS_CUSTOM_MOMENT = new Set(['game', 'pixel']);
+  const theme = () => root.getAttribute('data-lc-theme') || root.getAttribute('data-lct-theme') || '';
+  const on = () => !HAS_CUSTOM_MOMENT.has(theme()) && !root.hasAttribute('data-lc-focus');
+  const activeSettings = () => (theme() === 'crawler' ? settings.crawler : settings.anime) || DEFAULTS;
+
   /* a tab not clicked yet plays through the offscreen page: open it early */
   function primeSound() {
-    if (SFX && MOMENT_THEMES.has(theme()) && activeSettings().sound && activeSettings().titleCard) SFX.prime(theme());
+    if (SFX && on() && activeSettings().sound && activeSettings().titleCard) {
+      SFX.prime(theme() === 'crawler' ? 'crawler' : 'anime');
+    }
   }
 
-  chrome.storage.local.get(['lcAnime', 'lcCrawler', 'lcGrid'], (res) => {
+  chrome.storage.local.get(['lcAnime', 'lcCrawler', 'lcVolume'], (res) => {
     if (res.lcAnime) settings.anime = Object.assign({}, DEFAULTS, res.lcAnime);
+    if (typeof res.lcVolume === 'number') settings.anime.volume = res.lcVolume / 100;
     if (res.lcCrawler) settings.crawler = Object.assign({}, DEFAULTS, res.lcCrawler);
-    if (res.lcGrid) settings.grid = Object.assign({}, DEFAULTS, res.lcGrid);
-    if (UI && UI.setJapanese) UI.setJapanese(settings.anime.japanese);
+    if (UI && UI.setJapanese) UI.setJapanese(settings.anime.japanese !== false);
     primeSound();
   });
   chrome.storage.onChanged.addListener((ch, area) => {
     if (area !== 'local') return;
     if (ch.lcAnime) settings.anime = Object.assign({}, DEFAULTS, ch.lcAnime.newValue || {});
-    if (ch.lcAnime && UI && UI.setJapanese) UI.setJapanese(settings.anime.japanese);
+    if (ch.lcVolume && typeof ch.lcVolume.newValue === 'number') settings.anime.volume = ch.lcVolume.newValue / 100;
+    if (ch.lcAnime && UI && UI.setJapanese) UI.setJapanese(settings.anime.japanese !== false);
     if (ch.lcCrawler) settings.crawler = Object.assign({}, DEFAULTS, ch.lcCrawler.newValue || {});
-    if (ch.lcGrid) settings.grid = Object.assign({}, DEFAULTS, ch.lcGrid.newValue || {});
   });
 
   /* the overlay and its sound always start together */
   function sound(kind) {
-    if (activeSettings().sound && SFX) SFX.play(kind, { volume: activeSettings().volume });
+    if (activeSettings().sound && SFX) {
+      const vol = typeof activeSettings().volume === 'number' ? activeSettings().volume : 0.8;
+      const soundTheme = theme() === 'crawler' ? 'crawler' : 'anime';
+      SFX.play(kind, { volume: vol, theme: soundTheme });
+    }
   }
   function playResult(kind, info) {
     UI.result(kind, info);
@@ -59,8 +69,6 @@
     sound(action === 'submit' ? 'submit-start' : 'run-start');
   }
   function playTitle(info) { UI.titleCard(info); sound('title'); }
-
-  const on = () => MOMENT_THEMES.has(theme()) && !root.hasAttribute('data-lc-focus');
 
   /* ---- execution & verdicts ------------------------------------------------
      Detected once, for every theme, by src/verdict.js (LeetCode's own check
@@ -170,14 +178,17 @@
   maybeTitleCard();
   setInterval(() => {
     maybeTitleCard();
-    /* a theme's recorded sounds load once, the first time the theme is on */
-    if (SFX && MOMENT_THEMES.has(theme())) { SFX.warm(theme()); primeSound(); }
+    /* load sounds when universal moments or crawler are active */
+    if (SFX && on()) {
+      const soundTheme = theme() === 'crawler' ? 'crawler' : 'anime';
+      SFX.warm(soundTheme);
+      primeSound();
+    }
   }, 1000);
 
-  /* Anime Studio's "preview on this tab" and the test harness play a moment
-     by name; it only ever draws an overlay, so a page sending it gains nothing */
+  /* Preview from Customize tab or popup: play a moment by name on this tab */
   document.addEventListener('lcts:moment', (e) => {
-    if (!on() || !UI) return;
+    if (!UI) return;
     const name = String(e.detail || '');
     if (name === 'title') {
       playTitle(readTitle(slugOf() || '') || { number: '1', title: 'Two Sum', difficulty: 'Easy' });
@@ -187,7 +198,7 @@
       playAction('run');
     } else if (name === 'submit-start') {
       playAction('submit');
-    } else if (UI.VERDICTS[name]) {
+    } else if (UI.VERDICTS && UI.VERDICTS[name]) {
       playResult(name, name === 'ac' ? { beats: '92.4', action: 'submit' } : { action: 'run' });
     }
   });

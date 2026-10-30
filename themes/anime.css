@@ -164,22 +164,26 @@ html[data-lc-theme="anime"][data-lc-focus] {
   --lc-nav-bg: var(--lc-bg2);
 }
 html[data-lc-theme="anime"][data-lc-focus] body::before { display: none; }
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"])[data-lc-focus] .lcts-moment,
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"])[data-lc-focus] .lcts-card { display: none !important; }
+html[data-lc-focus] .lcts-moment,
+html[data-lc-focus] .lcts-card { display: none !important; }
 
 
 /* =========================== MOMENTS ======================================= */
-/* Shared pieces. Every overlay is pointer-events:none except the title card,
-   which a click dismisses. */
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment,
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-card {
+/* Universal overlays for all themes without dedicated custom verdict systems */
+.lcts-moment,
+.lcts-card {
   position: fixed; inset: 0; z-index: 2147483000;
   pointer-events: none;
-  font-family: var(--lc-font-display);
-  color: var(--lc-text);
+  font-family: var(--lc-font-display, "Dela Gothic One", sans-serif);
+  color: var(--lc-text, #ffffff);
   contain: strict;
+  --lc-accent: var(--lct-accent, #ec4899);
+  --lc-accent-2: var(--lct-accent-2, #38bdf8);
+  --lc-glow: var(--lct-glow, rgba(236, 72, 153, 0.45));
+  --lc-anime-scrim: rgba(11, 15, 25, 0.85);
+  --lc-submit-text: var(--lct-accent, #ec4899);
 }
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-jp { font-family: var(--lc-font-display); font-weight: 400; }
+.lcts-jp { font-family: var(--lc-font-display, "Dela Gothic One", sans-serif); font-weight: 400; }
 
 /* -- Accepted: the finisher ------------------------------------------------- */
 .lcts-moment[data-kind="ac"] { animation: lcts-out 1700ms linear forwards; }
@@ -310,34 +314,34 @@ html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-jp { font-family:
    upright star while it travels round.
    Keyframe names are global across every theme's stylesheet (crawler.css has
    its own lcts-spin), so these all carry the lcts-dz- prefix. */
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-dizzy { animation: lcts-out 1750ms linear forwards; }
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-dizzy .lcts-stack {
+.lcts-moment.is-dizzy { animation: lcts-out 1750ms linear forwards; }
+.lcts-moment.is-dizzy .lcts-stack {
   top: 50%; bottom: auto; transform: translateY(-50%);
 }
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-dizzy .lcts-dz-swirl {
+.lcts-moment.is-dizzy .lcts-dz-swirl {
   position: absolute; left: 50%; top: 50%;
   width: min(78vh, 62vw); aspect-ratio: 1;
   opacity: 0;
   animation: lcts-dz-swirl 1650ms cubic-bezier(.25,.6,.4,1) forwards;
 }
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-dizzy .lcts-dz-swirl svg { width: 100%; height: 100%; display: block; }
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-dizzy .lcts-dz-swirl path {
+.lcts-moment.is-dizzy .lcts-dz-swirl svg { width: 100%; height: 100%; display: block; }
+.lcts-moment.is-dizzy .lcts-dz-swirl path {
   fill: none; stroke: var(--lcts-tone); stroke-width: 2.6; stroke-linecap: round; opacity: .55;
 }
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-dizzy .lcts-big {
+.lcts-moment.is-dizzy .lcts-big {
   position: relative;
   transform-origin: 50% 90%;
   animation:
     lcts-thud 520ms cubic-bezier(.3,1.4,.5,1) forwards,
     lcts-dz-woozy 1150ms ease-in-out 520ms forwards;
 }
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-dizzy .lcts-sub {
+.lcts-moment.is-dizzy .lcts-sub {
   animation:
     lcts-rise 320ms ease-out 200ms forwards,
     lcts-dz-woozy-soft 1100ms ease-in-out 560ms forwards;
 }
 /* the stars: an ellipse over the stamp, sized from its font */
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-dizzy .lcts-orbit {
+.lcts-moment.is-dizzy .lcts-orbit {
   position: absolute; left: 50%; top: -.12em;
   width: 3.6em; height: 3.6em; margin: -1.8em 0 0 -1.8em;
   transform: scaleY(.3);
@@ -345,23 +349,23 @@ html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-dizzy .
   opacity: 0;
   animation: lcts-dz-stars 1750ms linear forwards;
 }
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-dizzy .lcts-ring {
+.lcts-moment.is-dizzy .lcts-ring {
   position: absolute; inset: 0;
   animation: lcts-dz-spin 620ms linear infinite;
 }
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-dizzy .lcts-star-at {
+.lcts-moment.is-dizzy .lcts-star-at {
   position: absolute; left: 50%; top: 50%; width: 0; height: 0;
   transform: rotate(var(--a)) translateX(1.8em) rotate(calc(-1 * var(--a)));
 }
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-dizzy .lcts-star {
+.lcts-moment.is-dizzy .lcts-star {
   position: absolute; left: -.21em; top: -.21em; width: .42em; height: .42em;
   animation: lcts-dz-unspin 620ms linear infinite;
 }
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-dizzy .lcts-star svg { width: 100%; height: 100%; display: block; overflow: visible; }
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-dizzy .lcts-star path {
+.lcts-moment.is-dizzy .lcts-star svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.lcts-moment.is-dizzy .lcts-star path {
   fill: var(--lc-yellow); stroke: var(--lc-anime-scrim); stroke-width: 1.6; paint-order: stroke;
 }
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-dizzy .lcts-star.is-alt path { fill: var(--lc-accent); }
+.lcts-moment.is-dizzy .lcts-star.is-alt path { fill: var(--lc-accent); }
 
 @keyframes lcts-dz-swirl {
   0%   { opacity: 0;   transform: translate(-50%, -50%) scale(.35) rotate(0deg); }
@@ -389,33 +393,33 @@ html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-dizzy .
 @keyframes lcts-dz-unspin { from { transform: rotate(0deg) scaleY(3.333); } to { transform: rotate(-360deg) scaleY(3.333); } }
 
 /* -- Execution in progress: Running & Submitting cues ----------------------- */
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action {
+.lcts-moment.is-action {
   position: fixed; inset: 0; z-index: 2147483000;
   pointer-events: none;
 }
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action.is-leaving {
+.lcts-moment.is-action.is-leaving {
   animation: lcts-leave 240ms ease-in forwards;
 }
 
 /* Run: tactical corner indicator with katana slash and energy dots */
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action[data-action="run"] .lcts-stack {
+.lcts-moment.is-action[data-action="run"] .lcts-stack {
   position: absolute; right: 4vw; bottom: 8vh;
   display: flex; flex-direction: column; align-items: flex-end; gap: .3vh;
   transform: rotate(-3deg);
 }
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action[data-action="run"] .lcts-big {
+.lcts-moment.is-action[data-action="run"] .lcts-big {
   font-size: 52px; line-height: 1;
   color: var(--lc-accent);
   text-shadow: 2px 2px 0 var(--lc-anime-scrim), 0 0 20px var(--lc-glow);
   opacity: 0; transform: scale(1.6) translateX(20px);
   animation: lcts-action-stamp 340ms cubic-bezier(.2,1.4,.4,1) forwards;
 }
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action[data-action="run"] .lcts-sub {
+.lcts-moment.is-action[data-action="run"] .lcts-sub {
   font-size: 11px; letter-spacing: .28em; color: var(--lc-text);
   text-shadow: 0 1px 6px var(--lc-anime-scrim);
   opacity: 0; animation: lcts-rise 280ms ease-out 120ms forwards;
 }
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action[data-action="run"] .lcts-action-slash {
+.lcts-moment.is-action[data-action="run"] .lcts-action-slash {
   position: absolute; right: 2vw; bottom: 7.2vh; width: min(340px, 45vw); height: 2px;
   background: linear-gradient(90deg, transparent, var(--lc-accent), #ffffff);
   box-shadow: 0 0 14px var(--lc-accent);
@@ -423,27 +427,27 @@ html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action[
   transform: scaleX(0);
   animation: lcts-draw 300ms cubic-bezier(.1,.9,.2,1) 60ms forwards;
 }
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action[data-action="run"] .lcts-action-pulse {
+.lcts-moment.is-action[data-action="run"] .lcts-action-pulse {
   display: flex; gap: 6px; margin-top: 4px;
 }
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action[data-action="run"] .lcts-action-pulse::before,
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action[data-action="run"] .lcts-action-pulse::after {
+.lcts-moment.is-action[data-action="run"] .lcts-action-pulse::before,
+.lcts-moment.is-action[data-action="run"] .lcts-action-pulse::after {
   content: ""; width: 6px; height: 6px; border-radius: 50%;
   background: var(--lc-accent); box-shadow: 0 0 8px var(--lc-glow);
   animation: lcts-action-dot 800ms ease-in-out infinite alternate;
 }
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action[data-action="run"] .lcts-action-pulse::after {
+.lcts-moment.is-action[data-action="run"] .lcts-action-pulse::after {
   animation-delay: 400ms;
 }
 
 /* Submit: epic central aura and dramatic focus lines */
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action[data-action="submit"] .lcts-action-aura {
+.lcts-moment.is-action[data-action="submit"] .lcts-action-aura {
   position: absolute; inset: 0;
   background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--lc-accent) 15%, transparent) 0%, color-mix(in srgb, var(--lc-anime-scrim) 65%, transparent) 80%);
   opacity: 0;
   animation: lcts-fade 320ms ease-out forwards;
 }
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action[data-action="submit"] .lcts-action-lines {
+.lcts-moment.is-action[data-action="submit"] .lcts-action-lines {
   position: absolute; inset: -10%;
   background: repeating-conic-gradient(from 0deg at 50% 50%,
               transparent 0deg 3.5deg, color-mix(in srgb, var(--lc-accent) 24%, transparent) 3.5deg 4deg);
@@ -452,12 +456,12 @@ html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action[
   opacity: 0; transform: scale(1.2);
   animation: lcts-action-lines 600ms ease-out forwards;
 }
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action[data-action="submit"] .lcts-stack {
+.lcts-moment.is-action[data-action="submit"] .lcts-stack {
   position: absolute; left: 0; right: 0; top: 50%;
   display: flex; flex-direction: column; align-items: center; gap: .8vh;
   transform: translateY(-50%) rotate(-4deg);
 }
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action[data-action="submit"] .lcts-big {
+.lcts-moment.is-action[data-action="submit"] .lcts-big {
   font-size: min(15vh, 12vw); line-height: .95;
   color: var(--lc-text);
   -webkit-text-stroke: .02em var(--lc-anime-scrim);
@@ -466,12 +470,12 @@ html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action[
   opacity: 0; transform: scale(1.8);
   animation: lcts-stamp 460ms cubic-bezier(.2,1.5,.35,1) 80ms forwards;
 }
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action[data-action="submit"] .lcts-sub {
+.lcts-moment.is-action[data-action="submit"] .lcts-sub {
   font-size: min(2.8vh, 2.4vw); letter-spacing: .38em;
   color: var(--lc-submit-text, var(--lc-accent));
   opacity: 0; animation: lcts-rise 360ms ease-out 260ms forwards;
 }
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action[data-action="submit"] .lcts-action-beam {
+.lcts-moment.is-action[data-action="submit"] .lcts-action-beam {
   width: min(40vw, 420px); height: 3px; margin-top: 1vh;
   background: linear-gradient(90deg, transparent, var(--lc-accent), #ffffff, var(--lc-accent-2), transparent);
   box-shadow: 0 0 16px var(--lc-glow);
@@ -479,7 +483,7 @@ html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action[
 }
 
 /* -- the episode title card ------------------------------------------------- */
-html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-card { pointer-events: auto; cursor: pointer; }
+.lcts-card { pointer-events: auto; cursor: pointer; }
 .lcts-card { animation: lcts-out 2300ms linear forwards; }
 .lcts-card.is-leaving { animation: lcts-leave 220ms ease-in forwards; }
 .lcts-card .lcts-shade {

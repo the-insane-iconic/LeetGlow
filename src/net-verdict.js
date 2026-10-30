@@ -39,19 +39,22 @@
   const actionOf = new Map();   // id -> 'run' | 'submit', learned from the POST responses
   const sent = new Set();       // ids already reported (the check URL is polled repeatedly)
 
+  function emitActionStart(action) {
+    try { document.dispatchEvent(new CustomEvent('lcts:net-action-start', { detail: { action } })); } catch (e) {}
+    try { window.postMessage({ source: 'lcts:net-action-start', payload: { action } }, '*'); } catch (e) {}
+  }
+
   function inspect(url, d) {
     if (!d || typeof d !== 'object') return;
     if ((RUN.test(url) || /interpret_solution/.test(url)) && (d.interpret_id || d.interpret_expected_id)) {
       const id = String(d.interpret_id || d.interpret_expected_id);
       actionOf.set(id, 'run');
-      try { document.dispatchEvent(new CustomEvent('lcts:net-action-start', { detail: { action: 'run' } })); } catch (e) {}
-      try { window.postMessage({ source: 'lcts:net-action-start', payload: { action: 'run' } }, '*'); } catch (e) {}
+      emitActionStart('run');
       return;
     }
     if ((SUBMIT.test(url) || /\/submit/.test(url)) && d.submission_id != null) {
       actionOf.set(String(d.submission_id), 'submit');
-      try { document.dispatchEvent(new CustomEvent('lcts:net-action-start', { detail: { action: 'submit' } })); } catch (e) {}
-      try { window.postMessage({ source: 'lcts:net-action-start', payload: { action: 'submit' } }, '*'); } catch (e) {}
+      emitActionStart('submit');
       return;
     }
 
@@ -84,6 +87,14 @@
   const origFetch = window.fetch;
   if (typeof origFetch === 'function') {
     window.fetch = function (input, init) {
+      try {
+        const url = typeof input === 'string' ? input : (input && input.url) || String(input || '');
+        if (SUBMIT.test(url) || /\/submit\b/.test(url)) {
+          emitActionStart('submit');
+        } else if (RUN.test(url) || /interpret_solution\b/.test(url)) {
+          emitActionStart('run');
+        }
+      } catch (e) {}
       const p = origFetch.apply(this, arguments);
       try {
         const url = typeof input === 'string' ? input : (input && input.url) || String(input || '');
@@ -108,6 +119,13 @@
     X.send = function () {
       try {
         const url = this.__lctsUrl;
+        if (url) {
+          if (SUBMIT.test(url) || /\/submit\b/.test(url)) {
+            emitActionStart('submit');
+          } else if (RUN.test(url) || /interpret_solution\b/.test(url)) {
+            emitActionStart('run');
+          }
+        }
         if (url && interesting(url)) {
           this.addEventListener('load', () => {
             try {

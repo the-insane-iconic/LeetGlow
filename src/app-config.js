@@ -20,3 +20,4 @@
     SUPPORT_EMAIL: _k(_E)
   };
 })(globalThis);
+

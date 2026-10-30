@@ -218,9 +218,12 @@
        up: focus mode hides a moment with display:none, which cancels the
        animation, and Chrome then sends neither animationend nor
        animationcancel -- the node would stay in the page forever. Every
-       moment is over within 2.3s, so 3s is always late enough. */
+       moment is over within 2.3s, so 3s is always late enough. Action overlays
+       manage their own 7s deadline and are replaced when result() mounts. */
     node.addEventListener('animationend', (e) => { if (e.target === node) node.remove(); });
-    setTimeout(() => node.remove(), 3000);
+    if (!node.classList.contains('is-action')) {
+      setTimeout(() => node.remove(), 3000);
+    }
     host.appendChild(node);
     return node;
   }

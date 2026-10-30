@@ -206,15 +206,16 @@
   document.addEventListener('click', (e) => {
     const t = e.target;
     if (!t || !t.closest) return;
-    const btn = t.closest('button, [role="button"]');
+    const btn = t.closest('button, [role="button"], [data-e2e-locator*="submit"], [data-e2e-locator*="run"], [class*="submit"], [class*="run"]');
     if (!btn) return;
     const text = (btn.textContent || '').trim().toLowerCase();
     const aria = (btn.getAttribute('aria-label') || '').trim().toLowerCase();
     const title = (btn.getAttribute('title') || '').trim().toLowerCase();
-    const isSubmit = btn.matches('[data-e2e-locator="console-submit-button"], [data-e2e-locator="submit-button"], button[data-cypress="SubmitCode"], [data-track-load="description_submit_btn"]') ||
-      text === 'submit' || text.startsWith('submit') || aria.includes('submit') || title.includes('submit');
-    const isRun = btn.matches('[data-e2e-locator="console-run-button"], [data-e2e-locator="run-code-btn"], button[data-cypress="RunCode"], [data-track-load="description_run_btn"]') ||
-      text === 'run' || text.startsWith('run') || aria.includes('run') || title.includes('run');
+    const locator = (btn.getAttribute('data-e2e-locator') || '').trim().toLowerCase();
+    const isSubmit = btn.matches('[data-e2e-locator*="submit"], button[data-cypress="SubmitCode"], [data-track-load="description_submit_btn"]') ||
+      locator.includes('submit') || text === 'submit' || text.startsWith('submit') || aria.includes('submit') || title.includes('submit');
+    const isRun = btn.matches('[data-e2e-locator*="run"], button[data-cypress="RunCode"], [data-track-load="description_run_btn"]') ||
+      locator.includes('run') || text === 'run' || text.startsWith('run') || aria.includes('run') || title.includes('run');
     if (isSubmit) {
       emitAction('submit');
       arm('submit');

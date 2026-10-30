@@ -560,7 +560,7 @@
 
   /* the first real interaction unlocks audio for the rest of the page's life */
   function unlock() {
-    if (!/^(anime|crawler|pixel|grid)$/.test(currentTheme())) return;
+    if (currentTheme() === 'game') return;
     try { ensureContext(0.6); running().then(sleepSoon); } catch (e) {}
     removeEventListener('pointerdown', unlock, true);
     removeEventListener('keydown', unlock, true);
