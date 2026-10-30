@@ -222,6 +222,14 @@ html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-jp { font-family:
   color: var(--lc-submit-text);
   opacity: 0; animation: lcts-rise 380ms ease-out 420ms forwards;
 }
+.lcts-moment[data-kind="ac"].is-legendary .lcts-big {
+  color: #fffbdf;
+  text-shadow: .05em .05em 0 #92400e, 0 0 40px #facc15;
+}
+.lcts-moment[data-kind="ac"].is-legendary .lcts-band {
+  background: linear-gradient(90deg, #f59e0b, #eab308 50%, #fef08a);
+  box-shadow: 0 0 80px -5px rgba(250, 204, 21, 0.75);
+}
 
 /* -- tests passed (Run): a quiet corner stamp ------------------------------ */
 .lcts-moment[data-kind="run"] { animation: lcts-out 1150ms linear forwards; }
@@ -274,6 +282,14 @@ html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-jp { font-family:
   width: min(42vw, 520px); height: 4px; margin-top: .8vh;
   background: var(--lcts-tone); transform-origin: left center;
   animation: lcts-drain 900ms cubic-bezier(.5,0,.8,.6) 250ms forwards;
+}
+/* memory overflow: flashing warning meter */
+.lcts-moment[data-kind="mle"] .lcts-mle-meter {
+  width: min(38vw, 460px); height: 6px; margin-top: .8vh;
+  border: 1px solid var(--lcts-tone);
+  background: repeating-linear-gradient(90deg, var(--lcts-tone) 0 8px, transparent 8px 12px);
+  box-shadow: 0 0 12px var(--lcts-tone);
+  animation: lcts-mle-flash 400ms steps(2) infinite alternate;
 }
 /* an error glitches: two tinted copies jitter behind the stamp */
 .lcts-moment[data-kind="err"] .lcts-big { position: relative; }
@@ -372,6 +388,96 @@ html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-dizzy .
 @keyframes lcts-dz-spin   { to { transform: rotate(360deg); } }
 @keyframes lcts-dz-unspin { from { transform: rotate(0deg) scaleY(3.333); } to { transform: rotate(-360deg) scaleY(3.333); } }
 
+/* -- Execution in progress: Running & Submitting cues ----------------------- */
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action {
+  position: fixed; inset: 0; z-index: 2147483000;
+  pointer-events: none;
+}
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action.is-leaving {
+  animation: lcts-leave 240ms ease-in forwards;
+}
+
+/* Run: tactical corner indicator with katana slash and energy dots */
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action[data-action="run"] .lcts-stack {
+  position: absolute; right: 4vw; bottom: 8vh;
+  display: flex; flex-direction: column; align-items: flex-end; gap: .3vh;
+  transform: rotate(-3deg);
+}
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action[data-action="run"] .lcts-big {
+  font-size: 52px; line-height: 1;
+  color: var(--lc-accent);
+  text-shadow: 2px 2px 0 var(--lc-anime-scrim), 0 0 20px var(--lc-glow);
+  opacity: 0; transform: scale(1.6) translateX(20px);
+  animation: lcts-action-stamp 340ms cubic-bezier(.2,1.4,.4,1) forwards;
+}
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action[data-action="run"] .lcts-sub {
+  font-size: 11px; letter-spacing: .28em; color: var(--lc-text);
+  text-shadow: 0 1px 6px var(--lc-anime-scrim);
+  opacity: 0; animation: lcts-rise 280ms ease-out 120ms forwards;
+}
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action[data-action="run"] .lcts-action-slash {
+  position: absolute; right: 2vw; bottom: 7.2vh; width: min(340px, 45vw); height: 2px;
+  background: linear-gradient(90deg, transparent, var(--lc-accent), #ffffff);
+  box-shadow: 0 0 14px var(--lc-accent);
+  transform-origin: right center;
+  transform: scaleX(0);
+  animation: lcts-draw 300ms cubic-bezier(.1,.9,.2,1) 60ms forwards;
+}
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action[data-action="run"] .lcts-action-pulse {
+  display: flex; gap: 6px; margin-top: 4px;
+}
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action[data-action="run"] .lcts-action-pulse::before,
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action[data-action="run"] .lcts-action-pulse::after {
+  content: ""; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--lc-accent); box-shadow: 0 0 8px var(--lc-glow);
+  animation: lcts-action-dot 800ms ease-in-out infinite alternate;
+}
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action[data-action="run"] .lcts-action-pulse::after {
+  animation-delay: 400ms;
+}
+
+/* Submit: epic central aura and dramatic focus lines */
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action[data-action="submit"] .lcts-action-aura {
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--lc-accent) 15%, transparent) 0%, color-mix(in srgb, var(--lc-anime-scrim) 65%, transparent) 80%);
+  opacity: 0;
+  animation: lcts-fade 320ms ease-out forwards;
+}
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action[data-action="submit"] .lcts-action-lines {
+  position: absolute; inset: -10%;
+  background: repeating-conic-gradient(from 0deg at 50% 50%,
+              transparent 0deg 3.5deg, color-mix(in srgb, var(--lc-accent) 24%, transparent) 3.5deg 4deg);
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent 0 25%, #000 65%);
+          mask-image: radial-gradient(circle at 50% 50%, transparent 0 25%, #000 65%);
+  opacity: 0; transform: scale(1.2);
+  animation: lcts-action-lines 600ms ease-out forwards;
+}
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action[data-action="submit"] .lcts-stack {
+  position: absolute; left: 0; right: 0; top: 50%;
+  display: flex; flex-direction: column; align-items: center; gap: .8vh;
+  transform: translateY(-50%) rotate(-4deg);
+}
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action[data-action="submit"] .lcts-big {
+  font-size: min(15vh, 12vw); line-height: .95;
+  color: var(--lc-text);
+  -webkit-text-stroke: .02em var(--lc-anime-scrim);
+  paint-order: stroke fill;
+  text-shadow: .04em .04em 0 var(--lc-anime-scrim), 0 0 40px var(--lc-glow);
+  opacity: 0; transform: scale(1.8);
+  animation: lcts-stamp 460ms cubic-bezier(.2,1.5,.35,1) 80ms forwards;
+}
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action[data-action="submit"] .lcts-sub {
+  font-size: min(2.8vh, 2.4vw); letter-spacing: .38em;
+  color: var(--lc-submit-text, var(--lc-accent));
+  opacity: 0; animation: lcts-rise 360ms ease-out 260ms forwards;
+}
+html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-moment.is-action[data-action="submit"] .lcts-action-beam {
+  width: min(40vw, 420px); height: 3px; margin-top: 1vh;
+  background: linear-gradient(90deg, transparent, var(--lc-accent), #ffffff, var(--lc-accent-2), transparent);
+  box-shadow: 0 0 16px var(--lc-glow);
+  animation: lcts-action-beam-pulse 1200ms ease-in-out infinite alternate;
+}
+
 /* -- the episode title card ------------------------------------------------- */
 html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-card { pointer-events: auto; cursor: pointer; }
 .lcts-card { animation: lcts-out 2300ms linear forwards; }
@@ -446,13 +552,35 @@ html:is([data-lc-theme="anime"], [data-lc-theme="grid"]) .lcts-card { pointer-ev
 @keyframes lcts-slide  { to { opacity: 1; transform: none; } }
 @keyframes lcts-draw   { to { transform: scaleX(1); } }
 @keyframes lcts-up     { to { opacity: 1; transform: none; } }
+@keyframes lcts-action-stamp {
+  0%   { opacity: 0; transform: scale(1.6) translateX(20px); }
+  100% { opacity: 1; transform: scale(1) translateX(0); }
+}
+@keyframes lcts-action-lines {
+  0%   { opacity: 0; transform: scale(1.25) rotate(0deg); }
+  100% { opacity: .75; transform: scale(1) rotate(4deg); }
+}
+@keyframes lcts-action-dot {
+  0%   { transform: scale(0.7); opacity: 0.4; }
+  100% { transform: scale(1.2); opacity: 1; }
+}
+@keyframes lcts-action-beam-pulse {
+  0%   { transform: scaleX(0.7); opacity: 0.6; }
+  100% { transform: scaleX(1.05); opacity: 1; }
+}
+@keyframes lcts-mle-flash {
+  0%   { opacity: 0.35; }
+  100% { opacity: 1; }
+}
 
 /* reduced motion: the same words, no movement */
 @media (prefers-reduced-motion: reduce) {
   .lcts-moment *, .lcts-card * { animation-duration: 1ms !important; animation-delay: 0ms !important; }
   .lcts-moment .lcts-lines, .lcts-moment .lcts-band, .lcts-moment .lcts-flash,
   .lcts-moment .lcts-ghost, .lcts-card .lcts-bar,
-  .lcts-moment .lcts-dz-swirl, .lcts-moment .lcts-orbit { display: none !important; }
+  .lcts-moment .lcts-dz-swirl, .lcts-moment .lcts-orbit,
+  .lcts-moment .lcts-action-lines, .lcts-moment .lcts-action-aura,
+  .lcts-moment .lcts-action-slash, .lcts-moment .lcts-mle-meter { display: none !important; }
 }
 
 /* ---- Problem Description Typography: Bright White for High Contrast -----------

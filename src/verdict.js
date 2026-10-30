@@ -27,8 +27,17 @@
   if (globalThis.LCTSVerdict) return;
 
   const subs = [];
+  const actionSubs = [];
   let netWorks = false;
   const recent = [];            // [time, kind, action] of recent emits, for de-duplication
+  let lastAction = { time: 0, action: '' };
+
+  function emitAction(action) {
+    const now = Date.now();
+    if (now - lastAction.time < 1200 && lastAction.action === action) return;
+    lastAction = { time: now, action };
+    actionSubs.forEach((fn) => { try { fn(action); } catch (e) {} });
+  }
 
   function emit(v) {
     const now = Date.now();
@@ -182,6 +191,18 @@
     armed = state;
   }
 
+  document.addEventListener('lcts:net-action-start', (e) => {
+    let act = e.detail;
+    if (act && typeof act === 'object') act = act.action;
+    if (act === 'run' || act === 'submit') emitAction(act);
+  });
+
+  window.addEventListener('message', (e) => {
+    if (e.source !== window || !e.data || e.data.source !== 'lcts:net-action-start') return;
+    const act = e.data.payload && e.data.payload.action;
+    if (act === 'run' || act === 'submit') emitAction(act);
+  });
+
   document.addEventListener('click', (e) => {
     const t = e.target;
     if (!t || !t.closest) return;
@@ -195,8 +216,10 @@
     const isRun = btn.matches('[data-e2e-locator="console-run-button"], [data-e2e-locator="run-code-btn"], button[data-cypress="RunCode"], [data-track-load="description_run_btn"]') ||
       text === 'run' || text.startsWith('run') || aria.includes('run') || title.includes('run');
     if (isSubmit) {
+      emitAction('submit');
       arm('submit');
     } else if (isRun) {
+      emitAction('run');
       arm('run');
     }
   }, true);
@@ -204,13 +227,21 @@
   /* LeetCode's own shortcuts: Ctrl/Cmd+Enter submits, Ctrl/Cmd+' runs */
   document.addEventListener('keydown', (e) => {
     if (!(e.ctrlKey || e.metaKey) || e.repeat) return;
-    if (e.key === 'Enter') arm('submit');
-    else if (e.key === "'") arm('run');
+    if (e.key === 'Enter') {
+      emitAction('submit');
+      arm('submit');
+    } else if (e.key === "'") {
+      emitAction('run');
+      arm('run');
+    }
   }, true);
 
   globalThis.LCTSVerdict = {
     subscribe(fn) { subs.push(fn); },
+    subscribeAction(fn) { actionSubs.push(fn); },
+    notifyAction(action) { emitAction(action); },
     /* for tests and the Studio: pretend a verdict arrived */
-    simulate(v) { emit(Object.assign({ action: 'submit', label: null, beats: null, source: 'sim' }, v)); }
+    simulate(v) { emit(Object.assign({ action: 'submit', label: null, beats: null, source: 'sim' }, v)); },
+    simulateAction(action) { emitAction(action); }
   };
 })();

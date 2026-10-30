@@ -157,12 +157,37 @@
       tone(b, 0.14, { freq: N(31), dur: 0.45, gain: 0.05, wet: 0.6 });                      // E7 air
     },
 
+    /* running testcases: a razor-sharp katana draw / unsheathing slice whoosh */
+    'run-start'(b) {
+      noise(b, 0, { filter: 'bandpass', freq: 2800, to: 7500, dur: 0.22, gain: 0.18, q: 3.5, attack: 0.01, wet: 0.35 });
+      tone(b, 0.02, { type: 'triangle', freq: 180, to: 65, glide: 0.08, dur: 0.12, gain: 0.15, attack: 0.002 });
+      tone(b, 0.05, { type: 'sine', freq: N(28), to: N(31), dur: 0.38, gain: 0.12, attack: 0.005, wet: 0.55 });
+      tone(b, 0.08, { type: 'triangle', freq: N(40), dur: 0.25, gain: 0.04, attack: 0.002, wet: 0.6 });
+    },
+
+    /* submitting: an epic sub-bass power swell, aura flare and resonant taiko chime */
+    'submit-start'(b) {
+      tone(b, 0, { type: 'sine', freq: 55, to: 110, glide: 0.3, dur: 0.5, gain: 0.28, attack: 0.03, wet: 0.2 });
+      noise(b, 0.02, { filter: 'bandpass', freq: 450, to: 2800, dur: 0.42, gain: 0.2, q: 1.8, attack: 0.05, wet: 0.4 });
+      drum(b, 0.16, 90, 0.65);
+      [N(5), N(12), N(17)].forEach((f, i) =>
+        tone(b, 0.18 + i * 0.04, { type: 'sine', freq: f, dur: 0.85, gain: 0.08, attack: 0.005, wet: 0.65 }));
+    },
+
     /* Wrong Answer: two drooping notes, the classic "not quite", and a dull
        thud when the stamp lands */
     wa(b) {
       tone(b, 0.02, { type: 'sawtooth', freq: N(-2), to: N(-3), glide: 0.2, dur: 0.26, gain: 0.1, lowpass: 1100, attack: 0.012 });
       tone(b, 0.3, { type: 'sawtooth', freq: N(-5), to: N(-9), glide: 0.45, dur: 0.62, gain: 0.11, lowpass: 900, attack: 0.012, wet: 0.2 });
       drum(b, 0.34, 58, 0.55);
+    },
+
+    /* Wrong Answer on Submit synth fallback: dizzy wobbly slide and cartoon stars */
+    'wa-submit'(b) {
+      tone(b, 0.02, { type: 'sawtooth', freq: N(2), to: N(-8), glide: 0.6, vibrato: 8, dur: 0.7, gain: 0.12, lowpass: 850, attack: 0.01, wet: 0.3 });
+      [0.2, 0.35, 0.5, 0.65].forEach((t, i) =>
+        tone(b, t, { type: 'sine', freq: N(20 + (i % 3) * 4), dur: 0.15, gain: 0.06, attack: 0.003, wet: 0.4 }));
+      drum(b, 0.42, 50, 0.6);
     },
 
     /* Time Limit Exceeded: a clock ticking faster, then the power running
@@ -217,6 +242,17 @@
     run(b) {
       tone(b, 0.03, { type: 'square', freq: N(19), dur: 0.09, gain: 0.36, attack: 0.002, lowpass: 3000 });
       tone(b, 0.12, { type: 'square', freq: N(24), dur: 0.14, gain: 0.36, attack: 0.002, lowpass: 3000, wet: 0.3 });
+    },
+
+    'run-start'(b) {
+      tone(b, 0, { type: 'square', freq: 440, to: 1760, glide: 0.12, dur: 0.15, gain: 0.25, lowpass: 3500, attack: 0.002 });
+      noise(b, 0.08, { filter: 'highpass', freq: 3000, dur: 0.05, gain: 0.18, attack: 0.001 });
+    },
+
+    'submit-start'(b) {
+      tone(b, 0, { type: 'square', freq: 110, to: 220, glide: 0.25, dur: 0.35, gain: 0.26, lowpass: 1800, attack: 0.01 });
+      tone(b, 0.15, { type: 'square', freq: N(19), dur: 0.18, gain: 0.22, attack: 0.002 });
+      tone(b, 0.28, { type: 'square', freq: N(24), dur: 0.25, gain: 0.25, attack: 0.002, wet: 0.3 });
     },
 
     /* Wrong Answer: a flat dissonant buzz, then a dull low drop */
@@ -296,6 +332,8 @@
     },
     /* the coin */
     run(b) { chip(b, 0.02, N(14), 0.08, 0.18); chip(b, 0.1, N(19), 0.5, 0.18); },
+    'run-start'(b) { chip(b, 0.02, N(7), 0.06, 0.18); chip(b, 0.07, N(12), 0.12, 0.18); },
+    'submit-start'(b) { chip(b, 0.02, N(3), 0.1, 0.2); chip(b, 0.12, N(8), 0.1, 0.2); chip(b, 0.22, N(15), 0.25, 0.22); },
     /* game over: a dud shot, then four falling notes */
     wa(b) {
       noise(b, 0, { filter: 'lowpass', freq: 600, to: 150, dur: 0.25, gain: 0.3, attack: 0.002 });
@@ -346,7 +384,7 @@
      moment's own length (the --dur values in themes/crawler.css, i.e. how long
      the overlay is on screen) with a short fade so the cut doesn't click. A
      shorter file simply plays out. Keep these in step with those durations. */
-  const MOMENT_SECONDS = { title: 2.3, ac: 1.7, run: 1.15, wa: 1.35, tle: 1.35, mle: 1.35, err: 1.35 };
+  const MOMENT_SECONDS = { title: 2.3, ac: 1.7, run: 1.15, wa: 1.35, tle: 1.35, mle: 1.35, err: 1.35, 'run-start': 1.0, 'submit-start': 1.2 };
   /* the anime dizzy Wrong Answer runs longer than the crawler's (anime.css) */
   const MOMENT_SECONDS_ANIME = { 'wa-submit': 1.75 };
   const FADE = 0.25;

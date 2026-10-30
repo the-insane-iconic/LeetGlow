@@ -54,16 +54,25 @@
     UI.result(kind, info);
     sound(kind === 'wa' && info && info.action === 'submit' ? 'wa-submit' : kind);
   }
+  function playAction(action) {
+    if (UI.actionStart) UI.actionStart(action);
+    sound(action === 'submit' ? 'submit-start' : 'run-start');
+  }
   function playTitle(info) { UI.titleCard(info); sound('title'); }
 
   const on = () => MOMENT_THEMES.has(theme()) && !root.hasAttribute('data-lc-focus');
 
-  /* ---- verdicts ------------------------------------------------------------
+  /* ---- execution & verdicts ------------------------------------------------
      Detected once, for every theme, by src/verdict.js (LeetCode's own check
-     JSON first, the DOM as a fallback). A Wrong Answer from Submit -- the
-     hidden tests -- is its own moment (anime: the dizzy spin and its
-     recording); a Wrong Answer from Run keeps the lighter one. */
+     JSON first, the DOM as a fallback). Running and submitting states trigger
+     tactical overlays and sfx; verdicts trigger terminal stamps. */
   if (globalThis.LCTSVerdict) {
+    if (globalThis.LCTSVerdict.subscribeAction) {
+      globalThis.LCTSVerdict.subscribeAction((action) => {
+        if (!on() || !activeSettings().moments || !UI) return;
+        playAction(action);
+      });
+    }
     globalThis.LCTSVerdict.subscribe((v) => {
       if (!on() || !activeSettings().moments || !UI) return;
       const info = { label: v.label, beats: v.beats, action: v.action, lang: v.lang,
@@ -174,6 +183,10 @@
       playTitle(readTitle(slugOf() || '') || { number: '1', title: 'Two Sum', difficulty: 'Easy' });
     } else if (name === 'wa-submit') {
       playResult('wa', { action: 'submit' });
+    } else if (name === 'run-start') {
+      playAction('run');
+    } else if (name === 'submit-start') {
+      playAction('submit');
     } else if (UI.VERDICTS[name]) {
       playResult(name, name === 'ac' ? { beats: '92.4', action: 'submit' } : { action: 'run' });
     }

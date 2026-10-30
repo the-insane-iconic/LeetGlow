@@ -813,6 +813,8 @@
     w.LCTSMoments.setJapanese(settings.japanese);
     if (name === 'title') w.LCTSMoments.titleCard({ number: '1', title: 'Two Sum', difficulty: 'Easy' });
     else if (name === 'wa-submit') w.LCTSMoments.result('wa', { action: 'submit' });
+    else if (name === 'run-start') w.LCTSMoments.actionStart('run');
+    else if (name === 'submit-start') w.LCTSMoments.actionStart('submit');
     else w.LCTSMoments.result(name, name === 'ac' ? { beats: '92.4', action: 'submit' } : { action: 'run' });
     if (settings.sound) globalThis.LCTSSounds.play(name, { volume: settings.volume, theme: 'anime' });
   }));

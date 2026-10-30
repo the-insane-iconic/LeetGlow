@@ -44,10 +44,14 @@
     if ((RUN.test(url) || /interpret_solution/.test(url)) && (d.interpret_id || d.interpret_expected_id)) {
       const id = String(d.interpret_id || d.interpret_expected_id);
       actionOf.set(id, 'run');
+      try { document.dispatchEvent(new CustomEvent('lcts:net-action-start', { detail: { action: 'run' } })); } catch (e) {}
+      try { window.postMessage({ source: 'lcts:net-action-start', payload: { action: 'run' } }, '*'); } catch (e) {}
       return;
     }
     if ((SUBMIT.test(url) || /\/submit/.test(url)) && d.submission_id != null) {
       actionOf.set(String(d.submission_id), 'submit');
+      try { document.dispatchEvent(new CustomEvent('lcts:net-action-start', { detail: { action: 'submit' } })); } catch (e) {}
+      try { window.postMessage({ source: 'lcts:net-action-start', payload: { action: 'submit' } }, '*'); } catch (e) {}
       return;
     }
 

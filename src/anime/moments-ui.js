@@ -253,7 +253,10 @@
       big.append(el('span', 'lcts-ghost a', stamp), el('span', 'lcts-ghost b', stamp));
     }
     let sub = info.label || v.en;
-    if (kind === 'ac' && info.beats) sub += ' · BEATS ' + info.beats + '%';
+    if (kind === 'ac') {
+      if (info.beats) sub += ' · BEATS ' + info.beats + '%';
+      if (info.beats && Number(info.beats) >= 90) node.classList.add('is-legendary');
+    }
     if (kind === 'wa' && !crawler && info.action === 'submit') {
       node.classList.add('is-dizzy');
       node.append(dizzy(big));
@@ -261,8 +264,46 @@
     stack.append(big, el('div', 'lcts-sub', sub));
     if (crawler) stack.append(el('div', 'lcts-code', v.code));
     if (kind === 'tle') stack.append(el('div', 'lcts-timer'));
+    if (kind === 'mle') stack.append(el('div', 'lcts-mle-meter'));
     node.append(stack);
     if (crawler) node.append(...drops(kind));
+    return mount(node, host);
+  }
+
+  /* action: 'run' | 'submit' — tactical execution cue before final verdict arrives */
+  function actionStart(action, host) {
+    const crawler = isCrawler();
+    const node = el('div', 'lcts-moment is-action');
+    node.dataset.action = action;
+    node.dataset.kind = action + '-start';
+
+    const stack = el('div', 'lcts-stack');
+    if (action === 'run') {
+      const stamp = crawler || japanese ? (crawler ? 'SCANNING…' : '修行中…') : 'TESTING…';
+      const big = el('div', 'lcts-big lcts-jp', stamp);
+      const sub = el('div', 'lcts-sub', crawler ? 'RUNNING TEST SUITE' : 'EXECUTING TESTCASES');
+      const pulse = el('div', 'lcts-action-pulse');
+      stack.append(big, sub, pulse);
+      node.append(el('div', 'lcts-action-slash'), stack);
+    } else {
+      node.append(el('div', 'lcts-action-aura'));
+      if (!crawler) node.append(el('div', 'lcts-action-lines'));
+      const stamp = crawler || japanese ? (crawler ? 'DISPATCHING…' : '決戦！') : 'SUBMITTING…';
+      const big = el('div', 'lcts-big lcts-jp', stamp);
+      const sub = el('div', 'lcts-sub', crawler ? 'EVALUATING ALL NODES' : 'JUDGING ALL TESTCASES');
+      const beam = el('div', 'lcts-action-beam');
+      stack.append(big, sub, beam);
+      node.append(stack);
+    }
+
+    /* safety fallback: auto-fade after 7s if network hangs so overlay never lingers */
+    setTimeout(() => {
+      if (node.isConnected) {
+        node.classList.add('is-leaving');
+        setTimeout(() => node.remove(), 350);
+      }
+    }, 7000);
+
     return mount(node, host);
   }
 
@@ -309,5 +350,5 @@
     return mount(node, host);
   }
 
-  root.LCTSMoments = { result, titleCard, setJapanese, VERDICTS, ARCS };
+  root.LCTSMoments = { result, actionStart, titleCard, setJapanese, VERDICTS, ARCS };
 })(globalThis);
