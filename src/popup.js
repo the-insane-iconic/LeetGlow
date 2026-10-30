@@ -507,6 +507,18 @@ function makeMatrixCard() {
     }
   });
 
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area !== 'local') return;
+    if (changes.lcFocus) {
+      focusBtn.classList.toggle('active', !!changes.lcFocus.newValue);
+    }
+    if (changes.lctSettings && changes.lctSettings.newValue) {
+      const s = changes.lctSettings.newValue;
+      if (s.audio) audioBtn.classList.toggle('active', !!s.audio.enabled);
+      if (s.pomodoro) timerBtn.classList.toggle('active', !!s.pomodoro.enabled);
+    }
+  });
+
   focusBtn.addEventListener('click', () => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs && tabs[0]) {
@@ -1705,10 +1717,150 @@ if (rateUsBtn) {
   });
 }
 
-/* Header "Open LeetCode" badge: always active, cleanly opens problem set in a new tab */
-const openLeetCodeBtn = document.getElementById('openLeetCodeBtn');
-if (openLeetCodeBtn) {
-  openLeetCodeBtn.addEventListener('click', () => {
-    chrome.tabs.create({ url: 'https://leetcode.com/problemset/' });
-  });
+/* =============================================================================
+   Header Daily Problem (POTD) Resolution & Caching
+   ============================================================================= */
+const LEETCODE_DAILY_STORAGE_KEY = 'lcDailyProblemCache';
+const LEETCODE_GRAPHQL_URL = 'https://leetcode.com/graphql';
+const LEETCODE_DAILY_QUERY = JSON.stringify({
+  query: `query questionOfToday {
+    activeDailyCodingChallengeQuestion {
+      date
+      link
+      question {
+        title
+        difficulty
+        titleSlug
+      }
+    }
+  }`
+});
+
+function getTodayUtcString() {
+  return new Date().toISOString().slice(0, 10);
 }
+
+let cachedDailyUrl = null;
+let dailyFetchPromise = null;
+
+async function fetchDailyProblem() {
+  if (dailyFetchPromise) return dailyFetchPromise;
+
+  dailyFetchPromise = (async () => {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4000);
+
+      const res = await fetch(LEETCODE_GRAPHQL_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: LEETCODE_DAILY_QUERY,
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      const daily = json && json.data && json.data.activeDailyCodingChallengeQuestion;
+      if (!daily || !daily.link) throw new Error('Invalid daily response');
+
+      const fullUrl = daily.link.startsWith('http')
+        ? daily.link
+        : `https://leetcode.com${daily.link}`;
+
+      const payload = {
+        date: daily.date || getTodayUtcString(),
+        url: fullUrl,
+        title: (daily.question && daily.question.title) || 'Daily Problem',
+        difficulty: (daily.question && daily.question.difficulty) || '',
+        titleSlug: (daily.question && daily.question.titleSlug) || ''
+      };
+
+      chrome.storage.local.set({ [LEETCODE_DAILY_STORAGE_KEY]: payload });
+      return payload;
+    } catch (err) {
+      console.warn('[LeetGlow] Could not fetch daily problem:', err && err.message);
+      return null;
+    } finally {
+      dailyFetchPromise = null;
+    }
+  })();
+
+  return dailyFetchPromise;
+}
+
+function updateDailyButtonUI(data) {
+  const btn = document.getElementById('openLeetCodeBtn');
+  const dot = document.getElementById('dailyProblemDot');
+  const label = document.getElementById('dailyProblemLabel');
+  if (!btn) return;
+
+  if (data && data.url) {
+    cachedDailyUrl = data.url;
+    const diff = data.difficulty ? ` (${data.difficulty})` : '';
+    btn.title = `Today's Problem: ${data.title}${diff} — Click to solve`;
+    btn.setAttribute('aria-label', `Solve today's Daily Problem: ${data.title}${diff}`);
+    if (dot && data.difficulty) {
+      dot.className = `badge-dot ${data.difficulty.toLowerCase()}`;
+      dot.hidden = false;
+    }
+  } else {
+    cachedDailyUrl = 'https://leetcode.com/problemset/';
+    btn.title = "Solve today's Daily Coding Challenge";
+  }
+}
+
+(function initDailyProblem() {
+  const btn = document.getElementById('openLeetCodeBtn');
+  if (!btn) return;
+
+  const today = getTodayUtcString();
+
+  // 1. Immediately apply cached daily problem if valid for today
+  chrome.storage.local.get([LEETCODE_DAILY_STORAGE_KEY], async (res) => {
+    const cached = res && res[LEETCODE_DAILY_STORAGE_KEY];
+    if (cached && cached.date === today && cached.url) {
+      updateDailyButtonUI(cached);
+    } else {
+      // Stale or empty: fetch in background
+      const fresh = await fetchDailyProblem();
+      if (fresh) {
+        updateDailyButtonUI(fresh);
+      } else if (cached && cached.url) {
+        updateDailyButtonUI(cached);
+      }
+    }
+  });
+
+  // 2. React to background service worker updates
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === 'local' && changes[LEETCODE_DAILY_STORAGE_KEY] && changes[LEETCODE_DAILY_STORAGE_KEY].newValue) {
+      updateDailyButtonUI(changes[LEETCODE_DAILY_STORAGE_KEY].newValue);
+    }
+  });
+
+  // 3. Click handler with instant launch & graceful fallback
+  btn.addEventListener('click', async () => {
+    let targetUrl = cachedDailyUrl;
+
+    if (!targetUrl) {
+      try {
+        const fresh = await Promise.race([
+          fetchDailyProblem(),
+          new Promise((resolve) => setTimeout(resolve, 1000))
+        ]);
+        if (fresh && fresh.url) targetUrl = fresh.url;
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    if (!targetUrl) {
+      targetUrl = 'https://leetcode.com/problemset/';
+    }
+
+    chrome.tabs.create({ url: targetUrl });
+  });
+})();
