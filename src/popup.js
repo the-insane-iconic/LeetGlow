@@ -1,27 +1,8 @@
-/* Popup: render four theme cards with live mini-editor previews, persist the
+/* Popup: render theme cards with live previews, persist the
    choice to storage (the content script applies it live to open LeetCode tabs). */
 
 const KEY = 'lcThemeStudio';
 const DEFAULT = 'sakura-dream';
-
-let isPremium = true;
-let isFreeBeta = true;
-
-function openStudioCheckout() {
-  const url = chrome.runtime.getURL('src/studio.html#upgrade');
-  try {
-    chrome.tabs.query({ url: chrome.runtime.getURL('src/studio.html*') }, (tabs) => {
-      if (tabs && tabs.length > 0) {
-        chrome.tabs.update(tabs[0].id, { active: true, url });
-        if (tabs[0].windowId) chrome.windows.update(tabs[0].windowId, { focused: true });
-      } else {
-        chrome.tabs.create({ url });
-      }
-    });
-  } catch (e) {
-    chrome.tabs.create({ url });
-  }
-}
 
 /* Per-theme preview palette (mirrors the real editor colors). */
 const THEMES = {
@@ -113,9 +94,6 @@ if (globalThis.LCT && globalThis.LCT.THEMES) {
     };
   });
 }
-/* the Open Anime Studio button lives directly under the Anime card, so it
-   reads as belonging to that theme; render() re-seats it after each redraw */
-const studioButton = document.getElementById('studio');
 
 /* Preview snippet, tokenized by hand so it shows off each palette.
    Each line: [lineNo, [ {t:'kw'|'fn'|..., s:'text'} | 'plain string' ]]  */
@@ -195,13 +173,6 @@ async function renderWallpaperGrid() {
     renderWallpaperSkeletons();
   }
 
-  let isPrem = isPremium;
-  try {
-    const pData = await chrome.storage.local.get('leetglowPremium');
-    isPrem = !!(pData.leetglowPremium && pData.leetglowPremium.active === true);
-    isPremium = isPrem;
-  } catch (e) { }
-
   const res = await chrome.storage.local.get(['lcAnime', 'lcAnimeArt']);
   const cfg = res.lcAnime || {};
   const isLive = cfg.sceneMode === 'live' && cfg.liveWallpaper;
@@ -217,8 +188,7 @@ async function renderWallpaperGrid() {
       id: 'custom',
       name: res.lcAnimeArt.name || 'Your picture',
       thumb: res.lcAnimeArt.blur || res.lcAnimeArt.wall,
-      isCustom: true,
-      isPro: true
+      isCustom: true
     });
   }
 
@@ -233,8 +203,7 @@ async function renderWallpaperGrid() {
             name: w.name,
             thumb: w.thumbUrl || (w.thumb ? chrome.runtime.getURL(w.thumb) : ''),
             isLive: true,
-            liveData: w,
-            isPro: !!w.isPro
+            liveData: w
           });
         } else {
           // Static wallpaper uploaded to bucket
@@ -245,8 +214,7 @@ async function renderWallpaperGrid() {
             imageUrl: w.imageUrl,
             isLive: false,
             isSupabase: true,
-            bucketData: w,
-            isPro: !!w.isPro
+            bucketData: w
           });
         }
       });
@@ -257,25 +225,13 @@ async function renderWallpaperGrid() {
 
   // 3. Preset scenes from globalThis.LCTS_SCENES (local to extension)
   const scenes = globalThis.LCTS_SCENES || {};
-  const BASIC_SCENES = new Set(['golden-hour', 'moon-field', 'harvest-moon']);
   Object.entries(scenes).forEach(([sceneId, s]) => {
     items.push({
       id: sceneId,
       name: s.name,
-      thumb: chrome.runtime.getURL(s.thumb || s.wall),
-      isPro: !BASIC_SCENES.has(sceneId)
+      thumb: chrome.runtime.getURL(s.thumb || s.wall)
     });
   });
-
-  // Basic free tier ordering: ensure golden-hour, moon-field, harvest-moon are first
-  if (!isPrem) {
-    const basicItems = [];
-    ['golden-hour', 'moon-field', 'harvest-moon'].forEach((bid) => {
-      const idx = items.findIndex((it) => it.id === bid);
-      if (idx > -1) basicItems.push(items.splice(idx, 1)[0]);
-    });
-    items = basicItems.concat(items);
-  }
 
   box.innerHTML = '';
 
@@ -285,12 +241,11 @@ async function renderWallpaperGrid() {
   }
 
   items.forEach(item => {
-    const isLocked = !isPrem && item.isPro;
     const isActive = (item.id === activeId);
 
     const b = document.createElement('button');
     b.type = 'button';
-    b.className = 'wp-card' + (isLocked ? ' is-locked' : '');
+    b.className = 'wp-card';
     b.setAttribute('role', 'radio');
     b.setAttribute('aria-checked', String(isActive));
     b.dataset.wpId = item.id;
@@ -307,11 +262,6 @@ async function renderWallpaperGrid() {
     let badgeHTML = '';
     if (item.isLive) {
       badgeHTML = '<span class="wp-live-badge"><span class="wp-live-dot"></span> LIVE</span><span class="wp-spinner" aria-hidden="true"></span>';
-      if (isLocked) {
-        badgeHTML += '<span class="pro-pill on-tile">PRO</span>';
-      }
-    } else if (isLocked) {
-      badgeHTML = '<span class="pro-pill on-tile">PRO</span>';
     }
 
     b.innerHTML = `
@@ -322,10 +272,6 @@ async function renderWallpaperGrid() {
 
     b.addEventListener('click', async (e) => {
       e.stopPropagation();
-      if (isLocked) {
-        openStudioCheckout();
-        return;
-      }
 
       if (item.isLive) b.classList.add('is-loading');
       try {
@@ -336,7 +282,7 @@ async function renderWallpaperGrid() {
             console.warn('[LeetGlow] Pre-cache warning (falling back to direct):', cacheErr);
           }
         }
-        await selectWallpaper(item, false);
+        await selectWallpaper(item);
       } finally {
         b.classList.remove('is-loading');
       }
@@ -346,11 +292,7 @@ async function renderWallpaperGrid() {
   });
 }
 
-async function selectWallpaper(item, isLocked) {
-  if (isLocked) {
-    openStudioCheckout();
-    return;
-  }
+async function selectWallpaper(item) {
 
   const res = await chrome.storage.local.get(['lcAnime']);
   const cfg = res.lcAnime || {};
@@ -402,7 +344,6 @@ async function selectWallpaper(item, isLocked) {
   });
 
   markSelected('anime');
-  if (studioButton) studioButton.classList.add('lit');
 
   const animeCard = document.querySelector('.card[data-id="anime"]');
   if (animeCard) {
@@ -539,11 +480,11 @@ function makeMatrixCard() {
         </span>
         <span class="q-label">Timer</span>
       </button>
-      <button class="quick-action-btn" data-action="studio" type="button" title="Custom themes, studio and settings">
+      <button class="quick-action-btn" data-action="studio" type="button" title="Anime wallpapers & scenes">
         <span class="q-icon">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3a9 9 0 0 0 0 18c1.3 0 2-.8 2-2 0-.6-.2-1.1-.6-1.5-.3-.4-.4-.7-.4-1 0-.7.5-1.2 1.3-1.2H16a5 5 0 0 0 5-5.1C21 6.6 17 3 12 3Zm-4.5 9a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Zm2.8-4.2a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Zm4.4 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Zm3.3 3.2a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Z"/></svg>
         </span>
-        <span class="q-label">Studio</span>
+        <span class="q-label">Anime</span>
       </button>
     </div>
   `;
@@ -657,13 +598,13 @@ function renderOriginalCards(selected, container) {
       card.type = 'button';
       card.setAttribute('role', 'radio');
       card.setAttribute('aria-checked', String(selected === 'anime'));
-      card.setAttribute('aria-label', 'Open Anime Studio with curated aesthetic wallpapers and live glass');
+      card.setAttribute('aria-label', 'Anime Themes with curated aesthetic wallpapers and live glass');
       card.dataset.id = 'anime';
       card.innerHTML = `
         <div class="anime-card-content">
           <span class="studio-jp" aria-hidden="true"><i>ア</i><i>ニ</i><i>メ</i></span>
           <span class="studio-text">
-            <b>Open Anime Studio</b>
+            <b>Anime Themes</b>
             <span>Curated wallpapers, live glass & sounds</span>
           </span>
           <div class="anime-meta-title-row" aria-label="Toggle wallpapers">
@@ -684,17 +625,13 @@ function renderOriginalCards(selected, container) {
       return;
     }
 
-    const isLocked = !isPremium && !isFreeBeta && id === 'crawler';
     const card = document.createElement('button');
-    card.className = 'card' + (isLocked ? ' is-locked' : '');
+    card.className = 'card';
     card.type = 'button';
     card.setAttribute('role', 'radio');
     card.setAttribute('aria-checked', String(id === selected));
-    card.setAttribute('aria-label', isLocked ? `${t.name} theme (PRO — Click to unlock)` : `${t.name} theme`);
+    card.setAttribute('aria-label', `${t.name} theme`);
     card.dataset.id = id;
-    if (isLocked) {
-      card.title = `${t.name} (PRO Theme)`;
-    }
     card.style.setProperty('--card-accent', t.accent);
     card.innerHTML =
       `<div class="preview tex-${t.tex}" style="${pvVars(t.pv)}">${preview}</div>` +
@@ -705,22 +642,11 @@ function renderOriginalCards(selected, container) {
       `<span class="check">${CHECK}</span>` +
       `</div>`;
     card.addEventListener('click', () => {
-      if (id === 'crawler' && !isPremium && !isFreeBeta) {
-        openStudioCheckout();
-        return;
-      }
       toggleWallpaperDrawer(false);
       choose(id);
     });
     container.appendChild(card);
 
-    if (id === 'crawler' && !isFreeBeta) {
-      const ribbon = document.createElement('div');
-      ribbon.className = 'corner-ribbon-wrap';
-      ribbon.setAttribute('aria-hidden', 'true');
-      ribbon.innerHTML = '<span class="corner-ribbon">Premium</span>';
-      card.appendChild(ribbon);
-    }
     if (id === 'game') {
       const url = chrome.runtime.getURL('textures/game/card.webp');
       card.querySelector('.preview').style.setProperty('--pv-scene', `url("${url}")`);
@@ -872,10 +798,6 @@ function markSelected(id) {
 }
 
 function choose(id) {
-  if (id === 'crawler' && !isPremium && !isFreeBeta) {
-    openStudioCheckout();
-    return;
-  }
   markSelected(id);
   chrome.storage.local.set({ [KEY]: id });
   /* content.js hears the storage change and applies it live in every open
@@ -909,9 +831,7 @@ try {
 } catch (e) { }
 
 /* boot */
-chrome.storage.local.get([KEY, 'leetglowPremium'], (res) => {
-  isPremium = res?.leetglowPremium ? !!res.leetglowPremium.active : true;
-  isFreeBeta = res?.leetglowPremium ? res.leetglowPremium.is_free_beta !== false : true;
+chrome.storage.local.get([KEY], (res) => {
   let selected = (res && res[KEY]);
   if (!selected || !THEMES[selected]) {
     selected = 'sakura-dream';
@@ -930,10 +850,6 @@ document.addEventListener('keydown', (e) => {
   const dir = (e.key === 'ArrowDown' || e.key === 'ArrowRight') ? 1 : -1;
   const next = cards[(idx + dir + cards.length) % cards.length];
   next.focus();
-  if (next.dataset.id === 'crawler' && !isPremium && !isFreeBeta) {
-    openStudioCheckout();
-    return;
-  }
   choose(next.dataset.id);
 });
 
@@ -1473,120 +1389,18 @@ if (openThemeDrawerBtn) {
 }
 
 /* =============================================================================
-   My Space: Custom Wallpapers Gallery, Upload & Premium Gating
+   My Space: Custom Wallpapers Gallery & Local Upload
    ============================================================================= */
 (function initMySpace() {
-  const badge = document.getElementById('myspacePremBadge');
   const dropzone = document.getElementById('customUploadDropzone');
   const dropContainer = document.getElementById('myspaceDropContainer') || dropzone;
   const uploadBtn = document.getElementById('myspaceUploadBtn');
   const fileInput = document.getElementById('customUploadInput');
-  const dropzoneContent = document.getElementById('dropzoneContent');
   const statusText = document.getElementById('uploadStatusText');
   const galleryList = document.getElementById('customGalleryList');
   const galleryCount = document.getElementById('customGalleryCount');
-  const upgradeModal = document.getElementById('popupUpgradeModal');
-  const closeUpgradeModal = document.getElementById('closePopupUpgradeModal');
-  const modalUpgradeBtn = document.getElementById('modalUpgradeBtn');
-  const modalActivateKeyBtn = document.getElementById('modalActivateKeyBtn');
 
   if (!dropzone || !galleryList) return;
-
-  async function checkPremium() {
-    try {
-      const data = await chrome.storage.local.get('leetglowPremium');
-      if (data && data.leetglowPremium) {
-        isPremium = data.leetglowPremium.active === true;
-        isFreeBeta = data.leetglowPremium.is_free_beta !== false;
-      } else {
-        isPremium = true;
-        isFreeBeta = true;
-      }
-    } catch (e) {
-      isPremium = true;
-      isFreeBeta = true;
-    }
-    updatePremiumUI();
-    if (globalThis.LeetGlowPremium && typeof LeetGlowPremium.syncUIElements === 'function') {
-      LeetGlowPremium.syncUIElements(document, { active: isPremium, is_free_beta: isFreeBeta });
-    }
-  }
-
-  function updatePremiumUI() {
-    if (badge) {
-      if (isFreeBeta) {
-        badge.style.display = 'none';
-      } else {
-        badge.style.display = '';
-        if (isPremium) {
-          badge.innerHTML = '<span class="badge-dot"></span><span>Premium Active</span>';
-          badge.className = 'prem-tier-badge pro';
-        } else {
-          badge.innerHTML = '<span>Free Plan</span>';
-          badge.className = 'prem-tier-badge free';
-        }
-      }
-    }
-
-    if (dropzone) {
-      if (isPremium || isFreeBeta) {
-        dropzone.classList.remove('locked');
-        dropzoneContent.innerHTML = `
-          <div class="dropzone-active-body">
-            <div class="dropzone-icon-box active">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="17 8 12 3 7 8"/>
-                <line x1="12" y1="3" x2="12" y2="15"/>
-              </svg>
-            </div>
-            <div class="dropzone-text">
-              <span class="dropzone-title">Upload Custom Wallpaper</span>
-              <span class="dropzone-sub">Click or drop any 4K illustration (PNG, JPG, WebP)</span>
-            </div>
-          </div>
-        `;
-      } else {
-        dropzone.classList.add('locked');
-        dropzoneContent.innerHTML = `
-          <div class="dropzone-locked-body">
-            <div class="dropzone-icon-box locked">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-              </svg>
-            </div>
-            <div class="dropzone-text">
-              <span class="dropzone-title">Custom Wallpaper Uploads</span>
-              <span class="dropzone-sub">Transform your problem workspace with your own artwork</span>
-            </div>
-            <button id="btnUnlockPremDropzone" class="btn-unlock-prem" type="button">
-              <svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor">
-                <path d="M8 1.5l1.8 3.6 4 .6-2.9 2.8.7 4L8 10.6l-3.6 1.9.7-4L2.2 5.7l4-.6L8 1.5z"/>
-              </svg>
-              <span>Unlock Custom Art · ₹29</span>
-            </button>
-          </div>
-        `;
-        const unlockBtn = document.getElementById('btnUnlockPremDropzone');
-        if (unlockBtn) {
-          unlockBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            openUpgrade();
-          });
-        }
-      }
-    }
-  }
-
-  function openUpgrade() {
-    if (isFreeBeta) return;
-    if (upgradeModal && typeof upgradeModal.showModal === 'function') {
-      upgradeModal.showModal();
-    } else {
-      openStudioCheckout();
-    }
-  }
 
   function showStatus(text, isError = false, isBusy = false) {
     if (!statusText) return;
@@ -1676,10 +1490,6 @@ if (openThemeDrawerBtn) {
   galleryList.addEventListener('click', async (e) => {
     const addMoreBtn = e.target.closest('#btnAddMoreWallpapers');
     if (addMoreBtn) {
-      if (!isPremium) {
-        openUpgrade();
-        return;
-      }
       if (fileInput) fileInput.click();
       return;
     }
@@ -1687,10 +1497,6 @@ if (openThemeDrawerBtn) {
     const applyBtn = e.target.closest('.btn-apply-wall');
     if (applyBtn) {
       const id = applyBtn.dataset.id;
-      if (!isPremium) {
-        openUpgrade();
-        return;
-      }
       chrome.storage.local.get(['lcCustomGallery', 'lcAnime'], (res) => {
         const item = (res.lcCustomGallery || []).find((g) => g.id === id);
         if (!item) return;
@@ -1754,10 +1560,6 @@ if (openThemeDrawerBtn) {
   /* Header Upload Button */
   if (uploadBtn) {
     uploadBtn.addEventListener('click', () => {
-      if (!isPremium) {
-        openUpgrade();
-        return;
-      }
       if (fileInput) fileInput.click();
     });
   }
@@ -1765,10 +1567,6 @@ if (openThemeDrawerBtn) {
   /* Dropzone and File Upload logic */
   if (dropzone) {
     dropzone.addEventListener('click', () => {
-      if (!isPremium) {
-        openUpgrade();
-        return;
-      }
       if (fileInput) fileInput.click();
     });
   }
@@ -1791,10 +1589,6 @@ if (openThemeDrawerBtn) {
       e.preventDefault();
       dropContainer.classList.remove('dragover');
       if (dropzone) dropzone.classList.remove('dragover');
-      if (!isPremium) {
-        openUpgrade();
-        return;
-      }
       const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
       if (file) handleUpload(file);
     });
@@ -1809,10 +1603,6 @@ if (openThemeDrawerBtn) {
   }
 
   async function handleUpload(file) {
-    if (!isPremium) {
-      openUpgrade();
-      return;
-    }
     if (!file.type.startsWith('image/')) {
       showStatus('Please select an image file (PNG, JPEG, WebP).', true);
       return;
@@ -1882,87 +1672,16 @@ if (openThemeDrawerBtn) {
     }
   }
 
-  /* Modal Close Handlers */
-  if (closeUpgradeModal && upgradeModal) {
-    closeUpgradeModal.addEventListener('click', () => upgradeModal.close());
-    upgradeModal.addEventListener('click', (e) => {
-      if (e.target === upgradeModal) upgradeModal.close();
-    });
-  }
-
-  if (modalUpgradeBtn) {
-    modalUpgradeBtn.addEventListener('click', () => {
-      if (upgradeModal) upgradeModal.close();
-      chrome.tabs.create({ url: chrome.runtime.getURL('src/studio.html#upgrade') });
-    });
-  }
-
-  if (modalActivateKeyBtn) {
-    modalActivateKeyBtn.addEventListener('click', () => {
-      if (upgradeModal) upgradeModal.close();
-      chrome.tabs.create({ url: chrome.runtime.getURL('src/studio.html#activate') });
-    });
-  }
-
   /* Listen for storage changes */
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area !== 'local') return;
-    if (changes.leetglowPremium) {
-      isPremium = !!changes.leetglowPremium.newValue?.active;
-      isFreeBeta = changes.leetglowPremium.newValue?.is_free_beta !== false;
-      updatePremiumUI();
-      updateFooterTierBadge(isPremium, isFreeBeta);
-      if (globalThis.LeetGlowPremium && typeof LeetGlowPremium.syncUIElements === 'function') {
-        LeetGlowPremium.syncUIElements(document, changes.leetglowPremium.newValue);
-      }
-      renderGallery();
-      chrome.storage.local.get(KEY, (res) => {
-        const cur = (res && res[KEY]) || DEFAULT;
-        render(cur);
-      });
-    }
     if (changes.lcCustomGallery || changes.lcAnimeArt || changes.lcAnime) {
       renderGallery();
     }
   });
 
-  checkPremium();
   renderGallery();
 })();
-
-/* Footer tier badge: Basic (pink theme) vs PRO (shiny golden); hidden in free beta */
-function updateFooterTierBadge(isPrem, isBeta) {
-  const badge = document.getElementById('tierBadge');
-  if (!badge) return;
-  if (isBeta !== false) {
-    badge.style.display = 'none';
-    return;
-  }
-  badge.style.display = '';
-  if (isPrem) {
-    badge.className = 'pro-pill';
-    badge.textContent = 'PRO';
-    badge.title = 'LeetGlow PRO Lifetime Active';
-  } else {
-    badge.className = 'tier-badge-pill basic';
-    badge.textContent = 'Basic';
-    badge.title = 'Basic Free Tier';
-  }
-}
-
-// Initial sync on popup boot
-chrome.storage.local.get('leetglowPremium', (data) => {
-  const isPrem = data?.leetglowPremium ? !!data.leetglowPremium.active : true;
-  const isBeta = data?.leetglowPremium ? data.leetglowPremium.is_free_beta !== false : true;
-  updateFooterTierBadge(isPrem, isBeta);
-  if (globalThis.LeetGlowPremium && typeof LeetGlowPremium.syncUIElements === 'function') {
-    LeetGlowPremium.syncUIElements(document, { active: isPrem, is_free_beta: isBeta });
-  }
-  // Seamlessly check remote entitlement in the background
-  if (globalThis.LeetGlowPremium && typeof LeetGlowPremium.checkServerEntitlement === 'function') {
-    LeetGlowPremium.checkServerEntitlement().catch(() => { });
-  }
-});
 
 /* Footer pill actions */
 if (globalThis.LCTSBugButton) {

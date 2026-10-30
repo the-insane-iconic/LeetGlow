@@ -14,7 +14,7 @@
    },
    "commands": {
       "toggle-focus": {
-         "description": "Anime Studio: toggle focus mode (hide the scene and moments)",
+         "description": "Toggle focus mode (hide the scene and moments)",
          "suggested_key": {
             "default": "Ctrl+Shift+Period",
             "mac": "Command+Shift+Period"
@@ -42,8 +42,7 @@
       "48": "icons/icon48.png"
    },
    "host_permissions": [
-      "https://*.supabase.co/*",
-      "https://*.razorpay.com/*"
+      "https://*.supabase.co/*"
    ],
    "manifest_version": 3,
    "name": "LeetGlow – Aesthetic LeetCode Themes, Clean Animations & Focus Tools",

@@ -164,7 +164,9 @@
   }
 
   function openStudio() {
-    window.open(chrome.runtime.getURL('src/studio.html'), '_blank');
+    try {
+      chrome.runtime.sendMessage({ type: 'open-side-panel' });
+    } catch (e) {}
   }
 
   async function syncActiveTheme(themeId) {

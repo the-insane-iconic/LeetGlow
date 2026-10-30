@@ -1645,12 +1645,6 @@ body {
   border-color: #ffffff;
   box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.45), 0 8px 24px -8px rgba(0, 0, 0, 0.6), 0 0 16px rgba(255, 255, 255, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
-.card.is-locked:hover {
-  border-color: rgba(34, 197, 94, 0.4);
-}
-.card.is-locked:hover .corner-ribbon {
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.55), 0 0 12px rgba(34, 197, 94, 0.5);
-}
 
 /* ---- Wallpaper Drawer (2*n grid in sidepanel) ---------------------------- */
 .wallpaper-drawer {
@@ -1905,51 +1899,6 @@ body {
   box-shadow: 0 0 6px #ff2a6d;
 }
 
-.wp-card.is-locked {
-  cursor: pointer;
-}
-
-/* ---- Golden Shiny PRO Pill Component (Unified) ----------------------------- */
-.pro-pill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-family: inherit;
-  font-size: 9.5px;
-  font-weight: 800;
-  padding: 1.5px 7.5px;
-  border-radius: 9999px;
-  background: linear-gradient(135deg, #fff3a1 0%, #ffd700 45%, #ff9e00 100%);
-  color: #3b1e00;
-  border: 1px solid #ffe57f;
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.75);
-  letter-spacing: 0.05em;
-  text-shadow: 0 0.5px 0 rgba(255, 255, 255, 0.6);
-  line-height: 1.25;
-  user-select: none;
-  white-space: nowrap;
-  flex-shrink: 0;
-  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
-}
-
-.pro-pill.on-tile,
-.wp-card .wp-pro-badge {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  z-index: 4;
-  pointer-events: none;
-  font-size: 7.5px;
-  padding: 1px 4.5px;
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.55), 0 2px 6px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.75);
-}
-
-.wp-card.is-locked:hover .pro-pill.on-tile,
-.wp-card.is-locked:hover .wp-pro-badge {
-  transform: scale(1.08);
-  box-shadow: 0 0 14px rgba(255, 215, 0, 0.75), 0 2px 8px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.85);
-}
-
 /* Loading state for wallpaper card (circular spinner & frosted backdrop) */
 .wp-card.is-loading::after {
   content: "";
@@ -2049,38 +1998,6 @@ body {
   100% {
     transform: translateX(100%);
   }
-}
-
-/* 45° green corner ribbon for premium themes (Anime Studio) */
-.corner-ribbon-wrap {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 75px;
-  height: 75px;
-  overflow: hidden;
-  pointer-events: none;
-  z-index: 6;
-}
-.corner-ribbon {
-  position: absolute;
-  top: 13px;
-  right: -25px;
-  width: 96px;
-  transform: rotate(45deg);
-  background: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
-  color: #ffffff;
-  text-align: center;
-  font-family: var(--font-ui);
-  font-size: 9.5px;
-  font-weight: 750;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  line-height: 18px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-  user-select: none;
 }
 
 /* mini editor preview — the hero of each card */
@@ -2204,40 +2121,6 @@ body {
   background-image: linear-gradient(color-mix(in srgb, var(--pv-bg) 72%, transparent), color-mix(in srgb, var(--pv-bg) 72%, transparent)), var(--pv-scene, none);
   background-size: auto, cover;
   background-position: center;
-}
-.studio {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  margin-top: -1px;
-  padding: 11px 14px;
-  border: 1.5px solid rgba(255, 255, 255, 0.92);
-  border-radius: 13px;
-  background: #ffffff;
-  color: #0f172a;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), 0 0 12px rgba(255, 255, 255, 0.25), inset 0 1px 0 rgba(255, 255, 255, 1);
-  transition: all .18s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.studio:hover {
-  background: #ffffff;
-  border-color: #cbd5e1;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25), 0 0 16px rgba(255, 255, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 1);
-  transform: translateY(-1px);
-}
-.studio:active {
-  transform: translateY(0);
-}
-.studio.lit {
-  border-color: #94a3b8;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-}
-.studio:focus-visible {
-  outline: 2px solid #0284c7;
-  outline-offset: 2px;
 }
 .studio-jp {
   font-family: "Dela Gothic One", var(--font-ui);
@@ -2802,14 +2685,6 @@ body {
   height: 40px;
   border-radius: 12px;
   transition: transform .18s ease;
-}
-.dropzone-icon-box.locked {
-  background: #ffffff;
-  color: #db2777;
-  border: 1px solid #fbcfe8;
-  box-shadow: 0 2px 6px rgba(244, 114, 182, 0.12);
-}
-.dropzone-icon-box.active {
   background: #fdf2f8;
   color: #ec4899;
   border: 1.5px solid #f472b6;
@@ -2829,28 +2704,6 @@ body {
   line-height: 1.4;
   max-width: 260px;
   margin-top: 2px;
-}
-
-.btn-unlock-prem {
-  margin-top: 6px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 16px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
-  color: #ffffff;
-  font-family: var(--font-ui);
-  font-weight: 700;
-  font-size: 11.5px;
-  border: none;
-  cursor: pointer;
-  box-shadow: 0 4px 14px -2px rgba(236, 72, 153, 0.45);
-  transition: transform .15s ease, box-shadow .15s ease;
-}
-.btn-unlock-prem:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 18px -2px rgba(236, 72, 153, 0.6);
 }
 
 .upload-status-text {
@@ -3031,169 +2884,5 @@ body {
   max-width: 250px;
 }
 
-/* =============================================================================
-   Premium Upgrade Modal in Side Panel
-   ============================================================================= */
-.popup-modal {
-  position: fixed;
-  inset: 0;
-  margin: auto;
-  border: none;
-  background: transparent;
-  padding: 16px;
-  max-width: 320px;
-  width: 90%;
-  z-index: 1000;
-}
-.popup-modal::backdrop {
-  background: rgba(0, 0, 0, 0.72);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-}
-.popup-modal-content {
-  position: relative;
-  background: #13151c;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 16px;
-  padding: 22px 18px;
-  box-shadow: 0 24px 60px -10px rgba(0, 0, 0, 0.9), 0 0 24px -2px rgba(122, 162, 247, 0.15);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  text-align: center;
-  animation: modal-pop 0.26s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@keyframes modal-pop {
-  from { opacity: 0; transform: scale(0.94) translateY(8px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
-}
-.popup-modal-close {
-  position: absolute;
-  top: 10px;
-  right: 12px;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  border: 1px solid var(--pop-border);
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--pop-muted);
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all .15s;
-}
-.popup-modal-close:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: #ffffff;
-}
-.popup-modal-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  margin: 0 auto;
-  padding: 3px 10px;
-  border-radius: 99px;
-  font-size: 10.5px;
-  font-weight: 600;
-  background: rgba(122, 162, 247, 0.12);
-  color: #93c5fd;
-  border: 1px solid rgba(122, 162, 247, 0.35);
-}
-.popup-modal-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: #ffffff;
-  letter-spacing: -0.01em;
-  margin-top: -2px;
-}
-.popup-modal-desc {
-  font-size: 11px;
-  color: var(--pop-muted);
-  line-height: 1.4;
-  margin-top: -4px;
-}
-.popup-modal-price-box {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
-  padding: 9px;
-}
-.price-amount {
-  font-size: 22px;
-  font-weight: 800;
-  color: #ffffff;
-}
-.price-label {
-  font-size: 10px;
-  color: var(--pop-faint);
-  margin-top: 1px;
-}
-.popup-modal-perks {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  text-align: left;
-}
-.popup-modal-perks li {
-  font-size: 10.5px;
-  color: var(--pop-text);
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-.popup-modal-perks li span {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: rgba(34, 197, 94, 0.2);
-  color: #4ade80;
-  font-size: 9px;
-  font-weight: 800;
-  flex-shrink: 0;
-}
-.popup-modal-cta {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  width: 100%;
-  padding: 9px 16px;
-  border-radius: 99px;
-  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-  color: #ffffff;
-  font-family: var(--font-ui);
-  font-weight: 650;
-  font-size: 12px;
-  border: none;
-  cursor: pointer;
-  box-shadow: 0 4px 16px -3px rgba(59, 130, 246, 0.5);
-  transition: transform .15s, box-shadow .15s;
-}
-.popup-modal-cta:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px -3px rgba(59, 130, 246, 0.7);
-}
-.popup-modal-secondary {
-  background: transparent;
-  border: none;
-  color: var(--pop-faint);
-  font-size: 10.5px;
-  cursor: pointer;
-  padding: 4px;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  transition: color .12s;
-}
-.popup-modal-secondary:hover {
-  color: var(--pop-text);
 }
 
