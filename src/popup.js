@@ -636,7 +636,9 @@ function makeMatrixCard() {
   });
 
   studioBtn.addEventListener('click', () => {
-    chrome.tabs.create({ url: chrome.runtime.getURL('src/studio.html') });
+    switchTab('tab-themes');
+    choose('anime');
+    toggleWallpaperDrawer(true);
   });
 
   return card;
@@ -648,6 +650,40 @@ function renderOriginalCards(selected, container) {
   ORDER.forEach((id) => {
     const t = THEMES[id];
     if (!t) return;
+
+    if (id === 'anime') {
+      const card = document.createElement('button');
+      card.className = 'card anime-studio-card';
+      card.type = 'button';
+      card.setAttribute('role', 'radio');
+      card.setAttribute('aria-checked', String(selected === 'anime'));
+      card.setAttribute('aria-label', 'Open Anime Studio with curated aesthetic wallpapers and live glass');
+      card.dataset.id = 'anime';
+      card.innerHTML = `
+        <div class="anime-card-content">
+          <span class="studio-jp" aria-hidden="true"><i>ア</i><i>ニ</i><i>メ</i></span>
+          <span class="studio-text">
+            <b>Open Anime Studio</b>
+            <span>Curated wallpapers, live glass & sounds</span>
+          </span>
+          <div class="anime-meta-title-row" aria-label="Toggle wallpapers">
+            <span class="click-here-text">click here</span>
+            <svg class="anime-down-arrow" viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4.5L6 8l3.5-3.5"/></svg>
+          </div>
+          <div class="meta check-only">
+            <span class="check">${CHECK}</span>
+          </div>
+        </div>
+      `;
+      card.addEventListener('click', () => {
+        choose('anime');
+        toggleWallpaperDrawer();
+      });
+      container.appendChild(card);
+      container.appendChild(wallpaperDrawer);
+      return;
+    }
+
     const isLocked = !isPremium && !isFreeBeta && id === 'crawler';
     const card = document.createElement('button');
     card.className = 'card' + (isLocked ? ' is-locked' : '');
@@ -657,7 +693,7 @@ function renderOriginalCards(selected, container) {
     card.setAttribute('aria-label', isLocked ? `${t.name} theme (PRO — Click to unlock)` : `${t.name} theme`);
     card.dataset.id = id;
     if (isLocked) {
-      card.title = `${t.name} (PRO Theme — Click to unlock in Anime Studio)`;
+      card.title = `${t.name} (PRO Theme)`;
     }
     card.style.setProperty('--card-accent', t.accent);
     card.innerHTML =
@@ -673,40 +709,11 @@ function renderOriginalCards(selected, container) {
         openStudioCheckout();
         return;
       }
-      if (id === 'anime') {
-        choose(id);
-        toggleWallpaperDrawer();
-      } else {
-        toggleWallpaperDrawer(false);
-        choose(id);
-      }
+      toggleWallpaperDrawer(false);
+      choose(id);
     });
     container.appendChild(card);
 
-    if (id === 'anime') {
-      paintAnimeCard(card.querySelector('.preview'));
-      if (!isFreeBeta) {
-        const ribbon = document.createElement('div');
-        ribbon.className = 'corner-ribbon-wrap';
-        ribbon.setAttribute('aria-hidden', 'true');
-        ribbon.innerHTML = '<span class="corner-ribbon">Premium</span>';
-        card.appendChild(ribbon);
-      }
-
-      const meta = card.querySelector('.meta');
-      if (meta) {
-        meta.innerHTML = `
-          <div class="anime-meta-title-row" aria-label="Toggle wallpapers">
-            <span class="click-here-text">click here</span>
-            <svg class="anime-down-arrow" viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4.5L6 8l3.5-3.5"/></svg>
-          </div>
-          <span class="check">${CHECK}</span>
-        `;
-      }
-
-      if (studioButton) container.appendChild(studioButton);
-      container.appendChild(wallpaperDrawer);
-    }
     if (id === 'crawler' && !isFreeBeta) {
       const ribbon = document.createElement('div');
       ribbon.className = 'corner-ribbon-wrap';
@@ -881,7 +888,6 @@ function choose(id) {
       });
     });
   } catch (e) { }
-  if (studioButton) studioButton.classList.toggle('lit', id === 'anime');
   const status = document.getElementById('status');
   if (status) {
     const tName = (THEMES[id] && THEMES[id].name) ||
@@ -912,14 +918,7 @@ chrome.storage.local.get([KEY, 'leetglowPremium'], (res) => {
     chrome.storage.local.set({ [KEY]: 'sakura-dream' });
   }
   render(selected);
-  if (studioButton) studioButton.classList.toggle('lit', selected === 'anime');
 });
-
-if (studioButton) {
-  studioButton.addEventListener('click', () => {
-    chrome.tabs.create({ url: chrome.runtime.getURL('src/studio.html') });
-  });
-}
 
 /* keyboard: arrow keys move between radio cards and select, as a radio group does */
 document.addEventListener('keydown', (e) => {
@@ -1272,14 +1271,79 @@ chrome.storage.onChanged.addListener((changes, area) => {
   }
 });
 
+/* Anime Experience & Moments toggles in Customize */
+const toggleTitleCard = document.getElementById('toggleTitleCard');
+const toggleMoments = document.getElementById('toggleMoments');
+const toggleJapanese = document.getElementById('toggleJapanese');
+const toggleShareCard = document.getElementById('toggleShareCard');
+
+chrome.storage.local.get(['lcAnime', 'lcShare'], (res) => {
+  const anime = res.lcAnime || {};
+  const share = res.lcShare || {};
+  if (toggleTitleCard) toggleTitleCard.checked = anime.titleCard !== false;
+  if (toggleMoments) toggleMoments.checked = anime.moments !== false;
+  if (toggleJapanese) toggleJapanese.checked = anime.japanese !== false;
+  if (toggleShareCard) toggleShareCard.checked = share.enabled !== false;
+});
+
+function updateAnimeSetting(key, val) {
+  chrome.storage.local.get(['lcAnime'], (res) => {
+    const cfg = res.lcAnime || {};
+    cfg[key] = val;
+    animeCfgCache = cfg;
+    chrome.storage.local.set({ lcAnime: cfg });
+  });
+}
+
+if (toggleTitleCard) {
+  toggleTitleCard.addEventListener('change', () => {
+    updateAnimeSetting('titleCard', toggleTitleCard.checked);
+  });
+}
+if (toggleMoments) {
+  toggleMoments.addEventListener('change', () => {
+    updateAnimeSetting('moments', toggleMoments.checked);
+  });
+}
+if (toggleJapanese) {
+  toggleJapanese.addEventListener('change', () => {
+    updateAnimeSetting('japanese', toggleJapanese.checked);
+  });
+}
+if (toggleShareCard) {
+  toggleShareCard.addEventListener('change', () => {
+    chrome.storage.local.set({ lcShare: { enabled: toggleShareCard.checked } });
+  });
+}
+
+/* Animations & SFX live preview badges */
+function previewMoment(momentName) {
+  const vol = Number(volumeSlider ? volumeSlider.value : 80) / 100;
+  if (globalThis.LCTSSounds && globalThis.LCTSSounds.play) {
+    globalThis.LCTSSounds.play(momentName, { volume: vol, theme: 'anime' });
+  }
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (tabs && tabs[0] && tabs[0].id) {
+      chrome.tabs.sendMessage(tabs[0].id, { type: 'lcts:play-moment', moment: momentName }, () => {
+        if (chrome.runtime.lastError) {} // suppress if not on problem tab
+      });
+    }
+  });
+}
+
+document.querySelectorAll('.sfx-badge-btn').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const moment = btn.dataset.moment;
+    if (!moment) return;
+    btn.classList.add('playing');
+    setTimeout(() => btn.classList.remove('playing'), 500);
+    previewMoment(moment);
+  });
+});
+
 if (testSoundBtn) {
   testSoundBtn.addEventListener('click', () => {
-    const vol = Number(volumeSlider ? volumeSlider.value : 80) / 100;
-    try {
-      const audio = new Audio(chrome.runtime.getURL('sounds/game/checkpoint.mp3'));
-      audio.volume = Math.max(0, Math.min(1, vol));
-      audio.play().catch(() => { });
-    } catch (e) { }
+    previewMoment('ac');
   });
 }
 
@@ -1361,11 +1425,19 @@ if (resetCustomizeBtn) {
     if (focusSwitch) focusSwitch.checked = false;
     setActivePaletteUI('auto');
 
+    if (toggleTitleCard) toggleTitleCard.checked = true;
+    if (toggleMoments) toggleMoments.checked = true;
+    if (toggleJapanese) toggleJapanese.checked = true;
+    if (toggleShareCard) toggleShareCard.checked = true;
+
     chrome.storage.local.get(['lcAnime', 'lcPixel'], (r) => {
       const cfg = r.lcAnime || {};
       cfg.containerTransparency = DEFAULT_CONTAINER;
       cfg.editorTransparency = DEFAULT_EDITOR;
       cfg.volume = DEFAULT_VOLUME_NORM;
+      cfg.titleCard = true;
+      cfg.moments = true;
+      cfg.japanese = true;
 
       const pix = r.lcPixel || {};
       pix.volume = DEFAULT_VOLUME_NORM;
@@ -1378,7 +1450,8 @@ if (resetCustomizeBtn) {
         lcPalette: 'auto',
         lcFocus: false,
         lcAnime: cfg,
-        lcPixel: pix
+        lcPixel: pix,
+        lcShare: { enabled: true }
       }, () => {
         if (resetStatusText) {
           resetStatusText.hidden = false;
@@ -1389,15 +1462,15 @@ if (resetCustomizeBtn) {
   });
 }
 
-/* Quick studio jump buttons in Customize and My Space */
-['openStudioTuner', 'openStudioArcs'].forEach((id) => {
-  const el = document.getElementById(id);
-  if (el) {
-    el.addEventListener('click', () => {
-      chrome.tabs.create({ url: chrome.runtime.getURL('src/studio.html') });
-    });
-  }
-});
+/* Quick jump buttons in Customize and My Space */
+const openThemeDrawerBtn = document.getElementById('openThemeDrawerBtn');
+if (openThemeDrawerBtn) {
+  openThemeDrawerBtn.addEventListener('click', () => {
+    switchTab('tab-themes');
+    choose('anime');
+    toggleWallpaperDrawer(true);
+  });
+}
 
 /* =============================================================================
    My Space: Custom Wallpapers Gallery, Upload & Premium Gating

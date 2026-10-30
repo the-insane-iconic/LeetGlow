@@ -291,6 +291,11 @@
           if (globalThis.LCT.widgets) globalThis.LCT.widgets.setFocus(!isFocus);
           sendResponse({ ok: true, focus: !isFocus });
         }
+      } else if (msg.type === 'lcts:play-moment') {
+        try {
+          document.dispatchEvent(new CustomEvent('lcts:moment', { detail: msg.moment }));
+        } catch (e) {}
+        sendResponse({ ok: true });
       }
     });
 

@@ -69,13 +69,6 @@
   <div id="view-themes" class="tab-view active" role="tabpanel" aria-labelledby="tab-themes">
     <div id="curatedGrid" class="curated-grid" role="radiogroup" aria-label="Curated vibes"></div>
     <div id="majorThemes" class="major-themes" role="radiogroup" aria-label="Major themes"></div>
-
-    <button id="studio" class="studio" type="button">
-      <span class="studio-jp" aria-hidden="true"><i>ア</i><i>ニ</i><i>メ</i></span>
-      <span class="studio-text"><b>Open Anime Studio</b><span>Use your own picture, tune the glass, preview the
-          moments</span></span>
-      <span class="studio-arrow" aria-hidden="true">→</span>
-    </button>
   </div>
 
   <!-- View 2: Customize View -->
@@ -268,25 +261,64 @@
       </div>
     </div>
 
-    <!-- Containers Transparency Slider -->
-    <div class="panel-card">
+    <!-- Glass & Container Transparency Card (Merged) -->
+    <div class="panel-card transparency-merged-card">
       <div class="panel-card-head">
         <div class="card-icon-title">
-          <div class="card-icon-wrap">
-            <svg class="card-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"
+          <div class="card-icon-wrap transparency-icon-wrap">
+            <svg class="card-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"
               stroke-linecap="round" stroke-linejoin="round">
               <rect x="2" y="2" width="7.5" height="7.5" rx="1.5" />
               <rect x="6.5" y="6.5" width="7.5" height="7.5" rx="1.5" stroke-dasharray="2 1.5" />
             </svg>
           </div>
-          <h3>Containers Transparency</h3>
+          <div>
+            <h3>Glass & Container Transparency</h3>
+            <p class="panel-card-sub">Fine-tune wallpaper reveal across editor and interface containers.</p>
+          </div>
         </div>
-        <span id="containerTransVal" class="slider-val-badge">30%</span>
       </div>
-      <div class="slider-group">
-        <input id="containerTransSlider" class="range-slider" type="range" min="0" max="95" step="1" value="30"
-          aria-label="Containers transparency" />
+
+      <div class="transparency-sliders-box">
+        <!-- Coding Container Transparency Row -->
+        <div class="dual-slider-row">
+          <div class="dual-slider-head">
+            <div class="dual-slider-label">
+              <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="4.5 4.5 1.5 8 4.5 11.5" />
+                <polyline points="11.5 4.5 14.5 8 11.5 11.5" />
+                <line x1="9.5" y1="2.5" x2="6.5" y2="13.5" />
+              </svg>
+              <span>Coding Container Transparency</span>
+            </div>
+            <span id="editorTransVal" class="slider-val-badge">25%</span>
+          </div>
+          <div class="slider-group">
+            <input id="editorTransSlider" class="range-slider" type="range" min="0" max="95" step="1" value="25"
+              aria-label="Coding container transparency" />
+          </div>
+        </div>
+
+        <!-- Interface Containers Transparency Row -->
+        <div class="dual-slider-row">
+          <div class="dual-slider-head">
+            <div class="dual-slider-label">
+              <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2.5" y="2.5" width="11" height="11" rx="1.5" />
+                <line x1="2.5" y1="6.5" x2="13.5" y2="6.5" />
+                <line x1="7.5" y1="6.5" x2="7.5" y2="13.5" />
+              </svg>
+              <span>Containers Transparency</span>
+            </div>
+            <span id="containerTransVal" class="slider-val-badge">30%</span>
+          </div>
+          <div class="slider-group">
+            <input id="containerTransSlider" class="range-slider" type="range" min="0" max="95" step="1" value="30"
+              aria-label="Containers transparency" />
+          </div>
+        </div>
       </div>
+
       <div class="slider-hint">
         <svg class="slider-hint-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="8" cy="8" r="6" />
@@ -297,47 +329,20 @@
       </div>
     </div>
 
-    <!-- Coding Container Transparency Slider -->
-    <div class="panel-card">
+    <!-- Animations & SFX Card -->
+    <div class="panel-card animations-sfx-card">
       <div class="panel-card-head">
         <div class="card-icon-title">
-          <div class="card-icon-wrap">
-            <svg class="card-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"
-              stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="4.5 4.5 1.5 8 4.5 11.5" />
-              <polyline points="11.5 4.5 14.5 8 11.5 11.5" />
-              <line x1="9.5" y1="2.5" x2="6.5" y2="13.5" />
-            </svg>
-          </div>
-          <h3>Coding Container Transparency</h3>
-        </div>
-        <span id="editorTransVal" class="slider-val-badge">25%</span>
-      </div>
-      <div class="slider-group">
-        <input id="editorTransSlider" class="range-slider" type="range" min="0" max="95" step="1" value="25"
-          aria-label="Coding container transparency" />
-      </div>
-    </div>
-
-    <!-- Sound Effects Volume Slider -->
-    <div class="panel-card">
-      <div class="panel-card-head">
-        <div class="card-icon-title">
-          <div class="card-icon-wrap">
-            <svg class="card-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"
+          <div class="card-icon-wrap sfx-icon-wrap">
+            <svg class="card-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"
               stroke-linecap="round" stroke-linejoin="round">
               <polygon points="7 3 3 6 1 6 1 10 3 10 7 13 7 3" fill="currentColor" />
               <path d="M10.5 4.5a5 5 0 0 1 0 7M13 2a8.5 8.5 0 0 1 0 12" />
             </svg>
           </div>
-          <div class="title-with-pill">
-            <h3>Sound Effects Volume</h3>
-            <button id="testSoundBtn" class="btn-test-sound" type="button" title="Test audio volume">
-              <svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor" aria-hidden="true">
-                <polygon points="4 2 13 8 4 14 4 2" />
-              </svg>
-              <span>Test Sound</span>
-            </button>
+          <div>
+            <h3>Animations & SFX</h3>
+            <p class="panel-card-sub">Audio volume and live animation previews.</p>
           </div>
         </div>
         <span id="volumeVal" class="slider-val-badge">80%</span>
@@ -345,6 +350,113 @@
       <div class="slider-group">
         <input id="volumeSlider" class="range-slider" type="range" min="0" max="100" step="1" value="80"
           aria-label="Sound effects volume" />
+      </div>
+
+      <!-- Compact Testing Badges -->
+      <div class="sfx-preview-section">
+        <div class="sfx-preview-title">Preview Animations & Sounds</div>
+        <div class="sfx-badges-grid">
+          <button class="sfx-badge-btn" type="button" data-moment="submit-start" title="Test Submit start animation & sound">
+            <svg viewBox="0 0 16 16" width="9" height="9" fill="currentColor"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
+            <span>Submit</span>
+          </button>
+          <button class="sfx-badge-btn" type="button" data-moment="run-start" title="Test Run code animation & sound">
+            <svg viewBox="0 0 16 16" width="9" height="9" fill="currentColor"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
+            <span>Run</span>
+          </button>
+          <button class="sfx-badge-btn" type="button" data-moment="ac" title="Test Accepted animation & sound">
+            <svg viewBox="0 0 16 16" width="9" height="9" fill="currentColor"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
+            <span>Accepted</span>
+          </button>
+          <button class="sfx-badge-btn" type="button" data-moment="run" title="Test Tests Passed animation & sound">
+            <svg viewBox="0 0 16 16" width="9" height="9" fill="currentColor"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
+            <span>Passed</span>
+          </button>
+          <button class="sfx-badge-btn" type="button" data-moment="wa" title="Test Wrong Answer animation & sound">
+            <svg viewBox="0 0 16 16" width="9" height="9" fill="currentColor"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
+            <span>Wrong Answer</span>
+          </button>
+          <button class="sfx-badge-btn" type="button" data-moment="tle" title="Test Time Limit Exceeded animation & sound">
+            <svg viewBox="0 0 16 16" width="9" height="9" fill="currentColor"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
+            <span>Time Limit</span>
+          </button>
+          <button class="sfx-badge-btn" type="button" data-moment="mle" title="Test Memory Limit Exceeded animation & sound">
+            <svg viewBox="0 0 16 16" width="9" height="9" fill="currentColor"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
+            <span>Memory Limit</span>
+          </button>
+          <button class="sfx-badge-btn" type="button" data-moment="title" title="Test Episode Title Card animation & sound">
+            <svg viewBox="0 0 16 16" width="9" height="9" fill="currentColor"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
+            <span>Title Card</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Anime Experience & Moments Toggles Card -->
+    <div class="panel-card anime-toggles-card">
+      <div class="panel-card-head">
+        <div class="card-icon-title">
+          <div class="card-icon-wrap toggles-icon-wrap">
+            <svg class="card-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 1.5l1.8 3.6L13.8 5.7l-2.9 2.8.7 4-3.6-1.9-3.6 1.9.7-4-2.9-2.8 4-0.6L8 1.5z" />
+            </svg>
+          </div>
+          <div>
+            <h3>Anime Experience & Moments</h3>
+            <p class="panel-card-sub">Personalize cinematic animations, celebratory overlays and typography.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="custom-toggles-list">
+        <!-- Toggle 1: Title Card -->
+        <label class="custom-toggle-row" for="toggleTitleCard">
+          <div class="toggle-text-col">
+            <span class="toggle-main-title">Episode title card when you open a problem</span>
+            <span class="toggle-sub-desc">Cinematic anime opening card for unsolved problems</span>
+          </div>
+          <span class="switch-toggle">
+            <input id="toggleTitleCard" type="checkbox" checked />
+            <span class="toggle-track"></span>
+          </span>
+        </label>
+
+        <!-- Toggle 2: Verdict Moments -->
+        <label class="custom-toggle-row" for="toggleMoments">
+          <div class="toggle-text-col">
+            <span class="toggle-main-title">Verdict moments after Run and Submit</span>
+            <span class="toggle-sub-desc">Full-screen animations, sword slashes, speed lines and verdicts</span>
+          </div>
+          <span class="switch-toggle">
+            <input id="toggleMoments" type="checkbox" checked />
+            <span class="toggle-track"></span>
+          </span>
+        </label>
+
+        <!-- Toggle 3: Japanese Typography -->
+        <label class="custom-toggle-row" for="toggleJapanese">
+          <div class="toggle-text-col">
+            <span class="toggle-main-title">Japanese typography (第1話, 完了！ and arc titles)</span>
+            <span class="toggle-sub-desc">Display Dela Gothic One kanji/kana stamps and arc titles</span>
+          </div>
+          <span class="switch-toggle">
+            <input id="toggleJapanese" type="checkbox" checked />
+            <span class="toggle-track"></span>
+          </span>
+        </label>
+
+        <!-- Toggle 4: Offer Share Card -->
+        <label class="custom-toggle-row" for="toggleShareCard">
+          <div class="toggle-text-col">
+            <span class="toggle-main-title">Offer share card after Accepted</span>
+            <span class="toggle-sub-desc">Show card toast to easily share solution beats on social media</span>
+          </div>
+          <span class="switch-toggle">
+            <input id="toggleShareCard" type="checkbox" checked />
+            <span class="toggle-track"></span>
+          </span>
+        </label>
       </div>
     </div>
 
@@ -457,8 +569,8 @@
             <p class="panel-card-sub">Assign separate wallpapers for Easy, Medium, and Hard.</p>
           </div>
         </div>
-        <button id="openStudioArcs" class="btn-open-studio" type="button">
-          <span>Configure in Studio</span>
+        <button id="openThemeDrawerBtn" class="btn-open-studio" type="button">
+          <span>Choose Wallpapers</span>
           <span aria-hidden="true">→</span>
         </button>
       </div>
@@ -568,6 +680,7 @@
   <script src="leet-themes/themes.js"></script>
   <script src="leet-themes/config.js"></script>
   <script src="leet-themes/utils.js"></script>
+  <script src="anime/sounds.js"></script>
   <script src="popup.js"></script>
 </body>
 
