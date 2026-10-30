@@ -146,15 +146,15 @@ Located in `supabase/functions/`:
 ## 6. Production Deployment Steps
 
 ### Step 1: Razorpay Configuration (Completed)
-- **Live Key ID**: `rzp_live_TsQqQz1qNKYvdP` is XOR-encoded into memory buffer `_R` in [src/premium-config.js](file:///Users/ansh/Documents/Github/LeetGlow/src/premium-config.js).
-- **Security Rule**: The `key_secret` is strictly confidential and **MUST NEVER** be placed in client extension bundles. It resides solely in Supabase Edge Functions Secrets.
+- **Live Key ID**: Configured via environment secret or XOR-encoded into runtime buffer in [src/premium-config.js](file:///Users/ansh/Documents/Github/LeetGlow/src/premium-config.js).
+- **Security Rule**: The `key_secret` is strictly confidential and **MUST NEVER** be placed in client extension bundles or public documentation. It resides solely in Supabase Edge Functions Secrets.
 
 ### Step 2: Set Supabase Secrets (For Optional Server-Side Edge Functions)
 To activate server-side HMAC verification and transactional emails, set secrets in Supabase:
 ```bash
-npx supabase secrets set --project-ref kxtdvzyftfhryvbpbohb \
-  RAZORPAY_KEY_ID=rzp_live_TsQqQz1qNKYvdP \
-  RAZORPAY_KEY_SECRET=yKltko7mpylsRTmHEd8EHV7R \
+npx supabase secrets set --project-ref YOUR_SUPABASE_PROJECT_REF \
+  RAZORPAY_KEY_ID=rzp_live_your_key_id_here \
+  RAZORPAY_KEY_SECRET=your_razorpay_secret_here \
   RAZORPAY_WEBHOOK_SECRET=your_webhook_secret_here \
   RESEND_API_KEY=re_your_resend_api_key
 ```

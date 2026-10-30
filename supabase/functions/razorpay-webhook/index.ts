@@ -4,10 +4,15 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
 
 // Helper: Send Transactional Email via EmailJS
 async function sendKeyEmail(email: string, name: string, key: string, orderId?: string) {
-  const serviceId = Deno.env.get("EMAILJS_SERVICE_ID") || "service_zo3rrys";
-  const templateId = Deno.env.get("EMAILJS_TEMPLATE_ID") || "template_s1jgrvc";
-  const publicKey = Deno.env.get("EMAILJS_PUBLIC_KEY") || "lr-VJt44cVESpln8f";
-  const privateKey = Deno.env.get("EMAILJS_PRIVATE_KEY") || "loLjzUSmwBA34U8ZGZF1s";
+  const serviceId = Deno.env.get("EMAILJS_SERVICE_ID");
+  const templateId = Deno.env.get("EMAILJS_TEMPLATE_ID");
+  const publicKey = Deno.env.get("EMAILJS_PUBLIC_KEY");
+  const privateKey = Deno.env.get("EMAILJS_PRIVATE_KEY");
+
+  if (!serviceId || !templateId || !publicKey || !privateKey) {
+    console.warn("[EmailJS Webhook] Missing EmailJS configuration secrets in environment variables.");
+    return;
+  }
 
   const purchaseDate = new Date().toLocaleDateString("en-US", {
     month: "short",
