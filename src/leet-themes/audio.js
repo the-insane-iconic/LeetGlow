@@ -110,7 +110,8 @@
     _canAutoplay() {
       if (this.ctx && this.ctx.state === 'running') return true;
       const ua = navigator.userActivation;
-      return !ua || ua.hasBeenActive;
+      if (ua) return Boolean(ua.hasBeenActive);
+      return false;
     }
 
     _armUserGesture() {

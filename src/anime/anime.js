@@ -38,10 +38,19 @@
     return el;
   }
 
+  function safeGetURL(path) {
+    try {
+      if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id && chrome.runtime.getURL) {
+        return chrome.runtime.getURL(path);
+      }
+    } catch (e) {}
+    return '';
+  }
+
   function presetUrls(id, cfg) {
     const s = SCENES[id];
     if (s) {
-      return { wall: chrome.runtime.getURL(s.wall), blur: chrome.runtime.getURL(s.blur) };
+      return { wall: safeGetURL(s.wall), blur: safeGetURL(s.blur) };
     }
     const c = cfg || cfgNow;
     if (c && c.staticWallpaper) {
@@ -49,7 +58,7 @@
       if (url) return { wall: url, blur: url };
     }
     const def = SCENES[DEF];
-    return { wall: chrome.runtime.getURL(def.wall), blur: chrome.runtime.getURL(def.blur) };
+    return { wall: def ? safeGetURL(def.wall) : '', blur: def ? safeGetURL(def.blur) : '' };
   }
 
   const LIVE_OVERRIDE_CSS = `

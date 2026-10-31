@@ -45,9 +45,12 @@
   const on = () => root.getAttribute('data-lc-theme') === 'game' &&
     /^\/problems\/[^/]+/.test(location.pathname);
 
-  const PETAL_URL = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
-    ? chrome.runtime.getURL('textures/game/sakura.png')
-    : 'textures/game/sakura.png';
+  let PETAL_URL = 'textures/game/sakura.png';
+  try {
+    if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id && chrome.runtime.getURL) {
+      PETAL_URL = chrome.runtime.getURL('textures/game/sakura.png');
+    }
+  } catch (e) {}
 
   /* LeetCode's own modals (Notes, the Submissions detail panel, etc.) sit
      ABOVE this layer -- it's aria-hidden decoration, not real UI, so it has

@@ -752,70 +752,79 @@ function paintPixelCard(preview) {
    difficulty, the three of them side by side (Easy | Medium | Hard); with one
    scene, that scene; with your own picture, its small blurred copy. */
 function paintAnimeCard(preview) {
-  if (!preview) return;
+  if (!preview || !preview.style) return;
   if (!chrome.runtime?.id) return;
-  chrome.storage.local.get(['lcAnime', 'lcAnimeArt'], (res) => {
-    if (!chrome.runtime?.id || !preview) return;
-    const cfg = (res && res.lcAnime) || {};
-    document.querySelectorAll('.studio-jp').forEach((e) => { e.hidden = cfg.japanese !== true; });
-    const scenes = globalThis.LCTS_SCENES || {}, DEF = globalThis.LCTS_SCENE_DEFAULT;
-    const ARC = globalThis.LCTS_ARC_DEFAULT || {};
-    const thumb = (id) => { const s = scenes[id] || scenes[DEF]; return s ? chrome.runtime.getURL(s.thumb || s.wall) : null; };
-    const custom = cfg.scene === 'custom' && res && res.lcAnimeArt;
-    const arcs = !custom && (cfg.arcs !== undefined ? !!cfg.arcs : !cfg.scene);
+  try {
+    chrome.storage.local.get(['lcAnime', 'lcAnimeArt'], (res) => {
+      try {
+        if (!chrome.runtime?.id || !preview || !preview.style) return;
+        const cfg = (res && res.lcAnime) || {};
+        document.querySelectorAll('.studio-jp').forEach((e) => { e.hidden = cfg.japanese !== true; });
+        const scenes = globalThis.LCTS_SCENES || {}, DEF = globalThis.LCTS_SCENE_DEFAULT;
+        const ARC = globalThis.LCTS_ARC_DEFAULT || {};
+        const thumb = (id) => {
+          try {
+            const s = scenes[id] || scenes[DEF];
+            return s && chrome.runtime?.id ? chrome.runtime.getURL(s.thumb || s.wall) : null;
+          } catch (e) { return null; }
+        };
+        const custom = cfg.scene === 'custom' && res && res.lcAnimeArt;
+        const arcs = !custom && (cfg.arcs !== undefined ? !!cfg.arcs : !cfg.scene);
 
-    let urls, inkFrom;
-    const isLive = cfg.sceneMode === 'live' && cfg.liveWallpaper;
-    if (isLive) {
-      const liveThumb = cfg.liveWallpaper.thumbUrl || (cfg.liveWallpaper.thumb ? chrome.runtime.getURL(cfg.liveWallpaper.thumb) : thumb(cfg.scene));
-      urls = [liveThumb];
-      inkFrom = cfg.liveWallpaper.themeId || cfg.scene || DEF;
-    } else if (cfg.staticWallpaper && cfg.staticWallpaper.imageUrl) {
-      urls = [cfg.staticWallpaper.thumbUrl || cfg.staticWallpaper.imageUrl];
-      inkFrom = cfg.staticWallpaper.themeId || DEF;
-    } else if (custom) { urls = [res.lcAnimeArt.blur]; inkFrom = 'custom'; }
-    else if (arcs) {
-      const pick = (d) => (scenes[(cfg.arcScenes || {})[d]] ? cfg.arcScenes[d] : ARC[d]);
-      const ids = ['easy', 'medium', 'hard'].map(pick);
-      urls = ids.map(thumb); inkFrom = ids[1];
-    } else { urls = [thumb(cfg.scene)]; inkFrom = scenes[cfg.scene] ? cfg.scene : DEF; }
+        let urls, inkFrom;
+        const isLive = cfg.sceneMode === 'live' && cfg.liveWallpaper;
+        if (isLive) {
+          const liveThumb = cfg.liveWallpaper.thumbUrl || (cfg.liveWallpaper.thumb && chrome.runtime?.id ? chrome.runtime.getURL(cfg.liveWallpaper.thumb) : thumb(cfg.scene));
+          urls = [liveThumb];
+          inkFrom = cfg.liveWallpaper.themeId || cfg.scene || DEF;
+        } else if (cfg.staticWallpaper && cfg.staticWallpaper.imageUrl) {
+          urls = [cfg.staticWallpaper.thumbUrl || cfg.staticWallpaper.imageUrl];
+          inkFrom = cfg.staticWallpaper.themeId || DEF;
+        } else if (custom) { urls = [res.lcAnimeArt.blur]; inkFrom = 'custom'; }
+        else if (arcs) {
+          const pick = (d) => (scenes[(cfg.arcScenes || {})[d]] ? cfg.arcScenes[d] : ARC[d]);
+          const ids = ['easy', 'medium', 'hard'].map(pick);
+          urls = ids.map(thumb); inkFrom = ids[1];
+        } else { urls = [thumb(cfg.scene)]; inkFrom = scenes[cfg.scene] ? cfg.scene : DEF; }
 
-    const t = (cfg.themes && cfg.themes[inkFrom]) || (inkFrom !== 'custom' && scenes[inkFrom] && scenes[inkFrom].theme) || cfg.theme;
-    if (t && t.ink) {
-      const ink = t.ink;
-      preview.setAttribute('style', (preview.getAttribute('style') || '') + pvVars({
-        bg: t.scrim, text: ink.variable, line: t.roles['--lc-text3'], kw: ink.keyword, fn: ink.func,
-        num: ink.number, var: ink.param, com: ink.comment, pn: ink.operator
-      }));
-    }
-    const scrim = 'linear-gradient(color-mix(in srgb, var(--pv-bg) 58%, transparent), color-mix(in srgb, var(--pv-bg) 58%, transparent))';
-    if (urls.length === 3) {
-      /* three slices with a hairline between them */
-      const line = 'linear-gradient(90deg, transparent calc(33.33% - 1px), rgba(255,255,255,.35) calc(33.33% - 1px) 33.33%, transparent 33.33% calc(66.66% - 1px), rgba(255,255,255,.35) calc(66.66% - 1px) 66.66%, transparent 66.66%)';
-      preview.style.backgroundImage = [scrim, line].concat(urls.map((u) => `url("${u}")`)).join(',');
-      preview.style.backgroundSize = 'auto, auto, 33.4% 100%, 33.4% 100%, 33.4% 100%';
-      preview.style.backgroundPosition = '0 0, 0 0, 0 0, 50% 0, 100% 0';
-      preview.style.backgroundRepeat = 'no-repeat';
-    } else {
-      preview.style.backgroundImage = '';
-      preview.style.backgroundSize = '';
-      preview.style.backgroundPosition = '';
-      preview.style.backgroundRepeat = '';
-      if (urls[0]) {
-        preview.style.setProperty('--pv-scene', `url("${urls[0]}")`);
-      }
-    }
-
-    if (isLive && (!cfg.liveWallpaper.thumbUrl && !urls[0]) && globalThis.LCTSLiveWallpapers && globalThis.LCTSLiveWallpapers.getThumbnail) {
-      globalThis.LCTSLiveWallpapers.getThumbnail(cfg.liveWallpaper).then(tUrl => {
-        if (!chrome.runtime?.id || !preview) return;
-        if (tUrl) {
-          preview.style.backgroundImage = '';
-          preview.style.setProperty('--pv-scene', `url("${tUrl}")`);
+        const t = (cfg.themes && cfg.themes[inkFrom]) || (inkFrom !== 'custom' && scenes[inkFrom] && scenes[inkFrom].theme) || cfg.theme;
+        if (t && t.ink && preview && typeof preview.setAttribute === 'function') {
+          const ink = t.ink;
+          preview.setAttribute('style', (preview.getAttribute('style') || '') + pvVars({
+            bg: t.scrim, text: ink.variable, line: t.roles['--lc-text3'], kw: ink.keyword, fn: ink.func,
+            num: ink.number, var: ink.param, com: ink.comment, pn: ink.operator
+          }));
         }
-      }).catch(() => { });
-    }
-  });
+        const scrim = 'linear-gradient(color-mix(in srgb, var(--pv-bg) 58%, transparent), color-mix(in srgb, var(--pv-bg) 58%, transparent))';
+        if (urls.length === 3) {
+          /* three slices with a hairline between them */
+          const line = 'linear-gradient(90deg, transparent calc(33.33% - 1px), rgba(255,255,255,.35) calc(33.33% - 1px) 33.33%, transparent 33.33% calc(66.66% - 1px), rgba(255,255,255,.35) calc(66.66% - 1px) 66.66%, transparent 66.66%)';
+          preview.style.backgroundImage = [scrim, line].concat(urls.map((u) => `url("${u}")`)).join(',');
+          preview.style.backgroundSize = 'auto, auto, 33.4% 100%, 33.4% 100%, 33.4% 100%';
+          preview.style.backgroundPosition = '0 0, 0 0, 0 0, 50% 0, 100% 0';
+          preview.style.backgroundRepeat = 'no-repeat';
+        } else {
+          preview.style.backgroundImage = '';
+          preview.style.backgroundSize = '';
+          preview.style.backgroundPosition = '';
+          preview.style.backgroundRepeat = '';
+          if (urls[0]) {
+            preview.style.setProperty('--pv-scene', `url("${urls[0]}")`);
+          }
+        }
+
+        if (isLive && (!cfg.liveWallpaper.thumbUrl && !urls[0]) && globalThis.LCTSLiveWallpapers && globalThis.LCTSLiveWallpapers.getThumbnail) {
+          globalThis.LCTSLiveWallpapers.getThumbnail(cfg.liveWallpaper).then(tUrl => {
+            if (!chrome.runtime?.id || !preview || !preview.style) return;
+            if (tUrl) {
+              preview.style.backgroundImage = '';
+              preview.style.setProperty('--pv-scene', `url("${tUrl}")`);
+            }
+          }).catch(() => { });
+        }
+      } catch (e) {}
+    });
+  } catch (e) {}
 }
 
 function setAccent(id) {

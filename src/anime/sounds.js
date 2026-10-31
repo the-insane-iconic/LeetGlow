@@ -411,20 +411,27 @@
   const warmed = {};
   /* fetch and decode one theme's recordings, once */
   function warm(themeId) {
-    themeId = themeId || currentTheme();
-    const files = FILES[themeId];
-    if (!files || warmed[themeId]) return;
-    warmed[themeId] = true;
-    const kinds = Object.keys(files);
-    if (!kinds.length || typeof chrome === 'undefined' || !chrome.runtime || !chrome.runtime.getURL) return;
-    const dec = new OfflineAudioContext(2, 1, 44100);
-    kinds.forEach((kind) => {
-      fetch(chrome.runtime.getURL('audio/' + themeId + '/' + files[kind]))
-        .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(r.status)))
-        .then((data) => dec.decodeAudioData(data))
-        .then((buf) => { recorded[themeId][kind] = buf; })
-        .catch(() => {});
-    });
+    try {
+      if (typeof chrome === 'undefined' || !chrome.runtime || !chrome.runtime.id || !chrome.runtime.getURL) return;
+      themeId = themeId || currentTheme();
+      const files = FILES[themeId];
+      if (!files || warmed[themeId]) return;
+      warmed[themeId] = true;
+      const kinds = Object.keys(files);
+      if (!kinds.length) return;
+      const dec = new OfflineAudioContext(2, 1, 44100);
+      kinds.forEach((kind) => {
+        try {
+          if (!chrome.runtime?.id) return;
+          const url = chrome.runtime.getURL('audio/' + themeId + '/' + files[kind]);
+          fetch(url)
+            .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(r.status)))
+            .then((data) => dec.decodeAudioData(data))
+            .then((buf) => { recorded[themeId][kind] = buf; })
+            .catch(() => {});
+        } catch (e) {}
+      });
+    } catch (e) {}
   }
 
   function sample(b, buf, kind, themeId) {

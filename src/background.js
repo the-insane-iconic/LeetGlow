@@ -100,7 +100,11 @@ chrome.runtime.onMessage.addListener((m, sender) => {
   ensureOffscreen()
     .then((created) => {
       /* the page did not exist when this message was broadcast: deliver it */
-      if (created || wasOpening) chrome.runtime.sendMessage(Object.assign({}, m.msg, { target: 'lcts-offscreen' }));
+      if (created || wasOpening) {
+        try {
+          chrome.runtime.sendMessage(Object.assign({}, m.msg, { target: 'lcts-offscreen' })).catch(() => {});
+        } catch (e) {}
+      }
     })
     .catch(() => {});
 });

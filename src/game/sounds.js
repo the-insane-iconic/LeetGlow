@@ -98,9 +98,12 @@
   } catch (e) {}
 
   function url(file) {
-    return (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
-      ? chrome.runtime.getURL(DIR + file)
-      : DIR + file;
+    try {
+      if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id && chrome.runtime.getURL) {
+        return chrome.runtime.getURL(DIR + file);
+      }
+    } catch (e) {}
+    return DIR + file;
   }
 
   function element(name) {

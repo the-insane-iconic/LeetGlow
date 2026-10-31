@@ -9,9 +9,12 @@
 (function (root) {
   'use strict';
 
-  var DEFAULT_IMAGE_URL = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
-    ? chrome.runtime.getURL('textures/game/sakura.png')
-    : 'textures/game/sakura.png';
+  var DEFAULT_IMAGE_URL = 'textures/game/sakura.png';
+  try {
+    if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id && chrome.runtime.getURL) {
+      DEFAULT_IMAGE_URL = chrome.runtime.getURL('textures/game/sakura.png');
+    }
+  } catch (e) {}
 
   var imgCache = {};
   function loadImage(src) {
