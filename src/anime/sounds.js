@@ -506,7 +506,11 @@
       running().then(sleepSoon);
     } catch (e) {}
   }
-  function currentTheme() { return document.documentElement.getAttribute('data-lc-theme') || ''; }
+  function currentTheme() {
+    return document.documentElement.getAttribute('data-lc-theme')
+      || document.documentElement.getAttribute('data-lct-theme')
+      || '';
+  }
 
   function ensureContext(volume) {
     if (!ctx) { ctx = new AudioContext({ latencyHint: 'interactive' }); bus = chain(ctx, volume); }
