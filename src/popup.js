@@ -529,18 +529,6 @@ function makeMatrixCard() {
     }
   });
 
-  chrome.storage.onChanged.addListener((changes, area) => {
-    if (area !== 'local') return;
-    if (changes.lcFocus) {
-      focusBtn.classList.toggle('active', !!changes.lcFocus.newValue);
-    }
-    if (changes.lctSettings && changes.lctSettings.newValue) {
-      const s = changes.lctSettings.newValue;
-      if (s.audio) audioBtn.classList.toggle('active', !!s.audio.enabled);
-      if (s.pomodoro) timerBtn.classList.toggle('active', !!s.pomodoro.enabled);
-    }
-  });
-
   focusBtn.addEventListener('click', () => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs && tabs[0]) {
@@ -1193,44 +1181,31 @@ if (pomoAutoToggle) {
   });
 }
 
+/* Consolidated Master Storage Listener */
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area !== 'local') return;
-  if (changes.lcAnime && changes.lcAnime.newValue) {
-    animeCfgCache = changes.lcAnime.newValue;
+
+  // 1. Focus Mode
+  if (changes.lcFocus) {
+    const isFocus = !!changes.lcFocus.newValue;
+    const focusBtn = document.querySelector('.quick-action-btn[data-action="focus"]');
+    if (focusBtn) focusBtn.classList.toggle('active', isFocus);
+    const focusSwitch = document.getElementById('focusSwitch');
+    if (focusSwitch) focusSwitch.checked = isFocus;
   }
-  if (changes.lcPixel && changes.lcPixel.newValue) {
-    pixelCfgCache = changes.lcPixel.newValue;
-  }
-  if (changes.lcPalette && changes.lcPalette.newValue) {
-    setActivePaletteUI(changes.lcPalette.newValue);
-  }
-  if (changes.lcHideAnimeCard) {
-    const hide = !!changes.lcHideAnimeCard.newValue;
-    const animeCard = document.querySelector('.card.anime-studio-card');
-    if (animeCard) animeCard.style.display = hide ? 'none' : '';
-    if (toggleAnimeCard) toggleAnimeCard.checked = !hide;
-  }
-  if (changes.lcContainerTrans && containerTransSlider && document.activeElement !== containerTransSlider) {
-    const v = changes.lcContainerTrans.newValue;
-    containerTransSlider.value = v;
-    if (containerTransVal) containerTransVal.textContent = v + '%';
-    updateSliderFill(containerTransSlider);
-  }
-  if (changes.lcEditorTrans && editorTransSlider && document.activeElement !== editorTransSlider) {
-    const v = changes.lcEditorTrans.newValue;
-    editorTransSlider.value = v;
-    if (editorTransVal) editorTransVal.textContent = v + '%';
-    updateSliderFill(editorTransSlider);
-  }
-  if (changes.lcVolume && volumeSlider && document.activeElement !== volumeSlider) {
-    const v = changes.lcVolume.newValue;
-    volumeSlider.value = v;
-    if (volumeVal) volumeVal.textContent = v + '%';
-    updateSliderFill(volumeSlider);
-  }
+
+  // 2. LeetThemes Settings (Audio, Pomodoro)
   if (changes.lctSettings && changes.lctSettings.newValue) {
-    const p = changes.lctSettings.newValue.pomodoro;
-    if (p) {
+    const s = changes.lctSettings.newValue;
+    if (s.audio) {
+      const audioBtn = document.querySelector('.quick-action-btn[data-action="audio"]');
+      if (audioBtn) audioBtn.classList.toggle('active', !!s.audio.enabled);
+    }
+    if (s.pomodoro) {
+      const timerBtn = document.querySelector('.quick-action-btn[data-action="timer"]');
+      if (timerBtn) timerBtn.classList.toggle('active', !!s.pomodoro.enabled);
+
+      const p = s.pomodoro;
       if (typeof p.work === 'number' && pomoWorkSlider && document.activeElement !== pomoWorkSlider) {
         pomoWorkSlider.value = p.work;
         if (pomoWorkVal) pomoWorkVal.textContent = p.work + ' min';
@@ -1252,6 +1227,54 @@ chrome.storage.onChanged.addListener((changes, area) => {
       if (typeof p.autoStart === 'boolean' && pomoAutoToggle) {
         pomoAutoToggle.checked = p.autoStart;
       }
+    }
+  }
+
+  // 3. Anime & Pixel Theme Caches
+  if (changes.lcAnime && changes.lcAnime.newValue) {
+    animeCfgCache = changes.lcAnime.newValue;
+  }
+  if (changes.lcPixel && changes.lcPixel.newValue) {
+    pixelCfgCache = changes.lcPixel.newValue;
+  }
+
+  // 4. Color Palette
+  if (changes.lcPalette && changes.lcPalette.newValue) {
+    setActivePaletteUI(changes.lcPalette.newValue);
+  }
+
+  // 5. Hide Anime Card
+  if (changes.lcHideAnimeCard) {
+    const hide = !!changes.lcHideAnimeCard.newValue;
+    const animeCard = document.querySelector('.card.anime-studio-card');
+    if (animeCard) animeCard.style.display = hide ? 'none' : '';
+    if (toggleAnimeCard) toggleAnimeCard.checked = !hide;
+  }
+
+  // 6. Sliders (Transparency & Volume)
+  if (changes.lcContainerTrans && containerTransSlider && document.activeElement !== containerTransSlider) {
+    const v = changes.lcContainerTrans.newValue;
+    containerTransSlider.value = v;
+    if (containerTransVal) containerTransVal.textContent = v + '%';
+    updateSliderFill(containerTransSlider);
+  }
+  if (changes.lcEditorTrans && editorTransSlider && document.activeElement !== editorTransSlider) {
+    const v = changes.lcEditorTrans.newValue;
+    editorTransSlider.value = v;
+    if (editorTransVal) editorTransVal.textContent = v + '%';
+    updateSliderFill(editorTransSlider);
+  }
+  if (changes.lcVolume && volumeSlider && document.activeElement !== volumeSlider) {
+    const v = changes.lcVolume.newValue;
+    volumeSlider.value = v;
+    if (volumeVal) volumeVal.textContent = v + '%';
+    updateSliderFill(volumeSlider);
+  }
+
+  // 7. My Space Gallery
+  if (changes.lcCustomGallery || changes.lcAnimeArt || changes.lcAnime) {
+    if (globalThis.__lctsRenderGallery) {
+      globalThis.__lctsRenderGallery();
     }
   }
 });
@@ -1344,11 +1367,6 @@ if (focusSwitch) {
   });
   focusSwitch.addEventListener('change', () => {
     chrome.storage.local.set({ lcFocus: focusSwitch.checked });
-  });
-  chrome.storage.onChanged.addListener((changes, area) => {
-    if (area === 'local' && changes.lcFocus) {
-      focusSwitch.checked = !!changes.lcFocus.newValue;
-    }
   });
 }
 
@@ -1745,13 +1763,8 @@ if (openThemeDrawerBtn) {
     }
   }
 
-  /* Listen for storage changes */
-  chrome.storage.onChanged.addListener((changes, area) => {
-    if (area !== 'local') return;
-    if (changes.lcCustomGallery || changes.lcAnimeArt || changes.lcAnime) {
-      renderGallery();
-    }
-  });
+  // Expose renderGallery to master storage listener
+  globalThis.__lctsRenderGallery = renderGallery;
 
   renderGallery();
 })();
