@@ -28,7 +28,7 @@
   const SHARE_URL = 'chromewebstore.google.com/detail/ecpfpadofaimilfpjedgoedhoaglpjdb';
   const W = 1200, H = 630;
   const root = document.documentElement;
-  const themeId = () => root.getAttribute('data-lc-theme');
+  const themeId = () => root.getAttribute('data-lc-theme') || root.getAttribute('data-lct-theme');
 
   let enabled = true, japanese = false;
   chrome.storage.local.get(['lcShare', 'lcAnime'], (r) => {
@@ -237,6 +237,7 @@
   box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.15);
 }
 html[data-lc-theme] .lcts-share-box textarea,
+html[data-lct-theme] .lcts-share-box textarea,
 .lcts-share-box textarea {
   width: 100%; box-sizing: border-box; margin: 14px 0 12px; min-height: 90px; resize: vertical;
   background: #f8fafc !important; color: #0f172a !important; -webkit-text-fill-color: #0f172a !important;
@@ -244,6 +245,7 @@ html[data-lc-theme] .lcts-share-box textarea,
   padding: 12px 14px; font: 500 13px/1.5 ${SANS}; transition: border-color .15s, box-shadow .15s;
 }
 html[data-lc-theme] .lcts-share-box textarea:focus,
+html[data-lct-theme] .lcts-share-box textarea:focus,
 .lcts-share-box textarea:focus {
   outline: none; border-color: #2563eb !important; background: #ffffff !important;
   color: #0f172a !important; -webkit-text-fill-color: #0f172a !important;
@@ -445,7 +447,7 @@ html[data-lc-theme] .lcts-share-box textarea:focus,
     const d = { number: p.number, title: p.title || document.title.replace(/\s*-\s*LeetCode\s*$/, ''),
                 difficulty: p.difficulty, beats: v.beats, lang: v.lang, runtime: v.runtime, streak };
     /* after the Accepted moment has had its stage */
-    setTimeout(() => offer(d), MOMENT_THEMES[themeId()] || 700);
+    setTimeout(() => offer(d), MOMENT_THEMES[themeId()] || 2100);
   }
   if (globalThis.LCTSVerdict) {
     globalThis.LCTSVerdict.subscribe((v) => { if (v.kind === 'ac' && v.action === 'submit') onAccepted(v); });
