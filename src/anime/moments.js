@@ -147,7 +147,7 @@
     const P = globalThis.LCTSProblem;
     const poll = setInterval(async () => {
       if (ticket !== cardTicket || ++tries > 90) { clearInterval(poll); return; }
-      if (!root.hasAttribute('data-lc-theme')) return;     // the theme is still being applied
+      if (!root.hasAttribute('data-lc-theme') && !root.hasAttribute('data-lct-theme')) return;     // the theme is still being applied
       let info;
       /* a full page load: the server-rendered data already knows whether you
          solved it, so the card can come as soon as the page shows anything */
