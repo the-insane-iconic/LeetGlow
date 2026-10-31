@@ -73,17 +73,53 @@
       string:'#b91c1c',   number:'#d97706',  func:'#0284c7',    type:'#7c3aed',
       param:'#4a1d48',    operator:'#db2777', regexp:'#c026d3', invalid:'#dc2626'
     },
+    'forest-mist': {
+      a: 1,
+      variable:'#e8f3e6', comment:'#96ab9c', keyword:'#7fd18b', control:'#d8c27a',
+      string:'#a7f3d0',   number:'#fde047',  func:'#86efac',    type:'#6ee7b7',
+      param:'#c2dfcb',    operator:'#7fd18b', regexp:'#a7f3d0', invalid:'#f87171'
+    },
+    'midnight-ink': {
+      a: 1,
+      variable:'#e9edf2', comment:'#8f98a5', keyword:'#7aa2ff', control:'#a78bfa',
+      string:'#86efac',   number:'#fdba74',  func:'#93c5fd',    type:'#c084fc',
+      param:'#cbd5e1',    operator:'#7aa2ff', regexp:'#86efac', invalid:'#f87171'
+    },
+    'lofi-cafe': {
+      a: 1,
+      variable:'#f4e7d3', comment:'#b9a48c', keyword:'#e0a86a', control:'#d97706',
+      string:'#9cbfa3',   number:'#f59e0b',  func:'#fcd34d',    type:'#e8b4b8',
+      param:'#d5c4b1',    operator:'#e0a86a', regexp:'#9cbfa3', invalid:'#ef4444'
+    },
+    'rainy-window': {
+      a: 1,
+      variable:'#e6eef7', comment:'#93a7bd', keyword:'#7fb7d8', control:'#c7a6e0',
+      string:'#86efac',   number:'#fde047',  func:'#93c5fd',    type:'#d8b4fe',
+      param:'#bfdbfe',    operator:'#7fb7d8', regexp:'#86efac', invalid:'#f87171'
+    },
     'meadow-breeze': {
       a: 1,
       variable:'#14291f', comment:'#587162', keyword:'#047857', control:'#0284c7',
       string:'#c2410c',   number:'#d97706',  func:'#2563eb',    type:'#0d9488',
       param:'#234233',    operator:'#059669', regexp:'#ea580c', invalid:'#dc2626'
     },
+    'ocean-deep': {
+      a: 1,
+      variable:'#e3f5fb', comment:'#8fb1c2', keyword:'#46c8d8', control:'#8a9dff',
+      string:'#6ee7b7',   number:'#fcd34d',  func:'#38bdf8',    type:'#a78bfa',
+      param:'#93c5fd',    operator:'#67e8f9', regexp:'#6ee7b7', invalid:'#f87171'
+    },
     'paper': {
       a: 1,
       variable:'#1c1917', comment:'#6d685d', keyword:'#c2410c', control:'#b91c1c',
       string:'#15803d',   number:'#d97706',  func:'#0369a1',    type:'#7c3aed',
       param:'#38302b',    operator:'#ea580c', regexp:'#b91c1c', invalid:'#e11d48'
+    },
+    'nord': {
+      a: 1,
+      variable:'#eceff4', comment:'#7b88a1', keyword:'#81a1c1', control:'#88c0d0',
+      string:'#a3be8c',   number:'#b48ead',  func:'#8fbcbb',    type:'#88c0d0',
+      param:'#d8dee9',    operator:'#81a1c1', regexp:'#ebcb8b', invalid:'#bf616a'
     }
   };
 

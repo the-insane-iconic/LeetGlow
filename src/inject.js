@@ -99,6 +99,62 @@
         'editorBracketMatch.background':'#f472b622','editorBracketMatch.border':'#c026d3'
       }
     },
+    'forest-mist': {
+      base: 'vs-dark', fg: 'e8f3e6',
+      syn: { comment:'96ab9ci', keyword:'7fd18bb', control:'d8c27ab', string:'a7f3d0',
+             number:'fde047', func:'86efacb', type:'6ee7b7', variable:'e8f3e6',
+             param:'c2dfcb', constant:'fde047', operator:'7fd18b', regexp:'a7f3d0',
+             tag:'86efac', attr:'6ee7b7', escape:'fde047' },
+      colors: {
+        'editor.background':'#11201a','editor.foreground':'#e8f3e6',
+        'editorLineNumber.foreground':'#405c4f','editorLineNumber.activeForeground':'#7fd18b',
+        'editor.lineHighlightBackground':'#172a2255','editorCursor.foreground':'#7fd18b',
+        'editor.selectionBackground':'#7fd18b33','editor.selectionHighlightBackground':'#7fd18b1f',
+        'editorBracketMatch.background':'#7fd18b26','editorBracketMatch.border':'#7fd18b'
+      }
+    },
+    'midnight-ink': {
+      base: 'vs-dark', fg: 'e9edf2',
+      syn: { comment:'8f98a5i', keyword:'7aa2ffb', control:'a78bfab', string:'86efac',
+             number:'fdba74', func:'93c5fdb', type:'c084fc', variable:'e9edf2',
+             param:'cbd5e1', constant:'fdba74', operator:'7aa2ff', regexp:'86efac',
+             tag:'93c5fd', attr:'c084fc', escape:'fdba74' },
+      colors: {
+        'editor.background':'#12151a','editor.foreground':'#e9edf2',
+        'editorLineNumber.foreground':'#475569','editorLineNumber.activeForeground':'#7aa2ff',
+        'editor.lineHighlightBackground':'#181c2355','editorCursor.foreground':'#7aa2ff',
+        'editor.selectionBackground':'#7aa2ff33','editor.selectionHighlightBackground':'#7aa2ff1f',
+        'editorBracketMatch.background':'#7aa2ff26','editorBracketMatch.border':'#7aa2ff'
+      }
+    },
+    'lofi-cafe': {
+      base: 'vs-dark', fg: 'f4e7d3',
+      syn: { comment:'b9a48ci', keyword:'e0a86ab', control:'d97706b', string:'9cbfa3',
+             number:'f59e0b', func:'fcd34db', type:'e8b4b8', variable:'f4e7d3',
+             param:'d5c4b1', constant:'f59e0b', operator:'e0a86a', regexp:'9cbfa3',
+             tag:'fcd34d', attr:'e8b4b8', escape:'f59e0b' },
+      colors: {
+        'editor.background':'#241c16','editor.foreground':'#f4e7d3',
+        'editorLineNumber.foreground':'#7c6a59','editorLineNumber.activeForeground':'#e0a86a',
+        'editor.lineHighlightBackground':'#2d231b55','editorCursor.foreground':'#e0a86a',
+        'editor.selectionBackground':'#e0a86a33','editor.selectionHighlightBackground':'#e0a86a1f',
+        'editorBracketMatch.background':'#e0a86a26','editorBracketMatch.border':'#e0a86a'
+      }
+    },
+    'rainy-window': {
+      base: 'vs-dark', fg: 'e6eef7',
+      syn: { comment:'93a7bdi', keyword:'7fb7d8b', control:'c7a6e0b', string:'86efac',
+             number:'fde047', func:'93c5fdb', type:'d8b4fe', variable:'e6eef7',
+             param:'bfdbfe', constant:'fde047', operator:'7fb7d8', regexp:'86efac',
+             tag:'93c5fd', attr:'d8b4fe', escape:'fde047' },
+      colors: {
+        'editor.background':'#162130','editor.foreground':'#e6eef7',
+        'editorLineNumber.foreground':'#536b85','editorLineNumber.activeForeground':'#7fb7d8',
+        'editor.lineHighlightBackground':'#1c2a3c55','editorCursor.foreground':'#7fb7d8',
+        'editor.selectionBackground':'#7fb7d833','editor.selectionHighlightBackground':'#7fb7d81f',
+        'editorBracketMatch.background':'#7fb7d826','editorBracketMatch.border':'#7fb7d8'
+      }
+    },
     'meadow-breeze': {
       base: 'vs', fg: '14291f',
       syn: { comment:'587162i', keyword:'047857b', control:'0284c7b', string:'c2410c',
@@ -113,6 +169,20 @@
         'editorBracketMatch.background':'#34d39922','editorBracketMatch.border':'#047857'
       }
     },
+    'ocean-deep': {
+      base: 'vs-dark', fg: 'e3f5fb',
+      syn: { comment:'8fb1c2i', keyword:'46c8d8b', control:'8a9dffb', string:'6ee7b7',
+             number:'fcd34d', func:'38bdf8b', type:'a78bfa', variable:'e3f5fb',
+             param:'93c5fd', constant:'fcd34d', operator:'67e8f9', regexp:'6ee7b7',
+             tag:'38bdf8', attr:'a78bfa', escape:'fcd34d' },
+      colors: {
+        'editor.background':'#0c2230','editor.foreground':'#e3f5fb',
+        'editorLineNumber.foreground':'#486577','editorLineNumber.activeForeground':'#46c8d8',
+        'editor.lineHighlightBackground':'#102c3e55','editorCursor.foreground':'#46c8d8',
+        'editor.selectionBackground':'#46c8d833','editor.selectionHighlightBackground':'#46c8d81f',
+        'editorBracketMatch.background':'#46c8d826','editorBracketMatch.border':'#46c8d8'
+      }
+    },
     'paper': {
       base: 'vs', fg: '1c1917',
       syn: { comment:'6d685di', keyword:'c2410cb', control:'b91c1cb', string:'15803d',
@@ -125,6 +195,20 @@
         'editor.lineHighlightBackground':'#eee4d044','editorCursor.foreground':'#c2410c',
         'editor.selectionBackground':'#fb923c38','editor.selectionHighlightBackground':'#fb923c22',
         'editorBracketMatch.background':'#fb923c22','editorBracketMatch.border':'#c2410c'
+      }
+    },
+    'nord': {
+      base: 'vs-dark', fg: 'eceff4',
+      syn: { comment:'7b88a1i', keyword:'81a1c1b', control:'88c0d0b', string:'a3be8c',
+             number:'b48ead', func:'8fbcbbb', type:'88c0d0', variable:'eceff4',
+             param:'d8dee9', constant:'b48ead', operator:'81a1c1', regexp:'ebcb8b',
+             tag:'8fbcbb', attr:'88c0d0', escape:'ebcb8b' },
+      colors: {
+        'editor.background':'#2e3440','editor.foreground':'#eceff4',
+        'editorLineNumber.foreground':'#4c566a','editorLineNumber.activeForeground':'#88c0d0',
+        'editor.lineHighlightBackground':'#3b425255','editorCursor.foreground':'#88c0d0',
+        'editor.selectionBackground':'#88c0d033','editor.selectionHighlightBackground':'#88c0d01f',
+        'editorBracketMatch.background':'#88c0d026','editorBracketMatch.border':'#88c0d0'
       }
     }
   };
