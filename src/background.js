@@ -21,6 +21,21 @@ chrome.runtime.onInstalled.addListener((details) => {
       .catch((error) => console.error('[LeetGlow] sidePanel.setPanelBehavior error:', error));
   }
   if (details && details.reason === 'install') {
+    // Fresh install defaults: Paper theme + Lofi audio
+    chrome.storage.local.set({
+      lcThemeStudio: 'paper',
+      lctSettings: {
+        version: 1,
+        enabled: true,
+        themeId: 'paper',
+        audio: {
+          enabled: true,
+          preset: 'cafe',
+          volume: 0.32,
+          pauseOnHide: true
+        }
+      }
+    });
     chrome.tabs.create({ url: 'https://leetcode.com/problemset/?topicSlugs=daily' });
   }
 });

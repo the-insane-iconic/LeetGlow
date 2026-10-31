@@ -11,7 +11,7 @@
 ============================================================================= */
 (() => {
   const KEY = 'lcThemeStudio';
-  const DEFAULT = 'sakura-dream';
+  const DEFAULT = 'paper';
   const DARK_THEMES = new Set(['grid', 'crawler', 'pixel']);
   const LCT_THEMES = new Set([
     'sakura-dream', 'forest-mist', 'midnight-ink', 'lofi-cafe',

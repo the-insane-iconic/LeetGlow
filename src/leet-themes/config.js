@@ -11,7 +11,7 @@
   const DEFAULTS = {
     version: 1,
     enabled: true,
-    themeId: 'neon-tokyo',
+    themeId: 'paper',
     intensity: 75,
     fonts: true,
     reducedMotion: false,
@@ -24,7 +24,7 @@
       hideFooter: true
     },
     audio: {
-      enabled: false,
+      enabled: true,
       preset: 'cafe',
       volume: 0.32,
       pauseOnHide: true

@@ -2,7 +2,7 @@
    choice to storage (the content script applies it live to open LeetCode tabs). */
 
 const KEY = 'lcThemeStudio';
-const DEFAULT = 'sakura-dream';
+const DEFAULT = 'paper';
 
 /* Per-theme preview palette (mirrors the real editor colors). */
 const THEMES = {
@@ -499,7 +499,10 @@ function makeMatrixCard() {
 
   chrome.storage.local.get(['lcFocus', 'lctSettings'], (res) => {
     if (res && res.lcFocus) focusBtn.classList.add('active');
-    if (res && res.lctSettings && res.lctSettings.audio && res.lctSettings.audio.enabled) {
+    const audioOn = (res && res.lctSettings && res.lctSettings.audio && typeof res.lctSettings.audio.enabled === 'boolean')
+      ? res.lctSettings.audio.enabled
+      : true;
+    if (audioOn) {
       audioBtn.classList.add('active');
     }
     if (res && res.lctSettings && res.lctSettings.pomodoro && res.lctSettings.pomodoro.enabled) {
@@ -542,7 +545,8 @@ function makeMatrixCard() {
           chrome.storage.local.get(['lctSettings'], (res) => {
             const cfg = res.lctSettings || {};
             cfg.audio = cfg.audio || {};
-            const next = !cfg.audio.enabled;
+            const cur = typeof cfg.audio.enabled === 'boolean' ? cfg.audio.enabled : true;
+            const next = !cur;
             cfg.audio.enabled = next;
             chrome.storage.local.set({ lctSettings: cfg });
             audioBtn.classList.toggle('active', next);
@@ -552,7 +556,8 @@ function makeMatrixCard() {
         chrome.storage.local.get(['lctSettings'], (res) => {
           const cfg = res.lctSettings || {};
           cfg.audio = cfg.audio || {};
-          const next = !cfg.audio.enabled;
+          const cur = typeof cfg.audio.enabled === 'boolean' ? cfg.audio.enabled : true;
+          const next = !cur;
           cfg.audio.enabled = next;
           chrome.storage.local.set({ lctSettings: cfg });
           audioBtn.classList.toggle('active', next);
@@ -849,8 +854,8 @@ try {
 chrome.storage.local.get([KEY], (res) => {
   let selected = (res && res[KEY]);
   if (!selected || !THEMES[selected]) {
-    selected = 'sakura-dream';
-    chrome.storage.local.set({ [KEY]: 'sakura-dream' });
+    selected = DEFAULT;
+    chrome.storage.local.set({ [KEY]: DEFAULT });
   }
   render(selected);
 });

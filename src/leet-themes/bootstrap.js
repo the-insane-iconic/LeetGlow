@@ -89,9 +89,9 @@
 
   function toggleAudio() {
     if (!state.settings) {
-      state.settings = { enabled: true, audio: { enabled: false, preset: 'cafe', volume: 0.35 } };
+      state.settings = { enabled: true, audio: { enabled: true, preset: 'cafe', volume: 0.35 } };
     }
-    if (!state.settings.audio) state.settings.audio = { enabled: false, preset: 'cafe', volume: 0.35 };
+    if (!state.settings.audio) state.settings.audio = { enabled: true, preset: 'cafe', volume: 0.35 };
     const audio = globalThis.LCT.audio;
     let nextOn = false;
     if (audio && audio.playing) {
@@ -235,9 +235,12 @@
 
     // 5. Read active theme from LeetGlow storage
     chrome.storage.local.get(['lcThemeStudio', 'lctSettings'], (res) => {
-      const activeTheme = res.lcThemeStudio || 'sakura-dream';
+      const activeTheme = res.lcThemeStudio || 'paper';
       syncActiveTheme(activeTheme);
-      if (res.lctSettings && res.lctSettings.audio && res.lctSettings.audio.enabled) {
+      const audioEnabled = (res.lctSettings && res.lctSettings.audio && typeof res.lctSettings.audio.enabled === 'boolean')
+        ? res.lctSettings.audio.enabled
+        : true;
+      if (audioEnabled) {
         startAudio();
       }
       if (res.lctSettings && res.lctSettings.pomodoro && res.lctSettings.pomodoro.enabled) {
@@ -306,7 +309,7 @@
 
   // Early theme apply
   chrome.storage.local.get(['lcThemeStudio'], (res) => {
-    const activeTheme = res.lcThemeStudio;
+    const activeTheme = (res && res.lcThemeStudio) || 'paper';
     if (activeTheme && LCT_THEME_IDS.has(activeTheme)) {
       document.documentElement.setAttribute('data-lct-enabled', 'true');
       document.documentElement.setAttribute('data-lct-theme', activeTheme);
