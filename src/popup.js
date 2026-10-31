@@ -156,6 +156,8 @@ function toggleWallpaperDrawer(force) {
   wallpapersDrawerOpen = typeof force === 'boolean' ? force : !wallpapersDrawerOpen;
   container.classList.toggle('wallpapers-expanded', wallpapersDrawerOpen);
   if (curated) curated.classList.toggle('hidden', wallpapersDrawerOpen);
+  const dividerLine = document.querySelector('.curated-end-divider');
+  if (dividerLine) dividerLine.classList.toggle('hidden', wallpapersDrawerOpen);
   document.querySelectorAll('.theme-section-divider').forEach((el) => {
     el.classList.toggle('hidden', wallpapersDrawerOpen);
   });
@@ -620,6 +622,11 @@ function renderOriginalCards(selected, container) {
       card.setAttribute('aria-checked', String(selected === 'anime'));
       card.setAttribute('aria-label', 'Anime Themes with curated aesthetic wallpapers and live glass');
       card.dataset.id = 'anime';
+
+      chrome.storage.local.get(['lcHideAnimeCard'], (res) => {
+        if (res && res.lcHideAnimeCard) card.style.display = 'none';
+      });
+
       card.innerHTML = `
         <div class="anime-card-content">
           <span class="studio-jp" aria-hidden="true"><i>ア</i><i>ニ</i><i>メ</i></span>
@@ -634,9 +641,21 @@ function renderOriginalCards(selected, container) {
           <div class="meta check-only">
             <span class="check">${CHECK}</span>
           </div>
+          <button class="anime-hide-btn" type="button" title="Hide Anime card from main list" aria-label="Hide Anime Themes card">
+            <svg viewBox="0 0 16 16" width="9" height="9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
+          </button>
         </div>
       `;
-      card.addEventListener('click', () => {
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.anime-hide-btn')) {
+          e.stopPropagation();
+          e.preventDefault();
+          chrome.storage.local.set({ lcHideAnimeCard: true });
+          card.style.display = 'none';
+          const toggle = document.getElementById('toggleAnimeCard');
+          if (toggle) toggle.checked = false;
+          return;
+        }
         choose('anime');
         toggleWallpaperDrawer();
       });
@@ -732,7 +751,7 @@ function paintPixelCard(preview) {
 function paintAnimeCard(preview) {
   chrome.storage.local.get(['lcAnime', 'lcAnimeArt'], (res) => {
     const cfg = res.lcAnime || {};
-    document.querySelectorAll('.studio-jp').forEach((e) => { e.hidden = cfg.japanese === false; });
+    document.querySelectorAll('.studio-jp').forEach((e) => { e.hidden = cfg.japanese !== true; });
     const scenes = globalThis.LCTS_SCENES || {}, DEF = globalThis.LCTS_SCENE_DEFAULT;
     const ARC = globalThis.LCTS_ARC_DEFAULT || {};
     const thumb = (id) => { const s = scenes[id] || scenes[DEF]; return s ? chrome.runtime.getURL(s.thumb || s.wall) : null; };
@@ -1161,6 +1180,12 @@ chrome.storage.onChanged.addListener((changes, area) => {
   if (changes.lcPalette && changes.lcPalette.newValue) {
     setActivePaletteUI(changes.lcPalette.newValue);
   }
+  if (changes.lcHideAnimeCard) {
+    const hide = !!changes.lcHideAnimeCard.newValue;
+    const animeCard = document.querySelector('.card.anime-studio-card');
+    if (animeCard) animeCard.style.display = hide ? 'none' : '';
+    if (toggleAnimeCard) toggleAnimeCard.checked = !hide;
+  }
   if (changes.lcContainerTrans && containerTransSlider && document.activeElement !== containerTransSlider) {
     const v = changes.lcContainerTrans.newValue;
     containerTransSlider.value = v;
@@ -1212,14 +1237,16 @@ const toggleTitleCard = document.getElementById('toggleTitleCard');
 const toggleMoments = document.getElementById('toggleMoments');
 const toggleJapanese = document.getElementById('toggleJapanese');
 const toggleShareCard = document.getElementById('toggleShareCard');
+const toggleAnimeCard = document.getElementById('toggleAnimeCard');
 
-chrome.storage.local.get(['lcAnime', 'lcShare'], (res) => {
+chrome.storage.local.get(['lcAnime', 'lcShare', 'lcHideAnimeCard'], (res) => {
   const anime = res.lcAnime || {};
   const share = res.lcShare || {};
   if (toggleTitleCard) toggleTitleCard.checked = anime.titleCard !== false;
   if (toggleMoments) toggleMoments.checked = anime.moments !== false;
-  if (toggleJapanese) toggleJapanese.checked = anime.japanese !== false;
+  if (toggleJapanese) toggleJapanese.checked = anime.japanese === true;
   if (toggleShareCard) toggleShareCard.checked = share.enabled !== false;
+  if (toggleAnimeCard) toggleAnimeCard.checked = res.lcHideAnimeCard !== true;
 });
 
 function updateAnimeSetting(key, val) {
@@ -1249,6 +1276,14 @@ if (toggleJapanese) {
 if (toggleShareCard) {
   toggleShareCard.addEventListener('change', () => {
     chrome.storage.local.set({ lcShare: { enabled: toggleShareCard.checked } });
+  });
+}
+if (toggleAnimeCard) {
+  toggleAnimeCard.addEventListener('change', () => {
+    const hide = !toggleAnimeCard.checked;
+    chrome.storage.local.set({ lcHideAnimeCard: hide });
+    const animeCard = document.querySelector('.card.anime-studio-card');
+    if (animeCard) animeCard.style.display = hide ? 'none' : '';
   });
 }
 

@@ -30,14 +30,14 @@
   const root = document.documentElement;
   const themeId = () => root.getAttribute('data-lc-theme');
 
-  let enabled = true, japanese = true;
+  let enabled = true, japanese = false;
   chrome.storage.local.get(['lcShare', 'lcAnime'], (r) => {
     enabled = !(r.lcShare && r.lcShare.enabled === false);
-    japanese = !(r.lcAnime && r.lcAnime.japanese === false);
+    japanese = !!(r.lcAnime && r.lcAnime.japanese === true);
   });
   chrome.storage.onChanged.addListener((ch, area) => {
     if (area === 'local' && ch.lcShare) enabled = !(ch.lcShare.newValue && ch.lcShare.newValue.enabled === false);
-    if (area === 'local' && ch.lcAnime) japanese = !(ch.lcAnime.newValue && ch.lcAnime.newValue.japanese === false);
+    if (area === 'local' && ch.lcAnime) japanese = !!(ch.lcAnime.newValue && ch.lcAnime.newValue.japanese === true);
   });
   const turnOff = () => { enabled = false; chrome.storage.local.set({ lcShare: { enabled: false } }); };
 

@@ -75,6 +75,8 @@
     </div>
     <div id="curatedGrid" class="curated-grid" role="radiogroup" aria-label="Curated vibes"></div>
 
+    <div class="curated-end-divider" aria-hidden="true"></div>
+
     <div class="theme-section-divider divider-dark">
       <span class="section-badge badge-dark">THEME ENGINES & SFX</span>
       <span class="section-hint">Deep dark immersion & gaming audio</span>
@@ -445,14 +447,14 @@
           </span>
         </label>
 
-        <!-- Toggle 3: Japanese Typography -->
+        <!-- Toggle 3: Japanese Typography (Default Off) -->
         <label class="custom-toggle-row" for="toggleJapanese">
           <div class="toggle-text-col">
             <span class="toggle-main-title">Japanese typography (第1話, 完了！ and arc titles)</span>
             <span class="toggle-sub-desc">Display Dela Gothic One kanji/kana stamps and arc titles</span>
           </div>
           <span class="switch-toggle">
-            <input id="toggleJapanese" type="checkbox" checked />
+            <input id="toggleJapanese" type="checkbox" />
             <span class="toggle-track"></span>
           </span>
         </label>
@@ -465,6 +467,18 @@
           </div>
           <span class="switch-toggle">
             <input id="toggleShareCard" type="checkbox" checked />
+            <span class="toggle-track"></span>
+          </span>
+        </label>
+
+        <!-- Toggle 5: Show Anime Studio Card in Themes -->
+        <label class="custom-toggle-row" for="toggleAnimeCard">
+          <div class="toggle-text-col">
+            <span class="toggle-main-title">Show Anime Themes in Themes tab</span>
+            <span class="toggle-sub-desc">Display the Anime Themes expandable card in the main themes list</span>
+          </div>
+          <span class="switch-toggle">
+            <input id="toggleAnimeCard" type="checkbox" checked />
             <span class="toggle-track"></span>
           </span>
         </label>
@@ -599,31 +613,21 @@
     </div>
   </div>
 
-  <!-- Sleek Minimal Footer matching Image 2 -->
+  <!-- Sleek Single-Line Minimal Footer -->
   <footer class="foot">
     <div class="foot-actions">
-      <button id="supportUsBtn" class="foot-link" type="button" title="Support LeetGlow project">
+      <button id="supportUsBtn" class="foot-link" type="button" title="Support LeetGlow (UPI & Cards)">
         <svg viewBox="0 0 24 24" class="foot-icon" fill="none" stroke="currentColor" stroke-width="1.8"
           stroke-linecap="round" stroke-linejoin="round">
           <path
             d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
         </svg>
         <span>Support</span>
-        <svg viewBox="0 0 16 16" class="foot-arrow" fill="none" stroke="currentColor" stroke-width="1.8"
-          stroke-linecap="round" stroke-linejoin="round">
-          <line x1="4" y1="12" x2="12" y2="4" />
-          <polyline points="6 4 12 4 12 10" />
-        </svg>
       </button>
 
-      <button id="bmcUsBtn" class="foot-link foot-bmc-link" type="button" title="Buy Me a Coffee (International / US supporters)">
+      <button id="bmcUsBtn" class="foot-link foot-bmc-link" type="button" title="Buy Me a Coffee (Global / US)">
         <span class="foot-bmc-emoji" aria-hidden="true">☕</span>
-        <span>Buy Me a Coffee</span>
-        <svg viewBox="0 0 16 16" class="foot-arrow" fill="none" stroke="currentColor" stroke-width="1.8"
-          stroke-linecap="round" stroke-linejoin="round">
-          <line x1="4" y1="12" x2="12" y2="4" />
-          <polyline points="6 4 12 4 12 10" />
-        </svg>
+        <span>Coffee</span>
       </button>
 
       <button id="rateUsBtn" class="foot-link" type="button" title="Rate LeetGlow on Chrome Web Store">
@@ -632,15 +636,10 @@
           <polygon
             points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
         </svg>
-        <span>Rate extension</span>
-        <svg viewBox="0 0 16 16" class="foot-arrow" fill="none" stroke="currentColor" stroke-width="1.8"
-          stroke-linecap="round" stroke-linejoin="round">
-          <line x1="4" y1="12" x2="12" y2="4" />
-          <polyline points="6 4 12 4 12 10" />
-        </svg>
+        <span>Rate</span>
       </button>
 
-      <button id="bug" class="foot-link" type="button" title="Report an issue (opens Gmail with template)">
+      <button id="bug" class="foot-link" type="button" title="Report an issue">
         <svg viewBox="0 0 24 24" class="foot-icon" fill="none" stroke="currentColor" stroke-width="1.8"
           stroke-linecap="round" stroke-linejoin="round">
           <rect width="8" height="10" x="8" y="7" rx="4" />
@@ -652,12 +651,7 @@
           <path d="M5 6l3 2" />
           <path d="M19 6l-3 2" />
         </svg>
-        <span>Report an issue</span>
-        <svg viewBox="0 0 16 16" class="foot-arrow" fill="none" stroke="currentColor" stroke-width="1.8"
-          stroke-linecap="round" stroke-linejoin="round">
-          <line x1="4" y1="12" x2="12" y2="4" />
-          <polyline points="6 4 12 4 12 10" />
-        </svg>
+        <span>Report</span>
       </button>
 
       <span class="foot-divider" aria-hidden="true"></span>

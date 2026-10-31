@@ -41,14 +41,14 @@
     if (res.lcAnime) settings.anime = Object.assign({}, DEFAULTS, res.lcAnime);
     if (typeof res.lcVolume === 'number') settings.anime.volume = res.lcVolume / 100;
     if (res.lcCrawler) settings.crawler = Object.assign({}, DEFAULTS, res.lcCrawler);
-    if (UI && UI.setJapanese) UI.setJapanese(settings.anime.japanese !== false);
+    if (UI && UI.setJapanese) UI.setJapanese(settings.anime.japanese === true);
     primeSound();
   });
   chrome.storage.onChanged.addListener((ch, area) => {
     if (area !== 'local') return;
     if (ch.lcAnime) settings.anime = Object.assign({}, DEFAULTS, ch.lcAnime.newValue || {});
     if (ch.lcVolume && typeof ch.lcVolume.newValue === 'number') settings.anime.volume = ch.lcVolume.newValue / 100;
-    if (ch.lcAnime && UI && UI.setJapanese) UI.setJapanese(settings.anime.japanese !== false);
+    if (ch.lcAnime && UI && UI.setJapanese) UI.setJapanese(settings.anime.japanese === true);
     if (ch.lcCrawler) settings.crawler = Object.assign({}, DEFAULTS, ch.lcCrawler.newValue || {});
   });
 

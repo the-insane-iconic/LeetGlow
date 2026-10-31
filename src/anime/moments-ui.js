@@ -33,8 +33,8 @@
      stamps and the title card speak English instead, with the same weight.
      The sub line under each stamp stays LeetCode's own verdict. */
   const STAMPS_EN = { ac: 'CLEARED!', run: 'NICE!', wa: 'NOT YET…', tle: 'TIME UP', mle: 'OUT OF MEMORY', err: 'ERROR' };
-  let japanese = true;
-  function setJapanese(on) { japanese = on !== false; }
+  let japanese = false;
+  function setJapanese(on) { japanese = on === true; }
 
   /* Web Crawler: same overlay engine and choreography (themes/crawler.css
      reuses the shared per-kind rules and @keyframes below), a crawler bot's
