@@ -530,14 +530,9 @@ function makeMatrixCard() {
   });
 
   focusBtn.addEventListener('click', () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs && tabs[0]) {
-        chrome.tabs.sendMessage(tabs[0].id, { type: 'lct:toggle-focus' }, (resp) => {
-          const active = resp && resp.focus;
-          focusBtn.classList.toggle('active', !!active);
-          chrome.storage.local.set({ lcFocus: !!active });
-        });
-      }
+    chrome.storage.local.get(['lcFocus'], (res) => {
+      const next = !(res && res.lcFocus);
+      chrome.storage.local.set({ lcFocus: next });
     });
   });
 
@@ -545,6 +540,7 @@ function makeMatrixCard() {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs && tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, { type: 'lct:toggle-audio' }, (resp) => {
+          if (chrome.runtime.lastError) { /* ignore disconnected tab */ }
           if (resp && typeof resp.playing === 'boolean') {
             audioBtn.classList.toggle('active', resp.playing);
             return;
@@ -577,6 +573,7 @@ function makeMatrixCard() {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs && tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, { type: 'lct:toggle-pomodoro' }, (resp) => {
+          if (chrome.runtime.lastError) { /* ignore disconnected tab */ }
           if (resp && typeof resp.enabled === 'boolean') {
             timerBtn.classList.toggle('active', resp.enabled);
             return;
