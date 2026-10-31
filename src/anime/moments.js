@@ -16,7 +16,7 @@
   /* Anime Studio and Web Crawler each get their own moments settings, keyed by
      storage key, so enabling/muting one never touches the other. Web Crawler
      has no settings UI yet, so it simply runs on DEFAULTS until one exists. */
-  const DEFAULTS = { titleCard: true, moments: true, sound: true, volume: 0.8 };
+  const DEFAULTS = { titleCard: true, moments: true, sound: true, volume: 0.5 };
   let settings = {
     anime: Object.assign({}, DEFAULTS),
     crawler: Object.assign({}, DEFAULTS)
@@ -55,7 +55,7 @@
   /* the overlay and its sound always start together */
   function sound(kind) {
     if (activeSettings().sound && SFX) {
-      const vol = typeof activeSettings().volume === 'number' ? activeSettings().volume : 0.8;
+      const vol = typeof activeSettings().volume === 'number' ? activeSettings().volume : 0.5;
       const soundTheme = theme() === 'crawler' ? 'crawler' : 'anime';
       SFX.play(kind, { volume: vol, theme: soundTheme });
     }

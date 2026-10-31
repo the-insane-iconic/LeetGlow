@@ -1011,10 +1011,10 @@ chrome.storage.local.get(['lcContainerTrans', 'lcEditorTrans', 'lcVolume', 'lcAn
     updateSliderFill(editorTransSlider);
   }
 
-  // Volume (default 80%)
+  // Volume (default 50%)
   const vVal = typeof res.lcVolume === 'number' ? res.lcVolume
     : (typeof animeCfgCache.volume === 'number' ? Math.round(animeCfgCache.volume * 100)
-      : (typeof res.lcGameVolume === 'number' ? Math.round(res.lcGameVolume * 100) : 80));
+      : (typeof res.lcGameVolume === 'number' ? Math.round(res.lcGameVolume * 100) : 50));
   if (volumeSlider && volumeVal) {
     volumeSlider.value = vVal;
     volumeVal.textContent = vVal + '%';
@@ -1290,7 +1290,7 @@ if (toggleAnimeCard) {
 
 /* Animations & SFX live preview badges */
 function previewMoment(momentName) {
-  const vol = Number(volumeSlider ? volumeSlider.value : 80) / 100;
+  const vol = Number(volumeSlider ? volumeSlider.value : 50) / 100;
   if (globalThis.LCTSSounds && globalThis.LCTSSounds.play) {
     globalThis.LCTSSounds.play(momentName, { volume: vol, theme: 'anime' });
   }
@@ -1343,8 +1343,8 @@ if (resetCustomizeBtn) {
   resetCustomizeBtn.addEventListener('click', () => {
     const DEFAULT_CONTAINER = 30;
     const DEFAULT_EDITOR = 25;
-    const DEFAULT_VOLUME = 80;
-    const DEFAULT_VOLUME_NORM = 0.8;
+    const DEFAULT_VOLUME = 50;
+    const DEFAULT_VOLUME_NORM = 0.5;
 
     if (containerTransSlider) {
       containerTransSlider.value = DEFAULT_CONTAINER;

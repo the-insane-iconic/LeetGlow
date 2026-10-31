@@ -89,9 +89,9 @@
 
   function toggleAudio() {
     if (!state.settings) {
-      state.settings = { enabled: true, audio: { enabled: true, preset: 'cafe', volume: 0.35 } };
+      state.settings = { enabled: true, audio: { enabled: true, preset: 'cafe', volume: 0.32 } };
     }
-    if (!state.settings.audio) state.settings.audio = { enabled: true, preset: 'cafe', volume: 0.35 };
+    if (!state.settings.audio) state.settings.audio = { enabled: true, preset: 'cafe', volume: 0.32 };
     const audio = globalThis.LCT.audio;
     let nextOn = false;
     if (audio && audio.playing) {
@@ -214,7 +214,7 @@
 
     // 3. Audio setup
     if (globalThis.LCT.audio) {
-      globalThis.LCT.audio.setVolume(settings.audio ? settings.audio.volume : 0.35);
+      globalThis.LCT.audio.setVolume(settings.audio ? settings.audio.volume : 0.32);
       globalThis.LCT.audio.setPauseOnHide(true);
       globalThis.LCT.audio.onChange(updateAudioWidget);
     }
