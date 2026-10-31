@@ -132,8 +132,25 @@ const wallpaperDrawer = document.createElement('div');
 wallpaperDrawer.id = 'wallpaperDrawer';
 wallpaperDrawer.className = 'wallpaper-drawer';
 wallpaperDrawer.innerHTML = `
+  <div class="wallpaper-drawer-header">
+    <button id="btnBackToThemes" class="wp-back-btn" type="button" aria-label="Back to all curated themes">
+      <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="10 13 5 8 10 3"></polyline>
+      </svg>
+      <span>All Themes</span>
+    </button>
+    <span class="wp-drawer-title">Wallpapers & Scenes</span>
+  </div>
   <div id="wallpaperGrid" class="wallpaper-grid"></div>
 `;
+
+const btnBackToThemes = wallpaperDrawer.querySelector('#btnBackToThemes');
+if (btnBackToThemes) {
+  btnBackToThemes.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleWallpaperDrawer(false);
+  });
+}
 
 let wallpapersDrawerOpen = false;
 
