@@ -911,23 +911,18 @@ function updateSliderFill(slider) {
   const val = Number(slider.value);
   const pct = Math.max(0, Math.min(100, ((val - min) / (max - min)) * 100));
   slider.style.background = `linear-gradient(to right, #ec4899 0%, #ec4899 ${pct}%, #ede9fe ${pct}%, #ede9fe 100%)`;
-  slider.setAttribute('aria-valuenow', String(val));
-  const unit = slider.id && slider.id.startsWith('pomo') ? ' min' : '%';
-  slider.setAttribute('aria-valuetext', `${val}${unit}`);
 }
 
-function switchTab(targetId, shouldFocus = false) {
+function switchTab(targetId) {
   if (document.body) document.body.dataset.activeTab = targetId;
   tabButtons.forEach(({ btn, view }) => {
     if (!btn || !view) return;
     const isActive = btn.id === targetId;
     btn.classList.toggle('active', isActive);
     btn.setAttribute('aria-selected', String(isActive));
-    btn.setAttribute('tabindex', isActive ? '0' : '-1');
     if (isActive) {
       view.removeAttribute('hidden');
       view.classList.add('active');
-      if (shouldFocus) btn.focus();
     } else {
       view.setAttribute('hidden', '');
       view.classList.remove('active');
@@ -940,34 +935,8 @@ tabButtons.forEach(({ btn }) => {
   btn.addEventListener('click', () => switchTab(btn.id));
 });
 
-const navTabs = document.querySelector('.nav-tabs');
-if (navTabs) {
-  navTabs.addEventListener('keydown', (e) => {
-    if (!['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End'].includes(e.key)) return;
-    const btns = tabButtons.map((t) => t.btn).filter(Boolean);
-    const currIdx = btns.indexOf(document.activeElement);
-    if (currIdx === -1) return;
-    e.preventDefault();
-    let nextIdx = currIdx;
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-      nextIdx = (currIdx + 1) % btns.length;
-    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-      nextIdx = (currIdx - 1 + btns.length) % btns.length;
-    } else if (e.key === 'Home') {
-      nextIdx = 0;
-    } else if (e.key === 'End') {
-      nextIdx = btns.length - 1;
-    }
-    const target = btns[nextIdx];
-    if (target) {
-      switchTab(target.id, true);
-    }
-  });
-}
-
 // Set default active tab
 if (document.body) document.body.dataset.activeTab = 'tab-themes';
-switchTab('tab-themes');
 
 /* Color Palette Selector */
 const paletteGrid = document.getElementById('colorPaletteGrid');
@@ -1826,7 +1795,7 @@ if (rateUsBtn) {
   });
 }
 
-/* Header "Two Sum" badge: opens LeetCode problem directly */
+/* Header button: opens LeetCode problem directly */
 const openLeetCodeBtn = document.getElementById('openLeetCodeBtn');
 if (openLeetCodeBtn) {
   openLeetCodeBtn.addEventListener('click', () => {
