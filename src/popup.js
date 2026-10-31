@@ -979,6 +979,13 @@ const pomoLongVal = document.getElementById('pomoLongVal');
 const pomoSoundToggle = document.getElementById('pomoSoundToggle');
 const pomoAutoToggle = document.getElementById('pomoAutoToggle');
 
+/* Anime Experience & Moments toggles in Customize */
+const toggleTitleCard = document.getElementById('toggleTitleCard');
+const toggleMoments = document.getElementById('toggleMoments');
+const toggleJapanese = document.getElementById('toggleJapanese');
+const toggleShareCard = document.getElementById('toggleShareCard');
+const toggleAnimeCard = document.getElementById('toggleAnimeCard');
+
 let animeCfgCache = null;
 let pixelCfgCache = null;
 
@@ -1232,13 +1239,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
   }
 });
 
-/* Anime Experience & Moments toggles in Customize */
-const toggleTitleCard = document.getElementById('toggleTitleCard');
-const toggleMoments = document.getElementById('toggleMoments');
-const toggleJapanese = document.getElementById('toggleJapanese');
-const toggleShareCard = document.getElementById('toggleShareCard');
-const toggleAnimeCard = document.getElementById('toggleAnimeCard');
-
+/* Anime Experience & Moments storage initialization */
 chrome.storage.local.get(['lcAnime', 'lcShare', 'lcHideAnimeCard'], (res) => {
   const anime = res.lcAnime || {};
   const share = res.lcShare || {};
