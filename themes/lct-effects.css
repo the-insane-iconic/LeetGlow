@@ -21,6 +21,16 @@ html[data-lct-enabled='true'] #lct-backdrop {
   transition: background-color 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.lct-bg-prev {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transform: scale(1.001);
+  will-change: opacity;
+}
+
 .lct-bg-media {
   opacity: 0;
   overflow: hidden;
@@ -128,6 +138,7 @@ html[data-lct-mode='light'] .lct-bg-aurora i { mix-blend-mode: normal; opacity: 
 .lct-bg-particles {
   overflow: hidden;
   contain: strict;
+  transition: opacity 0.35s ease;
 }
 .lct-p {
   position: absolute;

@@ -219,6 +219,7 @@
     backdrop.setAttribute('aria-hidden', 'true');
     backdrop.innerHTML = [
       '<div class="lct-bg-base"></div>',
+      '<div class="lct-bg-prev"></div>',
       '<div class="lct-bg-media"></div>',
       '<div class="lct-bg-aurora"><i></i><i></i><i></i></div>',
       '<div class="lct-bg-grid"></div>',
@@ -299,54 +300,66 @@
     if (signature === lastParticleSignature) return;
     lastParticleSignature = signature;
 
-    layer.innerHTML = '';
-    if (type === 'none' || reduced) return;
+    const spawn = () => {
+      layer.innerHTML = '';
+      if (type === 'none' || reduced) return;
 
-    const base = Math.max(0, Number(effects.count) || 0);
-    const count = Math.round(Math.min(90, base * (intensity / 100) * 1.1));
-    if (!count) return;
+      const base = Math.max(0, Number(effects.count) || 0);
+      const count = Math.round(Math.min(90, base * (intensity / 100) * 1.1));
+      if (!count) return;
 
-    const fragment = document.createDocumentFragment();
-    for (let index = 0; index < count; index += 1) {
-      const dot = document.createElement('i');
-      dot.className = 'lct-p lct-p-' + type;
-      dot.style.left = randomBetween(0, 100).toFixed(2) + '%';
+      const fragment = document.createDocumentFragment();
+      for (let index = 0; index < count; index += 1) {
+        const dot = document.createElement('i');
+        dot.className = 'lct-p lct-p-' + type;
+        dot.style.left = randomBetween(0, 100).toFixed(2) + '%';
 
-      if (type === 'stars') {
-        dot.style.top = randomBetween(0, 100).toFixed(2) + '%';
-        dot.style.setProperty('--p-size', randomBetween(1, 3.2).toFixed(2) + 'px');
-        dot.style.setProperty('--p-delay', randomBetween(-10, 0).toFixed(2) + 's');
-        dot.style.setProperty('--p-dur', randomBetween(2.4, 7.5).toFixed(2) + 's');
-      } else if (type === 'rain') {
-        dot.style.top = randomBetween(-30, 15).toFixed(2) + '%';
-        dot.style.setProperty('--p-size', randomBetween(1, 1.8).toFixed(2) + 'px');
-        dot.style.setProperty('--p-len', randomBetween(40, 100).toFixed(1) + 'px');
-        dot.style.setProperty('--p-delay', randomBetween(-8, 0).toFixed(2) + 's');
-        dot.style.setProperty('--p-dur', randomBetween(0.8, 1.8).toFixed(2) + 's');
-        dot.style.setProperty('--p-drift', randomBetween(-40, -10).toFixed(1) + 'px');
-      } else if (type === 'bubbles') {
-        dot.style.top = randomBetween(20, 105).toFixed(2) + '%';
-        dot.style.setProperty('--p-size', randomBetween(3, 12).toFixed(2) + 'px');
-        dot.style.setProperty('--p-delay', randomBetween(-18, 0).toFixed(2) + 's');
-        dot.style.setProperty('--p-dur', randomBetween(8, 20).toFixed(2) + 's');
-        dot.style.setProperty('--p-drift', randomBetween(-30, 30).toFixed(1) + 'px');
-      } else if (type === 'fireflies') {
-        dot.style.top = randomBetween(15, 95).toFixed(2) + '%';
-        dot.style.setProperty('--p-size', randomBetween(2, 4).toFixed(2) + 'px');
-        dot.style.setProperty('--p-delay', randomBetween(-14, 0).toFixed(2) + 's');
-        dot.style.setProperty('--p-dur', randomBetween(6, 15).toFixed(2) + 's');
-        dot.style.setProperty('--p-drift', randomBetween(-60, 60).toFixed(1) + 'px');
-      } else {
-        dot.style.top = randomBetween(-15, 5).toFixed(2) + '%';
-        dot.style.setProperty('--p-size', type === 'petals' ? randomBetween(6, 13).toFixed(2) + 'px' : randomBetween(1.5, 4).toFixed(2) + 'px');
-        dot.style.setProperty('--p-delay', randomBetween(-24, 0).toFixed(2) + 's');
-        dot.style.setProperty('--p-dur', type === 'leaves' ? randomBetween(11, 22).toFixed(2) + 's' : randomBetween(8, 20).toFixed(2) + 's');
-        dot.style.setProperty('--p-drift', randomBetween(-140, 140).toFixed(1) + 'px');
-        dot.style.setProperty('--p-rot', randomBetween(-180, 180).toFixed(0) + 'deg');
+        if (type === 'stars') {
+          dot.style.top = randomBetween(0, 100).toFixed(2) + '%';
+          dot.style.setProperty('--p-size', randomBetween(1, 3.2).toFixed(2) + 'px');
+          dot.style.setProperty('--p-delay', randomBetween(-10, 0).toFixed(2) + 's');
+          dot.style.setProperty('--p-dur', randomBetween(2.4, 7.5).toFixed(2) + 's');
+        } else if (type === 'rain') {
+          dot.style.top = randomBetween(-30, 15).toFixed(2) + '%';
+          dot.style.setProperty('--p-size', randomBetween(1, 1.8).toFixed(2) + 'px');
+          dot.style.setProperty('--p-len', randomBetween(40, 100).toFixed(1) + 'px');
+          dot.style.setProperty('--p-delay', randomBetween(-8, 0).toFixed(2) + 's');
+          dot.style.setProperty('--p-dur', randomBetween(0.8, 1.8).toFixed(2) + 's');
+          dot.style.setProperty('--p-drift', randomBetween(-40, -10).toFixed(1) + 'px');
+        } else if (type === 'bubbles') {
+          dot.style.top = randomBetween(20, 105).toFixed(2) + '%';
+          dot.style.setProperty('--p-size', randomBetween(3, 12).toFixed(2) + 'px');
+          dot.style.setProperty('--p-delay', randomBetween(-18, 0).toFixed(2) + 's');
+          dot.style.setProperty('--p-dur', randomBetween(8, 20).toFixed(2) + 's');
+          dot.style.setProperty('--p-drift', randomBetween(-30, 30).toFixed(1) + 'px');
+        } else if (type === 'fireflies') {
+          dot.style.top = randomBetween(15, 95).toFixed(2) + '%';
+          dot.style.setProperty('--p-size', randomBetween(2, 4).toFixed(2) + 'px');
+          dot.style.setProperty('--p-delay', randomBetween(-14, 0).toFixed(2) + 's');
+          dot.style.setProperty('--p-dur', randomBetween(6, 15).toFixed(2) + 's');
+          dot.style.setProperty('--p-drift', randomBetween(-60, 60).toFixed(1) + 'px');
+        } else {
+          dot.style.top = randomBetween(-15, 5).toFixed(2) + '%';
+          dot.style.setProperty('--p-size', type === 'petals' ? randomBetween(6, 13).toFixed(2) + 'px' : randomBetween(1.5, 4).toFixed(2) + 'px');
+          dot.style.setProperty('--p-delay', randomBetween(-24, 0).toFixed(2) + 's');
+          dot.style.setProperty('--p-dur', type === 'leaves' ? randomBetween(11, 22).toFixed(2) + 's' : randomBetween(8, 20).toFixed(2) + 's');
+          dot.style.setProperty('--p-drift', randomBetween(-140, 140).toFixed(1) + 'px');
+          dot.style.setProperty('--p-rot', randomBetween(-180, 180).toFixed(0) + 'deg');
+        }
+        fragment.appendChild(dot);
       }
-      fragment.appendChild(dot);
+      layer.appendChild(fragment);
+    };
+
+    if (layer.children.length > 0) {
+      layer.style.opacity = '0';
+      setTimeout(() => {
+        spawn();
+        layer.style.opacity = '1';
+      }, 200);
+    } else {
+      spawn();
     }
-    layer.appendChild(fragment);
   }
 
   function clearMedia() {
@@ -470,7 +483,28 @@
     }
 
     activeSettings = settings;
-    ensureBackdrop();
+    const backdrop = ensureBackdrop();
+
+    const prevThemeId = root.dataset.lctTheme;
+    if (prevThemeId && prevThemeId !== theme.id) {
+      const base = backdrop.querySelector('.lct-bg-base');
+      const prev = backdrop.querySelector('.lct-bg-prev');
+      if (base && prev) {
+        try {
+          const comp = window.getComputedStyle(base);
+          prev.style.transition = 'none';
+          prev.style.background = comp.background || comp.backgroundImage || '';
+          prev.style.backgroundColor = comp.backgroundColor || '';
+          prev.style.opacity = '1';
+          void prev.offsetHeight;
+          requestAnimationFrame(() => {
+            prev.style.transition = 'opacity 0.38s cubic-bezier(0.16, 1, 0.3, 1)';
+            prev.style.opacity = '0';
+          });
+        } catch (e) {}
+      }
+    }
+
     root.dataset.lctEnabled = 'true';
     root.dataset.lctTheme = theme.id;
     root.dataset.lctMode = theme.mode === 'light' ? 'light' : 'dark';
@@ -481,7 +515,6 @@
     setVars(root, theme, settings);
     applyHslVars(root, theme.palette || {});
 
-    const backdrop = ensureBackdrop();
     applyEffectFlags(backdrop, theme);
     renderParticles(theme, settings);
 
