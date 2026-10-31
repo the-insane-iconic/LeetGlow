@@ -251,6 +251,21 @@
           }));
         }
       }
+
+      // First-run onboarding toast
+      chrome.storage.local.get(['leetglowWelcomed'], (wRes) => {
+        if (!wRes.leetglowWelcomed) {
+          chrome.storage.local.set({ leetglowWelcomed: true });
+          const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+          const shortcut = isMac ? '⌘+Shift+.' : 'Ctrl+Shift+.';
+          setTimeout(() => {
+            toast(
+              `✨ <strong>Welcome to LeetGlow!</strong> Press <strong>${shortcut}</strong> for Focus Mode, or click the toolbar icon to switch themes.`,
+              { duration: 6500 }
+            );
+          }, 1500);
+        }
+      });
     });
 
     // 6. Listen for storage changes
