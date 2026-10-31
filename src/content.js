@@ -87,22 +87,8 @@
     }
   }
 
-  const PREMIUM_THEMES = new Set(['crawler']);
-
-  async function checkAllowed(theme) {
-    if (!PREMIUM_THEMES.has(theme)) return theme;
-    try {
-      const prem = (await chrome.storage.local.get('leetglowPremium'))?.leetglowPremium;
-      if (!prem || prem.active !== false || prem.is_free_beta !== false) return theme;
-    } catch (e) {
-      return theme;
-    }
-    return 'anime';
-  }
-
-  async function apply(theme) {
+  function apply(theme) {
     if (!VALID.has(theme)) theme = DEFAULT;
-    theme = await checkAllowed(theme);
     if (theme === current) return;
     const was = current;
     current = theme;
@@ -185,9 +171,6 @@
 
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area === 'local' && changes[KEY]) apply(changes[KEY].newValue || DEFAULT);
-    if (area === 'local' && changes.leetglowPremium) {
-      chrome.storage.local.get(KEY, (res) => apply((res && res[KEY]) || DEFAULT));
-    }
     if (area === 'local' && (changes.lcContainerTrans || changes.lcEditorTrans)) {
       const ct = changes.lcContainerTrans ? changes.lcContainerTrans.newValue : currentCt;
       const et = changes.lcEditorTrans ? changes.lcEditorTrans.newValue : currentEt;
