@@ -854,7 +854,6 @@ function choose(id) {
         if (!chrome.runtime?.id) return;
         (tabs || []).forEach(t => {
           try {
-            chrome.tabs.sendMessage(t.id, { type: 'theme-change', theme: id }, () => { void chrome.runtime.lastError; });
             chrome.tabs.sendMessage(t.id, { type: 'lct:set-theme', theme: id }, () => { void chrome.runtime.lastError; });
           } catch (e) {}
         });

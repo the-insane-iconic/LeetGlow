@@ -24,6 +24,7 @@
   let activeSettings = null;
   let originalThemeClasses = null;
   let modeObserver = null;
+  let particleSpawnTimer = null;
 
   function hexToHsl(hex) {
     let value = String(hex || '').trim();
@@ -219,7 +220,6 @@
     backdrop.setAttribute('aria-hidden', 'true');
     backdrop.innerHTML = [
       '<div class="lct-bg-base"></div>',
-      '<div class="lct-bg-prev"></div>',
       '<div class="lct-bg-media"></div>',
       '<div class="lct-bg-aurora"><i></i><i></i><i></i></div>',
       '<div class="lct-bg-grid"></div>',
@@ -351,9 +351,10 @@
       layer.appendChild(fragment);
     };
 
+    clearTimeout(particleSpawnTimer);
     if (layer.children.length > 0) {
       layer.style.opacity = '0';
-      setTimeout(() => {
+      particleSpawnTimer = setTimeout(() => {
         spawn();
         layer.style.opacity = '1';
       }, 80);
@@ -485,27 +486,6 @@
     activeSettings = settings;
     const backdrop = ensureBackdrop();
 
-    const prevThemeId = root.dataset.lctTheme;
-    if (prevThemeId && prevThemeId !== theme.id) {
-      const base = backdrop.querySelector('.lct-bg-base');
-      const prev = backdrop.querySelector('.lct-bg-prev');
-      if (base && prev) {
-        try {
-          const comp = window.getComputedStyle(base);
-          prev.style.transition = 'none';
-          prev.style.background = comp.background || comp.backgroundImage || '';
-          prev.style.backgroundColor = comp.backgroundColor || '';
-          prev.style.opacity = '1';
-          requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-              prev.style.transition = 'opacity 0.22s ease';
-              prev.style.opacity = '0';
-            });
-          });
-        } catch (e) {}
-      }
-    }
-
     root.dataset.lctEnabled = 'true';
     root.dataset.lctTheme = theme.id;
     root.dataset.lctMode = theme.mode === 'light' ? 'light' : 'dark';
@@ -541,6 +521,7 @@
   }
 
   function clear(settings) {
+    clearTimeout(particleSpawnTimer);
     const root = document.documentElement;
     root.removeAttribute('data-lct-theme');
     root.removeAttribute('data-lct-custom');

@@ -169,15 +169,24 @@
     } catch (e) {}
   }
 
+  let lastSyncedLctThemeId = null;
+
   async function syncActiveTheme(themeId) {
     if (!globalThis.LCT || !globalThis.LCT.engine) return;
     const isLctTheme = LCT_THEME_IDS.has(themeId);
     if (!isLctTheme) {
-      // Clear LeetThemes styles when LeetGlow's original theme (or 'off') is active
-      globalThis.LCT.engine.clear(state.settings || {});
-      state.theme = null;
+      // Clear LeetThemes styles only if an LCT theme was previously active
+      if (lastSyncedLctThemeId !== null) {
+        lastSyncedLctThemeId = null;
+        globalThis.LCT.engine.clear(state.settings || {});
+        state.theme = null;
+      }
       return;
     }
+
+    // Deduplicate: avoid re-running apply engine if this LCT theme is already active
+    if (themeId === lastSyncedLctThemeId) return;
+    lastSyncedLctThemeId = themeId;
 
     const theme = globalThis.LCT.themeById ? globalThis.LCT.themeById(themeId) : null;
     if (!theme) return;

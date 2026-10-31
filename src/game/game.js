@@ -44,6 +44,7 @@
 
      `level` is still threaded through so the escalation this was built for
      can come back by making this honour it again -- one line, here. */
+  let gameResizeTimer = null;
   function setLevel(level) {
     root.setAttribute('data-lc-game-level', 'easy');
     globalThis.__lctsGameInk = EASY_INK;
@@ -71,7 +72,10 @@
     globalThis.__lctsGameMode = mode;
     if (modeChanged && globalThis.__lctsReassertMode) globalThis.__lctsReassertMode();
     if (globalThis.__lctsInkRefresh) globalThis.__lctsInkRefresh();
-    setTimeout(() => { try { window.dispatchEvent(new Event('resize')); } catch (e) {} }, 240);
+    if (modeChanged) {
+      clearTimeout(gameResizeTimer);
+      gameResizeTimer = setTimeout(() => { try { window.dispatchEvent(new Event('resize')); } catch (e) {} }, 200);
+    }
   }
 
   /* ---- reading the open problem: same hooks as src/anime/moments.js ------- */

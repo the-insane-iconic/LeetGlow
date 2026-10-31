@@ -62,7 +62,7 @@ html[data-lct-enabled='true'][data-lct-mode='light'] { color-scheme: light !impo
 html[data-lct-enabled='true'] {
   background: var(--lct-bg) !important;
   scroll-behavior: smooth;
-  transition: background-color 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.18s ease;
 }
 
 html[data-lct-enabled='true'] body {
@@ -70,7 +70,7 @@ html[data-lct-enabled='true'] body {
   color: var(--lct-text) !important;
   -webkit-font-smoothing: antialiased;
   scroll-behavior: smooth;
-  transition: color 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: color 0.18s ease;
 }
 
 html[data-lct-enabled='true'][data-lct-fonts='on'] body,

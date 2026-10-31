@@ -656,50 +656,32 @@ html[data-lc-theme] ::-webkit-scrollbar-thumb:hover {
    Synchronized 0.35s GPU-friendly transitions for seamless 60fps switching.
    Applies during active themes and during switching (data-lc-transitioning).
 ============================================================================= */
-#lc-backdrop-crossfade {
-  position: fixed !important;
-  inset: 0 !important;
-  z-index: -1 !important;
-  pointer-events: none !important;
-  opacity: 0;
-  will-change: opacity;
-}
-
 /* Minimal, snappy, lightweight surface transitions */
 html[data-lc-theme] body,
-html[data-lc-transitioning] body,
 html[data-lct-enabled='true'] body,
 html[data-lc-theme] #__next,
-html[data-lc-transitioning] #__next,
 html[data-lct-enabled='true'] #__next,
 html[data-lc-theme] #__next nav,
-html[data-lc-transitioning] #__next nav,
 html[data-lct-enabled='true'] #__next nav,
 html[data-lc-theme] .flexlayout__tabset,
-html[data-lc-transitioning] .flexlayout__tabset,
 html[data-lct-enabled='true'] .flexlayout__tabset,
 html[data-lc-theme] .flexlayout__tab,
-html[data-lc-transitioning] .flexlayout__tab,
 html[data-lct-enabled='true'] .flexlayout__tab,
 html[data-lc-theme] .flexlayout__tabset_header,
-html[data-lc-transitioning] .flexlayout__tabset_header,
 html[data-lct-enabled='true'] .flexlayout__tabset_header,
 html[data-lc-theme] .flexlayout__tabset_tabbar_outer,
-html[data-lc-transitioning] .flexlayout__tabset_tabbar_outer,
 html[data-lct-enabled='true'] .flexlayout__tabset_tabbar_outer,
 html[data-lc-theme] .monaco-editor,
-html[data-lc-transitioning] .monaco-editor,
 html[data-lct-enabled='true'] .monaco-editor,
 html[data-lc-theme] .monaco-editor-background,
-html[data-lc-transitioning] .monaco-editor-background,
 html[data-lct-enabled='true'] .monaco-editor-background,
-html[data-lc-theme] pre {
+html[data-lc-theme] pre,
+html[data-lct-enabled='true'] pre {
   transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 }
 
 @media (prefers-reduced-motion: reduce) {
   html[data-lc-theme] *,
-  html[data-lc-transitioning] *,
   html[data-lct-enabled='true'] * {
     transition: none !important;
   }

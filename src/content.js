@@ -87,46 +87,12 @@
     }
   }
 
-  let transitionTimer = null;
-  function markTransitioning() {
-    root.setAttribute('data-lc-transitioning', 'true');
-    clearTimeout(transitionTimer);
-    transitionTimer = setTimeout(() => {
-      root.removeAttribute('data-lc-transitioning');
-    }, 260);
-  }
-
-  function crossfadeBackdrop() {
-    if (!document.body) return;
-    try {
-      const cs = window.getComputedStyle(document.body);
-      const bgImg = cs.backgroundImage;
-      const bgColor = cs.backgroundColor;
-      if ((bgImg && bgImg !== 'none') || (bgColor && bgColor !== 'rgba(0, 0, 0, 0)')) {
-        let ov = document.getElementById('lc-backdrop-crossfade');
-        if (!ov) {
-          ov = document.createElement('div');
-          ov.id = 'lc-backdrop-crossfade';
-          ov.setAttribute('aria-hidden', 'true');
-          document.body.appendChild(ov);
-        }
-        ov.style.transition = 'none';
-        ov.style.backgroundImage = bgImg;
-        ov.style.backgroundColor = bgColor;
-        ov.style.backgroundSize = cs.backgroundSize;
-        ov.style.backgroundRepeat = cs.backgroundRepeat;
-        ov.style.backgroundPosition = cs.backgroundPosition;
-        ov.style.backgroundAttachment = cs.backgroundAttachment;
-        ov.style.opacity = '1';
-
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            ov.style.transition = 'opacity 0.22s ease';
-            ov.style.opacity = '0';
-          });
-        });
-      }
-    } catch (e) {}
+  let resizeTimer = null;
+  function triggerResize() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      try { window.dispatchEvent(new Event('resize')); } catch (e) {}
+    }, 200);
   }
 
   function apply(theme) {
@@ -134,11 +100,6 @@
     if (theme === current) return;
     const was = current;
     current = theme;
-
-    if (was !== null) {
-      markTransitioning();
-      crossfadeBackdrop();
-    }
 
     if (LCT_THEMES.has(theme)) {
       applying = true;
@@ -149,7 +110,7 @@
         queueMicrotask(() => { applying = false; });
       }
       try { sessionStorage.setItem('__lcts_active_theme', theme); } catch (e) {}
-      setTimeout(() => { try { window.dispatchEvent(new Event('resize')); } catch (e) {} }, 240);
+      triggerResize();
       return;
     }
 
@@ -165,7 +126,7 @@
       } finally {
         queueMicrotask(() => { applying = false; });
       }
-      setTimeout(() => { try { window.dispatchEvent(new Event('resize')); } catch (e) {} }, 240);
+      triggerResize();
       return;
     }
     applying = true;
@@ -176,7 +137,7 @@
       queueMicrotask(() => { applying = false; });
     }
     try { sessionStorage.setItem('__lcts_active_theme', theme); } catch (e) {}
-    setTimeout(() => { try { window.dispatchEvent(new Event('resize')); } catch (e) {} }, 240);
+    triggerResize();
   }
 
   globalThis.__lctsReassertMode = () => { if (current && current !== 'off') setBaseMode(current); };

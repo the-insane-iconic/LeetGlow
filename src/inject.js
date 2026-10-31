@@ -278,6 +278,7 @@
   let applying = false, realSetTheme = null, siteTheme = null, oursApplied = false;
   let lastAppliedFont = undefined;
   const siteFont = new WeakMap();
+  let remeasureTimer = null;
   function applyFont(id) {
     const fam = (PALETTES[id] && PALETTES[id].font) || null;
     if (lastAppliedFont === fam) return;
@@ -293,12 +294,13 @@
                                : { fontFamily: siteFont.get(ed) || 'monospace' });
         } catch (e) {}
       });
-      setTimeout(() => {
+      clearTimeout(remeasureTimer);
+      remeasureTimer = setTimeout(() => {
         try {
           eds.forEach((ed) => { if (ed.remeasureFonts) ed.remeasureFonts(); });
           if (monaco.editor.remeasureFonts) monaco.editor.remeasureFonts();
         } catch (e) {}
-      }, 50);
+      }, 60);
     } catch (e) {}
   }
   function applyCurrent() {
