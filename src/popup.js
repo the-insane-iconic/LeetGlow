@@ -619,7 +619,7 @@ function renderOriginalCards(selected, container) {
 
     if (id === 'anime') {
       const card = document.createElement('button');
-      card.className = 'card anime-studio-card';
+      card.className = 'card anime-studio-card studio';
       card.type = 'button';
       card.setAttribute('role', 'radio');
       card.setAttribute('aria-checked', String(selected === 'anime'));

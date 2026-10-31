@@ -2598,6 +2598,8 @@ body {
 
 /* ---- Anime Themes Card (The Bridge between Light and Dark) ------------- */
 .card.anime-studio-card {
+  position: relative;
+  overflow: hidden;
   display: block;
   width: 100%;
   margin-top: 2px;
@@ -2613,18 +2615,24 @@ body {
     0 6px 20px -2px rgba(236, 72, 153, 0.18),
     0 2px 8px rgba(0, 0, 0, 0.28),
     inset 0 1px 0 #ffffff;
-  transition: all .18s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.2s ease,
+              box-shadow 0.2s ease;
   box-sizing: border-box;
 }
 
 .card.anime-studio-card:hover {
-  background: #ffffff;
+  background: linear-gradient(135deg, #ffffff 0%, #fff5f8 50%, #fdf2f8 100%);
   border-color: #f472b6;
   box-shadow:
     0 8px 24px -2px rgba(236, 72, 153, 0.32),
-    0 0 16px rgba(244, 114, 182, 0.3),
+    0 0 16px rgba(244, 114, 182, 0.28),
     inset 0 1px 0 #ffffff;
   transform: translateY(-1px);
+}
+
+.card.anime-studio-card:active {
+  transform: scale(0.99) translateY(0);
 }
 
 .card.anime-studio-card[aria-checked="true"] {
@@ -2635,6 +2643,8 @@ body {
 }
 
 .card.anime-studio-card .anime-card-content {
+  position: relative;
+  z-index: 3;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -3015,69 +3025,52 @@ body {
    A soft shiny sheen glides across periodically every few seconds,
    AND immediately triggers whenever the mouse hovers over the card!
    The アニメ glyphs wave in vibrant pink font. */
-.studio {
-  position: relative;
-  overflow: hidden;
-}
-
+.card.anime-studio-card::after,
 .studio::after {
   content: "";
   position: absolute;
-  top: 0;
-  bottom: 0;
+  top: -20%;
+  bottom: -20%;
   left: 0;
-  width: 42%;
-  background: linear-gradient(105deg,
-      transparent 0%,
-      rgba(255, 255, 255, 0.2) 20%,
-      rgba(255, 255, 255, 0.85) 50%,
-      rgba(255, 255, 255, 0.2) 80%,
-      transparent 100%);
-  transform: translateX(-150%) skewX(-20deg);
+  width: 45%;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.08) 20%,
+    rgba(255, 255, 255, 0.72) 50%,
+    rgba(255, 255, 255, 0.08) 80%,
+    transparent 100%
+  );
+  transform: translateX(-160%) skewX(-20deg);
   pointer-events: none;
-  animation: studio-periodic-sheen 4.5s ease-in-out 1.2s infinite;
+  opacity: 0;
+  z-index: 2;
 }
 
-/* Hover triggers shiny effect immediately on mouseover */
+/* Hover triggers elegant, non-blinking subtle shine */
+.card.anime-studio-card:hover::after,
 .studio:hover::after {
-  animation: studio-hover-sheen 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-
-@keyframes studio-periodic-sheen {
-  0% {
-    transform: translateX(-150%) skewX(-20deg);
-    opacity: 0;
-  }
-
-  2% {
-    opacity: 1;
-  }
-
-  22% {
-    transform: translateX(350%) skewX(-20deg);
-    opacity: 1;
-  }
-
-  23%,
-  100% {
-    transform: translateX(350%) skewX(-20deg);
-    opacity: 0;
-  }
+  opacity: 1;
+  animation: studio-hover-sheen 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes studio-hover-sheen {
   0% {
-    transform: translateX(-150%) skewX(-20deg);
+    transform: translateX(-160%) skewX(-20deg);
     opacity: 0;
   }
 
-  5% {
+  12% {
+    opacity: 1;
+  }
+
+  85% {
     opacity: 1;
   }
 
   100% {
-    transform: translateX(350%) skewX(-20deg);
-    opacity: 1;
+    transform: translateX(380%) skewX(-20deg);
+    opacity: 0;
   }
 }
 
