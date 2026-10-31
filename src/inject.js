@@ -291,10 +291,14 @@
           if (!siteFont.has(ed)) siteFont.set(ed, ed.getRawOptions().fontFamily);
           ed.updateOptions(fam ? { fontFamily: fam, fontLigatures: false }
                                : { fontFamily: siteFont.get(ed) || 'monospace' });
-          if (ed.remeasureFonts) ed.remeasureFonts();
         } catch (e) {}
       });
-      if (monaco.editor.remeasureFonts) monaco.editor.remeasureFonts();
+      setTimeout(() => {
+        try {
+          eds.forEach((ed) => { if (ed.remeasureFonts) ed.remeasureFonts(); });
+          if (monaco.editor.remeasureFonts) monaco.editor.remeasureFonts();
+        } catch (e) {}
+      }, 50);
     } catch (e) {}
   }
   function applyCurrent() {

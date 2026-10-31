@@ -279,9 +279,7 @@
     sig = signature(); lastTheme = theme;
 
     const map = palette();
-    const rules = [
-      '.monaco-editor .view-line span, .monaco-editor [class*="mtk"] { transition: color 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important; }'
-    ];
+    const rules = [];
     for (const cls in map) {
       const role = classify(map[cls]);
       /* unprefixed: LeetCode colourises testcase text with the same classes

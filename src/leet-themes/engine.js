@@ -356,7 +356,7 @@
       setTimeout(() => {
         spawn();
         layer.style.opacity = '1';
-      }, 200);
+      }, 80);
     } else {
       spawn();
     }
@@ -496,10 +496,11 @@
           prev.style.background = comp.background || comp.backgroundImage || '';
           prev.style.backgroundColor = comp.backgroundColor || '';
           prev.style.opacity = '1';
-          void prev.offsetHeight;
           requestAnimationFrame(() => {
-            prev.style.transition = 'opacity 0.38s cubic-bezier(0.16, 1, 0.3, 1)';
-            prev.style.opacity = '0';
+            requestAnimationFrame(() => {
+              prev.style.transition = 'opacity 0.22s ease';
+              prev.style.opacity = '0';
+            });
           });
         } catch (e) {}
       }
