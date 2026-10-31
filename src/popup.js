@@ -1746,7 +1746,7 @@ if (globalThis.LCTSBugButton) {
 const supportUsBtn = document.getElementById('supportUsBtn');
 if (supportUsBtn) {
   supportUsBtn.addEventListener('click', () => {
-    chrome.tabs.create({ url: 'https://leetglow.vercel.app/support.html' });
+    chrome.tabs.create({ url: 'https://leetglow.vercel.app/support' });
   });
 }
 
