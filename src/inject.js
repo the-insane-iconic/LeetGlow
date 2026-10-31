@@ -336,7 +336,17 @@
     } else if (++tries > 600) { clearInterval(waiter); }   // ~90s ceiling
   }, 150);
 
-  new MutationObserver(() => applyCurrent())
+  let applyScheduled = false;
+  function scheduleApply() {
+    if (applyScheduled) return;
+    applyScheduled = true;
+    queueMicrotask(() => {
+      applyScheduled = false;
+      applyCurrent();
+    });
+  }
+
+  new MutationObserver(() => scheduleApply())
     .observe(document.documentElement, { attributes: true, attributeFilter: ['data-lc-theme', 'data-lct-theme'] });
 
   /* This used to be a MutationObserver on document.body with subtree:true that
