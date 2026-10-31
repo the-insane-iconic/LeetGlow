@@ -43,13 +43,10 @@
   const needsPaneTag = () =>
     !!PANE_THEMES[document.documentElement.getAttribute('data-lc-theme') || ''];
 
-  /* cheap: no layout reads, four querySelector calls */
+  /* cheap: no layout reads, verify every tab has its pane role tagged */
   function settled(tabs) {
     for (const tab of tabs) {
       if (!tab.hasAttribute(PANE)) return false;
-      if (tab.getAttribute(PANE) === 'code') continue;
-      const s = tab.querySelector('[' + ATTR + ']');
-      if (!s || !s.isConnected) return false;
     }
     return true;
   }
@@ -98,14 +95,25 @@
 
   function nudge(ms) { setTimeout(() => { try { beat(); } catch (e) {} }, ms || 250); }
 
-  setInterval(beat, 1500);
+  /* Low-frequency idle watchdog (only when tab is visible and theme needs pane tags) */
+  setInterval(() => { if (!document.hidden && needsPaneTag()) beat(); }, 8000);
   beat();
 
-  /* a tab switch replaces the panel contents; catch it once, cheaply */
+  /* a tab switch replaces the panel contents; clear and re-tag */
   document.addEventListener('click', (e) => {
     const t = e.target;
-    if (t && t.closest && t.closest('.flexlayout__tab_button')) { nudge(120); nudge(600); }
+    if (t && t.closest && t.closest('.flexlayout__tab_button')) {
+      for (const tab of document.querySelectorAll('.flexlayout__tab')) tab.removeAttribute(PANE);
+      nudge(120); nudge(600);
+    }
   }, { capture: true, passive: true });
+
+  if (globalThis.LCTSProblem && globalThis.LCTSProblem.onChange) {
+    globalThis.LCTSProblem.onChange(() => {
+      for (const tab of document.querySelectorAll('.flexlayout__tab')) tab.removeAttribute(PANE);
+      nudge(200);
+    });
+  }
 
   let rz;
   window.addEventListener('resize', () => {
