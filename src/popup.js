@@ -369,7 +369,8 @@ async function selectWallpaper(item) {
 
   const animeCard = document.querySelector('.card[data-id="anime"]');
   if (animeCard) {
-    paintAnimeCard(animeCard.querySelector('.preview'));
+    const pv = animeCard.querySelector('.preview');
+    if (pv) paintAnimeCard(pv);
   }
 
   document.querySelectorAll('.wp-card').forEach(c => {
@@ -751,13 +752,16 @@ function paintPixelCard(preview) {
    difficulty, the three of them side by side (Easy | Medium | Hard); with one
    scene, that scene; with your own picture, its small blurred copy. */
 function paintAnimeCard(preview) {
+  if (!preview) return;
+  if (!chrome.runtime?.id) return;
   chrome.storage.local.get(['lcAnime', 'lcAnimeArt'], (res) => {
-    const cfg = res.lcAnime || {};
+    if (!chrome.runtime?.id || !preview) return;
+    const cfg = (res && res.lcAnime) || {};
     document.querySelectorAll('.studio-jp').forEach((e) => { e.hidden = cfg.japanese !== true; });
     const scenes = globalThis.LCTS_SCENES || {}, DEF = globalThis.LCTS_SCENE_DEFAULT;
     const ARC = globalThis.LCTS_ARC_DEFAULT || {};
     const thumb = (id) => { const s = scenes[id] || scenes[DEF]; return s ? chrome.runtime.getURL(s.thumb || s.wall) : null; };
-    const custom = cfg.scene === 'custom' && res.lcAnimeArt;
+    const custom = cfg.scene === 'custom' && res && res.lcAnimeArt;
     const arcs = !custom && (cfg.arcs !== undefined ? !!cfg.arcs : !cfg.scene);
 
     let urls, inkFrom;
@@ -779,7 +783,7 @@ function paintAnimeCard(preview) {
     const t = (cfg.themes && cfg.themes[inkFrom]) || (inkFrom !== 'custom' && scenes[inkFrom] && scenes[inkFrom].theme) || cfg.theme;
     if (t && t.ink) {
       const ink = t.ink;
-      preview.setAttribute('style', preview.getAttribute('style') + pvVars({
+      preview.setAttribute('style', (preview.getAttribute('style') || '') + pvVars({
         bg: t.scrim, text: ink.variable, line: t.roles['--lc-text3'], kw: ink.keyword, fn: ink.func,
         num: ink.number, var: ink.param, com: ink.comment, pn: ink.operator
       }));
@@ -804,6 +808,7 @@ function paintAnimeCard(preview) {
 
     if (isLive && (!cfg.liveWallpaper.thumbUrl && !urls[0]) && globalThis.LCTSLiveWallpapers && globalThis.LCTSLiveWallpapers.getThumbnail) {
       globalThis.LCTSLiveWallpapers.getThumbnail(cfg.liveWallpaper).then(tUrl => {
+        if (!chrome.runtime?.id || !preview) return;
         if (tUrl) {
           preview.style.backgroundImage = '';
           preview.style.setProperty('--pv-scene', `url("${tUrl}")`);
@@ -844,12 +849,17 @@ function choose(id) {
   /* content.js hears the storage change and applies it live in every open
      problem tab, so there is nothing to refresh */
   try {
-    chrome.tabs.query({ url: ['https://*.leetcode.com/*', 'https://*.leetcode.cn/*'] }, (tabs) => {
-      (tabs || []).forEach(t => {
-        chrome.tabs.sendMessage(t.id, { type: 'theme-change', theme: id });
-        chrome.tabs.sendMessage(t.id, { type: 'lct:set-theme', theme: id });
+    if (chrome.runtime?.id && chrome.tabs) {
+      chrome.tabs.query({ url: ['https://*.leetcode.com/*', 'https://*.leetcode.cn/*'] }, (tabs) => {
+        if (!chrome.runtime?.id) return;
+        (tabs || []).forEach(t => {
+          try {
+            chrome.tabs.sendMessage(t.id, { type: 'theme-change', theme: id }, () => { void chrome.runtime.lastError; });
+            chrome.tabs.sendMessage(t.id, { type: 'lct:set-theme', theme: id }, () => { void chrome.runtime.lastError; });
+          } catch (e) {}
+        });
       });
-    });
+    }
   } catch (e) { }
   const status = document.getElementById('status');
   if (status) {

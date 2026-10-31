@@ -107,6 +107,27 @@
       return function () { this.stateListeners.delete(listener); }.bind(this);
     }
 
+    _canAutoplay() {
+      if (this.ctx && this.ctx.state === 'running') return true;
+      const ua = navigator.userActivation;
+      return !ua || ua.hasBeenActive;
+    }
+
+    _armUserGesture() {
+      if (this._gestureArmed) return;
+      this._gestureArmed = true;
+      const unlock = () => {
+        window.removeEventListener('pointerdown', unlock, true);
+        window.removeEventListener('keydown', unlock, true);
+        this._gestureArmed = false;
+        if (this.pending && !this.playing && !document.hidden) {
+          this.start(this.preset);
+        }
+      };
+      window.addEventListener('pointerdown', unlock, { capture: true, once: true });
+      window.addEventListener('keydown', unlock, { capture: true, once: true });
+    }
+
     _onVisibility() {
       this.hidden = document.hidden;
       if (!this.pauseOnHide || !this.playing || !this.ctx) return;
@@ -114,6 +135,10 @@
         this._stopScheduling();
         this.ctx.suspend().catch(function () {});
       } else {
+        if (!this._canAutoplay()) {
+          this._armUserGesture();
+          return;
+        }
         this.ctx.resume().then(function () {
           this.nextChordAt = this.ctx.currentTime + 0.1;
           this._startScheduling();
@@ -386,6 +411,16 @@
       if (preset && PRESETS[preset]) this.preset = preset;
       // Never start in a background tab; the visible tab owns playback.
       if (document.hidden) return false;
+
+      // Never create or resume AudioContext before a user gesture — Chrome will refuse it and log
+      // "The AudioContext was not allowed to start" in extension errors.
+      if (!this._canAutoplay()) {
+        this.pending = true;
+        this._emit();
+        this._armUserGesture();
+        return false;
+      }
+
       if (!this._ensureContext()) return false;
       if (this.ctx.state === 'suspended') {
         try { await this.ctx.resume(); } catch (error) { /* gesture required */ }
@@ -393,6 +428,7 @@
       if (this.ctx.state !== 'running') {
         this.pending = true;
         this._emit();
+        this._armUserGesture();
         return false;
       }
       this.pending = false;
@@ -485,6 +521,7 @@
     }
 
     chime() {
+      if (!this._canAutoplay()) return;
       if (!this._ensureContext()) return;
       const ctx = this.ctx;
       // The context is suspended whenever lofi is stopped or the tab was hidden; wake it for the chime.
