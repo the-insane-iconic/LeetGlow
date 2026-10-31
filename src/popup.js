@@ -1398,7 +1398,7 @@ if (resetCustomizeBtn) {
 
     if (toggleTitleCard) toggleTitleCard.checked = true;
     if (toggleMoments) toggleMoments.checked = true;
-    if (toggleJapanese) toggleJapanese.checked = true;
+    if (toggleJapanese) toggleJapanese.checked = false;
     if (toggleShareCard) toggleShareCard.checked = true;
 
     chrome.storage.local.get(['lcAnime', 'lcPixel'], (r) => {
@@ -1408,7 +1408,7 @@ if (resetCustomizeBtn) {
       cfg.volume = DEFAULT_VOLUME_NORM;
       cfg.titleCard = true;
       cfg.moments = true;
-      cfg.japanese = true;
+      cfg.japanese = false;
 
       const pix = r.lcPixel || {};
       pix.volume = DEFAULT_VOLUME_NORM;
