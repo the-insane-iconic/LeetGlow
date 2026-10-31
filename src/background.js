@@ -36,7 +36,7 @@ chrome.runtime.onInstalled.addListener((details) => {
         }
       }
     });
-    chrome.tabs.create({ url: 'https://leetcode.com/problemset/?topicSlugs=daily' });
+    chrome.tabs.create({ url: 'https://leetcode.com/problems/two-sum/' });
   }
 });
 

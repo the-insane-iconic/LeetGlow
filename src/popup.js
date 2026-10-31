@@ -1795,10 +1795,10 @@ if (rateUsBtn) {
   });
 }
 
-/* Header "Daily Challenge" badge: opens LeetCode daily coding challenge directly */
+/* Header "Two Sum" badge: opens LeetCode problem directly */
 const openLeetCodeBtn = document.getElementById('openLeetCodeBtn');
 if (openLeetCodeBtn) {
   openLeetCodeBtn.addEventListener('click', () => {
-    chrome.tabs.create({ url: 'https://leetcode.com/problemset/?topicSlugs=daily' });
+    chrome.tabs.create({ url: 'https://leetcode.com/problems/two-sum/' });
   });
 }
