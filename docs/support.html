@@ -68,7 +68,7 @@
     .top-bar {
       position: relative;
       z-index: 10;
-      padding: 14px 32px;
+      padding: 12px 32px;
       background: rgba(255, 255, 255, 0.94);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
@@ -119,53 +119,40 @@
       transform: translateY(-0.5px);
     }
 
-    /* Centered Main Layout */
+    /* Centered Main Layout: Wide, Balanced & Elevated */
     .support-wrapper {
       position: relative;
       z-index: 1;
       flex: 1;
-      max-width: 580px;
+      max-width: 740px;
       width: 100%;
       margin: 0 auto;
-      padding: clamp(28px, 4vh, 48px) 20px 56px;
+      padding: 20px 24px 50px;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
 
-    /* Hero Header */
+    /* Compact, Punchy Hero Header (Brings container up) */
     .support-hero {
       text-align: center;
-      margin-bottom: 24px;
+      margin-bottom: 16px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 12px;
+      gap: 6px;
       width: 100%;
     }
-    .hero-badge {
+    .hero-title-row {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      background: var(--pink-soft);
-      color: var(--pink-accent);
-      border: 1px solid var(--pink-border);
-      padding: 5px 13px;
-      border-radius: 9999px;
-      font-size: 12.5px;
-      font-weight: 650;
-      letter-spacing: 0.01em;
-    }
-    .hero-badge svg {
-      width: 12px;
-      height: 12px;
-      fill: var(--pink-accent);
+      gap: 10px;
     }
     .hero-title {
-      font-size: clamp(32px, 5vw, 42px);
+      font-size: clamp(24px, 3.2vw, 30px);
       font-weight: 850;
       line-height: 1.15;
-      letter-spacing: -0.03em;
+      letter-spacing: -0.025em;
       color: var(--text-main);
     }
     .hero-title .gradient-brand {
@@ -176,33 +163,44 @@
       color: transparent;
       display: inline-block;
     }
+    .hero-badge-tag {
+      background: var(--pink-soft);
+      color: var(--pink-accent);
+      border: 1px solid var(--pink-border);
+      padding: 3px 9px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
     .hero-desc {
-      font-size: 14.5px;
+      font-size: 13.5px;
       color: var(--text-muted);
-      line-height: 1.55;
-      max-width: 480px;
+      line-height: 1.45;
+      max-width: 540px;
     }
 
-    /* Centered Sleek Support Checkout Card */
+    /* Centered Sleek Support Checkout Card: Wide, Modern & Balanced */
     .support-checkout-card {
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
-      border-radius: 24px;
-      padding: 24px 26px;
-      box-shadow: 0 20px 48px -12px rgba(15, 23, 42, 0.09), 0 4px 16px -2px rgba(15, 23, 42, 0.03);
+      border-radius: 20px;
+      padding: 22px 28px;
+      box-shadow: 0 16px 42px -10px rgba(15, 23, 42, 0.08), 0 2px 10px -1px rgba(15, 23, 42, 0.02);
       width: 100%;
-      margin-bottom: 32px;
+      margin-bottom: 28px;
     }
 
-    /* Segmented Payment Tabs (UPI vs BMC) */
+    /* Segmented Payment Tabs (Wide Tactile Control) */
     .payment-tabs {
       display: flex;
       align-items: center;
       background: #f1f5f9;
       border: 1px solid #e2e8f0;
-      border-radius: 13px;
+      border-radius: 12px;
       padding: 3.5px;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
       gap: 3px;
       user-select: none;
     }
@@ -212,9 +210,9 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      padding: 8px 12px;
-      border-radius: 10px;
+      gap: 7px;
+      padding: 8px 14px;
+      border-radius: 9px;
       border: none;
       background: transparent;
       color: var(--text-muted);
@@ -232,7 +230,7 @@
       background: #ffffff;
       color: var(--text-main);
       box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
-      font-weight: 700;
+      font-weight: 750;
     }
     .pay-tab .tab-flag {
       font-size: 14px;
@@ -252,10 +250,10 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Preset amount chips */
-    .chips-grid {
+    /* Unified Horizontal Amount Selection Grid: 4 Preset Chips + 1 Custom in 1 Row */
+    .amount-selection-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(4, 1fr) 1.25fr;
       gap: 8px;
       margin-bottom: 14px;
     }
@@ -263,10 +261,10 @@
       height: 44px;
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
-      border-radius: 11px;
+      border-radius: 10px;
       font-family: var(--font-sans);
       font-size: 15px;
-      font-weight: 700;
+      font-weight: 750;
       color: var(--text-main);
       cursor: pointer;
       transition: all 0.15s ease;
@@ -285,24 +283,16 @@
       box-shadow: 0 3px 10px rgba(5, 150, 105, 0.25);
     }
 
-    /* Custom amount input */
-    .field-label {
-      display: block;
-      font-size: 12.5px;
-      font-weight: 650;
-      color: #334155;
-      margin-bottom: 6px;
-    }
-    .custom-input-wrap {
+    /* Custom Amount Integrated Cell */
+    .custom-amount-cell {
       position: relative;
       display: flex;
       align-items: center;
-      margin-bottom: 14px;
     }
     .custom-currency-symbol {
       position: absolute;
-      left: 14px;
-      font-size: 16px;
+      left: 12px;
+      font-size: 15px;
       font-weight: 750;
       color: #475569;
       pointer-events: none;
@@ -311,11 +301,11 @@
     .custom-amount-input {
       width: 100%;
       height: 44px;
-      padding: 0 14px 0 34px;
+      padding: 0 10px 0 28px;
       border: 1px solid var(--border-subtle);
-      border-radius: 11px;
+      border-radius: 10px;
       font-family: var(--font-sans);
-      font-size: 15.5px;
+      font-size: 14.5px;
       font-weight: 750;
       color: var(--text-main);
       background: var(--bg-surface);
@@ -327,24 +317,21 @@
       box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.14);
     }
 
-    /* Supporter Inputs */
+    /* Supporter Details in a Sleek 2-Column Grid */
     .input-row-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
-      margin-bottom: 12px;
-    }
-    .input-field-group {
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
     .supporter-input {
       width: 100%;
-      height: 42px;
-      padding: 0 13px;
+      height: 40px;
+      padding: 0 12px;
       border: 1px solid var(--border-subtle);
-      border-radius: 10px;
+      border-radius: 9px;
       font-family: var(--font-sans);
-      font-size: 13.5px;
+      font-size: 13px;
       color: var(--text-main);
       background: var(--bg-surface);
       outline: none;
@@ -354,21 +341,20 @@
       border-color: var(--border-focus);
       box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
     }
-    textarea.supporter-input {
-      height: 60px;
-      padding: 10px 13px;
-      resize: vertical;
-      line-height: 1.4;
+
+    /* Note Input: Sleek Single-Line */
+    .input-field-group {
+      margin-bottom: 14px;
     }
 
-    /* Primary Razorpay Action CTA */
+    /* Primary Emerald Green Action CTA */
     .btn-pay-emerald {
       width: 100%;
-      height: 50px;
+      height: 48px;
       background: linear-gradient(135deg, #10b981 0%, #059669 100%);
       color: #ffffff;
       border: none;
-      border-radius: 13px;
+      border-radius: 12px;
       font-family: var(--font-sans);
       font-size: 15.5px;
       font-weight: 750;
@@ -378,7 +364,6 @@
       cursor: pointer;
       box-shadow: 0 4px 14px rgba(16, 185, 129, 0.32);
       transition: all 0.18s ease;
-      margin-top: 14px;
     }
     .btn-pay-emerald:hover {
       background: linear-gradient(135deg, #059669 0%, #047857 100%);
@@ -389,7 +374,7 @@
       transform: translateY(0.5px);
     }
 
-    /* Trust Footer */
+    /* Trust Footer & Switch Hint in Single Clean Row */
     .trust-container {
       margin-top: 14px;
       padding-top: 12px;
@@ -398,7 +383,7 @@
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 10px;
     }
     .trust-security-text {
       display: inline-flex;
@@ -423,9 +408,9 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      height: 20px;
-      padding: 0 7px;
-      border-radius: 5px;
+      height: 19px;
+      padding: 0 6px;
+      border-radius: 4px;
       border: 1px solid #e2e8f0;
       background: #f8fafc;
       font-size: 10px;
@@ -438,11 +423,8 @@
       background: #f0f9ff;
     }
 
-    /* Quick switch hint link */
     .switch-pane-hint {
-      text-align: center;
-      margin-top: 14px;
-      font-size: 12px;
+      font-size: 11.5px;
       color: var(--text-muted);
     }
     .switch-pane-btn {
@@ -450,7 +432,7 @@
       border: none;
       color: #0284c7;
       font-family: inherit;
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 650;
       cursor: pointer;
       text-decoration: underline;
@@ -462,40 +444,31 @@
     }
 
     /* =========================================================================
-       Buy Me a Coffee (International) Pane Styling
+       Buy Me a Coffee (International) Pane Styling: Wide & High Impact
        ========================================================================= */
     .bmc-pane-body {
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 12px;
       text-align: center;
-    }
-    .bmc-pane-header {
-      padding: 6px 0 2px;
-    }
-    .bmc-pane-title {
-      font-size: 19px;
-      font-weight: 800;
-      color: var(--text-main);
-      letter-spacing: -0.015em;
     }
     .bmc-pane-desc {
       font-size: 13px;
       color: var(--text-muted);
-      margin-top: 4px;
-      line-height: 1.45;
+      line-height: 1.4;
     }
 
     .bmc-chips-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
+      gap: 10px;
+      margin-top: 2px;
     }
     .bmc-chip-btn {
       height: 48px;
       background: #fffbeb;
       border: 1px solid #fde68a;
-      border-radius: 12px;
+      border-radius: 11px;
       font-family: var(--font-sans);
       cursor: pointer;
       display: flex;
@@ -523,29 +496,30 @@
       line-height: 1.1;
     }
     .bmc-chip-sub {
-      font-size: 10px;
+      font-size: 10.5px;
       opacity: 0.8;
       font-weight: 600;
     }
 
     .btn-bmc-primary {
       width: 100%;
-      height: 52px;
+      height: 48px;
       background: var(--bmc-yellow);
       color: #000000;
       border: 1px solid rgba(0, 0, 0, 0.08);
-      border-radius: 14px;
+      border-radius: 12px;
       text-decoration: none;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 9px;
+      gap: 8px;
       font-family: var(--font-sans);
-      font-size: 16px;
+      font-size: 15.5px;
       font-weight: 800;
       box-shadow: 0 4px 14px rgba(255, 221, 0, 0.42);
       transition: all 0.18s ease;
       cursor: pointer;
+      margin-top: 4px;
     }
     .btn-bmc-primary:hover {
       background: var(--bmc-yellow-hover);
@@ -557,86 +531,94 @@
       transform: translateY(0);
     }
     .btn-bmc-primary .bmc-cup-icon {
-      font-size: 20px;
+      font-size: 18px;
       line-height: 1;
     }
 
+    .bmc-trust-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+      padding-top: 10px;
+      border-top: 1px solid #f1f5f9;
+    }
     .bmc-badges-row {
       display: flex;
       align-items: center;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 2px;
+      gap: 5px;
     }
     .bmc-badge-pill {
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 600;
       color: #64748b;
       background: #f1f5f9;
-      padding: 3px 8px;
-      border-radius: 6px;
+      padding: 2.5px 7px;
+      border-radius: 5px;
     }
 
     /* Success Pane */
     .success-pane {
       text-align: center;
-      padding: 24px 12px;
+      padding: 20px 10px;
     }
     .success-icon-wrap {
-      width: 52px;
-      height: 52px;
+      width: 48px;
+      height: 48px;
       background: #ecfdf5;
       color: #10b981;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 12px;
+      margin: 0 auto 10px;
     }
     .success-icon-wrap svg {
-      width: 24px;
-      height: 24px;
+      width: 22px;
+      height: 22px;
       fill: currentColor;
     }
     .success-pane h3 {
-      font-size: 20px;
+      font-size: 19px;
       font-weight: 800;
       color: var(--text-main);
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
     .success-pane p {
-      font-size: 13.5px;
+      font-size: 13px;
       color: var(--text-muted);
       line-height: 1.5;
-      max-width: 360px;
+      max-width: 380px;
       margin: 0 auto;
     }
 
     /* =========================================================================
-       Fueling the Future (Secondary Context Section Below Support Card)
+       Fueling the Future: Wide & Harmonious with the 740px Card
        ========================================================================= */
     .future-story-section {
       width: 100%;
+      max-width: 740px;
       text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 14px;
-      padding-top: 8px;
+      gap: 12px;
+      padding-top: 6px;
       border-top: 1px dashed #e2e8f0;
     }
     .story-mini-title {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 800;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.015em;
       color: var(--text-main);
     }
     .story-mini-desc {
-      font-size: 13.5px;
+      font-size: 13px;
       color: var(--text-muted);
-      line-height: 1.55;
-      max-width: 480px;
+      line-height: 1.5;
+      max-width: 580px;
     }
 
     /* Creator Quote Card */
@@ -644,32 +626,31 @@
       background: #fff8fc;
       border: 1px solid #fce7f3;
       border-left: 4px solid #ec4899;
-      border-radius: 14px;
-      padding: 16px 20px;
+      border-radius: 12px;
+      padding: 14px 18px;
       text-align: left;
-      box-shadow: 0 4px 12px -2px rgba(236, 72, 153, 0.06);
+      box-shadow: 0 4px 12px -2px rgba(236, 72, 153, 0.05);
       width: 100%;
-      max-width: 520px;
     }
     .quote-text {
-      font-size: 13.5px;
+      font-size: 13px;
       color: #334155;
       font-style: italic;
       line-height: 1.55;
     }
     .quote-author {
-      font-size: 12.5px;
+      font-size: 12px;
       font-weight: 700;
       color: #db2777;
       font-style: normal;
-      margin-top: 6px;
+      margin-top: 5px;
     }
 
     /* Minimal Footer */
     .page-footer {
       position: relative;
       z-index: 10;
-      padding: 20px 24px;
+      padding: 18px 24px;
       text-align: center;
       font-size: 12px;
       color: var(--text-faint);
@@ -690,24 +671,31 @@
       color: var(--text-main);
     }
 
-    @media (max-width: 520px) {
+    @media (max-width: 620px) {
       .top-bar {
-        padding: 12px 18px;
+        padding: 10px 16px;
       }
       .support-wrapper {
-        padding: 24px 14px 44px;
+        padding: 16px 14px 40px;
       }
       .support-checkout-card {
-        padding: 20px 16px;
-        border-radius: 20px;
+        padding: 18px 16px;
+        border-radius: 18px;
+      }
+      .amount-selection-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .custom-amount-cell {
+        grid-column: span 2;
       }
       .input-row-grid {
         grid-template-columns: 1fr;
-        gap: 0;
+        gap: 8px;
       }
-      .trust-container {
+      .trust-container, .bmc-trust-row {
         flex-direction: column;
         align-items: center;
+        gap: 8px;
       }
     }
   </style>
@@ -731,24 +719,21 @@
     </div>
   </header>
 
-  <!-- Centered Support Experience -->
+  <!-- Centered Support Experience: Wide & Elevated -->
   <main class="support-wrapper">
 
-    <!-- Hero Header -->
+    <!-- Compact Hero Header -->
     <div class="support-hero">
-      <div class="hero-badge">
-        <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-        <span>Independent & Open Source</span>
+      <div class="hero-title-row">
+        <h1 class="hero-title">Support <span class="gradient-brand">LeetGlow</span></h1>
+        <span class="hero-badge-tag">Free & Open</span>
       </div>
-      <h1 class="hero-title">
-        Support <span class="gradient-brand">LeetGlow.</span>
-      </h1>
       <p class="hero-desc">
-        100% free, lightweight, and community-backed. Your contribution keeps 4K wallpaper CDN servers running and new themes coming.
+        100% free and community-backed. Your contribution keeps 4K CDN servers fast and updates coming.
       </p>
     </div>
 
-    <!-- Centered Checkout Card (Main Focus) -->
+    <!-- Wide Sleek Checkout Card (Main Focus) -->
     <div class="support-checkout-card" id="checkoutCard">
 
       <!-- Segmented Region / Gateway Switcher -->
@@ -759,46 +744,36 @@
         </button>
         <button type="button" class="pay-tab" id="tabGlobal" role="tab" aria-selected="false">
           <span class="tab-flag">🌍</span>
-          <span>Global (Buy Me a Coffee)</span>
+          <span>International (Buy Me a Coffee)</span>
         </button>
       </div>
 
       <!-- Pane 1: Domestic India (Razorpay UPI, QR, RuPay, NetBanking) -->
       <div id="paneIndia" class="pay-pane">
-        <!-- Preset Amount Chips -->
-        <div class="chips-grid">
+        <!-- Unified Amount Selection Grid (4 Chips + Custom in 1 Single Row) -->
+        <div class="amount-selection-grid">
           <button type="button" class="chip-btn" data-amt="50">₹50</button>
           <button type="button" class="chip-btn active" data-amt="100">₹100</button>
           <button type="button" class="chip-btn" data-amt="250">₹250</button>
           <button type="button" class="chip-btn" data-amt="500">₹500</button>
+          <div class="custom-amount-cell">
+            <span class="custom-currency-symbol">₹</span>
+            <input type="number" id="customAmountInput" class="custom-amount-input" value="100" min="10" step="10" placeholder="Custom" />
+          </div>
         </div>
 
-        <!-- Custom Amount Input -->
-        <label for="customAmountInput" class="field-label">Or enter a custom amount (INR)</label>
-        <div class="custom-input-wrap">
-          <span class="custom-currency-symbol">₹</span>
-          <input type="number" id="customAmountInput" class="custom-amount-input" value="100" min="10" step="10" placeholder="Custom amount" />
-        </div>
-
-        <!-- Supporter Details (Streamlined) -->
+        <!-- Supporter Details in a Sleek 2-Column Grid -->
         <div class="input-row-grid">
-          <div>
-            <label for="supporterName" class="field-label">Your Name (Optional)</label>
-            <input type="text" id="supporterName" class="supporter-input" placeholder="e.g. Alex" />
-          </div>
-          <div>
-            <label for="supporterEmail" class="field-label">Email (For receipt)</label>
-            <input type="email" id="supporterEmail" class="supporter-input" placeholder="alex@example.com" />
-          </div>
+          <input type="text" id="supporterName" class="supporter-input" placeholder="Your Name (Optional)" />
+          <input type="email" id="supporterEmail" class="supporter-input" placeholder="Email Address (For receipt)" />
         </div>
 
-        <!-- Supporter Note -->
+        <!-- Compact Message Input -->
         <div class="input-field-group">
-          <label for="supporterMessage" class="field-label">Message / Note (Optional)</label>
-          <textarea id="supporterMessage" class="supporter-input" placeholder="Say hi or suggest a feature!"></textarea>
+          <input type="text" id="supporterMessage" class="supporter-input" placeholder="Message or feature idea (Optional)" />
         </div>
 
-        <!-- Primary Emerald Green Action CTA -->
+        <!-- Primary Action CTA -->
         <button type="button" id="payRazorpayBtn" class="btn-pay-emerald">
           <span id="payBtnLabel">Support with ₹100</span>
         </button>
@@ -807,30 +782,27 @@
         <div class="trust-container">
           <div class="trust-security-text">
             <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
-            <span>India: UPI, Cards & NetBanking via Razorpay</span>
+            <span>Secured by Razorpay</span>
           </div>
           <div class="trust-methods-row">
             <span class="pay-chip upi-chip">UPI</span>
             <span class="pay-chip">GPay</span>
             <span class="pay-chip">PhonePe</span>
+            <span class="pay-chip">Paytm</span>
             <span class="pay-chip">Cards</span>
           </div>
-        </div>
-
-        <div class="switch-pane-hint">
-          Outside India or using a US card? <button type="button" id="switchToGlobalBtn" class="switch-pane-btn">Support via Buy Me a Coffee →</button>
+          <div class="switch-pane-hint">
+            Outside India? <button type="button" id="switchToGlobalBtn" class="switch-pane-btn">Pay via Buy Me a Coffee →</button>
+          </div>
         </div>
       </div>
 
       <!-- Pane 2: International (Buy Me a Coffee) -->
       <div id="paneGlobal" class="pay-pane" hidden>
         <div class="bmc-pane-body">
-          <div class="bmc-pane-header">
-            <h2 class="bmc-pane-title">Support on Buy Me a Coffee</h2>
-            <p class="bmc-pane-desc">Fast, secure international contributions with zero Indian banking OTP requirements.</p>
-          </div>
+          <p class="bmc-pane-desc">Fast, secure global contributions with Apple Pay, Google Pay, US/Global Cards or PayPal.</p>
 
-          <!-- Coffee Quantity Chips -->
+          <!-- Coffee Quantity Chips in Wide Grid -->
           <div class="bmc-chips-grid">
             <button type="button" class="bmc-chip-btn" data-bmc="1" data-val="3">
               <span class="bmc-chip-top">☕ 1 Coffee</span>
@@ -856,16 +828,17 @@
             </svg>
           </a>
 
-          <!-- International Trust Badges -->
-          <div class="bmc-badges-row">
-            <span class="bmc-badge-pill">Apple Pay</span>
-            <span class="bmc-badge-pill">Google Pay</span>
-            <span class="bmc-badge-pill">Visa / Mastercard</span>
-            <span class="bmc-badge-pill">PayPal</span>
-          </div>
-
-          <div class="switch-pane-hint">
-            In India with UPI? <button type="button" id="switchToIndiaBtn" class="switch-pane-btn">Pay via UPI & RuPay →</button>
+          <!-- International Trust & Switch Link -->
+          <div class="bmc-trust-row">
+            <div class="bmc-badges-row">
+              <span class="bmc-badge-pill">Apple Pay</span>
+              <span class="bmc-badge-pill">Google Pay</span>
+              <span class="bmc-badge-pill">Cards</span>
+              <span class="bmc-badge-pill">PayPal</span>
+            </div>
+            <div class="switch-pane-hint">
+              In India? <button type="button" id="switchToIndiaBtn" class="switch-pane-btn">Pay via UPI & RuPay →</button>
+            </div>
           </div>
         </div>
       </div>
@@ -877,12 +850,12 @@
         </div>
         <h3>Thank You So Much!</h3>
         <p>Your contribution was successful. You are actively keeping LeetGlow 100% free, fast, and inspiring for every developer grinding LeetCode.</p>
-        <a href="index.html" class="btn-ghost" style="margin-top: 16px; display: inline-flex;">Back to LeetGlow</a>
+        <a href="index.html" class="btn-ghost" style="margin-top: 14px; display: inline-flex;">Back to LeetGlow</a>
       </div>
 
     </div>
 
-    <!-- Fueling the Future (Secondary Context Section Below Support Card) -->
+    <!-- Fueling the Future (Harmonious Secondary Section Below Card) -->
     <div class="future-story-section">
       <h2 class="story-mini-title">Fueling the future of LeetGlow</h2>
       <p class="story-mini-desc">
@@ -1025,7 +998,7 @@
             email: email || undefined
           },
           theme: {
-            color: '#059669' // Emerald Green matching the UI button
+            color: '#059669' // Emerald Green
           },
           handler: function(response) {
             paneIndia.style.display = 'none';
