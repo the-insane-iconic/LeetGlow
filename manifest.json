@@ -42,7 +42,7 @@
       "48": "icons/icon48.png"
    },
    "host_permissions": [
-      "https://*.supabase.co/*"
+      "https://kxtdvzyftfhryvbpbohb.supabase.co/*"
    ],
    "manifest_version": 3,
    "name": "LeetGlow – Aesthetic LeetCode Themes, Clean Animations & Focus Tools",
