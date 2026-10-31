@@ -46,7 +46,7 @@
    ],
    "manifest_version": 3,
    "name": "LeetGlow – Aesthetic LeetCode Themes, Clean Animations & Focus Tools",
-   "permissions": [ "storage", "unlimitedStorage", "offscreen", "sidePanel" ],
+   "permissions": [ "storage", "offscreen", "sidePanel" ],
    "short_name": "LeetGlow",
    "side_panel": {
       "default_path": "src/popup.html"
