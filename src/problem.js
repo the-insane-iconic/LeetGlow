@@ -131,7 +131,23 @@
     check();
     readyWaiters.splice(0).forEach((fn) => fn());
   });
-  setInterval(() => { if (cacheReady) check(); }, 1000);
+
+  /* Event-driven SPA navigation: Navigation API (Chrome 102+) + popstate + visibility + title observer */
+  if (window.navigation) {
+    window.navigation.addEventListener('navigatesuccess', () => { if (cacheReady) check(); });
+    window.navigation.addEventListener('navigate', () => { setTimeout(() => { if (cacheReady) check(); }, 150); });
+  }
+  window.addEventListener('popstate', () => { if (cacheReady) check(); });
+  window.addEventListener('focus', () => { if (cacheReady) check(); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && cacheReady) check(); });
+
+  const titleEl = document.querySelector('title');
+  if (titleEl) {
+    new MutationObserver(() => { if (cacheReady) check(); }).observe(titleEl, { childList: true, characterData: true });
+  }
+
+  /* Low-frequency idle watchdog (only when tab is actively visible) */
+  setInterval(() => { if (cacheReady && !document.hidden) check(); }, 8000);
 
   globalThis.LCTSProblem = {
     get: () => Object.assign({}, cur),

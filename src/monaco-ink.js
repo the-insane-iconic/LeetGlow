@@ -309,8 +309,32 @@
     delay *= 2;
   })();
 
-  /* heartbeat: one string-length read every 2s, forever, costs nothing */
-  setInterval(function () { safe(false); }, 2000);
+  /* Event-driven style observer: catches newly inserted Monaco stylesheets without busy polling */
+  const headObserver = new MutationObserver(function (mutations) {
+    let hasStyle = false;
+    for (let i = 0; i < mutations.length; i++) {
+      const added = mutations[i].addedNodes;
+      for (let j = 0; j < added.length; j++) {
+        if (added[j].nodeName === 'STYLE' && added[j].id !== STYLE_ID) {
+          hasStyle = true;
+          break;
+        }
+      }
+      if (hasStyle) break;
+    }
+    if (hasStyle) safe(false);
+  });
+  if (document.head) {
+    headObserver.observe(document.head, { childList: true });
+  } else {
+    document.addEventListener('DOMContentLoaded', function () {
+      if (document.head) headObserver.observe(document.head, { childList: true });
+    }, { once: true });
+  }
+
+  /* Low-frequency idle fallback (only runs when the tab is actively visible) */
+  setInterval(function () { if (!document.hidden) safe(false); }, 10000);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) safe(false); });
 
   /* a new anime scene changes the inks without changing the theme id */
   globalThis.__lctsInkRefresh = function () { safe(true); };
