@@ -599,6 +599,102 @@
       margin: 0 auto;
     }
 
+    .btn-ghost-bmc {
+      background: #fefce8;
+      border-color: #fef08a;
+      color: #854d0e;
+      font-weight: 700;
+    }
+    .btn-ghost-bmc:hover {
+      background: #fef08a;
+      border-color: #fde047;
+      color: #713f12;
+    }
+
+    /* International Buy Me a Coffee Container */
+    .intl-bmc-box {
+      margin-top: 18px;
+    }
+    .intl-divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      margin: 18px 0 14px;
+      color: var(--text-faint);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .intl-divider::before,
+    .intl-divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .intl-divider span {
+      padding: 0 10px;
+    }
+    .btn-bmc-intl {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 13px 18px;
+      background: #FFDD00;
+      color: #000000;
+      border-radius: 14px;
+      text-decoration: none;
+      box-shadow: 0 4px 14px rgba(255, 221, 0, 0.4);
+      transition: all 0.18s ease;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+    }
+    .btn-bmc-intl:hover {
+      background: #facc15;
+      transform: translateY(-1.5px);
+      box-shadow: 0 6px 18px rgba(255, 221, 0, 0.55);
+      color: #000000;
+    }
+    .btn-bmc-intl:active {
+      transform: translateY(0);
+    }
+    .btn-bmc-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .bmc-cup-badge {
+      font-size: 24px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .btn-bmc-text {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      text-align: left;
+    }
+    .bmc-main-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #000000;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+    }
+    .bmc-sub-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(0, 0, 0, 0.7);
+      margin-top: 2px;
+    }
+    .btn-bmc-arrow {
+      color: #000000;
+      flex-shrink: 0;
+      transition: transform 0.18s ease;
+    }
+    .btn-bmc-intl:hover .btn-bmc-arrow {
+      transform: translate(2px, -2px);
+    }
+
     /* Responsive Breakdown */
     @media (max-width: 960px) {
       .support-wrapper {
@@ -644,6 +740,9 @@
       <span>LeetGlow</span>
     </a>
     <div class="top-bar-right">
+      <a href="https://buymeacoffee.com/leetglow" target="_blank" rel="noopener" class="btn-ghost btn-ghost-bmc" title="Support LeetGlow on Buy Me a Coffee">
+        <span>☕ Buy Me a Coffee</span>
+      </a>
       <a href="https://chromewebstore.google.com/detail/ecpfpadofaimilfpjedgoedhoaglpjdb" target="_blank" rel="noopener" class="btn-ghost">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="21.17" y1="8" x2="12" y2="8"/><line x1="3.95" y1="6.06" x2="8.54" y2="14"/><line x1="10.88" y1="21.94" x2="15.46" y2="14"/>
@@ -825,7 +924,7 @@
         <div class="trust-container">
           <div class="trust-security-text">
             <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
-            <span>Secure payments via Razorpay</span>
+            <span>India: UPI, Cards & NetBanking via Razorpay</span>
           </div>
           <div class="trust-methods-row">
             <span class="pay-chip upi-chip">UPI</span>
@@ -836,6 +935,26 @@
             </span>
             <span class="pay-chip netbank-chip">NetBanking</span>
           </div>
+        </div>
+
+        <!-- Dedicated International Supporters Box -->
+        <div class="intl-bmc-box">
+          <div class="intl-divider">
+            <span>OR OUTSIDE INDIA / INTERNATIONAL</span>
+          </div>
+          <a href="https://buymeacoffee.com/leetglow" target="_blank" rel="noopener" class="btn-bmc-intl" title="Support LeetGlow on Buy Me a Coffee">
+            <div class="btn-bmc-left">
+              <span class="bmc-cup-badge">☕</span>
+              <div class="btn-bmc-text">
+                <span class="bmc-main-title">Support on Buy Me a Coffee</span>
+                <span class="bmc-sub-title">US & Global Cards · Apple Pay · Google Pay · PayPal</span>
+              </div>
+            </div>
+            <svg class="btn-bmc-arrow" viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="4" y1="12" x2="12" y2="4"/>
+              <polyline points="6 4 12 4 12 10"/>
+            </svg>
+          </a>
         </div>
       </div>
 

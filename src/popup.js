@@ -1710,6 +1710,13 @@ if (supportUsBtn) {
   });
 }
 
+const bmcUsBtn = document.getElementById('bmcUsBtn');
+if (bmcUsBtn) {
+  bmcUsBtn.addEventListener('click', () => {
+    chrome.tabs.create({ url: 'https://buymeacoffee.com/leetglow' });
+  });
+}
+
 const rateUsBtn = document.getElementById('rateUsBtn');
 if (rateUsBtn) {
   rateUsBtn.addEventListener('click', () => {
