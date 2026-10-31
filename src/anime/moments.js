@@ -175,16 +175,33 @@
     }, 120);
   }
 
-  maybeTitleCard();
-  setInterval(() => {
+  function triggerTitle() {
     maybeTitleCard();
-    /* load sounds when universal moments or crawler are active */
     if (SFX && on()) {
       const soundTheme = theme() === 'crawler' ? 'crawler' : 'anime';
       SFX.warm(soundTheme);
       primeSound();
     }
-  }, 1000);
+  }
+
+  triggerTitle();
+
+  /* Event-driven SPA navigation & problem change detection */
+  if (globalThis.LCTSProblem && globalThis.LCTSProblem.onChange) {
+    globalThis.LCTSProblem.onChange(() => triggerTitle());
+  }
+  if (window.navigation) {
+    window.navigation.addEventListener('navigatesuccess', triggerTitle);
+  }
+  window.addEventListener('popstate', triggerTitle);
+  window.addEventListener('focus', triggerTitle);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) triggerTitle(); });
+
+  new MutationObserver(triggerTitle)
+    .observe(root, { attributes: true, attributeFilter: ['data-lc-theme', 'data-lct-theme'] });
+
+  /* Low-frequency idle watchdog (only when tab is active and visible) */
+  setInterval(() => { if (!document.hidden) triggerTitle(); }, 8000);
 
   /* Preview from Customize tab or popup: play a moment by name on this tab */
   document.addEventListener('lcts:moment', (e) => {

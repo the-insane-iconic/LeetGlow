@@ -193,7 +193,20 @@
     .observe(root, { attributes: true, attributeFilter: ['data-lc-theme'] });
 
   poll();
-  setInterval(poll, 1000);
+
+  /* Event-driven SPA navigation & problem change detection */
+  if (globalThis.LCTSProblem && globalThis.LCTSProblem.onChange) {
+    globalThis.LCTSProblem.onChange(() => { if (on()) poll(); });
+  }
+  if (window.navigation) {
+    window.navigation.addEventListener('navigatesuccess', () => { if (on()) poll(); });
+  }
+  window.addEventListener('popstate', () => { if (on()) poll(); });
+  window.addEventListener('focus', () => { if (on()) poll(); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && on()) poll(); });
+
+  /* Low-frequency idle watchdog (only when tab is visible and theme is game) */
+  setInterval(() => { if (!document.hidden && on()) poll(); }, 8000);
 
   /* our own theme switches: re-check the level at once, no page reload */
   new MutationObserver(() => { if (on()) { lastSlug = null; poll(); } })

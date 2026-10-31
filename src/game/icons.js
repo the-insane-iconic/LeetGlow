@@ -200,7 +200,23 @@
     setTimeout(tick, delay);
     delay *= 2;
   })();
-  setInterval(safe, 2000);
+  /* Event-driven hooks: problem switch, tab button clicks, visibility */
+  if (globalThis.LCTSProblem && globalThis.LCTSProblem.onChange) {
+    globalThis.LCTSProblem.onChange(() => { if (on()) safe(); });
+  }
+  if (window.navigation) {
+    window.navigation.addEventListener('navigatesuccess', () => { if (on()) safe(); });
+  }
+  window.addEventListener('popstate', () => { if (on()) safe(); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && on()) safe(); });
+  document.addEventListener('click', (e) => {
+    if (on() && e.target && e.target.closest && e.target.closest('.flexlayout__tab_button, [data-e2e-locator*="tab"]')) {
+      setTimeout(safe, 100);
+    }
+  }, { capture: true, passive: true });
+
+  /* Low-frequency idle watchdog (only when tab is visible and theme is game) */
+  setInterval(() => { if (!document.hidden && on()) safe(); }, 10000);
 
   /* our own theme switches, and only ours */
   new MutationObserver(safe)
