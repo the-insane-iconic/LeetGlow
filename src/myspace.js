@@ -13,6 +13,7 @@
     NICKNAME: 'msUserNickname',
     USER_ID: 'msUserId',
     FOCUS_TIME: 'msTodayFocusSeconds',
+    FOCUS_CYCLE: 'msTodayFocusCycle',
     POMODORO: 'lctPomodoro',
     SETTINGS: 'lctSettings'
   };
@@ -38,6 +39,7 @@
     },
 
     todayFocusSeconds: 135 * 60, // 2h 15m default progress
+    lastFocusCycle: null, // daily cycle ID (resets 5:30 AM IST / 00:00 UTC)
     members: [],
     globalLeaders: [],
     settingsMenuOpen: false,
@@ -87,6 +89,85 @@
       return parts[0].slice(0, 2).toUpperCase();
     }
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+
+  // Temporary floating toast notification
+  function showMySpaceToast(message) {
+    let toast = document.getElementById('msToast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'msToast';
+      toast.className = 'ms-toast';
+      document.body.appendChild(toast);
+    }
+    toast.innerHTML = `<span>${escapeHtml(message)}</span>`;
+    toast.classList.add('visible');
+    clearTimeout(toast._timeout);
+    toast._timeout = setTimeout(() => {
+      toast.classList.remove('visible');
+    }, 2400);
+  }
+
+  // Get a member's 24h cumulative focus seconds (resets daily at 5:30 AM IST / 00:00:00 UTC)
+  function getMemberCumulativeSeconds(m, isYou) {
+    if (isYou) return state.todayFocusSeconds;
+    const curCycle = window.MySpaceAPI ? window.MySpaceAPI.getDailyCycleId() : '';
+    if (m.cycleDate && m.cycleDate === curCycle && m.todayFocusSeconds !== undefined) {
+      return Number(m.todayFocusSeconds) || 0;
+    }
+    if (m.todayFocusSeconds !== undefined && Number(m.todayFocusSeconds) > 0) {
+      return Number(m.todayFocusSeconds) || 0;
+    }
+    // Realistic initial active distribution for squad teammates
+    const nick = (m.nickname || '').toLowerCase();
+    if (nick.includes('elena')) return 6300; // 1h 45m
+    if (nick.includes('kenji')) return 4500; // 1h 15m
+    if (nick.includes('sarah')) return 3000; // 50m
+    if (nick.includes('aryan')) return 40800; // 11h 20m
+    if (nick.includes('riya')) return 35100; // 9h 45m
+    if (nick.includes('neha')) return 29400; // 8h 10m
+    return 1800; // 30m
+  }
+
+  function renderCumulativeMembersHtml() {
+    const list = [...state.members];
+    const items = list.map((m) => {
+      const isYou = m.id === state.userId;
+      const seconds = getMemberCumulativeSeconds(m, isYou);
+      return {
+        ...m,
+        isYou,
+        seconds
+      };
+    });
+
+    // Rank highest cumulative practice time first
+    items.sort((a, b) => b.seconds - a.seconds);
+
+    return items.map((item) => `
+      <div class="ms-cumulative-item ${item.isYou ? 'is-you' : ''}">
+        <div class="ms-cumulative-left">
+          <div class="ms-member-avatar-wrap ${item.isYou ? 'is-you' : ''}" style="width: 26px; height: 26px; font-size: 10px;">
+            <span class="ms-avatar-text">${escapeHtml(getInitials(item.nickname || 'Coder'))}</span>
+          </div>
+          <span class="ms-cumulative-name">${escapeHtml(item.nickname || 'Coder')}${item.isYou ? ' (You)' : ''}</span>
+        </div>
+        <span class="ms-cumulative-time">${formatHoursMinutes(item.seconds)}</span>
+      </div>
+    `).join('');
+  }
+
+  // Resets focus time daily at 5:30 AM IST (00:00:00 UTC) worldwide
+  function checkDailyReset() {
+    if (!window.MySpaceAPI) return;
+    const currentCycle = window.MySpaceAPI.getDailyCycleId();
+    if (state.lastFocusCycle && state.lastFocusCycle !== currentCycle) {
+      state.todayFocusSeconds = 0;
+      state.lastFocusCycle = currentCycle;
+      persistTodayFocus();
+      updateTimerUI();
+      updateMembersListUI();
+    }
   }
 
   // Format member status based on presence and active time
@@ -466,12 +547,23 @@
               </div>
             </div>
           </div>
-          <button id="msGroupSettingsBtn" class="ms-group-settings-btn" type="button" title="Group Settings" aria-label="Settings">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="3" />
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-            </svg>
-          </button>
+          <div class="ms-group-actions">
+            <button id="msGroupShareBtn" class="ms-group-action-btn ms-group-share-btn" type="button" title="Invite Friends (Copy Code)" aria-label="Share">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="18" cy="5" r="3" />
+                <circle cx="6" cy="12" r="3" />
+                <circle cx="18" cy="19" r="3" />
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+              </svg>
+            </button>
+            <button id="msGroupSettingsBtn" class="ms-group-action-btn ms-group-settings-btn" type="button" title="Group Settings" aria-label="Settings">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3" />
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         <!-- Settings Popup Menu -->
@@ -682,6 +774,21 @@
               <span class="ms-stat-progress-title">Progress</span>
               <span class="ms-stat-progress-pct">${progressPct}%</span>
             </div>
+          </div>
+        </div>
+
+        <!-- 24h Cumulative Practice Time Container (Resets daily at 5:30 AM IST) -->
+        <div class="ms-cumulative-card">
+          <div class="ms-cumulative-head">
+            <div class="ms-cumulative-title-wrap">
+              <span class="ms-cumulative-icon">⏱️</span>
+              <span class="ms-cumulative-title">Daily Practice (24h)</span>
+            </div>
+            <span class="ms-cumulative-badge">Resets 5:30 AM IST</span>
+          </div>
+
+          <div id="msCumulativeList" class="ms-cumulative-list">
+            ${renderCumulativeMembersHtml()}
           </div>
         </div>
       </div>
@@ -1128,6 +1235,39 @@
       });
     }
 
+    // 1b. Share / Invite button (One-click copy with instant feedback)
+    const shareBtn = container.querySelector('#msGroupShareBtn');
+    if (shareBtn && state.activeRoom) {
+      shareBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const code = state.activeRoom.code || '';
+        try {
+          await navigator.clipboard.writeText(code);
+        } catch (err) {
+          const ta = document.createElement('textarea');
+          ta.value = code;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+        }
+
+        const origHtml = shareBtn.innerHTML;
+        shareBtn.innerHTML = `
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        `;
+        shareBtn.classList.add('copied');
+        showMySpaceToast(`✨ Room code ${code} copied! Share with friends.`);
+
+        setTimeout(() => {
+          shareBtn.innerHTML = origHtml;
+          shareBtn.classList.remove('copied');
+        }, 2000);
+      });
+    }
+
     // Close menu when clicking outside
     document.addEventListener('click', (e) => {
       if (state.settingsMenuOpen && settingsMenu && !settingsMenu.contains(e.target)) {
@@ -1231,6 +1371,7 @@
       if (state.timer.secondsLeft > 0) {
         state.timer.secondsLeft -= 1;
         if (state.timer.status === 'Focusing') {
+          checkDailyReset();
           state.todayFocusSeconds += 1;
         }
 
@@ -1350,6 +1491,7 @@
           if (state.timer.secondsLeft > 0) {
             state.timer.secondsLeft -= 1;
             if (state.timer.status === 'Focusing') {
+              checkDailyReset();
               state.todayFocusSeconds += 1;
             }
             if (state.timer.secondsLeft % 30 === 0) {
@@ -1393,7 +1535,8 @@
     clearTimeout(saveFocusDebounce);
     saveFocusDebounce = setTimeout(() => {
       chrome.storage.local.set({
-        [STORAGE_KEYS.FOCUS_TIME]: state.todayFocusSeconds
+        [STORAGE_KEYS.FOCUS_TIME]: state.todayFocusSeconds,
+        [STORAGE_KEYS.FOCUS_CYCLE]: state.lastFocusCycle || (window.MySpaceAPI ? window.MySpaceAPI.getDailyCycleId() : '')
       });
     }, 400);
   }
@@ -1471,6 +1614,12 @@
     if (pctEl) {
       pctEl.textContent = `${progressPct}%`;
     }
+
+    // 7. Update cumulative 24h practice time row for current user
+    const youCumulativeTimeEl = container.querySelector('.ms-cumulative-item.is-you .ms-cumulative-time');
+    if (youCumulativeTimeEl) {
+      youCumulativeTimeEl.textContent = formatHoursMinutes(state.todayFocusSeconds);
+    }
   }
 
   function updateMembersListUI() {
@@ -1528,6 +1677,12 @@
 
       scrollEl.innerHTML = rowsHtml + inviteHintHtml;
     }
+
+    // 4. Update Cumulative 24h Practice List
+    const cumulativeListEl = container.querySelector('#msCumulativeList');
+    if (cumulativeListEl) {
+      cumulativeListEl.innerHTML = renderCumulativeMembersHtml();
+    }
   }
 
   // Real-time polling for room member presence
@@ -1554,6 +1709,7 @@
       const remoteMembers = await window.MySpaceAPI.getRoomMembers(state.activeRoom.code);
       const isHost = Boolean(state.activeRoom.creator === state.nickname || state.activeRoom.isHost);
       const isBreak = state.timer.status === 'Break';
+      const curCycle = window.MySpaceAPI ? window.MySpaceAPI.getDailyCycleId() : '';
       const you = {
         id: state.userId,
         nickname: state.nickname || 'You',
@@ -1561,6 +1717,8 @@
         timerFormatted: formatTime(state.timer.secondsLeft),
         isHost: isHost,
         avatar: getInitials(state.nickname || 'You'),
+        todayFocusSeconds: state.todayFocusSeconds,
+        cycleDate: curCycle,
         lastActive: Date.now()
       };
 
@@ -1587,13 +1745,17 @@
     if (state.activeRoom) {
       const isHost = Boolean(state.activeRoom.creator === state.nickname || state.activeRoom.isHost);
       const isBreak = state.timer.status === 'Break';
+      const curCycle = window.MySpaceAPI ? window.MySpaceAPI.getDailyCycleId() : '';
       const me = {
         id: state.userId,
         nickname: state.nickname || 'You',
         status: isBreak ? 'Break' : 'Active',
         timerFormatted: formatTime(state.timer.secondsLeft),
         isHost: isHost,
-        avatar: getInitials(state.nickname || 'You')
+        avatar: getInitials(state.nickname || 'You'),
+        todayFocusSeconds: state.todayFocusSeconds,
+        cycleDate: curCycle,
+        lastActive: Date.now()
       };
       window.MySpaceAPI.syncMember(state.activeRoom.code, me);
     }
@@ -1621,8 +1783,12 @@
       STORAGE_KEYS.NICKNAME,
       STORAGE_KEYS.USER_ID,
       STORAGE_KEYS.FOCUS_TIME,
+      STORAGE_KEYS.FOCUS_CYCLE,
       STORAGE_KEYS.POMODORO
     ], (res) => {
+      const curCycle = window.MySpaceAPI ? window.MySpaceAPI.getDailyCycleId() : '';
+      state.lastFocusCycle = (res && res[STORAGE_KEYS.FOCUS_CYCLE]) ? res[STORAGE_KEYS.FOCUS_CYCLE] : curCycle;
+
       if (res && res[STORAGE_KEYS.USER_ID]) {
         state.userId = res[STORAGE_KEYS.USER_ID];
       } else {
@@ -1641,7 +1807,12 @@
         chrome.storage.local.set({ [STORAGE_KEYS.NICKNAME]: 'Ansh' });
       }
 
-      if (res && res[STORAGE_KEYS.FOCUS_TIME]) {
+      // Check if 24-hour cycle has reset (resets at 5:30 AM IST / 00:00:00 UTC worldwide)
+      if (res && res[STORAGE_KEYS.FOCUS_CYCLE] && res[STORAGE_KEYS.FOCUS_CYCLE] !== curCycle) {
+        state.todayFocusSeconds = 0;
+        state.lastFocusCycle = curCycle;
+        persistTodayFocus();
+      } else if (res && res[STORAGE_KEYS.FOCUS_TIME]) {
         state.todayFocusSeconds = Number(res[STORAGE_KEYS.FOCUS_TIME]) || state.todayFocusSeconds;
       }
 

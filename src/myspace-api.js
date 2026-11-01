@@ -43,6 +43,27 @@
     return `week_${y}_${m}_${dateStr}`;
   }
 
+  // Calculate deterministic daily 24h cycle ID: resets every day at 5:30 AM IST (00:00:00 UTC) worldwide.
+  function getDailyCycleId(now = new Date()) {
+    const d = new Date(now.getTime());
+    const y = d.getUTCFullYear();
+    const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+    const dateStr = String(d.getUTCDate()).padStart(2, '0');
+    return `day_${y}_${m}_${dateStr}`;
+  }
+
+  // Calculate human-readable countdown to upcoming 5:30 AM IST (00:00:00 UTC) reset worldwide
+  function getTimeUntilDailyReset(now = new Date()) {
+    const d = new Date(now.getTime());
+    const nextReset = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + 1, 0, 0, 0, 0));
+    const diffMs = Math.max(0, nextReset.getTime() - d.getTime());
+    const totalMinutes = Math.floor(diffMs / (1000 * 60));
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    return `${Math.max(1, minutes)}m`;
+  }
+
   // Calculate human-readable countdown to upcoming Monday 5:30 AM IST (00:00:00 UTC) worldwide
   function getTimeUntilReset(now = new Date()) {
     const d = new Date(now.getTime());
@@ -165,6 +186,8 @@
           timerFormatted: '25:00',
           isHost: true,
           avatar: 'AN',
+          todayFocusSeconds: 21600, // 6h 00m
+          cycleDate: getDailyCycleId(),
           lastActive: Date.now()
         }
       }
@@ -174,7 +197,9 @@
   window.MySpaceAPI = {
     normalizeRoomCode,
     getWeeklyCycleId,
+    getDailyCycleId,
     getTimeUntilReset,
+    getTimeUntilDailyReset,
 
     // 1. Room Management
     async getRoom(code) {
@@ -287,6 +312,8 @@
         timerFormatted: member.timerFormatted || '24:58',
         isHost: Boolean(member.isHost),
         avatar: member.avatar || 'AN',
+        todayFocusSeconds: Number(member.todayFocusSeconds) || 0,
+        cycleDate: member.cycleDate || getDailyCycleId(),
         lastActive: Date.now()
       };
 
