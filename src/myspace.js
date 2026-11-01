@@ -14,8 +14,14 @@
     USER_ID: 'msUserId',
     FOCUS_TIME: 'msTodayFocusSeconds',
     FOCUS_CYCLE: 'msTodayFocusCycle',
+    WEEKLY_FOCUS_TIME: 'msWeeklyFocusSeconds',
+    WEEKLY_FOCUS_CYCLE: 'msWeeklyFocusCycle',
     POMODORO: 'lctPomodoro',
-    SETTINGS: 'lctSettings'
+    SETTINGS: 'lctSettings',
+    STATS: 'lcStats',
+    CURRENT_PROBLEM: 'lcCurrentProblem',
+    RECENT_SOLVE: 'lcRecentSolve',
+    PENDING_JOIN_CODE: 'msPendingJoinCode'
   };
 
   const DEFAULT_TIMER_SECONDS = 25 * 60; // 25 minutes default Pomodoro
@@ -25,9 +31,15 @@
     currentView: 'lobby', // 'lobby' | 'create' | 'join' | 'workspace'
     activeWorkspaceTab: 'group', // 'group' | 'leaderboard'
     activeRoom: null,
-    nickname: 'Ansh',
-    userId: 'usr_ansh',
+    nickname: '',
+    userId: '',
+    nicknameModalOpen: false,
+    leaveConfirmOpen: false,
+    pendingJoinCode: null, // set when auto-navigated via ?glowroom=GLOW-XXXX
     selectedRoomType: 'private', // 'private' | 'open'
+    selectedTopic: 'All', // 'All' | 'Blind 75' | 'Dynamic Programming' | etc.
+    currentProblem: null, // { slug, number, title, difficulty }
+    recentSolve: null,    // { slug, number, title, difficulty, timestamp }
     
     // Focus Timer State
     timer: {
@@ -38,8 +50,12 @@
       interval: null
     },
 
-    todayFocusSeconds: 135 * 60, // 2h 15m default progress
+    todayFocusSeconds: 0,
     lastFocusCycle: null, // daily cycle ID (resets 5:30 AM IST / 00:00 UTC)
+    weeklyFocusSeconds: 0,
+    lastWeeklyCycle: null, // weekly cycle ID (resets Monday 5:30 AM IST / 00:00 UTC)
+    streak: 0,
+    solvedCount: 0,
     members: [],
     globalLeaders: [],
     settingsMenuOpen: false,
@@ -91,6 +107,89 @@
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   }
 
+  // Generate shareable room invite link: https://leetcode.com/problems/{slug}/?glowroom=GLOW-XXXX
+  function getShareableRoomUrl(roomCode) {
+    const rawCode = roomCode || (state.activeRoom && state.activeRoom.code) || '';
+    const normCode = window.MySpaceAPI ? window.MySpaceAPI.normalizeRoomCode(rawCode) : rawCode.trim().toUpperCase();
+    const slug = (state.currentProblem && state.currentProblem.slug) ? state.currentProblem.slug : 'two-sum';
+    return `https://leetcode.com/problems/${encodeURIComponent(slug)}/?glowroom=${encodeURIComponent(normCode)}`;
+  }
+
+  // Cryptographically safe host verification by userId (falls back to nickname)
+  function checkIsHost(room) {
+    if (!room) return false;
+    if (room.creatorId && state.userId) {
+      return room.creatorId === state.userId;
+    }
+    return Boolean(room.isHost || (state.nickname && room.creator === state.nickname));
+  }
+
+  // Render DSA Problem & Solved badges for peer presence
+  function renderMemberBadges(m, isYou) {
+    const prob = isYou ? (state.currentProblem || m.currentProblem) : m.currentProblem;
+    const solve = isYou ? (state.recentSolve || m.recentSolve) : m.recentSolve;
+    const badges = [];
+
+    if (prob && prob.title) {
+      const diff = (prob.difficulty || 'medium').toLowerCase();
+      const numStr = prob.number ? `#${prob.number} ` : '';
+      badges.push(`
+        <span class="ms-member-problem-badge diff-${diff}" title="Solving: ${escapeHtml(numStr + prob.title)}">
+          <span class="ms-prob-icon">🎯</span>
+          <span>${escapeHtml(numStr + prob.title)}</span>
+        </span>
+      `);
+    }
+
+    if (solve && solve.title && (Date.now() - Number(solve.timestamp || 0) < 10 * 60 * 1000)) {
+      badges.push(`
+        <span class="ms-member-solve-badge" title="Solved ${escapeHtml(solve.title)}!">
+          <span>🎉 Solved ${escapeHtml(solve.title)}</span>
+        </span>
+      `);
+    }
+
+    if (!badges.length) return '';
+    return `<div class="ms-member-badges">${badges.join('')}</div>`;
+  }
+
+  // Calculate real consecutive days streak and total solved clears from LeetCode data (lcStats)
+  function computeStreakAndClears(lcStats) {
+    if (!lcStats || typeof lcStats !== 'object') {
+      return { streak: 0, clears: 0 };
+    }
+    const days = Array.isArray(lcStats.days) ? lcStats.days : [];
+    const clears = Math.max(0, Number(lcStats.clears) || 0);
+    const set = new Set(days);
+
+    function formatDay(d) {
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+
+    let streak = 0;
+    const d = new Date();
+    // Check if streak was maintained today
+    if (set.has(formatDay(d))) {
+      while (set.has(formatDay(d))) {
+        streak++;
+        d.setDate(d.getDate() - 1);
+      }
+    } else {
+      // Check if streak is still active from yesterday
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      if (set.has(formatDay(yesterday))) {
+        const cur = new Date(yesterday.getTime());
+        while (set.has(formatDay(cur))) {
+          streak++;
+          cur.setDate(cur.getDate() - 1);
+        }
+      }
+    }
+
+    return { streak, clears };
+  }
+
   // Polished floating notification (clean, minimal, professional)
   function showMySpaceToast(message) {
     let toast = document.getElementById('msToast');
@@ -120,20 +219,12 @@
     if (isYou) return state.todayFocusSeconds;
     const curCycle = window.MySpaceAPI ? window.MySpaceAPI.getDailyCycleId() : '';
     if (m.cycleDate && m.cycleDate === curCycle && m.todayFocusSeconds !== undefined) {
-      return Number(m.todayFocusSeconds) || 0;
+      return Math.max(0, Number(m.todayFocusSeconds) || 0);
     }
     if (m.todayFocusSeconds !== undefined && Number(m.todayFocusSeconds) > 0) {
-      return Number(m.todayFocusSeconds) || 0;
+      return Math.max(0, Number(m.todayFocusSeconds) || 0);
     }
-    // Realistic initial active distribution for squad teammates
-    const nick = (m.nickname || '').toLowerCase();
-    if (nick.includes('elena')) return 6300; // 1h 45m
-    if (nick.includes('kenji')) return 4500; // 1h 15m
-    if (nick.includes('sarah')) return 3000; // 50m
-    if (nick.includes('aryan')) return 40800; // 11h 20m
-    if (nick.includes('riya')) return 35100; // 9h 45m
-    if (nick.includes('neha')) return 29400; // 8h 10m
-    return 1800; // 30m
+    return 0;
   }
 
   function renderCumulativeMembersHtml() {
@@ -174,6 +265,17 @@
       persistTodayFocus();
       updateTimerUI();
       updateMembersListUI();
+    }
+  }
+
+  // Resets weekly focus time every Monday at 5:30 AM IST (00:00:00 UTC) worldwide
+  function checkWeeklyReset() {
+    if (!window.MySpaceAPI || !window.MySpaceAPI.getWeeklyCycleId) return;
+    const currentWeekCycle = window.MySpaceAPI.getWeeklyCycleId();
+    if (state.lastWeeklyCycle && state.lastWeeklyCycle !== currentWeekCycle) {
+      state.weeklyFocusSeconds = 0;
+      state.lastWeeklyCycle = currentWeekCycle;
+      persistTodayFocus();
     }
   }
 
@@ -244,6 +346,16 @@
         <!-- Study Banner -->
         <div class="ms-banner">
           <div class="ms-banner-content">
+            <div class="ms-banner-user-row">
+              <button id="msLobbyNicknameBtn" class="ms-banner-nick-pill" type="button" title="${state.nickname ? 'Change Nickname' : 'Set Nickname'}">
+                <span class="ms-nick-avatar">${escapeHtml(getInitials(state.nickname || 'Coder'))}</span>
+                <span class="ms-nick-text">${escapeHtml(state.nickname || 'Set Nickname')}</span>
+                <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 20h9" />
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                </svg>
+              </button>
+            </div>
             <h2 class="ms-banner-title">Focus Together</h2>
             <p class="ms-banner-sub">Invite friends, stay consistent, and grow together.</p>
           </div>
@@ -401,13 +513,32 @@
           </div>
 
           <div class="ms-form-group">
+            <label class="ms-form-label" for="msRoomTopicSelect">DSA Focus Topic</label>
+            <div class="ms-select-wrap">
+              <select id="msRoomTopicSelect" class="ms-form-select">
+                <option value="General DSA" selected>General DSA / Mixed Practice</option>
+                <option value="Blind 75 / Grind 75">Blind 75 / Grind 75</option>
+                <option value="Dynamic Programming">Dynamic Programming (DP)</option>
+                <option value="Trees & Graphs">Trees, Graphs & BFS/DFS</option>
+                <option value="Arrays & Two Pointers">Arrays & Two Pointers</option>
+                <option value="Contest Prep">Weekly Contest Prep ⏱️</option>
+              </select>
+              <span class="ms-select-arrow-icon">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </span>
+            </div>
+          </div>
+
+          <div class="ms-form-group">
             <label class="ms-form-label" for="msCreatorNicknameInput">Your Nickname</label>
             <input
               id="msCreatorNicknameInput"
               class="ms-form-input"
               type="text"
-              placeholder="e.g. Ansh"
-              value="${escapeHtml(state.nickname || 'Ansh')}"
+              placeholder="e.g. Alex"
+              value="${escapeHtml(state.nickname || '')}"
               maxlength="20"
             />
           </div>
@@ -456,15 +587,19 @@
               <span>Room Code</span>
               <span class="ms-hint">Ask your study partner</span>
             </label>
-            <input
-              id="msJoinCodeInput"
-              class="ms-form-input ms-code-input"
-              type="text"
-              placeholder="GLOW-9X42"
-              maxlength="16"
-              autocomplete="off"
-              spellcheck="false"
-            />
+            <div class="ms-code-input-wrap">
+              <span class="ms-code-prefix">GLOW-</span>
+              <input
+                id="msJoinCodeInput"
+                class="ms-code-input"
+                type="text"
+                placeholder="9X42"
+                value="${escapeHtml(state.pendingJoinCode ? state.pendingJoinCode.replace(/^GLOW-/i, '') : '')}"
+                maxlength="6"
+                autocomplete="off"
+                spellcheck="false"
+              />
+            </div>
           </div>
 
           <div class="ms-form-group">
@@ -473,8 +608,8 @@
               id="msJoinNicknameInput"
               class="ms-form-input"
               type="text"
-              placeholder="e.g. Ansh"
-              value="${escapeHtml(state.nickname || 'Ansh')}"
+              placeholder="e.g. Alex"
+              value="${escapeHtml(state.nickname || '')}"
               maxlength="20"
             />
           </div>
@@ -511,6 +646,15 @@
                 <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
               </svg>
             </button>
+          </div>
+
+          <div class="ms-topic-pills-bar" id="msTopicPillsBar">
+            <button type="button" class="ms-topic-pill ${state.selectedTopic === 'All' ? 'active' : ''}" data-topic="All">All Topics</button>
+            <button type="button" class="ms-topic-pill ${state.selectedTopic === 'Blind 75' ? 'active' : ''}" data-topic="Blind 75">Blind 75</button>
+            <button type="button" class="ms-topic-pill ${state.selectedTopic === 'Dynamic Programming' ? 'active' : ''}" data-topic="Dynamic Programming">Dynamic Programming</button>
+            <button type="button" class="ms-topic-pill ${state.selectedTopic === 'Trees & Graphs' ? 'active' : ''}" data-topic="Trees & Graphs">Trees & Graphs</button>
+            <button type="button" class="ms-topic-pill ${state.selectedTopic === 'Arrays' ? 'active' : ''}" data-topic="Arrays">Arrays</button>
+            <button type="button" class="ms-topic-pill ${state.selectedTopic === 'Contest Prep' ? 'active' : ''}" data-topic="Contest Prep">Contest Prep</button>
           </div>
 
           <div id="msPublicRoomsList" class="ms-public-rooms-list">
@@ -551,11 +695,12 @@
                 <span>${memberCount} members</span>
                 <span class="dot">•</span>
                 <span>Daily goal: ${escapeHtml(goalText)}</span>
+                ${room.topic ? `<span class="dot">•</span><span class="ms-topic-tag">${escapeHtml(room.topic)}</span>` : ''}
               </div>
             </div>
           </div>
           <div class="ms-group-actions">
-            <button id="msGroupShareBtn" class="ms-group-action-btn ms-group-share-btn" type="button" title="Share Extension Link" aria-label="Share Extension">
+            <button id="msGroupShareBtn" class="ms-group-action-btn ms-group-share-btn" type="button" title="Share Room Invite Link" aria-label="Share Room Invite Link">
               <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="18" cy="5" r="3" />
                 <circle cx="6" cy="12" r="3" />
@@ -575,12 +720,19 @@
 
         <!-- Settings Popup Menu -->
         <div id="msSettingsMenu" class="ms-settings-menu" style="display: ${state.settingsMenuOpen ? 'flex' : 'none'};">
+          <button id="msChangeNicknameBtn" class="ms-menu-item" type="button">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 20h9" />
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+            </svg>
+            <span>Change Nickname</span>
+          </button>
           <button id="msCopyCodeBtn" class="ms-menu-item" type="button">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
             </svg>
-            <span>Copy Room Code</span>
+            <span>Copy Invite Link</span>
           </button>
           <button id="msLeaveGroupBtn" class="ms-menu-item danger" type="button">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -591,6 +743,24 @@
             <span>Leave Group</span>
           </button>
         </div>
+
+        <!-- Inline Leave Confirmation Dialog -->
+        ${state.leaveConfirmOpen ? `
+          <div class="ms-leave-inline-confirm" id="msLeaveInlineConfirm" role="alert">
+            <div class="ms-leave-confirm-info">
+              <svg class="ms-leave-confirm-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+              <span class="ms-leave-confirm-text">Leave this session? Your focus time is saved.</span>
+            </div>
+            <div class="ms-leave-confirm-actions">
+              <button id="msCancelLeaveBtn" class="ms-btn-inline-cancel" type="button">Cancel</button>
+              <button id="msConfirmLeaveBtn" class="ms-btn-inline-leave" type="button">Leave</button>
+            </div>
+          </div>
+        ` : ''}
 
         <!-- 2. Flexible Content Size Area -->
         <div class="ms-workspace-body">
@@ -739,6 +909,7 @@
                       <span class="ms-member-status-text ${textClass}">
                         ${escapeHtml(text)}
                       </span>
+                      ${renderMemberBadges(m, isYou)}
                     </div>
                   </div>
                 `;
@@ -818,12 +989,23 @@
             <span>🏆 Global Focus Arena</span>
           </div>
           <div class="ms-lb-badge-group">
+            <button id="msRefreshLeaderboardBtn" class="ms-btn-refresh ms-lb-refresh-btn" type="button" title="Refresh leaderboard" aria-label="Refresh leaderboard">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+              </svg>
+            </button>
             <span class="ms-lb-badge">Top 20</span>
           </div>
         </div>
 
         <div class="ms-leaderboard-list">
-          ${leaders.map((item) => {
+          ${leaders.length === 0 ? `
+            <div class="ms-lb-empty">
+              <span class="ms-lb-empty-icon">🏆</span>
+              <span class="ms-lb-empty-title">Be the first on the board!</span>
+              <p class="ms-lb-empty-sub">Focus with LeetGlow to climb this week's global ranking.</p>
+            </div>
+          ` : leaders.map((item) => {
             const isYou = item.id === state.userId;
             const rankClass = item.rank === 1 ? 'ms-lb-rank-1' : item.rank === 2 ? 'ms-lb-rank-2' : item.rank === 3 ? 'ms-lb-rank-3' : '';
             const rankEmoji = item.rank === 1 ? '🥇' : item.rank === 2 ? '🥈' : item.rank === 3 ? '🥉' : `#${item.rank}`;
@@ -838,9 +1020,9 @@
                 </div>
                 <div class="ms-lb-user-info">
                   <span class="ms-lb-name">${escapeHtml(item.nickname)}${isYou ? ' (You)' : ''}</span>
-                  <span class="ms-lb-stats">🔥 ${item.streak || 1}d streak • 🏷️ ${escapeHtml(item.roomName || 'Solo Coder')}</span>
+                  <span class="ms-lb-stats">${Number(item.streak) > 0 ? `🔥 ${item.streak}d streak • ` : ''}${Number(item.solvedCount) > 0 ? `✓ ${item.solvedCount} solved • ` : ''}🏷️ ${escapeHtml(item.roomName || 'Solo Coder')}</span>
                 </div>
-                <span class="ms-lb-hours">${item.todayDisplay || '3h 15m'}</span>
+                <span class="ms-lb-hours">${escapeHtml(item.weeklyDisplay || item.todayDisplay || '0m')}</span>
               </div>
             `;
           }).join('')}
@@ -852,19 +1034,150 @@
                   <span>#${leaders.length + 1}</span>
                 </div>
                 <div class="ms-member-avatar-wrap is-you" style="width: 28px; height: 28px; font-size: 11px;">
-                  <span class="ms-avatar-text">${escapeHtml(getInitials(state.nickname || 'Ansh'))}</span>
+                  <span class="ms-avatar-text">${escapeHtml(getInitials(state.nickname || 'You'))}</span>
                 </div>
                 <div class="ms-lb-user-info">
-                  <span class="ms-lb-name">${escapeHtml(state.nickname || 'Ansh')} (You)</span>
-                  <span class="ms-lb-stats">🔥 1d streak • 🏷️ ${escapeHtml(currentRoomName)}</span>
+                  <span class="ms-lb-name">${escapeHtml(state.nickname || 'You')} (You)</span>
+                  <span class="ms-lb-stats">${state.streak > 0 ? `🔥 ${state.streak}d streak • ` : ''}${state.solvedCount > 0 ? `✓ ${state.solvedCount} solved • ` : ''}🏷️ ${escapeHtml(currentRoomName)}</span>
                 </div>
-                <span class="ms-lb-hours">${formatHoursMinutes(state.todayFocusSeconds)}</span>
+                <span class="ms-lb-hours">${formatHoursMinutes(Math.max(state.weeklyFocusSeconds || 0, state.todayFocusSeconds || 0))}</span>
               </div>
             </div>
           ` : ''}
         </div>
       </div>
     `;
+  }
+
+  // Modal: Set / Change Nickname Prompt
+  function renderNicknameModal(container) {
+    if (!state.nicknameModalOpen) return;
+
+    const modalBackdrop = document.createElement('div');
+    modalBackdrop.id = 'msNicknameModal';
+    modalBackdrop.className = 'ms-modal-backdrop';
+    modalBackdrop.innerHTML = `
+      <div class="ms-modal-card" role="dialog" aria-modal="true" aria-labelledby="msModalTitle">
+        <div class="ms-modal-badge">
+          <span class="ms-modal-icon">👋</span>
+        </div>
+        <h3 id="msModalTitle" class="ms-modal-title">${state.nickname ? 'Update Nickname' : 'Welcome to My Space'}</h3>
+        <p class="ms-modal-sub">${state.nickname ? 'Change the name visible to your study squad and leaderboard.' : 'Choose your coder nickname to get started with focus rooms and practice.'}</p>
+        <div class="ms-modal-form">
+          <div class="ms-form-group">
+            <label class="ms-form-label" for="msModalNicknameInput">
+              <span>Nickname</span>
+              <span class="ms-hint">Max 20 chars</span>
+            </label>
+            <input
+              id="msModalNicknameInput"
+              class="ms-form-input"
+              type="text"
+              placeholder="e.g. Alex, CodeNinja"
+              value="${escapeHtml(state.nickname || '')}"
+              maxlength="20"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <div id="msModalNicknameError" class="ms-error-text" hidden></div>
+          </div>
+          <div class="ms-modal-actions">
+            <button id="msModalSaveNicknameBtn" class="ms-btn ms-btn-primary ms-btn-block" type="button">
+              ${state.nickname ? 'Save Nickname' : 'Get Started'}
+            </button>
+            ${state.nickname ? `
+              <button id="msModalCancelNicknameBtn" class="ms-btn-modal-cancel" type="button">Cancel</button>
+            ` : `
+              <button id="msModalSkipNicknameBtn" class="ms-btn-modal-cancel" type="button">Skip for now</button>
+            `}
+          </div>
+        </div>
+      </div>
+    `;
+
+    container.appendChild(modalBackdrop);
+
+    const input = modalBackdrop.querySelector('#msModalNicknameInput');
+    const saveBtn = modalBackdrop.querySelector('#msModalSaveNicknameBtn');
+    const cancelBtn = modalBackdrop.querySelector('#msModalCancelNicknameBtn');
+    const skipBtn = modalBackdrop.querySelector('#msModalSkipNicknameBtn');
+    const errorEl = modalBackdrop.querySelector('#msModalNicknameError');
+
+    setTimeout(() => {
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    }, 50);
+
+    function submitNickname() {
+      const val = (input && input.value.trim()) || '';
+      if (!val) {
+        if (errorEl) {
+          errorEl.textContent = 'Please enter a nickname (1-20 characters)';
+          errorEl.hidden = false;
+        }
+        if (input) input.focus();
+        return;
+      }
+      state.nickname = val;
+      state.nicknameModalOpen = false;
+      chrome.storage.local.set({ [STORAGE_KEYS.NICKNAME]: val });
+
+      // Update self in room if active
+      if (state.activeRoom) {
+        const selfMember = state.members.find(m => m.id === state.userId);
+        if (selfMember) {
+          selfMember.nickname = val;
+          selfMember.avatar = getInitials(val);
+        }
+        if (state.activeRoom.creator === state.nickname || state.activeRoom.isHost) {
+          state.activeRoom.creator = val;
+        }
+        chrome.storage.local.set({ [STORAGE_KEYS.ROOM]: state.activeRoom });
+        syncHeartbeat();
+      }
+
+      render();
+      showMySpaceToast(`Nickname saved: ${val}`);
+    }
+
+    if (saveBtn) {
+      saveBtn.addEventListener('click', submitNickname);
+    }
+
+    if (input) {
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          submitNickname();
+        } else if (e.key === 'Escape' && state.nickname) {
+          state.nicknameModalOpen = false;
+          render();
+        }
+      });
+      input.addEventListener('input', () => {
+        if (errorEl) errorEl.hidden = true;
+      });
+    }
+
+    if (cancelBtn) {
+      cancelBtn.addEventListener('click', () => {
+        state.nicknameModalOpen = false;
+        render();
+      });
+    }
+
+    if (skipBtn) {
+      skipBtn.addEventListener('click', () => {
+        const defaultNick = 'Coder';
+        state.nickname = defaultNick;
+        state.nicknameModalOpen = false;
+        chrome.storage.local.set({ [STORAGE_KEYS.NICKNAME]: defaultNick });
+        render();
+        showMySpaceToast(`Using default nickname: ${defaultNick}`);
+      });
+    }
   }
 
   // ===========================================================================
@@ -874,11 +1187,14 @@
     const container = document.getElementById('view-myspace');
     if (!container) return;
 
+    state.settingsMenuOpen = false;
+
     if (state.activeRoom) {
       container.dataset.view = 'workspace';
       container.dataset.workspaceTab = state.activeWorkspaceTab;
       container.innerHTML = renderActiveWorkspace();
       bindWorkspaceEvents(container);
+      renderNicknameModal(container);
       return;
     }
 
@@ -896,12 +1212,21 @@
       container.innerHTML = renderLobbyView();
       bindLobbyEvents(container);
     }
+    renderNicknameModal(container);
   }
 
   // ===========================================================================
   // 6. EVENT BINDINGS
   // ===========================================================================
   function bindLobbyEvents(container) {
+    const nickBtn = container.querySelector('#msLobbyNicknameBtn');
+    if (nickBtn) {
+      nickBtn.addEventListener('click', () => {
+        state.nicknameModalOpen = true;
+        render();
+      });
+    }
+
     const createBtn = container.querySelector('#msOpenCreateBtn');
     if (createBtn) {
       createBtn.addEventListener('click', () => {
@@ -949,7 +1274,17 @@
       submitBtn.addEventListener('click', async () => {
         const roomName = (nameInput && nameInput.value.trim()) || 'Study Squad';
         const goal = (goalSelect && goalSelect.value) || '3 hours';
-        const nickname = (nicknameInput && nicknameInput.value.trim()) || state.nickname || 'Host';
+        const topicSelect = container.querySelector('#msRoomTopicSelect');
+        const topic = (topicSelect && topicSelect.value) || 'General DSA';
+        const nickname = (nicknameInput && nicknameInput.value.trim()) || state.nickname;
+
+        if (!nickname) {
+          if (nicknameInput) {
+            nicknameInput.focus();
+            nicknameInput.placeholder = 'Please enter your nickname';
+          }
+          return;
+        }
 
         const roomCode = generateRoomCode();
         const initialMembers = [
@@ -960,6 +1295,8 @@
             timerFormatted: '25:00',
             isHost: true,
             avatar: getInitials(nickname),
+            currentProblem: state.currentProblem,
+            recentSolve: state.recentSolve,
             joinedAt: Date.now()
           }
         ];
@@ -968,8 +1305,10 @@
           code: roomCode,
           name: roomName,
           goal: goal,
+          topic: topic,
           type: state.selectedRoomType,
           creator: nickname,
+          creatorId: state.userId,
           createdAt: Date.now(),
           members: initialMembers
         };
@@ -987,7 +1326,10 @@
         // Sync with Firebase in background
         if (window.MySpaceAPI) {
           window.MySpaceAPI.saveRoom(room);
-          window.MySpaceAPI.syncMember(roomCode, initialMembers[0]);
+          window.MySpaceAPI.syncMember(roomCode, initialMembers[0], {
+            memberCount: 1,
+            isPublic: room.type === 'open'
+          });
         }
 
         startMemberPolling();
@@ -1013,15 +1355,36 @@
     const refreshBtn = container.querySelector('#msRefreshPublicBtn');
 
     if (codeInput) {
+      if (state.pendingJoinCode) {
+        codeInput.value = state.pendingJoinCode.replace(/^GLOW-/i, '');
+        showMySpaceToast(`Invite code ${state.pendingJoinCode} pre-filled! 🔗`);
+        state.pendingJoinCode = null;
+      }
+
       codeInput.addEventListener('input', () => {
-        codeInput.value = codeInput.value.toUpperCase();
+        let val = codeInput.value.toUpperCase().replace(/[^A-Z0-9-]/g, '');
+        if (val.startsWith('GLOW-')) {
+          val = val.slice(5);
+        } else if (val.startsWith('GLOW')) {
+          val = val.slice(4);
+        }
+        val = val.replace(/-/g, '').slice(0, 6);
+        codeInput.value = val;
         if (errorEl) errorEl.hidden = true;
+      });
+
+      codeInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          if (submitBtn) submitBtn.click();
+        }
       });
     }
 
     // Shared execution logic for joining with direct code or public group
     async function executeJoin(rawCode, targetBtn, feedbackEl) {
-      if (!rawCode || rawCode.length < 3) {
+      const suffix = String(rawCode || '').replace(/^GLOW-?/i, '').trim();
+      if (!suffix || suffix.length < 3) {
         if (feedbackEl) {
           feedbackEl.textContent = 'Please enter a valid room code';
           feedbackEl.hidden = false;
@@ -1030,7 +1393,15 @@
         return;
       }
 
-      const nickname = (nicknameInput && nicknameInput.value.trim()) || state.nickname || 'Coder';
+      const nickname = (nicknameInput && nicknameInput.value.trim()) || state.nickname;
+      if (!nickname) {
+        if (feedbackEl) {
+          feedbackEl.textContent = 'Please enter your nickname before joining';
+          feedbackEl.hidden = false;
+        }
+        if (nicknameInput) nicknameInput.focus();
+        return;
+      }
       const code = window.MySpaceAPI ? window.MySpaceAPI.normalizeRoomCode(rawCode) : rawCode;
 
       const prevText = targetBtn ? targetBtn.textContent : '';
@@ -1062,16 +1433,21 @@
         const roomInfo = onlineRoom.info;
         const roomName = roomInfo.name || 'Study Squad';
         const roomGoal = roomInfo.goal || '3 hours';
+        const roomTopic = roomInfo.topic || 'General DSA';
         const roomType = roomInfo.type || 'open';
         const creator = roomInfo.creator || 'Host';
+        const creatorId = roomInfo.creatorId || '';
 
+        const isHost = Boolean((creatorId && creatorId === state.userId) || creator === nickname);
         const me = {
           id: state.userId,
           nickname: nickname,
           status: 'Active',
           timerFormatted: '25:00',
-          isHost: false,
+          isHost: isHost,
           avatar: getInitials(nickname),
+          currentProblem: state.currentProblem,
+          recentSolve: state.recentSolve,
           joinedAt: Date.now()
         };
 
@@ -1084,8 +1460,10 @@
           code: code,
           name: roomName,
           goal: roomGoal,
+          topic: roomTopic,
           type: roomType,
           creator: creator,
+          creatorId: creatorId,
           joinedAt: Date.now(),
           members: initialMembers
         };
@@ -1100,7 +1478,10 @@
         });
 
         if (window.MySpaceAPI) {
-          window.MySpaceAPI.syncMember(code, me);
+          window.MySpaceAPI.syncMember(code, me, {
+            memberCount: initialMembers.length,
+            isPublic: roomType === 'open'
+          });
         }
 
         startMemberPolling();
@@ -1120,8 +1501,9 @@
 
     if (submitBtn) {
       submitBtn.addEventListener('click', () => {
-        const rawCode = (codeInput && codeInput.value.trim().toUpperCase()) || '';
-        executeJoin(rawCode, submitBtn, errorEl);
+        const rawVal = (codeInput && codeInput.value.trim().toUpperCase()) || '';
+        const fullCode = rawVal.startsWith('GLOW-') ? rawVal : ('GLOW-' + rawVal);
+        executeJoin(fullCode, submitBtn, errorEl);
       });
     }
 
@@ -1136,7 +1518,10 @@
       `;
 
       try {
-        const rooms = window.MySpaceAPI ? await window.MySpaceAPI.getPublicRooms() : [];
+        const allRooms = window.MySpaceAPI ? await window.MySpaceAPI.getPublicRooms() : [];
+        const rooms = (state.selectedTopic && state.selectedTopic !== 'All')
+          ? allRooms.filter(r => (r.topic || '').toLowerCase().includes(state.selectedTopic.toLowerCase()))
+          : allRooms;
         if (!rooms || rooms.length === 0) {
           publicListEl.innerHTML = `
             <div class="ms-public-empty">
@@ -1172,6 +1557,7 @@
                     <span>👥 ${count} online</span>
                     <span class="dot">•</span>
                     <span>🎯 ${escapeHtml(room.goal || '3 hours')}</span>
+                    ${room.topic ? `<span class="dot">•</span><span class="ms-topic-badge">${escapeHtml(room.topic)}</span>` : ''}
                   </div>
                 </div>
               </div>
@@ -1201,7 +1587,8 @@
           item.addEventListener('click', () => {
             const code = item.dataset.code;
             if (codeInput && code) {
-              codeInput.value = code;
+              const stripped = code.replace(/^GLOW-?/i, '');
+              codeInput.value = stripped;
               codeInput.focus();
             }
           });
@@ -1226,19 +1613,57 @@
       });
     }
 
+    const pillsBar = container.querySelector('#msTopicPillsBar');
+    if (pillsBar) {
+      pillsBar.querySelectorAll('.ms-topic-pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+          pillsBar.querySelectorAll('.ms-topic-pill').forEach(p => p.classList.remove('active'));
+          pill.classList.add('active');
+          state.selectedTopic = pill.dataset.topic || 'All';
+          loadPublicRooms();
+        });
+      });
+    }
+
     // Initial load
     loadPublicRooms();
   }
 
   function bindWorkspaceEvents(container) {
-    // 1. Settings button
+    // 1. Settings button & dropdown menu management
     const settingsBtn = container.querySelector('#msGroupSettingsBtn');
     const settingsMenu = container.querySelector('#msSettingsMenu');
+
+    function closeSettingsMenu() {
+      state.settingsMenuOpen = false;
+      if (settingsMenu) settingsMenu.style.display = 'none';
+      document.removeEventListener('click', onOutsideClick);
+    }
+
+    function onOutsideClick(e) {
+      if (
+        settingsMenu &&
+        !settingsMenu.contains(e.target) &&
+        settingsBtn &&
+        !settingsBtn.contains(e.target)
+      ) {
+        closeSettingsMenu();
+      }
+    }
+
     if (settingsBtn && settingsMenu) {
       settingsBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         state.settingsMenuOpen = !state.settingsMenuOpen;
         settingsMenu.style.display = state.settingsMenuOpen ? 'flex' : 'none';
+        if (state.settingsMenuOpen) {
+          document.removeEventListener('click', onOutsideClick);
+          setTimeout(() => {
+            document.addEventListener('click', onOutsideClick);
+          }, 0);
+        } else {
+          document.removeEventListener('click', onOutsideClick);
+        }
       });
     }
 
@@ -1247,12 +1672,13 @@
     if (shareBtn && state.activeRoom) {
       shareBtn.addEventListener('click', async (e) => {
         e.stopPropagation();
-        const extensionUrl = window.LCTS_STORE_URL || 'https://chromewebstore.google.com/detail/ecpfpadofaimilfpjedgoedhoaglpjdb';
+        closeSettingsMenu();
+        const shareUrl = getShareableRoomUrl(state.activeRoom.code);
         try {
-          await navigator.clipboard.writeText(extensionUrl);
+          await navigator.clipboard.writeText(shareUrl);
         } catch (err) {
           const ta = document.createElement('textarea');
-          ta.value = extensionUrl;
+          ta.value = shareUrl;
           document.body.appendChild(ta);
           ta.select();
           document.execCommand('copy');
@@ -1266,7 +1692,7 @@
           </svg>
         `;
         shareBtn.classList.add('copied');
-        showMySpaceToast('Extension link copied to clipboard');
+        showMySpaceToast('Room invite link copied! 🔗');
 
         setTimeout(() => {
           shareBtn.innerHTML = origHtml;
@@ -1275,39 +1701,74 @@
       });
     }
 
-    // Close menu when clicking outside
-    document.addEventListener('click', (e) => {
-      if (state.settingsMenuOpen && settingsMenu && !settingsMenu.contains(e.target)) {
-        state.settingsMenuOpen = false;
-        settingsMenu.style.display = 'none';
-      }
-    }, { once: true });
-
-    // Copy Room Code
-    const copyBtn = container.querySelector('#msCopyCodeBtn');
-    if (copyBtn && state.activeRoom) {
-      copyBtn.addEventListener('click', () => {
-        navigator.clipboard.writeText(state.activeRoom.code || '');
-        const span = copyBtn.querySelector('span');
-        if (span) span.textContent = 'Copied! ✓';
-        setTimeout(() => {
-          if (span) span.textContent = 'Copy Room Code';
-        }, 1800);
+    // Change Nickname
+    const changeNickBtn = container.querySelector('#msChangeNicknameBtn');
+    if (changeNickBtn) {
+      changeNickBtn.addEventListener('click', () => {
+        closeSettingsMenu();
+        state.nicknameModalOpen = true;
+        render();
       });
     }
 
-    // Leave Group
+    // Copy Room Invite Link
+    const copyBtn = container.querySelector('#msCopyCodeBtn');
+    if (copyBtn && state.activeRoom) {
+      copyBtn.addEventListener('click', async () => {
+        const shareUrl = getShareableRoomUrl(state.activeRoom.code);
+        try {
+          await navigator.clipboard.writeText(shareUrl);
+        } catch (err) {
+          const ta = document.createElement('textarea');
+          ta.value = shareUrl;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+        }
+        const span = copyBtn.querySelector('span');
+        if (span) span.textContent = 'Copied Link! ✓';
+        showMySpaceToast('Room invite link copied! 🔗');
+        setTimeout(() => {
+          if (span) span.textContent = 'Copy Invite Link';
+          closeSettingsMenu();
+        }, 1200);
+      });
+    }
+
+    // Leave Group Safety & Inline Confirmation
     const leaveBtn = container.querySelector('#msLeaveGroupBtn');
     if (leaveBtn) {
       leaveBtn.addEventListener('click', () => {
+        closeSettingsMenu();
+        state.leaveConfirmOpen = true;
+        render();
+      });
+    }
+
+    const cancelLeaveBtn = container.querySelector('#msCancelLeaveBtn');
+    if (cancelLeaveBtn) {
+      cancelLeaveBtn.addEventListener('click', () => {
+        state.leaveConfirmOpen = false;
+        render();
+      });
+    }
+
+    const confirmLeaveBtn = container.querySelector('#msConfirmLeaveBtn');
+    if (confirmLeaveBtn) {
+      confirmLeaveBtn.addEventListener('click', () => {
+        state.leaveConfirmOpen = false;
         if (state.activeRoom && window.MySpaceAPI) {
           window.MySpaceAPI.removeMember(state.activeRoom.code, state.userId);
+          if (state.activeRoom.type === 'open' && window.MySpaceAPI.updatePublicRoomMemberCount) {
+            const remainingCount = Math.max(0, (state.members ? state.members.length : 1) - 1);
+            window.MySpaceAPI.updatePublicRoomMemberCount(state.activeRoom.code, remainingCount);
+          }
         }
         stopMemberPolling();
         stopTimer();
         state.activeRoom = null;
         state.currentView = 'lobby';
-        state.settingsMenuOpen = false;
         chrome.storage.local.remove([STORAGE_KEYS.ROOM], () => {
           render();
         });
@@ -1339,6 +1800,7 @@
 
     if (navGroupBtn) {
       navGroupBtn.addEventListener('click', () => {
+        closeSettingsMenu();
         if (state.activeWorkspaceTab !== 'group') {
           state.activeWorkspaceTab = 'group';
           render();
@@ -1347,22 +1809,54 @@
     }
 
     if (navLbBtn) {
-      navLbBtn.addEventListener('click', async () => {
+      navLbBtn.addEventListener('click', () => {
+        closeSettingsMenu();
         if (state.activeWorkspaceTab !== 'leaderboard') {
           state.activeWorkspaceTab = 'leaderboard';
           render();
-          if (window.MySpaceAPI) {
-            state.globalLeaders = await window.MySpaceAPI.getGlobalLeaderboard();
-            if (state.activeWorkspaceTab === 'leaderboard') {
-              const bodyEl = container.querySelector('.ms-workspace-body');
-              if (bodyEl) {
-                bodyEl.innerHTML = renderLeaderboardContent();
-              }
-            }
-          }
         }
       });
     }
+
+    // 4. Attach Leaderboard Refresh Button Listener
+    attachLeaderboardRefresh(container);
+  }
+
+  // Attach on-demand refresh for Global Leaderboard (avoids automatic polling & DB load)
+  function attachLeaderboardRefresh(container) {
+    const refreshLbBtn = container.querySelector('#msRefreshLeaderboardBtn');
+    if (!refreshLbBtn) return;
+
+    refreshLbBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      if (refreshLbBtn.classList.contains('rotating')) return;
+      refreshLbBtn.classList.add('rotating');
+
+      try {
+        if (window.MySpaceAPI) {
+          const freshLeaders = await window.MySpaceAPI.getGlobalLeaderboard();
+          state.globalLeaders = freshLeaders;
+          try {
+            chrome.storage.local.set({
+              ms_leaderboard_cache: { leaders: freshLeaders, updatedAt: Date.now() }
+            });
+          } catch (e) {}
+        }
+      } catch (err) {
+        console.error('Failed to refresh leaderboard:', err);
+      } finally {
+        setTimeout(() => {
+          refreshLbBtn.classList.remove('rotating');
+          if (state.activeWorkspaceTab === 'leaderboard') {
+            const bodyEl = container.querySelector('.ms-workspace-body') || container;
+            if (bodyEl) {
+              bodyEl.innerHTML = renderLeaderboardContent();
+              attachLeaderboardRefresh(bodyEl);
+            }
+          }
+        }, 500);
+      }
+    });
   }
 
   // ===========================================================================
@@ -1379,7 +1873,9 @@
         state.timer.secondsLeft -= 1;
         if (state.timer.status === 'Focusing') {
           checkDailyReset();
+          checkWeeklyReset();
           state.todayFocusSeconds += 1;
+          state.weeklyFocusSeconds += 1;
         }
 
         // Sync every 30 seconds
@@ -1394,14 +1890,14 @@
         state.timer.status = 'Break';
         state.timer.secondsLeft = 5 * 60; // 5 min break
         state.timer.totalSeconds = 5 * 60;
-        syncHeartbeat();
+        syncHeartbeat(true);
         syncToPomodoroWidget();
         persistTodayFocus();
         updateTimerUI();
       }
     }, 1000);
 
-    syncHeartbeat();
+    syncHeartbeat(false);
     syncToPomodoroWidget();
     persistTodayFocus();
     updateTimerUI();
@@ -1414,7 +1910,7 @@
       clearInterval(state.timer.interval);
       state.timer.interval = null;
     }
-    syncHeartbeat();
+    syncHeartbeat(true);
     syncToPomodoroWidget();
     persistTodayFocus();
     updateTimerUI();
@@ -1429,7 +1925,7 @@
       clearInterval(state.timer.interval);
       state.timer.interval = null;
     }
-    syncHeartbeat();
+    syncHeartbeat(true);
     syncToPomodoroWidget();
     persistTodayFocus();
     updateTimerUI();
@@ -1499,7 +1995,9 @@
             state.timer.secondsLeft -= 1;
             if (state.timer.status === 'Focusing') {
               checkDailyReset();
+              checkWeeklyReset();
               state.todayFocusSeconds += 1;
+              state.weeklyFocusSeconds += 1;
             }
             if (state.timer.secondsLeft % 30 === 0) {
               syncHeartbeat();
@@ -1527,10 +2025,35 @@
   function watchPomodoroStorage() {
     try {
       chrome.storage.onChanged.addListener((changes, area) => {
-        if (area !== 'local' || !changes[STORAGE_KEYS.POMODORO]) return;
-        const saved = changes[STORAGE_KEYS.POMODORO].newValue;
-        if (!saved || saved.source === 'myspace') return;
-        adoptPomodoroState(saved);
+        if (area !== 'local') return;
+        if (changes[STORAGE_KEYS.POMODORO]) {
+          const saved = changes[STORAGE_KEYS.POMODORO].newValue;
+          if (!saved || saved.source === 'myspace') return;
+          adoptPomodoroState(saved);
+        }
+        if (changes[STORAGE_KEYS.STATS]) {
+          const { streak, clears } = computeStreakAndClears(changes[STORAGE_KEYS.STATS].newValue);
+          state.streak = streak;
+          state.solvedCount = clears;
+          if (state.activeWorkspaceTab === 'leaderboard') {
+            const container = document.getElementById('view-myspace');
+            const bodyEl = container && container.querySelector('.ms-workspace-body');
+            if (bodyEl) bodyEl.innerHTML = renderLeaderboardContent();
+          }
+        }
+        if (changes[STORAGE_KEYS.CURRENT_PROBLEM]) {
+          state.currentProblem = changes[STORAGE_KEYS.CURRENT_PROBLEM].newValue || null;
+          updateMembersListUI();
+          syncHeartbeat();
+        }
+        if (changes[STORAGE_KEYS.RECENT_SOLVE]) {
+          state.recentSolve = changes[STORAGE_KEYS.RECENT_SOLVE].newValue || null;
+          if (state.recentSolve && state.recentSolve.title) {
+            showMySpaceToast(`🎉 Cleared ${state.recentSolve.title}!`);
+          }
+          updateMembersListUI();
+          syncHeartbeat();
+        }
       });
     } catch (err) {
       // Extension context invalidated
@@ -1543,7 +2066,9 @@
     saveFocusDebounce = setTimeout(() => {
       chrome.storage.local.set({
         [STORAGE_KEYS.FOCUS_TIME]: state.todayFocusSeconds,
-        [STORAGE_KEYS.FOCUS_CYCLE]: state.lastFocusCycle || (window.MySpaceAPI ? window.MySpaceAPI.getDailyCycleId() : '')
+        [STORAGE_KEYS.FOCUS_CYCLE]: state.lastFocusCycle || (window.MySpaceAPI ? window.MySpaceAPI.getDailyCycleId() : ''),
+        [STORAGE_KEYS.WEEKLY_FOCUS_TIME]: state.weeklyFocusSeconds,
+        [STORAGE_KEYS.WEEKLY_FOCUS_CYCLE]: state.lastWeeklyCycle || (window.MySpaceAPI ? window.MySpaceAPI.getWeeklyCycleId() : '')
       });
     }, 400);
   }
@@ -1646,6 +2171,7 @@
         <span>${state.members.length} members</span>
         <span class="dot">•</span>
         <span>Daily goal: ${escapeHtml(state.activeRoom.goal || '3h')}</span>
+        ${state.activeRoom.topic ? `<span class="dot">•</span><span class="ms-topic-tag">${escapeHtml(state.activeRoom.topic)}</span>` : ''}
       `;
     }
 
@@ -1671,6 +2197,7 @@
               <span class="ms-member-status-text ${textClass}">
                 ${escapeHtml(text)}
               </span>
+              ${renderMemberBadges(m, isYou)}
             </div>
           </div>
         `;
@@ -1678,11 +2205,41 @@
 
       const inviteHintHtml = state.members.length === 1 ? `
         <div class="ms-member-invite-hint">
-          <span>Share code <strong>${escapeHtml(roomCode)}</strong> to study together live!</span>
+          <span>Study squad active! Invite friends to code together live:</span>
+          <button id="msCopyInviteHintBtn" class="ms-btn-hint-share" type="button">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+            </svg>
+            <span>Copy Room Invite Link</span>
+          </button>
         </div>
       ` : '';
 
       scrollEl.innerHTML = rowsHtml + inviteHintHtml;
+
+      const hintCopyBtn = scrollEl.querySelector('#msCopyInviteHintBtn');
+      if (hintCopyBtn && state.activeRoom) {
+        hintCopyBtn.addEventListener('click', async () => {
+          const shareUrl = getShareableRoomUrl(state.activeRoom.code);
+          try {
+            await navigator.clipboard.writeText(shareUrl);
+          } catch (e) {
+            const ta = document.createElement('textarea');
+            ta.value = shareUrl;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+          }
+          const span = hintCopyBtn.querySelector('span');
+          if (span) span.textContent = 'Copied Link! ✓';
+          showMySpaceToast('Room invite link copied! 🔗');
+          setTimeout(() => {
+            if (span) span.textContent = 'Copy Room Invite Link';
+          }, 1500);
+        });
+      }
     }
 
     // 4. Update Cumulative 24h Practice List
@@ -1714,7 +2271,7 @@
 
     try {
       const remoteMembers = await window.MySpaceAPI.getRoomMembers(state.activeRoom.code);
-      const isHost = Boolean(state.activeRoom.creator === state.nickname || state.activeRoom.isHost);
+      const isHost = checkIsHost(state.activeRoom);
       const isBreak = state.timer.status === 'Break';
       const curCycle = window.MySpaceAPI ? window.MySpaceAPI.getDailyCycleId() : '';
       const you = {
@@ -1726,21 +2283,35 @@
         avatar: getInitials(state.nickname || 'You'),
         todayFocusSeconds: state.todayFocusSeconds,
         cycleDate: curCycle,
+        currentProblem: state.currentProblem || null,
+        recentSolve: state.recentSolve || null,
         lastActive: Date.now()
       };
 
-      // Exclude current user from remote array to prevent duplicate rows
-      const peers = (remoteMembers || []).filter(m => m && m.id && m.id !== state.userId);
+      // Filter out stale peers (no activity in 3+ minutes) to prevent ghost members
+      const STALE_THRESHOLD_MS = 3 * 60 * 1000;
+      const now = Date.now();
+      const peers = (remoteMembers || []).filter(m => {
+        if (!m || !m.id || m.id === state.userId) return false;
+        if (m.lastActive && (now - Number(m.lastActive)) > STALE_THRESHOLD_MS) return false;
+        return true;
+      });
 
       // Real users only (no mock peers)
       state.members = [you, ...peers];
       updateMembersListUI();
+
+      // If room is public, dynamically update active online member count
+      if (state.activeRoom.type === 'open' && window.MySpaceAPI.updatePublicRoomMemberCount) {
+        window.MySpaceAPI.updatePublicRoomMemberCount(state.activeRoom.code, state.members.length);
+      }
     } catch (err) {
       // Keep existing members if network fetch fails
     }
   }
 
-  function syncHeartbeat() {
+  let lastLeaderboardSync = 0;
+  function syncHeartbeat(forceLeaderboard = false) {
     if (!window.MySpaceAPI) return;
 
     const isPrivate = Boolean(state.activeRoom && state.activeRoom.type === 'private');
@@ -1750,7 +2321,7 @@
 
     // 1. If in active room, sync presence
     if (state.activeRoom) {
-      const isHost = Boolean(state.activeRoom.creator === state.nickname || state.activeRoom.isHost);
+      const isHost = checkIsHost(state.activeRoom);
       const isBreak = state.timer.status === 'Break';
       const curCycle = window.MySpaceAPI ? window.MySpaceAPI.getDailyCycleId() : '';
       const me = {
@@ -1762,23 +2333,37 @@
         avatar: getInitials(state.nickname || 'You'),
         todayFocusSeconds: state.todayFocusSeconds,
         cycleDate: curCycle,
+        currentProblem: state.currentProblem || null,
+        recentSolve: state.recentSolve || null,
         lastActive: Date.now()
       };
-      window.MySpaceAPI.syncMember(state.activeRoom.code, me);
+      const isOpen = state.activeRoom && state.activeRoom.type === 'open';
+      const currentMemberCount = (state.members && state.members.length) || 1;
+      window.MySpaceAPI.syncMember(state.activeRoom.code, me, {
+        memberCount: currentMemberCount,
+        isPublic: isOpen
+      });
     }
 
-    // 2. Sync to weekly global leaderboard (resets Monday 5:30 AM IST / 00:00 UTC)
-    window.MySpaceAPI.syncToGlobalLeaderboard({
-      id: state.userId,
-      nickname: state.nickname || 'You',
-      focusSeconds: state.todayFocusSeconds,
-      todayDisplay: formatHoursMinutes(state.todayFocusSeconds),
-      streak: 3,
-      solvedCount: 6,
-      roomName: roomName,
-      isPrivateRoom: isPrivate,
-      avatar: getInitials(state.nickname || 'You')
-    });
+    // 2. Sync to weekly global leaderboard (throttled to every 5 minutes or on milestones to avoid DB load)
+    const now = Date.now();
+    const shouldSyncLeaderboard = forceLeaderboard || (now - lastLeaderboardSync >= 5 * 60 * 1000);
+    const weeklySec = Math.max(state.weeklyFocusSeconds || 0, state.todayFocusSeconds || 0);
+    if (weeklySec > 0 && shouldSyncLeaderboard) {
+      lastLeaderboardSync = now;
+      window.MySpaceAPI.syncToGlobalLeaderboard({
+        id: state.userId,
+        nickname: state.nickname || 'You',
+        focusSeconds: weeklySec,
+        weeklyDisplay: formatHoursMinutes(weeklySec),
+        todayDisplay: formatHoursMinutes(weeklySec),
+        streak: state.streak,
+        solvedCount: state.solvedCount,
+        roomName: roomName,
+        isPrivateRoom: isPrivate,
+        avatar: getInitials(state.nickname || 'You')
+      });
+    }
   }
 
   // ===========================================================================
@@ -1791,27 +2376,73 @@
       STORAGE_KEYS.USER_ID,
       STORAGE_KEYS.FOCUS_TIME,
       STORAGE_KEYS.FOCUS_CYCLE,
-      STORAGE_KEYS.POMODORO
-    ], (res) => {
+      STORAGE_KEYS.WEEKLY_FOCUS_TIME,
+      STORAGE_KEYS.WEEKLY_FOCUS_CYCLE,
+      STORAGE_KEYS.POMODORO,
+      STORAGE_KEYS.STATS,
+      STORAGE_KEYS.CURRENT_PROBLEM,
+      STORAGE_KEYS.RECENT_SOLVE,
+      STORAGE_KEYS.PENDING_JOIN_CODE
+    ], async (res) => {
       const curCycle = window.MySpaceAPI ? window.MySpaceAPI.getDailyCycleId() : '';
       state.lastFocusCycle = (res && res[STORAGE_KEYS.FOCUS_CYCLE]) ? res[STORAGE_KEYS.FOCUS_CYCLE] : curCycle;
 
+      const curWeekCycle = window.MySpaceAPI ? window.MySpaceAPI.getWeeklyCycleId() : '';
+      state.lastWeeklyCycle = (res && res[STORAGE_KEYS.WEEKLY_FOCUS_CYCLE]) ? res[STORAGE_KEYS.WEEKLY_FOCUS_CYCLE] : curWeekCycle;
+
+      // Check for incoming room invite link (?glowroom=GLOW-XXXX)
+      if (res && res[STORAGE_KEYS.PENDING_JOIN_CODE]) {
+        state.pendingJoinCode = String(res[STORAGE_KEYS.PENDING_JOIN_CODE]).trim().toUpperCase();
+        chrome.storage.local.remove([STORAGE_KEYS.PENDING_JOIN_CODE]);
+        state.currentView = 'join';
+      }
+
+      // Link userId with Firebase persistent anonymous UID (data.localId)
       if (res && res[STORAGE_KEYS.USER_ID]) {
         state.userId = res[STORAGE_KEYS.USER_ID];
-      } else {
+      }
+      if (window.MySpaceAPI && window.MySpaceAPI.getAuthUserId) {
+        try {
+          const uid = await window.MySpaceAPI.getAuthUserId();
+          if (uid) {
+            state.userId = uid;
+            chrome.storage.local.set({ [STORAGE_KEYS.USER_ID]: uid });
+          }
+        } catch (e) {}
+      }
+      if (!state.userId) {
         state.userId = 'usr_' + Math.random().toString(36).substring(2, 9);
         chrome.storage.local.set({ [STORAGE_KEYS.USER_ID]: state.userId });
       }
 
       if (res && res[STORAGE_KEYS.NICKNAME]) {
-        state.nickname = res[STORAGE_KEYS.NICKNAME];
-        if (!state.nickname || state.nickname === String.fromCharCode(86, 105, 110, 97, 121)) {
-          state.nickname = 'Ansh';
-          chrome.storage.local.set({ [STORAGE_KEYS.NICKNAME]: 'Ansh' });
+        const savedNick = String(res[STORAGE_KEYS.NICKNAME]).trim();
+        if (savedNick && savedNick !== String.fromCharCode(86, 105, 110, 97, 121)) {
+          state.nickname = savedNick;
+        } else {
+          state.nickname = '';
         }
       } else {
-        state.nickname = 'Ansh';
-        chrome.storage.local.set({ [STORAGE_KEYS.NICKNAME]: 'Ansh' });
+        state.nickname = '';
+      }
+
+      if (!state.nickname) {
+        state.nicknameModalOpen = true;
+      }
+
+      // Load active DSA problem if opened on LeetCode
+      if (res && res[STORAGE_KEYS.CURRENT_PROBLEM]) {
+        state.currentProblem = res[STORAGE_KEYS.CURRENT_PROBLEM];
+      }
+      if (res && res[STORAGE_KEYS.RECENT_SOLVE]) {
+        state.recentSolve = res[STORAGE_KEYS.RECENT_SOLVE];
+      }
+
+      // Load real streak and problem clear stats from LeetCode solver data
+      if (res && res[STORAGE_KEYS.STATS]) {
+        const { streak, clears } = computeStreakAndClears(res[STORAGE_KEYS.STATS]);
+        state.streak = streak;
+        state.solvedCount = clears;
       }
 
       // Check if 24-hour cycle has reset (resets at 5:30 AM IST / 00:00:00 UTC worldwide)
@@ -1823,17 +2454,31 @@
         state.todayFocusSeconds = Number(res[STORAGE_KEYS.FOCUS_TIME]) || state.todayFocusSeconds;
       }
 
+      // Check if weekly cycle has reset (resets Monday 5:30 AM IST / 00:00:00 UTC worldwide)
+      if (res && res[STORAGE_KEYS.WEEKLY_FOCUS_CYCLE] && res[STORAGE_KEYS.WEEKLY_FOCUS_CYCLE] !== curWeekCycle) {
+        state.weeklyFocusSeconds = 0;
+        state.lastWeeklyCycle = curWeekCycle;
+        persistTodayFocus();
+      } else if (res && res[STORAGE_KEYS.WEEKLY_FOCUS_TIME]) {
+        state.weeklyFocusSeconds = Number(res[STORAGE_KEYS.WEEKLY_FOCUS_TIME]) || 0;
+      } else {
+        // Fallback: seed weekly with current today's focus seconds
+        state.weeklyFocusSeconds = state.todayFocusSeconds || 0;
+      }
+
       if (res && res[STORAGE_KEYS.ROOM]) {
         state.activeRoom = res[STORAGE_KEYS.ROOM];
-        const isHost = Boolean(state.activeRoom.creator === state.nickname || state.activeRoom.isHost);
+        const isHost = checkIsHost(state.activeRoom);
         state.members = [
           {
             id: state.userId,
-            nickname: state.nickname,
+            nickname: state.nickname || 'You',
             status: 'Active',
             timerFormatted: '25:00',
             isHost: isHost,
-            avatar: getInitials(state.nickname),
+            avatar: getInitials(state.nickname || 'You'),
+            currentProblem: state.currentProblem,
+            recentSolve: state.recentSolve,
             lastActive: Date.now()
           }
         ];
@@ -1845,14 +2490,26 @@
         adoptPomodoroState(res[STORAGE_KEYS.POMODORO]);
       }
 
-      // Preload global leaderboard
-      if (window.MySpaceAPI) {
-        window.MySpaceAPI.getGlobalLeaderboard().then((leaders) => {
-          state.globalLeaders = leaders;
-        });
-      }
+      // Load cached global leaderboard if available (on-demand refresh avoids initial DB hit)
+      chrome.storage.local.get(['ms_leaderboard_cache'], (cacheRes) => {
+        if (cacheRes && cacheRes.ms_leaderboard_cache && Array.isArray(cacheRes.ms_leaderboard_cache.leaders)) {
+          state.globalLeaders = cacheRes.ms_leaderboard_cache.leaders;
+        }
+      });
 
       watchPomodoroStorage();
+
+      // Listen for runtime room invite links while extension is already open
+      chrome.storage.onChanged.addListener((changes, area) => {
+        if (area === 'local' && changes[STORAGE_KEYS.PENDING_JOIN_CODE] && changes[STORAGE_KEYS.PENDING_JOIN_CODE].newValue) {
+          state.pendingJoinCode = String(changes[STORAGE_KEYS.PENDING_JOIN_CODE].newValue).trim().toUpperCase();
+          chrome.storage.local.remove([STORAGE_KEYS.PENDING_JOIN_CODE]);
+          state.currentView = 'join';
+          render();
+          showMySpaceToast(`Found room invite: ${state.pendingJoinCode} 🔗`);
+        }
+      });
+
       render();
     });
   }

@@ -28,7 +28,22 @@
   const slugOf = () => { const m = /^\/problems\/([^/]+)/.exec(location.pathname); return m ? m[1] : null; };
   const norm = (d) => { d = String(d || '').trim().toLowerCase(); return /^(easy|medium|hard)$/.test(d) ? d : null; };
 
-  function fire() { subs.forEach((fn) => { try { fn(Object.assign({}, cur)); } catch (e) {} }); }
+  function fire() {
+    subs.forEach((fn) => { try { fn(Object.assign({}, cur)); } catch (e) {} });
+    if (cur.slug && (cur.title || cur.number)) {
+      try {
+        chrome.storage.local.set({
+          lcCurrentProblem: {
+            slug: cur.slug,
+            number: cur.number,
+            title: cur.title,
+            difficulty: cur.difficulty,
+            updatedAt: Date.now()
+          }
+        });
+      } catch (e) {}
+    }
+  }
 
   /* the title is only trusted once its link points at the current slug:
      after an in-app navigation the previous problem's title lingers briefly */

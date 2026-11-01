@@ -21,9 +21,64 @@
 
   const TIMEOUT_MS = 4500;
 
-  // Cached anonymous auth token
-  let cachedIdToken = null;
-  let tokenExpiry = 0;
+  // Cached anonymous auth token and persistent session
+  const AUTH_STORAGE_KEY = 'ms_firebase_auth';
+  let cachedAuth = null; // { idToken, refreshToken, localId, tokenExpiry }
+
+  // Load auth session from chrome.storage.local
+  async function loadCachedAuth() {
+    if (cachedAuth && cachedAuth.idToken) return cachedAuth;
+    try {
+      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+        const stored = await new Promise(resolve => {
+          chrome.storage.local.get([AUTH_STORAGE_KEY], res => resolve(res ? res[AUTH_STORAGE_KEY] : null));
+        });
+        if (stored && stored.idToken && stored.tokenExpiry) {
+          cachedAuth = stored;
+          return cachedAuth;
+        }
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  // Save auth session to chrome.storage.local
+  async function saveAuthSession(authData) {
+    cachedAuth = authData;
+    try {
+      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+        chrome.storage.local.set({ [AUTH_STORAGE_KEY]: authData });
+      }
+    } catch (e) {}
+  }
+
+  // Refresh expired token using Google Secure Token API
+  async function refreshAuthToken(refreshToken) {
+    if (!refreshToken) return null;
+    try {
+      const body = new URLSearchParams({
+        grant_type: 'refresh_token',
+        refresh_token: refreshToken
+      });
+      const res = await fetch(`https://securetoken.googleapis.com/v1/token?key=${FIREBASE_CONFIG.apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: body.toString()
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const idToken = data.id_token || data.access_token;
+        const newRefreshToken = data.refresh_token || refreshToken;
+        const localId = data.user_id || (cachedAuth && cachedAuth.localId);
+        const expiresIn = Number(data.expires_in || 3600);
+        const tokenExpiry = Date.now() + (expiresIn - 120) * 1000;
+        const newAuth = { idToken, refreshToken: newRefreshToken, localId, tokenExpiry };
+        await saveAuthSession(newAuth);
+        return idToken;
+      }
+    } catch (e) {}
+    return null;
+  }
 
   // Calculate deterministic weekly cycle ID: resets every Monday at 5:30 AM IST (00:00:00 UTC) worldwide.
   // Using pure UTC epoch methods guarantees users in every country/timezone transition at the identical wall-clock moment.
@@ -101,9 +156,18 @@
 
   // Fetch or refresh Firebase anonymous auth token
   async function getAuthToken() {
-    if (cachedIdToken && Date.now() < tokenExpiry) {
-      return cachedIdToken;
+    await loadCachedAuth();
+    if (cachedAuth && cachedAuth.idToken && Date.now() < cachedAuth.tokenExpiry) {
+      return cachedAuth.idToken;
     }
+
+    // Try refreshing existing token silently
+    if (cachedAuth && cachedAuth.refreshToken) {
+      const refreshed = await refreshAuthToken(cachedAuth.refreshToken);
+      if (refreshed) return refreshed;
+    }
+
+    // Otherwise create brand new anonymous session
     try {
       const res = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FIREBASE_CONFIG.apiKey}`, {
         method: 'POST',
@@ -113,15 +177,31 @@
       if (res.ok) {
         const data = await res.json();
         if (data && data.idToken) {
-          cachedIdToken = data.idToken;
-          tokenExpiry = Date.now() + (Number(data.expiresIn || 3600) - 120) * 1000;
-          return cachedIdToken;
+          const expiresIn = Number(data.expiresIn || 3600);
+          const newAuth = {
+            idToken: data.idToken,
+            refreshToken: data.refreshToken || null,
+            localId: data.localId || null,
+            tokenExpiry: Date.now() + (expiresIn - 120) * 1000
+          };
+          await saveAuthSession(newAuth);
+          return newAuth.idToken;
         }
       }
     } catch (e) {
       // Offline or network error
     }
-    return null;
+    return cachedAuth ? cachedAuth.idToken : null;
+  }
+
+  // Get persistent authenticated user UID (matches auth.uid for security rules)
+  async function getAuthUserId() {
+    await loadCachedAuth();
+    if (cachedAuth && cachedAuth.localId) {
+      return cachedAuth.localId;
+    }
+    await getAuthToken();
+    return (cachedAuth && cachedAuth.localId) || null;
   }
 
   async function apiFetch(path, options = {}) {
@@ -151,46 +231,21 @@
     }
   }
 
-  // Default Global Leaderboard Benchmark (Ansh as sole initial benchmark player)
-  const DEFAULT_GLOBAL_LEADERS = [
-    {
-      id: 'usr_ansh',
-      nickname: 'Ansh',
-      focusSeconds: 21600,
-      todayDisplay: '6h 00m',
-      streak: 28,
-      solvedCount: 14,
-      rank: 1,
-      avatar: 'AN',
-      roomName: 'LeetGlow Squad'
-    }
-  ];
-
-  // Single Default Public Community Focus Room (Created by Ansh)
+  // Default Public Community Focus Room (no fake members)
   const COMMUNITY_ROOMS = {
     'GLOW-LEET': {
       info: {
         code: 'GLOW-LEET',
-        name: 'LeetGlow Squad',
+        name: 'LeetGlow Lounge',
         goal: '3 hours',
         type: 'open',
-        creator: 'Ansh',
-        avatar: 'LS',
-        createdAt: Date.now() - 3600000
+        topic: 'General DSA',
+        creator: 'Community',
+        creatorId: 'community_system',
+        avatar: 'LG',
+        createdAt: 1730000000000
       },
-      members: {
-        'usr_ansh': {
-          id: 'usr_ansh',
-          nickname: 'Ansh',
-          status: 'Active',
-          timerFormatted: '25:00',
-          isHost: true,
-          avatar: 'AN',
-          todayFocusSeconds: 21600, // 6h 00m
-          cycleDate: getDailyCycleId(),
-          lastActive: Date.now()
-        }
-      }
+      members: {}
     }
   };
 
@@ -200,6 +255,7 @@
     getDailyCycleId,
     getTimeUntilReset,
     getTimeUntilDailyReset,
+    getAuthUserId,
 
     // 1. Room Management
     async getRoom(code) {
@@ -221,7 +277,9 @@
               code: data.info.code,
               name: data.info.name,
               goal: data.info.goal,
+              topic: data.info.topic || 'General DSA',
               creator: data.info.creator,
+              creatorId: data.info.creatorId || '',
               avatar: data.info.avatar || '🌐',
               memberCount: Object.keys(data.members || {}).length,
               createdAt: data.info.createdAt
@@ -241,7 +299,9 @@
         name: room.name,
         goal: room.goal || '3 hours',
         type: room.type || 'private',
+        topic: room.topic || 'General DSA',
         creator: room.creator || 'Host',
+        creatorId: room.creatorId || '',
         createdAt: room.createdAt || Date.now()
       };
 
@@ -258,7 +318,9 @@
             code: payload.code,
             name: payload.name,
             goal: payload.goal,
+            topic: payload.topic,
             creator: payload.creator || 'Host',
+            creatorId: payload.creatorId || '',
             avatar: '🌐',
             memberCount: (room.members && room.members.length) || 1,
             createdAt: payload.createdAt
@@ -267,6 +329,16 @@
       }
 
       return true;
+    },
+
+    // Update real-time member count for public rooms
+    async updatePublicRoomMemberCount(roomCode, count) {
+      if (!roomCode) return;
+      const cleanCode = encodeURIComponent(normalizeRoomCode(roomCode));
+      await apiFetch(`/public_rooms/${cleanCode}/memberCount`, {
+        method: 'PUT',
+        body: JSON.stringify(Math.max(0, count))
+      });
     },
 
     // Query All Public Available Groups from Server
@@ -287,7 +359,9 @@
             code: cr.info.code,
             name: cr.info.name,
             goal: cr.info.goal,
+            topic: cr.info.topic || 'General DSA',
             creator: cr.info.creator,
+            creatorId: cr.info.creatorId || '',
             avatar: cr.info.avatar,
             memberCount: Object.keys(cr.members || {}).length,
             createdAt: cr.info.createdAt,
@@ -300,7 +374,7 @@
     },
 
     // 2. Member Presence & Live Heartbeat
-    async syncMember(roomCode, member) {
+    async syncMember(roomCode, member, options = {}) {
       if (!roomCode || !member || !member.id) return false;
       const cleanCode = encodeURIComponent(normalizeRoomCode(roomCode));
       const cleanId = encodeURIComponent(member.id);
@@ -314,6 +388,8 @@
         avatar: member.avatar || 'AN',
         todayFocusSeconds: Number(member.todayFocusSeconds) || 0,
         cycleDate: member.cycleDate || getDailyCycleId(),
+        currentProblem: member.currentProblem || null,
+        recentSolve: member.recentSolve || null,
         lastActive: Date.now()
       };
 
@@ -321,6 +397,48 @@
         method: 'PUT',
         body: JSON.stringify(payload)
       });
+
+      // Update public_rooms/{code}/memberCount in the syncMember flow
+      try {
+        let count = typeof options === 'number'
+          ? options
+          : (options && options.memberCount !== undefined ? options.memberCount : member.memberCount);
+
+        const isPublic = typeof options === 'object' && options !== null && options.isPublic !== undefined
+          ? options.isPublic
+          : member.isPublic;
+
+        // Skip updating public_rooms if explicitly marked private
+        if (isPublic !== false) {
+          if (count === undefined || count === null) {
+            const membersRes = await apiFetch(`/rooms/${cleanCode}/members`);
+            if (membersRes && typeof membersRes === 'object') {
+              count = Object.keys(membersRes).length;
+            }
+          }
+
+          const finalCount = Math.max(1, Number(count) || 1);
+
+          if (isPublic === true) {
+            await apiFetch(`/public_rooms/${cleanCode}/memberCount`, {
+              method: 'PUT',
+              body: JSON.stringify(finalCount)
+            });
+          } else {
+            // Verify public room entry exists before writing to avoid orphan nodes
+            const pubRoom = await apiFetch(`/public_rooms/${cleanCode}/code`);
+            if (pubRoom) {
+              await apiFetch(`/public_rooms/${cleanCode}/memberCount`, {
+                method: 'PUT',
+                body: JSON.stringify(finalCount)
+              });
+            }
+          }
+        }
+      } catch (e) {
+        // Silently catch network or non-public room errors
+      }
+
       return true;
     },
 
@@ -349,16 +467,8 @@
       
       let list = [];
       if (res && typeof res === 'object') {
-        list = Object.values(res);
+        list = Object.values(res).filter(u => u && u.id && (Number(u.focusSeconds) || 0) > 0);
       }
-
-      // Merge initial benchmark player (Ansh) if not yet in active cycle
-      const existingIds = new Set(list.map(u => u.id));
-      DEFAULT_GLOBAL_LEADERS.forEach(u => {
-        if (!existingIds.has(u.id)) {
-          list.push(u);
-        }
-      });
 
       // Sort by focusSeconds descending
       list.sort((a, b) => (Number(b.focusSeconds) || 0) - (Number(a.focusSeconds) || 0));
@@ -367,7 +477,8 @@
       const top20 = list.slice(0, 20);
       return top20.map((item, index) => ({
         ...item,
-        rank: index + 1
+        rank: index + 1,
+        weeklyDisplay: item.weeklyDisplay || item.todayDisplay || '0m'
       }));
     },
 
@@ -376,13 +487,17 @@
       const cycleId = getWeeklyCycleId();
       const cleanId = encodeURIComponent(user.id);
 
+      const focusSec = Number(user.focusSeconds) || 0;
+      const displayVal = user.weeklyDisplay || user.todayDisplay || '0m';
+
       const payload = {
         id: user.id,
         nickname: user.nickname || 'Anonymous',
-        focusSeconds: Number(user.focusSeconds) || 0,
-        todayDisplay: user.todayDisplay || '0m',
-        streak: Number(user.streak) || 1,
-        solvedCount: Number(user.solvedCount) || 1,
+        focusSeconds: focusSec,
+        weeklyDisplay: displayVal,
+        todayDisplay: displayVal, // preserve for backward compatibility
+        streak: Math.max(0, Number(user.streak) || 0),
+        solvedCount: Math.max(0, Number(user.solvedCount) || 0),
         roomName: user.roomName || 'Solo Coder',
         isPrivate: Boolean(user.isPrivateRoom),
         avatar: user.avatar || 'AN',

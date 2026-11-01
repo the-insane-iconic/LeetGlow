@@ -362,4 +362,28 @@
     setTimeout(catchUp, reapply);
     reapply *= 2;
   })();
+
+  /* ===========================================================================
+     Room Invite via Link Detection (?glowroom=GLOW-XXXX)
+     Dispatches invite event & message to content script to auto-open side panel
+  =========================================================================== */
+  try {
+    const search = window.location.search;
+    if (search && search.includes('glowroom')) {
+      const params = new URLSearchParams(search);
+      const roomParam = params.get('glowroom');
+      if (roomParam) {
+        const cleanCode = roomParam.trim().toUpperCase();
+        const fullCode = cleanCode.startsWith('GLOW-') ? cleanCode : ('GLOW-' + cleanCode);
+        window.postMessage({
+          source: 'leetglow-inject',
+          type: 'LEETGLOW_INVITE_DETECTED',
+          roomCode: fullCode
+        }, '*');
+        window.dispatchEvent(new CustomEvent('leetglow:invite-detected', {
+          detail: { roomCode: fullCode }
+        }));
+      }
+    }
+  } catch (e) {}
 })();

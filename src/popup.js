@@ -956,6 +956,24 @@ tabButtons.forEach(({ btn }) => {
 // Set default active tab
 if (document.body) document.body.dataset.activeTab = 'tab-themes';
 
+// Auto-switch tab if requested via invite link or background message (?glowroom=GLOW-XXXX)
+try {
+  chrome.storage.local.get(['msAutoOpenTab'], (res) => {
+    if (res && res.msAutoOpenTab) {
+      chrome.storage.local.remove(['msAutoOpenTab']);
+      switchTab(res.msAutoOpenTab);
+    }
+  });
+
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === 'local' && changes.msAutoOpenTab && changes.msAutoOpenTab.newValue) {
+      const tabId = changes.msAutoOpenTab.newValue;
+      chrome.storage.local.remove(['msAutoOpenTab']);
+      switchTab(tabId);
+    }
+  });
+} catch (e) {}
+
 /* Color Palette Selector */
 const paletteGrid = document.getElementById('colorPaletteGrid');
 const paletteSwatches = document.querySelectorAll('.palette-swatch-item');

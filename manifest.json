@@ -97,8 +97,9 @@
    },
    "host_permissions": [
       "https://kxtdvzyftfhryvbpbohb.supabase.co/*",
-      "https://*.firebaseio.com/*",
-      "https://*.firebaseapp.com/*"
+      "https://cryo-byte-default-rtdb.firebaseio.com/*",
+      "https://identitytoolkit.googleapis.com/*",
+      "https://securetoken.googleapis.com/*"
    ],
    "manifest_version": 3,
    "name": "LeetGlow – Aesthetic LeetCode Themes, Clean Animations & Focus Tools",

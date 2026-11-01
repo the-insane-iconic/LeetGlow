@@ -442,8 +442,19 @@ html[data-lct-theme] .lcts-share-box textarea:focus,
   async function onAccepted(v) {
     if (!themeId()) return;                       // "Off" means off
     const { streak } = await recordClear();
-    if (!enabled || root.hasAttribute('data-lc-focus')) return;
     const p = globalThis.LCTSProblem ? globalThis.LCTSProblem.get() : {};
+    try {
+      chrome.storage.local.set({
+        lcRecentSolve: {
+          slug: p.slug || null,
+          number: p.number || null,
+          title: p.title || document.title.replace(/\s*-\s*LeetCode\s*$/, ''),
+          difficulty: p.difficulty || null,
+          timestamp: Date.now()
+        }
+      });
+    } catch (e) {}
+    if (!enabled || root.hasAttribute('data-lc-focus')) return;
     const d = { number: p.number, title: p.title || document.title.replace(/\s*-\s*LeetCode\s*$/, ''),
                 difficulty: p.difficulty, beats: v.beats, lang: v.lang, runtime: v.runtime, streak };
     /* after the Accepted moment has had its stage */

@@ -231,4 +231,115 @@
     });
   });
   guard.observe(root, { attributes: true, attributeFilter: ['class', 'data-lc-theme', 'data-theme'] });
+
+  /* ===========================================================================
+     Room Invite via Link Handler (?glowroom=GLOW-XXXX)
+     Dispatches to background to open side panel directly into join view
+  =========================================================================== */
+  let inviteHandled = false;
+  function handleGlowRoomInvite(roomCode) {
+    if (inviteHandled || !roomCode) return;
+    inviteHandled = true;
+
+    const cleanCode = String(roomCode).trim().toUpperCase();
+    const fullCode = cleanCode.startsWith('GLOW-') ? cleanCode : ('GLOW-' + cleanCode);
+
+    try {
+      chrome.storage.local.set({
+        msPendingJoinCode: fullCode,
+        msAutoOpenTab: 'tab-myspace'
+      });
+    } catch (e) {}
+
+    // Request background.js to open side panel
+    try {
+      chrome.runtime.sendMessage({
+        type: 'open-side-panel',
+        targetTab: 'tab-myspace',
+        roomCode: fullCode
+      });
+    } catch (e) {}
+
+    // Show floating pill notification on page to allow 1-click open if browser requires user click
+    showInvitePill(fullCode);
+  }
+
+  function showInvitePill(fullCode) {
+    if (document.getElementById('lct-invite-pill')) return;
+    const pill = document.createElement('div');
+    pill.id = 'lct-invite-pill';
+    pill.style.cssText = `
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 999999;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: #0f172a;
+      color: #ffffff;
+      border: 1.5px solid #ec4899;
+      border-radius: 999px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), 0 0 16px rgba(236, 72, 153, 0.4);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    `;
+    pill.innerHTML = `
+      <span style="font-size: 15px;">👋</span>
+      <span>Study Squad: <strong style="color: #f472b6; font-family: monospace;">${fullCode}</strong></span>
+      <button type="button" style="
+        background: linear-gradient(135deg, #ec4899, #f43f5e);
+        color: #ffffff;
+        border: none;
+        padding: 5px 12px;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 11px;
+        cursor: pointer;
+      ">Open LeetGlow 🚀</button>
+      <span style="color: #64748b; font-size: 15px; margin-left: 4px; cursor: pointer;" title="Dismiss">&times;</span>
+    `;
+
+    pill.addEventListener('click', (e) => {
+      if (e.target.textContent === '×') {
+        pill.remove();
+        return;
+      }
+      try {
+        chrome.runtime.sendMessage({ type: 'open-side-panel', targetTab: 'tab-myspace', roomCode: fullCode });
+      } catch (err) {}
+      setTimeout(() => pill.remove(), 1200);
+    });
+
+    if (document.body) {
+      document.body.appendChild(pill);
+    } else {
+      document.addEventListener('DOMContentLoaded', () => document.body.appendChild(pill));
+    }
+  }
+
+  // Listen for invite broadcast from inject.js (MAIN world)
+  window.addEventListener('message', (e) => {
+    if (e && e.data && e.data.source === 'leetglow-inject' && e.data.type === 'LEETGLOW_INVITE_DETECTED') {
+      handleGlowRoomInvite(e.data.roomCode);
+    }
+  });
+
+  window.addEventListener('leetglow:invite-detected', (e) => {
+    if (e && e.detail && e.detail.roomCode) {
+      handleGlowRoomInvite(e.detail.roomCode);
+    }
+  });
+
+  // Direct check in content.js
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const glowRoom = params.get('glowroom');
+    if (glowRoom) {
+      handleGlowRoomInvite(glowRoom);
+    }
+  } catch (e) {}
 })();

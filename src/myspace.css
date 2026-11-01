@@ -343,17 +343,66 @@
   color: #94a3b8;
 }
 
-/* Code Input Box (Uppercase, spaced) */
-.ms-code-input {
+/* Code Input Box (Auto-Prefix GLOW- with sleek inner field) */
+.ms-code-input-wrap {
+  display: flex;
+  align-items: center;
+  background: #fdf2f8;
+  border: 1.5px solid #fbcfe8;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.ms-code-input-wrap:focus-within {
+  border-color: #ec4899;
+  box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.18);
+  background: #ffffff;
+}
+
+.ms-code-prefix {
+  font-family: var(--font-mono, monospace);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #db2777;
+  background: rgba(236, 72, 153, 0.08);
+  padding: 0 12px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  user-select: none;
+  border-right: 1.5px solid #fbcfe8;
+  flex-shrink: 0;
+}
+
+.ms-code-input-wrap:focus-within .ms-code-prefix {
+  background: rgba(236, 72, 153, 0.12);
+  border-color: rgba(236, 72, 153, 0.25);
+}
+
+.ms-code-input-wrap .ms-code-input {
+  flex: 1;
+  width: 100%;
+  height: 42px;
+  border: none !important;
+  background: transparent !important;
   font-family: var(--font-mono, monospace);
   font-size: 16px;
   font-weight: 700;
-  letter-spacing: 2.5px;
+  letter-spacing: 2px;
   text-transform: uppercase;
-  text-align: center;
-  color: #db2777;
-  background: #fdf2f8;
-  border-color: #fbcfe8;
+  color: #0f172a;
+  padding: 0 14px;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.ms-code-input-wrap .ms-code-input::placeholder {
+  color: #cbd5e1;
+  font-weight: 600;
+  letter-spacing: 1.5px;
 }
 
 /* Goal Selector Dropdown */
@@ -1318,6 +1367,35 @@
   font-weight: 700;
 }
 
+.ms-btn-hint-share {
+  margin-top: 7px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #db2777;
+  border: 1.2px solid #fbcfe8;
+  font-size: 10.5px;
+  font-weight: 600;
+  font-family: var(--font-ui, sans-serif);
+  cursor: pointer;
+  transition: all 0.16s ease;
+  box-shadow: 0 1px 3px rgba(219, 39, 119, 0.08);
+}
+
+.ms-btn-hint-share:hover {
+  background: #fdf2f8;
+  border-color: #ec4899;
+  transform: translateY(-0.5px);
+  box-shadow: 0 2px 6px rgba(219, 39, 119, 0.15);
+}
+
+.ms-btn-hint-share:active {
+  transform: scale(0.97);
+}
+
 /* Bottom Card: Group Status / Daily Progress Bar */
 .ms-group-stats-card {
   display: grid;
@@ -1567,6 +1645,31 @@
   font-weight: 700;
 }
 
+.ms-lb-refresh-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.18s ease;
+}
+
+.ms-lb-refresh-btn:hover {
+  background: #fdf2f8;
+  color: #db2777;
+  border-color: #fbcfe8;
+}
+
+.ms-lb-refresh-btn.rotating svg {
+  animation: ms-spin 0.6s linear;
+}
+
 .ms-lb-pinned-user {
   margin-top: 4px;
   padding-top: 6px;
@@ -1583,6 +1686,42 @@
   padding-bottom: 6px;
   flex: 1;
   min-height: 0;
+}
+
+/* Empty Leaderboard State */
+.ms-lb-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px 16px;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1.5px dashed #fbcfe8;
+  margin: 6px 0;
+}
+
+.ms-lb-empty-icon {
+  font-size: 28px;
+  margin-bottom: 6px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 8px rgba(236, 72, 153, 0.25));
+}
+
+.ms-lb-empty-title {
+  font-family: 'Space Grotesk', var(--font-ui), sans-serif;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.ms-lb-empty-sub {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 4px;
+  line-height: 1.4;
+  max-width: 240px;
 }
 
 /* Custom Sleek Scrollbar for Members & Leaderboard */
@@ -1843,5 +1982,503 @@
   line-height: 1;
   color: #f1f5f9;
   font-weight: 500;
+}
+
+/* =============================================================================
+   6. NICKNAME PROMPT MODAL & BANNER USER PILL
+============================================================================= */
+
+/* Banner Nickname Pill */
+.ms-banner-user-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.ms-banner-nick-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2.5px 8px 2.5px 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid #fbcfe8;
+  color: #db2777;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  transition: all 0.16s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 2px 6px rgba(236, 72, 153, 0.12);
+}
+
+.ms-banner-nick-pill:hover {
+  background: #ffffff;
+  border-color: #ec4899;
+  transform: translateY(-0.5px);
+  box-shadow: 0 4px 12px rgba(236, 72, 153, 0.22);
+}
+
+.ms-banner-nick-pill:active {
+  transform: scale(0.97);
+}
+
+.ms-nick-avatar {
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ec4899, #f43f5e);
+  color: #ffffff;
+  font-size: 8.5px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  letter-spacing: -0.04em;
+  flex-shrink: 0;
+}
+
+.ms-nick-text {
+  max-width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Nickname Modal */
+.ms-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 250;
+  background: rgba(15, 23, 42, 0.58);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: ms-fade-in 0.18s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.ms-modal-card {
+  width: 100%;
+  max-width: 320px;
+  background: #ffffff;
+  border: 1.5px solid rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 22px 18px 18px;
+  box-shadow: 0 20px 48px -8px rgba(0, 0, 0, 0.38), 0 0 0 1px rgba(244, 114, 182, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-sizing: border-box;
+  animation: ms-modal-pop 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes ms-modal-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.ms-modal-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: #fdf2f8;
+  border: 1.5px solid #fbcfe8;
+  display: grid;
+  place-items: center;
+  margin-bottom: 10px;
+  box-shadow: 0 4px 12px rgba(236, 72, 153, 0.15);
+}
+
+.ms-modal-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.ms-modal-title {
+  font-family: 'Space Grotesk', var(--font-ui), sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.25;
+}
+
+.ms-modal-sub {
+  font-size: 11.5px;
+  color: #64748b;
+  line-height: 1.4;
+  margin-top: 4px;
+  margin-bottom: 14px;
+}
+
+.ms-modal-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+}
+
+.ms-modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.ms-btn-modal-cancel {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-family: var(--font-ui);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: color 0.15s ease;
+}
+
+.ms-btn-modal-cancel:hover {
+  color: #64748b;
+  text-decoration: underline;
+}
+
+.input-error {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.18) !important;
+}
+
+/* Topic Badges & Tags */
+.ms-topic-tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: 9999px;
+  background: rgba(99, 102, 241, 0.1);
+  color: #6366f1;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.ms-topic-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 9.5px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 9999px;
+  background: rgba(99, 102, 241, 0.08);
+  color: #6366f1;
+  border: 1px solid rgba(99, 102, 241, 0.18);
+}
+
+/* Topic Filter Pills Bar */
+.ms-topic-pills-bar {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 4px 2px 10px 2px;
+  margin-bottom: 6px;
+  scrollbar-width: none;
+}
+.ms-topic-pills-bar::-webkit-scrollbar {
+  display: none;
+}
+.ms-topic-pill {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  font-size: 10.5px;
+  font-weight: 600;
+  border-radius: 9999px;
+  background: rgba(241, 245, 249, 0.85);
+  color: #64748b;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: var(--font-ui);
+}
+.ms-topic-pill:hover {
+  background: rgba(226, 232, 240, 0.9);
+  color: #334155;
+}
+.ms-topic-pill.active {
+  background: #0f172a;
+  color: #ffffff;
+  border-color: #0f172a;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.18);
+}
+
+/* Problem Badges in Member List */
+.ms-member-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+.ms-member-problem-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3.5px;
+  font-size: 9.5px;
+  font-weight: 600;
+  padding: 1.5px 6px;
+  border-radius: 6px;
+  background: rgba(241, 245, 249, 0.9);
+  color: #475569;
+  border: 1px solid rgba(203, 213, 225, 0.7);
+  max-width: 170px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ms-member-problem-badge .ms-prob-icon {
+  font-size: 9px;
+}
+.ms-member-problem-badge.diff-easy {
+  background: rgba(16, 185, 129, 0.08);
+  color: #059669;
+  border-color: rgba(16, 185, 129, 0.25);
+}
+.ms-member-problem-badge.diff-medium {
+  background: rgba(245, 158, 11, 0.08);
+  color: #d97706;
+  border-color: rgba(245, 158, 11, 0.25);
+}
+.ms-member-problem-badge.diff-hard {
+  background: rgba(239, 68, 68, 0.08);
+  color: #dc2626;
+  border-color: rgba(239, 68, 68, 0.25);
+}
+
+.ms-member-solve-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 1.5px 6px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(245, 158, 11, 0.25));
+  color: #b45309;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  animation: ms-solve-pulse 1.8s ease-in-out infinite;
+}
+@keyframes ms-solve-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.02); }
+}
+
+/* Topic Badges & Tags */
+.ms-topic-tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: 9999px;
+  background: rgba(99, 102, 241, 0.1);
+  color: #6366f1;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.ms-topic-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 9.5px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 9999px;
+  background: rgba(99, 102, 241, 0.08);
+  color: #6366f1;
+  border: 1px solid rgba(99, 102, 241, 0.18);
+}
+
+/* Topic Filter Pills Bar */
+.ms-topic-pills-bar {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 4px 2px 10px 2px;
+  margin-bottom: 6px;
+  scrollbar-width: none;
+}
+.ms-topic-pills-bar::-webkit-scrollbar {
+  display: none;
+}
+.ms-topic-pill {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  font-size: 10.5px;
+  font-weight: 600;
+  border-radius: 9999px;
+  background: rgba(241, 245, 249, 0.85);
+  color: #64748b;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: var(--font-ui);
+}
+.ms-topic-pill:hover {
+  background: rgba(226, 232, 240, 0.9);
+  color: #334155;
+}
+.ms-topic-pill.active {
+  background: #0f172a;
+  color: #ffffff;
+  border-color: #0f172a;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.18);
+}
+
+/* Problem Badges in Member List */
+.ms-member-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+.ms-member-problem-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3.5px;
+  font-size: 9.5px;
+  font-weight: 600;
+  padding: 1.5px 6px;
+  border-radius: 6px;
+  background: rgba(241, 245, 249, 0.9);
+  color: #475569;
+  border: 1px solid rgba(203, 213, 225, 0.7);
+  max-width: 170px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ms-member-problem-badge .ms-prob-icon {
+  font-size: 9px;
+}
+.ms-member-problem-badge.diff-easy {
+  background: rgba(16, 185, 129, 0.08);
+  color: #059669;
+  border-color: rgba(16, 185, 129, 0.25);
+}
+.ms-member-problem-badge.diff-medium {
+  background: rgba(245, 158, 11, 0.08);
+  color: #d97706;
+  border-color: rgba(245, 158, 11, 0.25);
+}
+.ms-member-problem-badge.diff-hard {
+  background: rgba(239, 68, 68, 0.08);
+  color: #dc2626;
+  border-color: rgba(239, 68, 68, 0.25);
+}
+
+.ms-member-solve-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 1.5px 6px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(245, 158, 11, 0.25));
+  color: #b45309;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  animation: ms-solve-pulse 1.8s ease-in-out infinite;
+}
+@keyframes ms-solve-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.02); }
+}
+
+/* Inline Leave Confirmation Dialog */
+.ms-leave-inline-confirm {
+  margin: 0 14px 10px 14px;
+  padding: 10px 12px;
+  background: linear-gradient(135deg, #fff1f2 0%, #fff5f5 100%);
+  border: 1.5px solid rgba(244, 63, 94, 0.32);
+  border-radius: 12px;
+  box-shadow: 0 3px 12px rgba(244, 63, 94, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  animation: ms-fade-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.ms-leave-confirm-info {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex: 1 1 auto;
+}
+
+.ms-leave-confirm-icon {
+  color: #e11d48;
+  flex-shrink: 0;
+}
+
+.ms-leave-confirm-text {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #9f1239;
+  line-height: 1.35;
+}
+
+.ms-leave-confirm-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.ms-btn-inline-cancel {
+  padding: 5px 11px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+  border-radius: 6px;
+  background: #ffffff;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ms-btn-inline-cancel:hover {
+  background: #f8fafc;
+  color: #334155;
+  border-color: #94a3b8;
+}
+
+.ms-btn-inline-leave {
+  padding: 5px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: var(--font-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+  border-radius: 6px;
+  background: linear-gradient(135deg, #ef4444 0%, #e11d48 100%);
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(225, 29, 72, 0.3);
+  transition: all 0.15s ease;
+}
+
+.ms-btn-inline-leave:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #be123c 100%);
+  box-shadow: 0 3px 10px rgba(225, 29, 72, 0.4);
+  transform: translateY(-0.5px);
 }
 
