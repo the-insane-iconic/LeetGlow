@@ -152,6 +152,7 @@
       border: 0; border-radius: 10px; cursor: pointer;
       background: var(--w-accent);
       color: var(--w-on-accent); font-size: 12px; font-weight: 750;
+      box-shadow: 0 4px 14px -4px var(--w-accent);
       transition: transform .16s cubic-bezier(0.16, 1, 0.3, 1), filter .16s ease, box-shadow .16s ease;
     }
     .primary-btn:hover { filter: brightness(1.08); transform: translateY(-1px) scale(1.02); }
@@ -220,20 +221,60 @@
 
     .focus-chip {
       position: fixed; left: 18px; bottom: 18px; border-radius: 999px;
-      display: flex; align-items: center; gap: 8px; padding: 9px 10px 9px 12px;
-      font-size: 11px; font-weight: 650; letter-spacing: .01em;
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 10px 7px 7px;
+      width: auto; max-width: min(290px, calc(100vw - 24px));
+      cursor: default; user-select: none;
     }
-    .focus-chip svg { width: 14px; height: 14px; color: var(--w-accent); }
-    .focus-chip span { color: var(--w-muted); font-weight: 500; }
-    .focus-chip button {
-      margin-left: 2px; width: 22px; height: 22px; border: 0; border-radius: 50%; cursor: pointer;
-      background: color-mix(in srgb, var(--w-text) 8%, transparent); color: var(--w-text);
+    .focus-badge {
+      width: 34px; height: 34px; border-radius: 50%; flex: none;
       display: grid; place-items: center;
-      transition: background .15s ease, transform .14s ease;
+      background: var(--w-accent);
+      color: var(--w-on-accent);
+      box-shadow: 0 4px 14px -4px var(--w-accent);
+      transition: transform .16s cubic-bezier(0.16, 1, 0.3, 1), filter .16s ease;
     }
-    .focus-chip button:hover { background: color-mix(in srgb, var(--w-text) 15%, transparent); transform: scale(1.1); }
-    .focus-chip button:active { transform: scale(0.92); }
-    .focus-chip button svg { width: 12px; height: 12px; color: inherit; }
+    .focus-chip:hover .focus-badge {
+      transform: scale(1.06); filter: brightness(1.08);
+    }
+    .focus-badge svg {
+      width: 15px; height: 15px; fill: currentColor;
+    }
+    .focus-pulse {
+      display: flex; align-items: center; justify-content: center;
+      width: 12px; height: 12px; position: relative; flex: none;
+    }
+    .focus-pulse-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--w-accent);
+      box-shadow: 0 0 8px var(--w-accent);
+    }
+    .focus-pulse-ring {
+      position: absolute; width: 12px; height: 12px; border-radius: 50%;
+      border: 1.5px solid var(--w-accent);
+      animation: focus-ring 2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+      opacity: 0;
+    }
+    @keyframes focus-ring {
+      0% { transform: scale(0.5); opacity: 0.9; }
+      50% { opacity: 0.4; }
+      100% { transform: scale(1.8); opacity: 0; }
+    }
+    .focus-info {
+      min-width: 0; flex: 1 1 auto; overflow: hidden; padding-right: 4px;
+    }
+    .focus-title {
+      font-size: 11px; font-weight: 700; letter-spacing: .01em; line-height: 1.2;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--w-text);
+    }
+    .focus-sub {
+      font-size: 9px; color: var(--w-muted); letter-spacing: .08em;
+      text-transform: uppercase; margin-top: 2px; white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis;
+    }
+    .focus-chip .icon-btn {
+      width: 24px; height: 24px; flex: none;
+    }
 
     .toasts {
       position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%);
@@ -313,10 +354,18 @@
         </section>
       </div>
 
-      <div class="focus-chip hidden" data-el="focusChip">
-        ${ICONS.focus}<span>Focus mode</span>
-        <button data-el="focusExit" title="Exit focus mode" aria-label="Exit focus mode">${ICONS.close}</button>
-      </div>
+      <section class="pill focus-chip hidden" data-el="focusChip" aria-label="Focus mode active">
+        <div class="focus-badge" aria-hidden="true">${ICONS.focus}</div>
+        <div class="focus-pulse" aria-hidden="true">
+          <span class="focus-pulse-ring"></span>
+          <span class="focus-pulse-dot"></span>
+        </div>
+        <div class="focus-info">
+          <div class="focus-title">Focus Mode</div>
+          <div class="focus-sub">Distraction-free · ⌘⇧.</div>
+        </div>
+        <button class="icon-btn" data-el="focusExit" title="Exit focus mode (⌘+Shift+.)" aria-label="Exit focus mode">${ICONS.close}</button>
+      </section>
 
       <div class="toasts" data-el="toasts" role="status" aria-live="polite"></div>
     </div>
