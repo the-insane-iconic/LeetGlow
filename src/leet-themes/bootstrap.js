@@ -185,7 +185,7 @@
   function openStudio() {
     try {
       chrome.runtime.sendMessage({ type: 'open-side-panel' });
-    } catch (e) {}
+    } catch (e) { }
   }
 
   let lastSyncedLctThemeId = null;
@@ -354,7 +354,7 @@
       } else if (msg.type === 'lcts:play-moment') {
         try {
           document.dispatchEvent(new CustomEvent('lcts:moment', { detail: msg.moment }));
-        } catch (e) {}
+        } catch (e) { }
         sendResponse({ ok: true });
       }
     });

@@ -428,10 +428,10 @@
             .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(r.status)))
             .then((data) => dec.decodeAudioData(data))
             .then((buf) => { recorded[themeId][kind] = buf; })
-            .catch(() => {});
-        } catch (e) {}
+            .catch(() => { });
+        } catch (e) { }
       });
-    } catch (e) {}
+    } catch (e) { }
   }
 
   function sample(b, buf, kind, themeId) {
@@ -487,7 +487,7 @@
       if (!(typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id)) return false;
       if (!/^https?:/.test(location.protocol)) return false;       // extension pages play themselves
       msg = Object.assign({ id: Date.now().toString(36) + Math.random().toString(36).slice(2) }, msg);
-      chrome.runtime.sendMessage({ type: 'lcts-sound', msg }).catch(() => {});
+      chrome.runtime.sendMessage({ type: 'lcts-sound', msg }).catch(() => { });
       return true;
     } catch (e) { return false; }
   }
@@ -513,7 +513,7 @@
       ensureContext(0.6);
       holdUntil = Math.max(holdUntil, performance.now() + ms);
       running().then(sleepSoon);
-    } catch (e) {}
+    } catch (e) { }
   }
   function currentTheme() {
     return document.documentElement.getAttribute('data-lc-theme')
@@ -587,7 +587,7 @@
         ensureContext(0.6);
         running().then(sleepSoon);
       }
-    } catch (e) {}
+    } catch (e) { }
     removeEventListener('pointerdown', unlock, true);
     removeEventListener('keydown', unlock, true);
   }

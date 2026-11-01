@@ -135,7 +135,7 @@
           if (this.trackElement) this.trackElement.pause();
         } else {
           this._stopScheduling();
-          if (this.ctx) this.ctx.suspend().catch(function () {});
+          if (this.ctx) this.ctx.suspend().catch(function () { });
         }
       } else {
         if (!this._canAutoplay()) {
@@ -144,14 +144,14 @@
         }
         if (spec.type === 'track') {
           if (this.trackElement) {
-            this.trackElement.play().catch(function () {});
+            this.trackElement.play().catch(function () { });
           }
         } else {
           if (this.ctx) {
             this.ctx.resume().then(function () {
               this.nextChordAt = this.ctx.currentTime + 0.1;
               this._startScheduling();
-            }.bind(this)).catch(function () {});
+            }.bind(this)).catch(function () { });
           }
         }
       }
@@ -544,7 +544,7 @@
       this.stopTimer = setTimeout(function () {
         self._stopSources();
         self.stopTimer = null;
-        if (self.ctx && !self.playing) self.ctx.suspend().catch(function () {});
+        if (self.ctx && !self.playing) self.ctx.suspend().catch(function () { });
       }, 800);
       this.playing = false;
       this._emit();
@@ -617,7 +617,7 @@
       const ctx = this.ctx;
       // The context is suspended whenever lofi is stopped or the tab was hidden; wake it for the chime.
       if (ctx.state !== 'running') {
-        ctx.resume().then(this._playChime.bind(this)).catch(function () {});
+        ctx.resume().then(this._playChime.bind(this)).catch(function () { });
         return;
       }
       this._playChime();
@@ -643,7 +643,7 @@
       });
       const self = this;
       setTimeout(function () {
-        if (self.ctx && !self.playing) self.ctx.suspend().catch(function () {});
+        if (self.ctx && !self.playing) self.ctx.suspend().catch(function () { });
       }, 2400);
     }
 

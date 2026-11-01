@@ -1,348 +1,545 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LeetGlow — Custom Themes, Sound Effects & Backgrounds for LeetCode</title>
-  <meta name="description" content="Transform your LeetCode problem solving with Studio Ghibli-inspired anime scenes, custom wallpapers, ambient lofi soundtracks, and victory celebration sound effects. 100% Free.">
-  <meta name="keywords" content="LeetCode themes, LeetCode dark mode, LeetCode wallpapers, anime coding themes, LeetGlow">
-  <link rel="icon" type="image/png" href="assets/icon128.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LeetGlow — Your LeetCode, Elevated</title>
+  <meta name="description" content="LeetGlow transforms your LeetCode environment with handcrafted themes, live wallpapers, focus timers, and ambient sound. Free Chrome extension." />
+  <meta name="theme-color" content="#080a0f" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="LeetGlow — Your LeetCode, Elevated" />
+  <meta property="og:description" content="Twelve handpicked themes. Live wallpapers. Focus mode. Ambient sound. Completely free." />
+  <meta property="og:image" content="assets/blue-dragon.webp" />
+  <meta property="og:type" content="website" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <link rel="icon" type="image/png" href="assets/icon128.png" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- Navigation Bar -->
-  <header class="navbar">
-    <div class="container">
-      <a href="index.html" class="nav-brand">
-        <img src="assets/icon128.png" alt="LeetGlow Logo" class="nav-logo">
-        <span class="nav-title">LeetGlow</span>
-        <span class="nav-badge">Free</span>
+  <!-- SVG Grain Filter (no external image) -->
+  <svg class="grain-svg" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" />
+      <feColorMatrix type="saturate" values="0" />
+      <feBlend in="SourceGraphic" mode="overlay" result="blend" />
+      <feComposite in="blend" in2="SourceGraphic" operator="in" />
+    </filter>
+  </svg>
+
+  <!-- ─── NAVBAR ───────────────────────────────────────────── -->
+  <header class="navbar" id="navbar">
+    <div class="navbar-inner">
+      <a href="#" class="nav-logo" aria-label="LeetGlow home">
+        <img src="assets/icon128.png" alt="LeetGlow icon" class="nav-icon" />
+        <span class="nav-wordmark">LeetGlow</span>
       </a>
-
-      <nav class="nav-links">
-        <a href="#features" class="nav-link">Features</a>
-        <a href="#themes" class="nav-link">Themes</a>
-        <a href="#faq" class="nav-link">FAQ</a>
-        <a href="support.html" class="nav-link">Support Us ❤️</a>
-        <a href="contact.html" class="nav-link">Contact</a>
+      <nav class="nav-links" aria-label="Primary navigation">
+        <a href="#themes">Themes</a>
+        <a href="#features">Features</a>
+        <a href="#demo">Demo</a>
+        <a href="#focus">Focus</a>
+        <a href="#faq">FAQ</a>
       </nav>
-
-      <div class="nav-actions">
-        <a href="support.html" class="btn btn-outline" style="padding: 8px 16px; font-size: 13px;">Support Us</a>
-        <a href="https://chromewebstore.google.com/detail/ecpfpadofaimilfpjedgoedhoaglpjdb" target="_blank" class="btn btn-primary" style="padding: 8px 18px; font-size: 13px;">Add to Chrome</a>
-      </div>
+      <a
+        href="https://chromewebstore.google.com/detail/ecpfpadofaimilfpjedgoedhoaglpjdb"
+        class="btn btn-nav"
+        target="_blank"
+        rel="noopener noreferrer"
+      >Add to Chrome</a>
+      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <div class="nav-mobile-menu" id="mobile-menu" aria-hidden="true">
+      <a href="#themes">Themes</a>
+      <a href="#features">Features</a>
+      <a href="#demo">Demo</a>
+      <a href="#focus">Focus</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://chromewebstore.google.com/detail/ecpfpadofaimilfpjedgoedhoaglpjdb" class="btn btn-nav" target="_blank" rel="noopener noreferrer">Add to Chrome</a>
     </div>
   </header>
 
-  <!-- Hero Section -->
-  <section class="hero">
-    <div class="container">
-      <div class="hero-pill">
-        <span class="hero-pill-badge">FREE</span>
-        <span>Studio Ghibli, 4K Anime Art & Sound Effects for LeetCode</span>
-      </div>
-
-      <h1 class="hero-title">
-        Make your LeetCode grind feel <span class="gradient-text">truly iconic.</span>
+  <!-- ─── HERO ─────────────────────────────────────────────── -->
+  <section class="hero" id="hero">
+    <div class="hero-grain"></div>
+    <div class="hero-inner">
+      <p class="hero-eyebrow reveal-item">Chrome Extension &mdash; Free Forever</p>
+      <h1 class="hero-headline reveal-item">
+        Make your<br />
+        LeetCode grind<br />
+        <em>feel sacred.</em>
       </h1>
-
-      <p class="hero-desc">
-        Say goodbye to dull problem pages. Immerse your coding sessions in Studio Ghibli vibes, cyber grids, custom uploaded backgrounds, and victory celebration sound effects.
+      <p class="hero-sub reveal-item">
+        Twelve handcrafted themes. Live wallpapers. Focus timers.<br class="br-desktop" />
+        Ambient sound. Zero tracking. Completely free.
       </p>
-
-      <div class="hero-cta">
-        <a href="https://chromewebstore.google.com/detail/ecpfpadofaimilfpjedgoedhoaglpjdb" target="_blank" class="btn btn-primary" style="padding: 13px 28px; font-size: 15.5px;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="21.17" y1="8" x2="12" y2="8"/><line x1="3.95" y1="6.06" x2="8.54" y2="14"/><line x1="10.88" y1="21.94" x2="15.46" y2="14"/></svg>
-          Add to Chrome — It's Free
-        </a>
-        <a href="support.html" class="btn btn-secondary" style="padding: 13px 24px; font-size: 15.5px;">
-          Support the Project ❤️
+      <div class="hero-actions reveal-item">
+        <a
+          href="https://chromewebstore.google.com/detail/ecpfpadofaimilfpjedgoedhoaglpjdb"
+          class="btn btn-primary"
+          target="_blank"
+          rel="noopener noreferrer"
+        >Add to Chrome &mdash; It&rsquo;s Free</a>
+        <a href="#demo" class="btn-text-link">
+          See it in action
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </a>
       </div>
+      <div class="hero-badges reveal-item">
+        <span class="badge">Zero trackers</span>
+        <span class="badge">Local-first</span>
+        <span class="badge">WCAG 7.0:1</span>
+        <span class="badge">4,200+ users</span>
+      </div>
+    </div>
+    <div class="hero-scroll-hint reveal-item" aria-hidden="true">
+      <span class="scroll-line"></span>
+      <span class="scroll-label">scroll</span>
+    </div>
+  </section>
 
-      <div class="hero-guarantee">
-        <span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          Guaranteed 7.0:1 WCAG Text Contrast
-        </span>
-        <span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          Zero Lag &lt; 2MB Memory
-        </span>
-        <span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          100% Privacy Focused
-        </span>
+  <!-- ─── STATS MARQUEE ────────────────────────────────────── -->
+  <div class="stats-marquee" aria-label="Key statistics">
+    <div class="marquee-track">
+      <div class="marquee-inner">
+        <span>4,200+ active users</span>
+        <span class="marquee-dot" aria-hidden="true">&middot;</span>
+        <span>12 curated themes</span>
+        <span class="marquee-dot" aria-hidden="true">&middot;</span>
+        <span>60 FPS wallpapers</span>
+        <span class="marquee-dot" aria-hidden="true">&middot;</span>
+        <span>0 trackers</span>
+        <span class="marquee-dot" aria-hidden="true">&middot;</span>
+        <span>&lt;2 MB install</span>
+        <span class="marquee-dot" aria-hidden="true">&middot;</span>
+        <span>Free forever</span>
+        <span class="marquee-dot" aria-hidden="true">&middot;</span>
+        <span>WCAG 7.0:1 contrast</span>
+        <span class="marquee-dot" aria-hidden="true">&middot;</span>
+        <span>Local-first storage</span>
+        <span class="marquee-dot" aria-hidden="true">&middot;</span>
+        <!-- Duplicate for seamless loop -->
+        <span>4,200+ active users</span>
+        <span class="marquee-dot" aria-hidden="true">&middot;</span>
+        <span>12 curated themes</span>
+        <span class="marquee-dot" aria-hidden="true">&middot;</span>
+        <span>60 FPS wallpapers</span>
+        <span class="marquee-dot" aria-hidden="true">&middot;</span>
+        <span>0 trackers</span>
+        <span class="marquee-dot" aria-hidden="true">&middot;</span>
+        <span>&lt;2 MB install</span>
+        <span class="marquee-dot" aria-hidden="true">&middot;</span>
+        <span>Free forever</span>
+        <span class="marquee-dot" aria-hidden="true">&middot;</span>
+        <span>WCAG 7.0:1 contrast</span>
+        <span class="marquee-dot" aria-hidden="true">&middot;</span>
+        <span>Local-first storage</span>
+        <span class="marquee-dot" aria-hidden="true">&middot;</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── THEME GALLERY ────────────────────────────────────── -->
+  <section class="themes-gallery" id="themes" aria-label="Theme gallery">
+    <div class="gallery-header reveal-item">
+      <p class="section-label">Themes</p>
+      <h2 class="section-headline">An atmosphere<br /><em>for every mood.</em></h2>
+      <p class="section-sub">Six distinct worlds. Each one a complete visual system — colors, wallpaper, sound, and feel working together.</p>
+    </div>
+
+    <div class="gallery-viewport" id="gallery-viewport" role="list">
+      <!-- Cards generated by JS -->
+    </div>
+
+    <div class="gallery-controls" aria-label="Gallery navigation">
+      <button class="gallery-btn" id="gallery-prev" aria-label="Previous theme">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="M13 4l-6 6 6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="gallery-dots" id="gallery-dots" role="tablist" aria-label="Theme navigation dots"></div>
+      <button class="gallery-btn" id="gallery-next" aria-label="Next theme">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="M7 4l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- ─── STORY CHAPTERS ───────────────────────────────────── -->
+  <section class="story-chapters" id="features" aria-label="Feature chapters">
+    <div class="chapters-inner">
+
+      <!-- Sticky chapter spine -->
+      <div class="chapter-spine" aria-hidden="true">
+        <div class="spine-line"></div>
+        <div class="spine-marker" id="spine-marker"></div>
       </div>
 
-      <!-- Interactive Mockup Preview -->
-      <div class="preview-showcase" id="themes">
-        <div class="preview-switcher">
-          <button class="theme-pill-btn active" data-theme="blue-dragon">🌸 Pink Sakura</button>
-          <button class="theme-pill-btn" data-theme="harvest">⚡ Ultimate Goku</button>
-          <button class="theme-pill-btn" data-theme="golden-hour">🌅 Golden Hour</button>
-          <button class="theme-pill-btn" data-theme="moon-field">🌙 Moon Field</button>
+      <!-- Ch.01 — The Environment -->
+      <article class="chapter" data-chapter="01" id="ch-01">
+        <div class="chapter-meta">
+          <span class="chapter-num">Ch.01</span>
+          <span class="chapter-title">The Environment</span>
         </div>
-
-        <div class="preview-window">
-          <div class="window-header">
-            <div class="window-dots">
-              <span class="window-dot dot-red"></span>
-              <span class="window-dot dot-yellow"></span>
-              <span class="window-dot dot-green"></span>
+        <div class="chapter-body chapter-left">
+          <div class="chapter-text reveal-item">
+            <h2 class="chapter-headline">Your editor.<br /><em>Your aesthetic.</em></h2>
+            <p>Twelve handpicked themes &mdash; Anime, Minimal, Lofi, Nature. Each one a complete visual system: colors, typography, particle effects, and ambient audio working in unison. Switch atmospheres with a single click.</p>
+            <p>Live wallpapers draw from Studio Ghibli-inspired scenes &mdash; Pink Sakura, Golden Hour, Moon Field. They breathe. They move. At 60 FPS, beautifully.</p>
+          </div>
+          <div class="chapter-visual reveal-item">
+            <div class="palette-showcase">
+              <div class="palette-row" data-palette="sakura">
+                <div class="palette-swatch" style="background:#fbeef2;"></div>
+                <div class="palette-swatch" style="background:#d8538c;"></div>
+                <div class="palette-swatch" style="background:#8f7be8;"></div>
+                <div class="palette-swatch" style="background:#2d1527;"></div>
+                <span class="palette-name">Sakura Dream</span>
+              </div>
+              <div class="palette-row" data-palette="forest">
+                <div class="palette-swatch" style="background:#0b1410;"></div>
+                <div class="palette-swatch" style="background:#7fd18b;"></div>
+                <div class="palette-swatch" style="background:#d8c27a;"></div>
+                <div class="palette-swatch" style="background:#e8f3e6;"></div>
+                <span class="palette-name">Forest Mist</span>
+              </div>
+              <div class="palette-row" data-palette="midnight">
+                <div class="palette-swatch" style="background:#0b0d10;"></div>
+                <div class="palette-swatch" style="background:#7aa2ff;"></div>
+                <div class="palette-swatch" style="background:#a78bfa;"></div>
+                <div class="palette-swatch" style="background:#e9edf2;"></div>
+                <span class="palette-name">Midnight Ink</span>
+              </div>
+              <div class="palette-row" data-palette="lofi">
+                <div class="palette-swatch" style="background:#1c1410;"></div>
+                <div class="palette-swatch" style="background:#d4956a;"></div>
+                <div class="palette-swatch" style="background:#a07850;"></div>
+                <div class="palette-swatch" style="background:#f0e8d8;"></div>
+                <span class="palette-name">Lofi Caf&eacute;</span>
+              </div>
             </div>
-            <div class="window-title">
-              <span>leetcode.com/problems/two-sum</span>
-            </div>
-            <div class="window-badge">
-              ⚡ Beats 98.4%
+            <div class="wallpaper-strip">
+              <img src="assets/blue-dragon.webp" alt="Pink Sakura wallpaper" class="wallpaper-thumb" loading="lazy" />
+              <img src="assets/golden-hour.webp" alt="Golden Hour wallpaper" class="wallpaper-thumb" loading="lazy" />
+              <img src="assets/moon-field.webp" alt="Moon Field wallpaper" class="wallpaper-thumb" loading="lazy" />
+              <img src="assets/harvest-moon.webp" alt="Harvest Moon wallpaper" class="wallpaper-thumb" loading="lazy" />
             </div>
           </div>
+        </div>
+      </article>
 
-          <div class="window-stage" id="previewStage">
-            <div class="window-glass-editor">
-              <pre><code><span class="code-comment">// 1. Two Sum (LeetCode) — Monaco Glass Theme</span>
-<span class="code-keyword">function</span> <span class="code-func">twoSum</span>(<span class="code-var">nums</span>: <span class="code-type">number[]</span>, <span class="code-var">target</span>: <span class="code-type">number</span>): <span class="code-type">number[]</span> {
-  <span class="code-keyword">const</span> map = <span class="code-keyword">new</span> <span class="code-func">Map</span>&lt;<span class="code-type">number</span>, <span class="code-type">number</span>&gt;();
-  <span class="code-keyword">for</span> (<span class="code-keyword">let</span> i = <span class="code-num">0</span>; i &lt; nums.<span class="code-var">length</span>; i++) {
-    <span class="code-keyword">const</span> diff = target - nums[i];
-    <span class="code-keyword">if</span> (map.<span class="code-func">has</span>(diff)) {
-      <span class="code-keyword">return</span> [map.<span class="code-func">get</span>(diff)!, i];
-    }
-    map.<span class="code-func">set</span>(nums[i], i);
-  }
-  <span class="code-keyword">return</span> [];
-};</code></pre>
+      <!-- Ch.02 — The Flow State -->
+      <article class="chapter" data-chapter="02" id="ch-02">
+        <div class="chapter-meta">
+          <span class="chapter-num">Ch.02</span>
+          <span class="chapter-title">The Flow State</span>
+        </div>
+        <div class="chapter-body chapter-right">
+          <div class="chapter-visual reveal-item">
+            <div class="timer-mockup-mini">
+              <div class="timer-ring-mini" aria-hidden="true">
+                <svg viewBox="0 0 120 120" class="ring-svg-mini">
+                  <circle cx="60" cy="60" r="50" class="ring-track-mini" />
+                  <circle cx="60" cy="60" r="50" class="ring-fill-mini" id="chapter-ring" />
+                </svg>
+                <div class="timer-center-mini">
+                  <span class="timer-digits-mini" id="chapter-timer-digits">25:00</span>
+                </div>
+              </div>
+              <div class="timer-label-mini">Focus Session</div>
             </div>
+          </div>
+          <div class="chapter-text reveal-item">
+            <h2 class="chapter-headline">Deep work,<br /><em>by design.</em></h2>
+            <p>The integrated Pomodoro timer syncs with your theme. When focus mode activates, distractions retract. Sidebar collapses. Panel noise disappears.</p>
+            <p>When time runs out, a gentle chime pulls you back &mdash; not a jarring alarm. The kind of interruption that respects your cognitive state.</p>
+          </div>
+        </div>
+      </article>
 
-            <div class="submission-toast">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-              <div>
-                <strong style="color: #10b981; font-size: 13.5px;">Accepted · Runtime 48ms</strong>
-                <p style="font-size: 12px; color: #a7f3d0; margin: 0;">Victory Fanfare played in Anime Studio</p>
+      <!-- Ch.03 — The Celebration -->
+      <article class="chapter" data-chapter="03" id="ch-03">
+        <div class="chapter-meta">
+          <span class="chapter-num">Ch.03</span>
+          <span class="chapter-title">The Celebration</span>
+        </div>
+        <div class="chapter-body chapter-left">
+          <div class="chapter-text reveal-item">
+            <h2 class="chapter-headline">Victory<br /><em>deserves fanfare.</em></h2>
+            <p>Submit an accepted solution and LeetGlow knows. A custom sound effect fires. Confetti petals drift across your theme. The moment is marked.</p>
+            <p>Because every solved problem is worth celebrating &mdash; whether it&rsquo;s a two-pointer or a DP problem that took four days.</p>
+          </div>
+          <div class="chapter-visual reveal-item">
+            <div class="accepted-showcase">
+              <div class="accepted-toast" id="accepted-toast">
+                <div class="accepted-dot"></div>
+                <div class="accepted-text">
+                  <span class="accepted-label">Accepted</span>
+                  <span class="accepted-meta">Runtime 48ms &middot; Beats 98.4%</span>
+                </div>
+              </div>
+              <div class="confetti-area" id="confetti-area" aria-hidden="true">
+                <span class="petal" style="--delay:0s;--x:20%;--r:15deg;"></span>
+                <span class="petal" style="--delay:0.1s;--x:45%;--r:-20deg;"></span>
+                <span class="petal" style="--delay:0.2s;--x:70%;--r:30deg;"></span>
+                <span class="petal" style="--delay:0.3s;--x:35%;--r:-10deg;"></span>
+                <span class="petal" style="--delay:0.15s;--x:60%;--r:25deg;"></span>
+                <span class="petal" style="--delay:0.25s;--x:80%;--r:-35deg;"></span>
+              </div>
+              <button class="replay-btn" id="replay-celebration">Replay</button>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Ch.04 — The Community -->
+      <article class="chapter" data-chapter="04" id="ch-04">
+        <div class="chapter-meta">
+          <span class="chapter-num">Ch.04</span>
+          <span class="chapter-title">The Community</span>
+        </div>
+        <div class="chapter-body chapter-right">
+          <div class="chapter-visual reveal-item">
+            <div class="share-card-mockup">
+              <div class="share-card-header">
+                <div class="share-avatar"></div>
+                <div class="share-user-info">
+                  <span class="share-username">@ansh</span>
+                  <span class="share-time">just now</span>
+                </div>
+                <span class="share-theme-badge">Sakura Dream</span>
+              </div>
+              <div class="share-card-code">
+                <span class="code-lang">python</span>
+                <pre class="share-code"><code>def twoSum(nums, target):
+    seen = {}
+    for i, n in enumerate(nums):
+        diff = target - n
+        if diff in seen:
+            return [seen[diff], i]
+        seen[n] = i</code></pre>
+              </div>
+              <div class="share-card-footer">
+                <span class="share-result">Two Sum &middot; Accepted</span>
+                <span class="share-time-meta">48ms</span>
               </div>
             </div>
           </div>
+          <div class="chapter-text reveal-item">
+            <h2 class="chapter-headline">Share the<br /><em>grind.</em></h2>
+            <p>MySpace-inspired Moments let you capture and share your solve snapshots &mdash; annotated, styled in your theme, ready to post.</p>
+            <p>Your coding journey, beautifully documented. Because the process matters as much as the result.</p>
+          </div>
         </div>
-      </div>
+      </article>
+
     </div>
   </section>
 
-  <!-- Features Grid -->
-  <section class="features-section" id="features">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-tag">Crafted For Engineers</span>
-        <h2 class="section-title">Designed so you never want to close LeetCode.</h2>
-        <p class="section-subtitle">Every pixel and sound effect is tuned for deep flow state, crisp syntax readability, and dopamine hits when tests pass.</p>
+  <!-- ─── EDITOR DEMO ───────────────────────────────────────── -->
+  <section class="editor-demo" id="demo" aria-label="Interactive editor demo">
+    <div class="editor-demo-inner">
+      <div class="editor-header-text reveal-item">
+        <p class="section-label">Live Demo</p>
+        <h2 class="section-headline">See it<br /><em>transform.</em></h2>
+        <p class="section-sub">Click a theme below to see how the editor environment shifts. Every color, every detail, reconsidered.</p>
       </div>
 
-      <div class="features-grid">
-        <div class="feature-card">
-          <div class="feature-icon-wrapper">🌸</div>
-          <h3 class="feature-title">Studio Ghibli & Anime Scenes</h3>
-          <p class="feature-desc">Over a dozen high-resolution, hand-picked anime wallpapers ranging from Torii forest shrines to starry cyberpunk rain, fully optimized in WebP.</p>
+      <div class="editor-layout reveal-item">
+        <!-- Theme picker -->
+        <div class="editor-theme-picker" role="tablist" aria-label="Editor theme switcher">
+          <button class="theme-tab active" data-theme="midnight-ink" role="tab" aria-selected="true">Midnight Ink</button>
+          <button class="theme-tab" data-theme="sakura-dream" role="tab" aria-selected="false">Sakura Dream</button>
+          <button class="theme-tab" data-theme="lofi-cafe" role="tab" aria-selected="false">Lofi Caf&eacute;</button>
+          <button class="theme-tab" data-theme="forest-mist" role="tab" aria-selected="false">Forest Mist</button>
         </div>
 
-        <div class="feature-card">
-          <div class="feature-icon-wrapper">🛡️</div>
-          <h3 class="feature-title">Strict Contrast Guarantee</h3>
-          <p class="feature-desc">Our intelligent glassmorphism engine locks the minimum contrast floor to 7.0:1 (exceeding WCAG AAA standards). Code syntax is always effortlessly legible.</p>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon-wrapper">🎵</div>
-          <h3 class="feature-title">Lo-Fi Soundscapes & SFX</h3>
-          <p class="feature-desc">Integrated lofi rain soundtracks, subtle keypress audio, and an unmistakable victory fanfare triggered automatically when your solution is accepted.</p>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon-wrapper">🖼️</div>
-          <h3 class="feature-title">Custom Wallpaper Uploads</h3>
-          <p class="feature-desc">Easily upload any custom PNG, JPEG, or WebP wallpaper. Set your favorite gaming landscape, 4K setup, or artwork directly behind the editor.</p>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon-wrapper">⚡</div>
-          <h3 class="feature-title">Ultra Lightweight Engine</h3>
-          <p class="feature-desc">Written in 100% pure vanilla JavaScript and CSS with zero heavy third-party framework overhead. Consumes under 2MB RAM and runs at 60 FPS.</p>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon-wrapper">🔒</div>
-          <h3 class="feature-title">Strict Privacy & Local-First</h3>
-          <p class="feature-desc">No tracking, no analytics, no external servers monitoring your code. Your custom settings and art live strictly in your local browser storage.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Themes Showcase Section -->
-  <section class="themes-section">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-tag">Curated Collection</span>
-        <h2 class="section-title">Explore Built-in Aesthetics</h2>
-        <p class="section-subtitle">Switch atmospheres with a single click in your LeetGlow sidebar.</p>
-      </div>
-
-      <div class="themes-grid">
-        <div class="theme-preview-card">
-          <img src="assets/blue-dragon.webp" alt="Pink Sakura" class="theme-card-img" />
-          <div class="theme-card-body">
-            <h3 class="theme-card-title">Pink Sakura</h3>
-            <span class="theme-card-tag">Gentle Cherry Blossom Glow</span>
+        <!-- Monaco mock -->
+        <div class="monaco-window" id="monaco-window" data-active-theme="midnight-ink" role="region" aria-label="Code editor preview">
+          <div class="monaco-titlebar">
+            <div class="window-dots" aria-hidden="true">
+              <span class="dot dot-red"></span>
+              <span class="dot dot-yellow"></span>
+              <span class="dot dot-green"></span>
+            </div>
+            <span class="monaco-filename" id="monaco-filename">solution.py &mdash; LeetCode #1</span>
           </div>
-        </div>
-
-        <div class="theme-preview-card">
-          <img src="assets/golden-hour.webp" alt="Golden Hour" class="theme-card-img" />
-          <div class="theme-card-body">
-            <h3 class="theme-card-title">Golden Hour</h3>
-            <span class="theme-card-tag">Studio Ghibli Sunset Vibe</span>
+          <div class="monaco-body">
+            <div class="monaco-sidebar" aria-hidden="true">
+              <span class="line-num">1</span>
+              <span class="line-num">2</span>
+              <span class="line-num">3</span>
+              <span class="line-num">4</span>
+              <span class="line-num">5</span>
+              <span class="line-num">6</span>
+              <span class="line-num">7</span>
+              <span class="line-num">8</span>
+              <span class="line-num">9</span>
+              <span class="line-num">10</span>
+            </div>
+            <pre class="monaco-code" id="monaco-code"><code><span class="tok-keyword">class</span> <span class="tok-class">Solution</span>:
+    <span class="tok-keyword">def</span> <span class="tok-fn">twoSum</span>(<span class="tok-self">self</span>, nums: <span class="tok-type">list</span>[<span class="tok-type">int</span>], target: <span class="tok-type">int</span>) -&gt; <span class="tok-type">list</span>[<span class="tok-type">int</span>]:
+        seen = {}
+        <span class="tok-keyword">for</span> i, n <span class="tok-keyword">in</span> <span class="tok-fn">enumerate</span>(nums):
+            diff = target - n
+            <span class="tok-keyword">if</span> diff <span class="tok-keyword">in</span> seen:
+                <span class="tok-keyword">return</span> [seen[diff], i]
+            seen[n] = i
+        <span class="tok-comment"># O(n) time · O(n) space</span>
+        <span class="tok-keyword">return</span> []</code></pre>
           </div>
-        </div>
-
-        <div class="theme-preview-card">
-          <img src="assets/moon-field.webp" alt="Moon Field" class="theme-card-img" />
-          <div class="theme-card-body">
-            <h3 class="theme-card-title">Moon Field</h3>
-            <span class="theme-card-tag">Lofi Starry Meadows</span>
-          </div>
-        </div>
-
-        <div class="theme-preview-card">
-          <img src="assets/harvest-moon.webp" alt="Ultimate Goku" class="theme-card-img" />
-          <div class="theme-card-body">
-            <h3 class="theme-card-title">Ultimate Goku</h3>
-            <span class="theme-card-tag">Saiyan Aura & Harvest Glow</span>
+          <!-- Accepted toast overlay -->
+          <div class="editor-toast" id="editor-toast" aria-live="polite" aria-atomic="true">
+            <span class="editor-toast-dot"></span>
+            <span class="editor-toast-text">Accepted &mdash; Runtime 48ms &middot; Beats 98.4%</span>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Community Support Callout Section -->
-  <section class="support-callout-section">
-    <div class="container">
-      <div class="support-callout-card">
-        <h2 class="support-callout-title">Love LeetGlow? Support Independent Development</h2>
-        <p class="support-callout-desc">
-          LeetGlow is 100% free with no paywalls or intrusive ads. If LeetGlow makes your problem-solving sessions more inspiring, you can help fund our high-speed 4K CDN server costs and weekly theme drops.
-        </p>
-        <div class="support-callout-actions">
-          <a href="support.html" class="btn btn-primary" style="background: #15803d; border-color: #15803d;">
-            <span>Support LeetGlow ❤️</span>
-          </a>
-          <a href="https://chromewebstore.google.com/detail/ecpfpadofaimilfpjedgoedhoaglpjdb" target="_blank" class="btn btn-outline">
-            <span>Install Extension</span>
-          </a>
+  <!-- ─── FOCUS MODE SECTION ───────────────────────────────── -->
+  <section class="focus-section" id="focus" aria-label="Focus mode">
+    <div class="focus-inner">
+      <div class="focus-text reveal-item">
+        <p class="section-label">Focus Mode</p>
+        <h2 class="section-headline">One problem.<br /><em>Full attention.</em></h2>
+        <p class="section-sub">The Pomodoro timer fades the noise and holds space for deep work. When the session ends, LeetGlow celebrates the effort &mdash; not just the result.</p>
+      </div>
+
+      <div class="timer-showcase reveal-item">
+        <div class="timer-ring" role="timer" aria-label="Pomodoro timer">
+          <svg viewBox="0 0 200 200" class="ring-svg" aria-hidden="true">
+            <circle cx="100" cy="100" r="84" class="ring-track" />
+            <circle cx="100" cy="100" r="84" class="ring-progress" id="ring-progress" />
+          </svg>
+          <div class="timer-inner">
+            <span class="timer-label">Focus</span>
+            <span class="timer-display" id="timer-display">25:00</span>
+            <span class="timer-session">Session 1 of 4</span>
+          </div>
+        </div>
+        <div class="timer-controls">
+          <button class="timer-btn" id="timer-start" aria-label="Start focus session">Start</button>
+          <button class="timer-btn timer-btn-ghost" id="timer-reset" aria-label="Reset timer">Reset</button>
+        </div>
+        <div class="timer-tags" aria-label="Timer features">
+          <span class="timer-tag">Auto-break</span>
+          <span class="timer-tag">Gentle chime</span>
+          <span class="timer-tag">Theme-sync</span>
+          <span class="timer-tag">Focus lock</span>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- FAQ Section -->
-  <section class="faq-section" id="faq">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-tag">Got Questions?</span>
-        <h2 class="section-title">Frequently Asked Questions</h2>
+  <!-- ─── FAQ ─────────────────────────────────────────────── -->
+  <section class="faq-section" id="faq" aria-label="Frequently asked questions">
+    <div class="faq-inner">
+      <div class="faq-header reveal-item">
+        <p class="section-label">FAQ</p>
+        <h2 class="section-headline">Questions,<br /><em>answered.</em></h2>
       </div>
 
-      <div class="faq-list">
-        <div class="faq-item">
-          <button class="faq-question">
-            <span>Is LeetGlow free to use?</span>
-            <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-          <div class="faq-answer">
-            Yes! LeetGlow is completely free. You get access to all anime scenes, custom wallpaper uploads, contrast solvers, and victory sound effects right out of the box without any paywalls or ads.
-          </div>
+      <div class="faq-layout">
+        <!-- Question list -->
+        <ul class="faq-questions" id="faq-questions" role="list">
+          <li class="faq-q active" data-faq="0" role="button" tabindex="0" aria-expanded="true">Is LeetGlow really free?</li>
+          <li class="faq-q" data-faq="1" role="button" tabindex="0" aria-expanded="false">Does it slow down LeetCode?</li>
+          <li class="faq-q" data-faq="2" role="button" tabindex="0" aria-expanded="false">What is the &#8377;29 premium?</li>
+          <li class="faq-q" data-faq="3" role="button" tabindex="0" aria-expanded="false">Does it track my activity?</li>
+          <li class="faq-q" data-faq="4" role="button" tabindex="0" aria-expanded="false">Which browsers are supported?</li>
+          <li class="faq-q" data-faq="5" role="button" tabindex="0" aria-expanded="false">Can I use my own wallpaper?</li>
+          <li class="faq-q" data-faq="6" role="button" tabindex="0" aria-expanded="false">What are Live Wallpapers?</li>
+          <li class="faq-q" data-faq="7" role="button" tabindex="0" aria-expanded="false">How do I share my moments?</li>
+        </ul>
+
+        <!-- Answer panel -->
+        <div class="faq-answer-panel" id="faq-answer-panel" aria-live="polite">
+          <!-- Answers injected by JS -->
         </div>
 
-        <div class="faq-item">
-          <button class="faq-question">
-            <span>Does LeetGlow slow down LeetCode?</span>
-            <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-          <div class="faq-answer">
-            Not at all. LeetGlow is built with zero third-party framework overhead using vanilla JavaScript and hardware-accelerated CSS. It operates under 2MB RAM and maintains smooth 60 FPS performance.
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-question">
-            <span>Can I upload my own custom wallpapers?</span>
-            <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-          <div class="faq-answer">
-            Yes! In the LeetGlow sidebar under "My Space" or Anime Studio, you can drag and drop any 4K illustration, anime artwork, or desktop wallpaper (PNG, JPG, WebP). LeetGlow's contrast solver automatically balances your editor transparency and text inks.
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-question">
-            <span>Does LeetGlow track my code or LeetCode passwords?</span>
-            <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-          <div class="faq-answer">
-            Never. LeetGlow operates with strict data minimization. We do not read, transmit, or record your code submissions, passwords, or personal browsing history. Your preferences and custom wallpapers stay strictly inside your local browser storage.
-          </div>
+        <!-- Mobile accordion -->
+        <div class="faq-accordion" id="faq-accordion">
+          <!-- Accordion items injected by JS -->
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="container">
-      <div class="footer-top">
-        <div class="footer-brand">
-          <div class="nav-brand">
-            <img src="assets/icon128.png" alt="LeetGlow Logo" class="nav-logo">
-            <span class="nav-title">LeetGlow</span>
-          </div>
-          <p>The ultimate visual and audio customization companion for developers grinding LeetCode. 100% free & open.</p>
-        </div>
+  <!-- ─── FINAL CTA ─────────────────────────────────────────── -->
+  <section class="cta-final" aria-label="Call to action">
+    <div class="cta-inner reveal-item">
+      <p class="section-label">Get Started</p>
+      <h2 class="cta-headline">Your grind<br /><em>deserves this.</em></h2>
+      <p class="cta-sub">Free. No account. No tracking. Install in 30 seconds.</p>
+      <div class="cta-actions">
+        <a
+          href="https://chromewebstore.google.com/detail/ecpfpadofaimilfpjedgoedhoaglpjdb"
+          class="btn btn-primary btn-large"
+          target="_blank"
+          rel="noopener noreferrer"
+        >Add to Chrome &mdash; Free</a>
+        <a href="#themes" class="btn-text-link">
+          Browse themes
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
 
-        <div>
-          <h4 class="footer-heading">Product</h4>
-          <ul class="footer-links">
-            <li><a href="#features" class="footer-link">Features</a></li>
-            <li><a href="#themes" class="footer-link">Theme Showcase</a></li>
-            <li><a href="https://chromewebstore.google.com/detail/ecpfpadofaimilfpjedgoedhoaglpjdb" class="footer-link" target="_blank">Chrome Web Store</a></li>
-            <li><a href="https://chromewebstore.google.com/detail/ecpfpadofaimilfpjedgoedhoaglpjdb/reviews" class="footer-link" target="_blank">Rate Us ★</a></li>
-          </ul>
-        </div>
-
-        <div>
-          <h4 class="footer-heading">Legal</h4>
-          <ul class="footer-links">
-            <li><a href="terms.html" class="footer-link">Terms and Conditions</a></li>
-            <li><a href="privacy.html" class="footer-link">Privacy Policy</a></li>
-            <li><a href="contact.html" class="footer-link">Contact & Support</a></li>
-          </ul>
-        </div>
-
-        <div>
-          <h4 class="footer-heading">Community</h4>
-          <ul class="footer-links">
-            <li><a href="support.html" class="footer-link">Support Us ❤️</a></li>
-            <li><a href="mailto:anupamyadav6477@gmail.com" class="footer-link">Email Developer</a></li>
-            <li><a href="https://github.com/the-insane-iconic/LeetGlow" class="footer-link" target="_blank">GitHub Repository</a></li>
-          </ul>
-        </div>
+  <!-- ─── FOOTER ───────────────────────────────────────────── -->
+  <footer class="footer" aria-label="Site footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="#" class="footer-wordmark" aria-label="LeetGlow home">LeetGlow</a>
+        <p class="footer-tagline">Your LeetCode, elevated.</p>
+        <a
+          href="https://chromewebstore.google.com/detail/ecpfpadofaimilfpjedgoedhoaglpjdb"
+          class="btn btn-primary footer-cta"
+          target="_blank"
+          rel="noopener noreferrer"
+        >Add to Chrome</a>
       </div>
 
-      <div class="footer-bottom">
-        <span>© 2026 LeetGlow. Crafted with care by Ansh. Free for developers worldwide.</span>
-        <span>LeetGlow is not affiliated with, endorsed by, or sponsored by LeetCode Inc.</span>
+      <div class="footer-links-col">
+        <h3 class="footer-col-title">Product</h3>
+        <ul>
+          <li><a href="#themes">Themes</a></li>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#focus">Focus Mode</a></li>
+          <li><a href="#demo">Demo</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
       </div>
+
+      <div class="footer-links-col">
+        <h3 class="footer-col-title">Legal &amp; Support</h3>
+        <ul>
+          <li><a href="privacy.html">Privacy Policy</a></li>
+          <li><a href="terms.html">Terms of Use</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="support.html">Support</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p class="footer-copy">&copy; 2024 LeetGlow. Built with care, not venture capital.</p>
+      <p class="footer-love">Zero trackers &middot; Zero ads &middot; Just vibes</p>
     </div>
   </footer>
 

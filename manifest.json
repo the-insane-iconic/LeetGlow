@@ -21,19 +21,73 @@
          }
       }
    },
-   "content_scripts": [ {
-      "all_frames": false,
-      "css": [ "themes/core.css", "themes/grid.css", "themes/anime.css", "themes/crawler.css", "themes/game.css", "themes/pixel.css", "themes/lct-fonts.css", "themes/lct-base.css", "themes/lct-themes.css", "themes/lct-effects.css" ],
-      "js": [ "src/leet-themes/config.js", "src/leet-themes/themes.js", "src/leet-themes/utils.js", "src/leet-themes/engine.js", "src/leet-themes/audio.js", "src/leet-themes/widgets.js", "src/leet-themes/pomodoro.js", "src/leet-themes/focus.js", "src/leet-themes/bootstrap.js", "src/content.js", "src/problem.js", "src/anime/scenes.js", "src/anime/css.js", "src/anime/anime.js", "src/monaco-ink.js", "src/sheet-scroll.js", "src/verdict.js", "src/share.js", "src/anime/moments-ui.js", "src/anime/sounds.js", "src/anime/moments.js", "src/game/petals.js", "src/game/sounds.js", "src/game/title-card.js", "src/game/game.js", "src/game/icons.js", "src/game/ambient.js", "src/game/result.js", "src/pixel/sprites.js", "src/pixel/pixel.js" ],
-      "matches": [ "https://leetcode.com/problems/*", "https://leetcode.cn/problems/*" ],
-      "run_at": "document_start"
-   }, {
-      "all_frames": false,
-      "js": [ "src/net-verdict.js", "src/inject.js" ],
-      "matches": [ "https://leetcode.com/problems/*", "https://leetcode.cn/problems/*" ],
-      "run_at": "document_start",
-      "world": "MAIN"
-   } ],
+   "content_scripts": [
+      {
+         "all_frames": false,
+         "css": [
+            "themes/core.css",
+            "themes/grid.css",
+            "themes/anime.css",
+            "themes/crawler.css",
+            "themes/game.css",
+            "themes/pixel.css",
+            "themes/lct-fonts.css",
+            "themes/lct-base.css",
+            "themes/lct-themes.css",
+            "themes/lct-effects.css"
+         ],
+         "js": [
+            "src/leet-themes/config.js",
+            "src/leet-themes/themes.js",
+            "src/leet-themes/utils.js",
+            "src/leet-themes/engine.js",
+            "src/leet-themes/audio.js",
+            "src/leet-themes/widgets.js",
+            "src/leet-themes/pomodoro.js",
+            "src/leet-themes/focus.js",
+            "src/leet-themes/bootstrap.js",
+            "src/content.js",
+            "src/problem.js",
+            "src/anime/scenes.js",
+            "src/anime/css.js",
+            "src/anime/anime.js",
+            "src/monaco-ink.js",
+            "src/sheet-scroll.js",
+            "src/verdict.js",
+            "src/share.js",
+            "src/anime/moments-ui.js",
+            "src/anime/sounds.js",
+            "src/anime/moments.js",
+            "src/game/petals.js",
+            "src/game/sounds.js",
+            "src/game/title-card.js",
+            "src/game/game.js",
+            "src/game/icons.js",
+            "src/game/ambient.js",
+            "src/game/result.js",
+            "src/pixel/sprites.js",
+            "src/pixel/pixel.js"
+         ],
+         "matches": [
+            "https://leetcode.com/problems/*",
+            "https://leetcode.cn/problems/*"
+         ],
+         "run_at": "document_start"
+      },
+      {
+         "all_frames": false,
+         "js": [
+            "src/net-verdict.js",
+            "src/inject.js"
+         ],
+         "matches": [
+            "https://leetcode.com/problems/*",
+            "https://leetcode.cn/problems/*"
+         ],
+         "run_at": "document_start",
+         "world": "MAIN"
+      }
+   ],
    "description": "Aesthetic themes, generative lofi soundscapes, Pomodoro focus timer, and custom backgrounds for your LeetCode sessions.",
    "icons": {
       "128": "icons/icon128.png",
@@ -48,14 +102,33 @@
    ],
    "manifest_version": 3,
    "name": "LeetGlow – Aesthetic LeetCode Themes, Clean Animations & Focus Tools",
-   "permissions": [ "storage", "offscreen", "sidePanel" ],
+   "permissions": [
+      "storage",
+      "offscreen",
+      "sidePanel"
+   ],
    "short_name": "LeetGlow",
    "side_panel": {
       "default_path": "src/popup.html"
    },
    "version": "3.8.0",
-   "web_accessible_resources": [ {
-      "matches": [ "https://leetcode.com/*", "https://leetcode.cn/*" ],
-      "resources": [ "fonts/*.woff2", "audio/anime/*", "audio/crawler/*", "audio/lofi/*", "textures/*", "textures/anime/*", "textures/game/*", "textures/game/icon/*", "sounds/game/*" ]
-   } ]
+   "web_accessible_resources": [
+      {
+         "matches": [
+            "https://leetcode.com/*",
+            "https://leetcode.cn/*"
+         ],
+         "resources": [
+            "fonts/*.woff2",
+            "audio/anime/*",
+            "audio/crawler/*",
+            "audio/lofi/*",
+            "textures/*",
+            "textures/anime/*",
+            "textures/game/*",
+            "textures/game/icon/*",
+            "sounds/game/*"
+         ]
+      }
+   ]
 }
