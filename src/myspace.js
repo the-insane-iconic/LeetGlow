@@ -1,7 +1,7 @@
 /* =============================================================================
    My Space — Collaborative Focus & Competitive Arena
    Handles view routing, focus room lobby, two-column group dashboard,
-   weekly global leaderboard with Monday 5:30 PM reset, live member presence,
+   weekly global leaderboard with Monday 5:30 AM IST (00:00 UTC) reset, live member presence,
    in-page LeetCode timer sync, and secure Firebase Realtime Database integration.
 ============================================================================= */
 
@@ -679,7 +679,7 @@
   // Weekly Leaderboard View (Top 20 + Reset countdown)
   function renderLeaderboardContent() {
     const leaders = (state.globalLeaders && state.globalLeaders.length) ? state.globalLeaders : [];
-    const countdown = window.MySpaceAPI ? window.MySpaceAPI.getTimeUntilReset() : 'Monday 5:30 PM';
+    const countdown = window.MySpaceAPI ? window.MySpaceAPI.getTimeUntilReset() : 'Monday 5:30 AM IST';
     const userRankIdx = leaders.findIndex(l => l.id === state.userId);
     const isUserInTop20 = userRankIdx >= 0 && userRankIdx < 20;
     const currentRoomName = state.activeRoom
@@ -693,7 +693,7 @@
             <span>🏆 Global Focus Arena</span>
           </div>
           <div class="ms-lb-badge-group">
-            <span class="ms-lb-badge-reset" title="Resets weekly every Monday at 5:30 PM">⏳ Resets in ${escapeHtml(countdown)}</span>
+            <span class="ms-lb-badge-reset" title="Resets weekly every Monday at 5:30 AM IST (00:00 UTC) worldwide">⏳ Resets in ${escapeHtml(countdown)}</span>
             <span class="ms-lb-badge">Top 20</span>
           </div>
         </div>
@@ -1543,10 +1543,11 @@
     try {
       const remoteMembers = await window.MySpaceAPI.getRoomMembers(state.activeRoom.code);
       const isHost = Boolean(state.activeRoom.creator === state.nickname || state.activeRoom.isHost);
+      const isBreak = state.timer.status === 'Break';
       const you = {
         id: state.userId,
         nickname: state.nickname || 'You',
-        status: state.timer.status,
+        status: isBreak ? 'Break' : 'Active',
         timerFormatted: formatTime(state.timer.secondsLeft),
         isHost: isHost,
         avatar: isHost ? '👑' : '👨‍💻',
@@ -1587,7 +1588,7 @@
       window.MySpaceAPI.syncMember(state.activeRoom.code, me);
     }
 
-    // 2. Sync to weekly global leaderboard (resets Monday 5:30 PM)
+    // 2. Sync to weekly global leaderboard (resets Monday 5:30 AM IST / 00:00 UTC)
     window.MySpaceAPI.syncToGlobalLeaderboard({
       id: state.userId,
       nickname: state.nickname || 'You',

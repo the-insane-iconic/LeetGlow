@@ -2,7 +2,7 @@
    MySpace Firebase API Client
    Direct, secure REST integration with Firebase Realtime Database.
    Features:
-   - Weekly Leaderboard Reset every Monday at 5:30 PM IST (12:00 UTC)
+   - Weekly Leaderboard Reset every Monday at 5:30 AM IST (00:00:00 UTC) worldwide
    - Top 20 Global Rankings with real player sync
    - Real-time Focus Rooms with private isolation & presence
    - Anonymous Authentication support with token caching
@@ -25,52 +25,47 @@
   let cachedIdToken = null;
   let tokenExpiry = 0;
 
-  // Calculate deterministic weekly cycle ID: resets every Monday at 5:30 PM IST (12:00:00 UTC)
+  // Calculate deterministic weekly cycle ID: resets every Monday at 5:30 AM IST (00:00:00 UTC) worldwide.
+  // Using pure UTC epoch methods guarantees users in every country/timezone transition at the identical wall-clock moment.
   function getWeeklyCycleId(now = new Date()) {
     const d = new Date(now.getTime());
     const day = d.getUTCDay(); // 0 = Sun, 1 = Mon, ..., 6 = Sat
-    const hour = d.getUTCHours();
     
-    // Monday is day 1. If Monday before 12:00 UTC, belongs to previous week
-    let diffDays = 0;
-    if (day === 1) {
-      diffDays = hour >= 12 ? 0 : 7;
-    } else if (day === 0) {
-      diffDays = 6;
-    } else {
-      diffDays = day - 1;
-    }
+    // Cycle starts on Monday at 00:00:00 UTC (= 5:30 AM IST).
+    // Sunday (0) belongs to the cycle that started 6 days ago.
+    // Mon (1) through Sat (6) belong to Monday of this current week.
+    const diffDays = (day === 0) ? 6 : (day - 1);
 
-    const cycleStart = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - diffDays, 12, 0, 0, 0));
+    const cycleStart = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - diffDays, 0, 0, 0, 0));
     const y = cycleStart.getUTCFullYear();
     const m = String(cycleStart.getUTCMonth() + 1).padStart(2, '0');
     const dateStr = String(cycleStart.getUTCDate()).padStart(2, '0');
     return `week_${y}_${m}_${dateStr}`;
   }
 
-  // Calculate human-readable countdown to next Monday 5:30 PM IST
+  // Calculate human-readable countdown to upcoming Monday 5:30 AM IST (00:00:00 UTC) worldwide
   function getTimeUntilReset(now = new Date()) {
     const d = new Date(now.getTime());
     const day = d.getUTCDay();
-    const hour = d.getUTCHours();
 
-    let daysUntil = 0;
-    if (day === 1) {
-      daysUntil = hour < 12 ? 0 : 7;
-    } else if (day === 0) {
-      daysUntil = 1;
-    } else {
-      daysUntil = 8 - day;
-    }
+    // Days until upcoming Monday 00:00:00 UTC:
+    // Sunday (0) -> 1 day (tomorrow)
+    // Monday (1) -> 7 days (next Monday)
+    // Tuesday (2) -> 6 days ... Saturday (6) -> 2 days
+    const daysUntil = (day === 0) ? 1 : (8 - day);
 
-    const nextReset = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + daysUntil, 12, 0, 0, 0));
+    const nextReset = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + daysUntil, 0, 0, 0, 0));
     const diffMs = Math.max(0, nextReset.getTime() - d.getTime());
-    const totalHours = Math.floor(diffMs / (1000 * 60 * 60));
+    
+    const totalMinutes = Math.floor(diffMs / (1000 * 60));
+    const totalHours = Math.floor(totalMinutes / 60);
     const days = Math.floor(totalHours / 24);
     const hours = totalHours % 24;
+    const minutes = totalMinutes % 60;
 
     if (days > 0) return `${days}d ${hours}h`;
-    return `${hours}h`;
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    return `${Math.max(1, minutes)}m`;
   }
 
   // Normalize room codes: accepts "9X42", "glow-9x42", "GLOW-9X42", etc.
@@ -166,7 +161,7 @@
         'usr_ansh': {
           id: 'usr_ansh',
           nickname: 'Ansh',
-          status: 'Focusing',
+          status: 'Active',
           timerFormatted: '25:00',
           isHost: true,
           avatar: '👑',
@@ -320,7 +315,7 @@
       return true;
     },
 
-    // 3. Weekly Global Leaderboard (Top 20, resets Monday 5:30 PM)
+    // 3. Weekly Global Leaderboard (Top 20, resets Monday 5:30 AM IST / 00:00:00 UTC)
     async getGlobalLeaderboard() {
       const cycleId = getWeeklyCycleId();
       const res = await apiFetch(`/leaderboard/${cycleId}`);
