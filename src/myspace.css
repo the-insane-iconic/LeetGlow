@@ -1,0 +1,447 @@
+/* =============================================================================
+   My Space — Collaborative Focus & Competitive Arena
+   Scoped styles for Lobby, Room Creation, and Room Joining
+============================================================================= */
+
+#view-myspace {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: ms-fade-in 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes ms-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.ms-view {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.ms-view[hidden] {
+  display: none !important;
+}
+
+/* =============================================================================
+   1. LOBBY VIEW
+============================================================================= */
+
+/* Hero Banner */
+.ms-banner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  border-radius: 18px;
+  padding: 18px 18px;
+  min-height: 124px;
+  background-color: #fdf2f8;
+  background-image:
+    linear-gradient(to right, rgba(253, 242, 248, 0.98) 0%, rgba(253, 242, 248, 0.88) 46%, rgba(253, 242, 248, 0.18) 75%, transparent 100%),
+    url('../textures/myspace-banner.webp');
+  background-size: cover;
+  background-position: center right;
+  border: 1px solid rgba(244, 114, 182, 0.4);
+  box-shadow: 0 12px 32px -12px rgba(236, 72, 153, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.4) inset;
+}
+
+.ms-banner-content {
+  position: relative;
+  z-index: 2;
+  max-width: 58%;
+}
+
+.ms-banner-title {
+  font-family: 'Space Grotesk', var(--font-ui), sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.18;
+  letter-spacing: -0.025em;
+  color: #1e1b4b;
+}
+
+.ms-banner-sub {
+  font-size: 11.5px;
+  line-height: 1.38;
+  color: #475569;
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+/* 3 Feature Pills */
+.ms-features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.ms-feature-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 12px 6px;
+  background: var(--pop-panel, #131722);
+  border: 1px solid var(--pop-border, rgba(255, 255, 255, 0.08));
+  border-radius: 14px;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.ms-feature-card:hover {
+  transform: translateY(-1.5px);
+  border-color: rgba(244, 114, 182, 0.35);
+  background: var(--pop-panel-2, #191e2b);
+}
+
+.ms-feature-icon-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 8px;
+  transition: transform 0.18s ease;
+}
+
+.ms-feature-card:hover .ms-feature-icon-wrap {
+  transform: scale(1.08);
+}
+
+.ms-feature-icon-wrap.icon-focus {
+  background: rgba(244, 63, 94, 0.14);
+  color: #f43f5e;
+  border: 1px solid rgba(244, 63, 94, 0.22);
+}
+
+.ms-feature-icon-wrap.icon-progress {
+  background: rgba(168, 85, 247, 0.14);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.22);
+}
+
+.ms-feature-icon-wrap.icon-challenge {
+  background: rgba(245, 158, 11, 0.14);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.22);
+}
+
+.ms-feature-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #e2e8f0;
+  line-height: 1.25;
+}
+
+/* Actions Section */
+.ms-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-top: 4px;
+}
+
+.ms-btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 44px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ec4899 0%, #f43f5e 100%);
+  color: #ffffff;
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 6px 20px -4px rgba(236, 72, 153, 0.45);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+  user-select: none;
+}
+
+.ms-btn-primary:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+  box-shadow: 0 10px 26px -4px rgba(236, 72, 153, 0.6);
+}
+
+.ms-btn-primary:active {
+  transform: scale(0.98);
+}
+
+.ms-btn-secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 44px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1.5px solid rgba(244, 114, 182, 0.35);
+  color: #f472b6;
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.16s ease, background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+  user-select: none;
+}
+
+.ms-btn-secondary:hover {
+  background: rgba(236, 72, 153, 0.12);
+  border-color: #ec4899;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.ms-btn-secondary:active {
+  transform: scale(0.98);
+}
+
+/* =============================================================================
+   2. FORM VIEWS (CREATE & JOIN ROOMS)
+============================================================================= */
+
+/* Top View Header with Back Navigation */
+.ms-view-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 2px 8px;
+}
+
+.ms-back-btn {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--pop-border, rgba(255, 255, 255, 0.08));
+  color: var(--pop-muted, #94a3b8);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.ms-back-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  transform: translateX(-1px);
+}
+
+.ms-view-title {
+  font-family: 'Space Grotesk', var(--font-ui), sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+/* Form Container Card */
+.ms-form-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--pop-panel, #131722);
+  border: 1px solid var(--pop-border, rgba(255, 255, 255, 0.08));
+  box-shadow: 0 8px 24px -10px rgba(0, 0, 0, 0.5);
+}
+
+.ms-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ms-form-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ms-form-label .ms-hint {
+  font-size: 10.5px;
+  font-weight: 400;
+  color: #64748b;
+}
+
+.ms-form-input {
+  width: 100%;
+  height: 42px;
+  padding: 0 12px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #f8fafc;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ms-form-input:focus {
+  outline: none;
+  border-color: #ec4899;
+  box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.2);
+}
+
+.ms-form-input::placeholder {
+  color: #64748b;
+}
+
+/* Code Input Box (Uppercase, spaced) */
+.ms-code-input {
+  font-family: var(--font-mono, monospace);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  text-align: center;
+  color: #f472b6;
+}
+
+/* Goal Selector Dropdown */
+.ms-select-container {
+  position: relative;
+  width: 100%;
+}
+
+.ms-select-container select {
+  width: 100%;
+  height: 42px;
+  padding: 0 36px 0 38px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #f8fafc;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ms-select-container select:focus {
+  outline: none;
+  border-color: #ec4899;
+  box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.2);
+}
+
+.ms-select-lead-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #f43f5e;
+  pointer-events: none;
+}
+
+.ms-select-arrow-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--pop-muted, #94a3b8);
+  pointer-events: none;
+}
+
+/* Room Type Segmented Cards (Private vs Open) */
+.ms-room-types {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.ms-room-type-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.24);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.16s ease;
+  user-select: none;
+}
+
+.ms-room-type-btn:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #f1f5f9;
+}
+
+.ms-room-type-btn.active {
+  background: rgba(236, 72, 153, 0.12);
+  border-color: #ec4899;
+  color: #ffffff;
+  box-shadow: 0 0 16px -4px rgba(236, 72, 153, 0.3) inset;
+}
+
+.ms-room-type-btn .type-icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: currentColor;
+  flex-shrink: 0;
+}
+
+.ms-room-type-btn.active .type-icon {
+  background: rgba(236, 72, 153, 0.25);
+  color: #f472b6;
+}
+
+.ms-room-type-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.ms-room-type-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: inherit;
+  line-height: 1.2;
+}
+
+.ms-room-type-desc {
+  font-size: 10.5px;
+  color: #64748b;
+  margin-top: 2px;
+  line-height: 1.2;
+}
+
+.ms-room-type-btn.active .ms-room-type-desc {
+  color: #cbd5e1;
+}
+
+/* Feedback / Error text */
+.ms-error-text {
+  font-size: 11.5px;
+  color: #f87171;
+  margin-top: 2px;
+}

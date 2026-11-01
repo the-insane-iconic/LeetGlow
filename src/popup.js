@@ -938,6 +938,9 @@ function switchTab(targetId) {
     if (isActive) {
       view.removeAttribute('hidden');
       view.classList.add('active');
+      if (btn.id === 'tab-myspace' && window.LeetGlowMySpace) {
+        window.LeetGlowMySpace.render();
+      }
     } else {
       view.setAttribute('hidden', '');
       view.classList.remove('active');
