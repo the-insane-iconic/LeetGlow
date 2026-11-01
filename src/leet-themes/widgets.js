@@ -316,6 +316,114 @@
       stroke: var(--w-on-accent);
     }
 
+    /* Light Theme Refinements — eliminates heavy dark blotches & harsh drop shadows */
+    :host-context([data-lct-mode="light"]),
+    :host-context(.light),
+    :host-context([data-theme="light"]),
+    :host([data-mode="light"]) {
+      --w-surface: var(--lct-surface, #fbf8f1);
+      --w-surface-2: var(--lct-surface-2, #efe8d9);
+      --w-elevated: var(--lct-elevated, #ffffff);
+      --w-text: var(--lct-text, #1c1917);
+      --w-muted: var(--lct-muted, #6d685d);
+      --w-border: var(--lct-border, rgba(43, 42, 38, 0.13));
+    }
+
+    :host-context([data-lct-mode="light"]) .pill,
+    :host-context(.light) .pill,
+    :host-context([data-theme="light"]) .pill,
+    :host([data-mode="light"]) .pill {
+      background: color-mix(in srgb, var(--w-surface) 92%, transparent);
+      border: 1px solid color-mix(in srgb, var(--w-text) 12%, transparent);
+      box-shadow: 0 10px 32px -8px rgba(0,0,0,.09), 0 2px 6px -1px rgba(0,0,0,.04), 0 0 0 1px rgba(255,255,255,.7) inset;
+      backdrop-filter: blur(24px) saturate(120%);
+      -webkit-backdrop-filter: blur(24px) saturate(120%);
+    }
+
+    :host-context([data-lct-mode="light"]) .play-btn,
+    :host-context(.light) .play-btn,
+    :host-context([data-theme="light"]) .play-btn,
+    :host([data-mode="light"]) .play-btn {
+      background: color-mix(in srgb, var(--w-accent) 15%, var(--w-surface));
+      color: var(--w-accent-text, var(--w-accent));
+      border: 1px solid color-mix(in srgb, var(--w-accent) 26%, transparent);
+      box-shadow: 0 2px 8px -2px color-mix(in srgb, var(--w-accent) 22%, transparent);
+    }
+    :host-context([data-lct-mode="light"]) .play-btn:hover,
+    :host-context(.light) .play-btn:hover,
+    :host-context([data-theme="light"]) .play-btn:hover,
+    :host([data-mode="light"]) .play-btn:hover {
+      background: color-mix(in srgb, var(--w-accent) 22%, var(--w-surface));
+      border-color: color-mix(in srgb, var(--w-accent) 38%, transparent);
+      box-shadow: 0 3px 10px -2px color-mix(in srgb, var(--w-accent) 30%, transparent);
+    }
+    :host-context([data-lct-mode="light"]) .play-btn:active,
+    :host-context(.light) .play-btn:active,
+    :host-context([data-theme="light"]) .play-btn:active,
+    :host([data-mode="light"]) .play-btn:active {
+      background: color-mix(in srgb, var(--w-accent) 28%, var(--w-surface));
+    }
+
+    :host-context([data-lct-mode="light"]) .timer-toggle-btn .ring .track,
+    :host-context(.light) .timer-toggle-btn .ring .track,
+    :host-context([data-theme="light"]) .timer-toggle-btn .ring .track,
+    :host([data-mode="light"]) .timer-toggle-btn .ring .track {
+      stroke: color-mix(in srgb, var(--w-accent) 16%, transparent);
+    }
+    :host-context([data-lct-mode="light"]) .timer-toggle-btn .ring .progress,
+    :host-context(.light) .timer-toggle-btn .ring .progress,
+    :host-context([data-theme="light"]) .timer-toggle-btn .ring .progress,
+    :host([data-mode="light"]) .timer-toggle-btn .ring .progress {
+      stroke: var(--w-accent-text, var(--w-accent));
+    }
+
+    :host-context([data-lct-mode="light"]) .timer-pill.warn .timer-toggle-btn,
+    :host-context(.light) .timer-pill.warn .timer-toggle-btn,
+    :host-context([data-theme="light"]) .timer-pill.warn .timer-toggle-btn,
+    :host([data-mode="light"]) .timer-pill.warn .timer-toggle-btn {
+      background: color-mix(in srgb, var(--w-accent-2) 16%, var(--w-surface));
+      color: var(--w-accent-2);
+      border-color: color-mix(in srgb, var(--w-accent-2) 30%, transparent);
+      box-shadow: 0 2px 8px -2px color-mix(in srgb, var(--w-accent-2) 24%, transparent);
+    }
+
+    :host-context([data-lct-mode="light"]) .audio-pill.playing .eq i,
+    :host-context(.light) .audio-pill.playing .eq i,
+    :host-context([data-theme="light"]) .audio-pill.playing .eq i,
+    :host([data-mode="light"]) .audio-pill.playing .eq i {
+      background: var(--w-accent-text, var(--w-accent));
+    }
+
+    :host-context([data-lct-mode="light"]) .volume,
+    :host-context(.light) .volume,
+    :host-context([data-theme="light"]) .volume,
+    :host([data-mode="light"]) .volume {
+      background: color-mix(in srgb, var(--w-text) 14%, transparent);
+    }
+
+    :host-context([data-lct-mode="light"]) .focus-badge,
+    :host-context(.light) .focus-badge,
+    :host-context([data-theme="light"]) .focus-badge,
+    :host([data-mode="light"]) .focus-badge {
+      background: color-mix(in srgb, var(--w-accent) 15%, var(--w-surface));
+      color: var(--w-accent-text, var(--w-accent));
+      border: 1px solid color-mix(in srgb, var(--w-accent) 26%, transparent);
+      box-shadow: 0 2px 8px -2px color-mix(in srgb, var(--w-accent) 22%, transparent);
+    }
+    :host-context([data-lct-mode="light"]) .focus-pulse-dot,
+    :host-context(.light) .focus-pulse-dot,
+    :host-context([data-theme="light"]) .focus-pulse-dot,
+    :host([data-mode="light"]) .focus-pulse-dot {
+      background: var(--w-accent-text, var(--w-accent));
+      box-shadow: 0 0 6px color-mix(in srgb, var(--w-accent) 40%, transparent);
+    }
+    :host-context([data-lct-mode="light"]) .focus-pulse-ring,
+    :host-context(.light) .focus-pulse-ring,
+    :host-context([data-theme="light"]) .focus-pulse-ring,
+    :host([data-mode="light"]) .focus-pulse-ring {
+      border-color: var(--w-accent-text, var(--w-accent));
+    }
+
     @media (max-width: 640px) {
       .dock-stack { right: 10px; bottom: 10px; }
       .audio-pill { width: calc(100vw - 20px); }
@@ -417,6 +525,22 @@
         this.refs[element.dataset.el] = element;
       }.bind(this));
       this._bind();
+      this._syncMode();
+      if (typeof MutationObserver !== 'undefined' && typeof document !== 'undefined' && document.documentElement) {
+        this.modeObserver = new MutationObserver(this._syncMode.bind(this));
+        this.modeObserver.observe(document.documentElement, {
+          attributes: true,
+          attributeFilter: ['data-lct-mode', 'class', 'data-theme']
+        });
+      }
+    }
+
+    _syncMode() {
+      if (!this.host || typeof document === 'undefined') return;
+      const doc = document.documentElement;
+      if (!doc) return;
+      const isLight = doc.dataset.lctMode === 'light' || doc.classList.contains('light') || doc.getAttribute('data-theme') === 'light';
+      this.host.setAttribute('data-mode', isLight ? 'light' : 'dark');
     }
 
     configure(callbacks) {
@@ -451,6 +575,7 @@
 
     _refreshVisibility() {
       if (!this.mounted) return;
+      this._syncMode();
       if (!this._visible) {
         this.host.style.display = 'none';
         return;
@@ -545,6 +670,10 @@
     }
 
     destroy() {
+      if (this.modeObserver) {
+        this.modeObserver.disconnect();
+        this.modeObserver = null;
+      }
       if (this.host) this.host.remove();
       this.mounted = false;
     }

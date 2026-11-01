@@ -19,11 +19,12 @@
         text: '#2d1527',
         muted: '#7f6174',
         border: 'rgba(74, 47, 66, 0.12)',
-        accent: '#dd5e95',
-        accentText: '#cb2b70',
+        accent: '#d8538c',
+        accentText: '#b82a69',
+        onAccent: '#ffffff',
         accent2: '#8f7be8',
         code: '#c026d3',
-        glow: 'rgba(228, 107, 158, 0.26)'
+        glow: 'rgba(216, 83, 140, 0.20)'
       },
       fonts: { ui: 'Inter', display: 'Space Grotesk', mono: 'JetBrains Mono', accent: 'Caveat' },
       effects: { particles: 'petals', count: 30, grain: 0.03, vignette: 0.16, grid: false, scanlines: false, aurora: true }
@@ -130,11 +131,12 @@
         text: '#14291f',
         muted: '#587162',
         border: 'rgba(37, 59, 50, 0.12)',
-        accent: '#4f9568',
-        accentText: '#427c57',
+        accent: '#438a5c',
+        accentText: '#2d6d45',
+        onAccent: '#ffffff',
         accent2: '#e8b45e',
         code: '#047857',
-        glow: 'rgba(79, 149, 104, 0.24)'
+        glow: 'rgba(67, 138, 92, 0.20)'
       },
       fonts: { ui: 'Inter', display: 'Space Grotesk', mono: 'JetBrains Mono', accent: 'Caveat' },
       effects: { particles: 'leaves', count: 24, grain: 0.02, vignette: 0.12, grid: false, scanlines: false, aurora: true }
@@ -175,11 +177,12 @@
         text: '#1c1917',
         muted: '#6d685d',
         border: 'rgba(43, 42, 38, 0.13)',
-        accent: '#c25c30',
-        accentText: '#ae522b',
+        accent: '#c05621',
+        accentText: '#9a3412',
+        onAccent: '#ffffff',
         accent2: '#4b6b5a',
         code: '#c2410c',
-        glow: 'rgba(180, 85, 45, 0.18)'
+        glow: 'rgba(192, 86, 33, 0.15)'
       },
       fonts: { ui: 'Inter', display: 'Cinzel', mono: 'JetBrains Mono', accent: 'Caveat' },
       effects: { particles: 'none', count: 0, grain: 0.025, vignette: 0.08, grid: false, scanlines: false, aurora: false }
