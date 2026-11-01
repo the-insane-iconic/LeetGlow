@@ -409,7 +409,7 @@
     const strokeOffset = CIRCLE_CIRCUMFERENCE * (1 - pct);
 
     return `
-      <div id="msWorkspace" class="ms-workspace">
+      <div id="msWorkspace" class="ms-workspace" data-workspace-tab="${state.activeWorkspaceTab}">
         <!-- 1. Sleek Group Info Header Card -->
         <div class="ms-group-info-card">
           <div class="ms-group-info-left">
@@ -714,18 +714,24 @@
     if (!container) return;
 
     if (state.activeRoom) {
+      container.dataset.view = 'workspace';
+      container.dataset.workspaceTab = state.activeWorkspaceTab;
       container.innerHTML = renderActiveWorkspace();
       bindWorkspaceEvents(container);
       return;
     }
 
+    container.dataset.workspaceTab = '';
     if (state.currentView === 'create') {
+      container.dataset.view = 'create';
       container.innerHTML = renderCreateView();
       bindCreateEvents(container);
     } else if (state.currentView === 'join') {
+      container.dataset.view = 'join';
       container.innerHTML = renderJoinView();
       bindJoinEvents(container);
     } else {
+      container.dataset.view = 'lobby';
       container.innerHTML = renderLobbyView();
       bindLobbyEvents(container);
     }
