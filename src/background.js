@@ -18,7 +18,7 @@ chrome.runtime.onInstalled.addListener((details) => {
   if (chrome.sidePanel && chrome.sidePanel.setPanelBehavior) {
     chrome.sidePanel
       .setPanelBehavior({ openPanelOnActionClick: true })
-      .catch((error) => console.error('[LeetGlow] sidePanel.setPanelBehavior error:', error));
+      .catch(() => {});
   }
   if (details && details.reason === 'install') {
     // Fresh install defaults: Paper theme + Lofi audio
@@ -44,16 +44,14 @@ chrome.runtime.onInstalled.addListener((details) => {
 if (chrome.sidePanel && chrome.sidePanel.setPanelBehavior) {
   chrome.sidePanel
     .setPanelBehavior({ openPanelOnActionClick: true })
-    .catch((error) => console.error('[LeetGlow] sidePanel.setPanelBehavior error:', error));
+    .catch(() => {});
 }
 if (chrome.action && chrome.action.onClicked) {
   chrome.action.onClicked.addListener(async (tab) => {
     if (chrome.sidePanel && chrome.sidePanel.open) {
       try {
         await chrome.sidePanel.open({ windowId: tab.windowId });
-      } catch (err) {
-        console.error('[LeetGlow] Error opening side panel on action click:', err);
-      }
+      } catch (err) {}
     }
   });
 }

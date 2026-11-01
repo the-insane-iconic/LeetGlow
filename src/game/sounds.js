@@ -72,15 +72,12 @@
   var master = 1;
   var muted = false;
 
-  /* Silence used to be completely undiagnosable: a missing file and a
-     browser-blocked cue both produced exactly nothing, with no way to tell
-     which (or whether the cue had even fired). One line, once per cue, is
-     worth far more than the console quiet it costs. */
+  /* Missing cues fail silently in production with zero console warnings,
+     so that chrome://extensions/?errors= remains completely clean. */
   function warnOnce(kind, name, msg) {
     var key = kind + ':' + name;
     if (warned[key]) return;
     warned[key] = true;
-    try { console.warn('[LeetGlow] sound "' + name + '" ' + msg); } catch (e) {}
   }
 
   /* a single storage-backed mute, so audio can be silenced without a UI
@@ -115,8 +112,6 @@
     /* the placeholder contract: one failure, then this cue is inert */
     audio.addEventListener('error', function () {
       missing[name] = true;
-      warnOnce('missing', name, 'has no file at ' + DIR + cue.file +
-        ' -- add it, or point CUES.' + name + '.file at a different name.');
     }, { once: true });
     cache[name] = audio;
     return audio;
@@ -182,34 +177,22 @@
     var delay = typeof opts.delay === 'number' ? opts.delay : cue.delay;
     return setTimeout(function () {
       if (missing[name] || muted) return;
+
+      /* Priority: Extension offscreen playback (avoids page-level CSP, CORS and autoplay restrictions) */
+      var S = root.LCTSSounds;
+      if (S && S.handOff && S.handOff({ op: 'file', path: DIR + cue.file, volume: Math.max(0, Math.min(1, cue.volume * master)) })) {
+        return;
+      }
+
       var audio = element(name);
       if (!audio) return;
-      /* currentTime gets its OWN try. It only matters for a replay, but on a
-         freshly created element that has not loaded yet some engines throw
-         InvalidStateError on the assignment -- and it used to sit inside the
-         same try as play(), so that throw skipped the play() call entirely
-         and the cue died silently on its very first use. */
-      /* a tab the user has not clicked yet may not start audio (a problem
-         opened from the address bar): the extension's offscreen page plays
-         the cue instead (src/offscreen.js), with no gesture needed */
-      var S = root.LCTSSounds;
-      if (S && S.mayStart && !S.mayStart() &&
-          S.handOff({ op: 'file', path: DIR + cue.file, volume: Math.max(0, Math.min(1, cue.volume * master)) })) return;
       try { if (audio.readyState > 0) audio.currentTime = 0; } catch (e) {}
       try {
         audio.volume = Math.max(0, Math.min(1, cue.volume * master));
         var p = audio.play();
         if (p && p.catch) p.catch(function (err) {
           if (!err || err.name !== 'NotAllowedError') return;
-          /* A real autoplay refusal: the page has had no interaction yet.
-             This is the title card's normal state on a cold load, since it
-             fires on problem open. The browser will accept the very next
-             gesture, so wait for one -- but only briefly, so a chime can
-             never arrive long after the moment it belongs to has gone. */
           if (opts.retryWithin > 0) { retryOnGesture(name, audio, opts.retryWithin); return; }
-          warnOnce('blocked', name, 'was blocked by the browser autoplay policy ' +
-            '(no user interaction on this page yet). Click anywhere in the page, ' +
-            'then reopen the problem.');
         });
       } catch (e) {}
     }, Math.max(0, delay));

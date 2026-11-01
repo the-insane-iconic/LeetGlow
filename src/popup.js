@@ -241,7 +241,7 @@ async function renderWallpaperGrid() {
         }
       });
     } catch (e) {
-      console.warn('[LeetGlow] Could not fetch bucket wallpapers for drawer:', e);
+      /* fallback to local scenes if remote bucket is offline */
     }
   }
 
@@ -301,7 +301,7 @@ async function renderWallpaperGrid() {
           try {
             await globalThis.LCTSLiveWallpapers.downloadAndCache(item.liveData.videoUrl);
           } catch (cacheErr) {
-            console.warn('[LeetGlow] Pre-cache warning (falling back to direct):', cacheErr);
+            /* fall back to direct streaming if precache is unavailable */
           }
         }
         await selectWallpaper(item);
@@ -1772,7 +1772,6 @@ if (openThemeDrawerBtn) {
         });
       });
     } catch (err) {
-      console.error('[LeetGlow MySpace] Upload error:', err);
       dropzone.classList.remove('busy');
       showStatus('Failed to process image. Try another PNG or JPEG.', true);
     }
