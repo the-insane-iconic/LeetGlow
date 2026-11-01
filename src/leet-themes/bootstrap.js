@@ -28,7 +28,7 @@
     }
   }
 
-  function updateAudioWidget() {
+  function updateAudioWidget(data) {
     if (!state.settings || !globalThis.LCT || !globalThis.LCT.widgets) return;
     const enabled = Boolean(state.settings.audio && state.settings.audio.enabled);
     const audio = globalThis.LCT.audio;
@@ -36,9 +36,17 @@
       globalThis.LCT.widgets.updateAudio({ visible: false });
       return;
     }
-    const activePreset = (state.settings.audio && state.settings.audio.preset === 'rain')
-      ? 'water'
-      : (state.settings.audio ? state.settings.audio.preset : 'cafe');
+    const activePreset = (data && data.preset)
+      ? data.preset
+      : (audio.preset || ((state.settings.audio && state.settings.audio.preset === 'rain')
+        ? 'water'
+        : (state.settings.audio ? state.settings.audio.preset : 'cafe')));
+
+    if (state.settings.audio && activePreset !== state.settings.audio.preset) {
+      state.settings.audio.preset = activePreset;
+      globalThis.LCT.setSettings({ audio: { preset: activePreset } });
+    }
+
     globalThis.LCT.widgets.updateAudio({
       visible: true,
       playing: audio.playing,
@@ -139,15 +147,21 @@
 
   function nextPresetFromWidget() {
     if (!state.settings || !globalThis.LCT) return;
-    const presets = Object.keys(globalThis.LCT.AUDIO_PRESETS || { cafe: 1, water: 1, fish: 1, night: 1 });
-    let current = presets.indexOf(state.settings.audio.preset);
-    if (current === -1) current = 0;
-    const preset = presets[(current + 1) % presets.length];
-    globalThis.LCT.setSettings({ audio: { preset: preset } });
-    if (globalThis.LCT.audio && globalThis.LCT.audio.playing) {
-      globalThis.LCT.audio.setPreset(preset);
+    const audio = globalThis.LCT.audio;
+    let nextPresetKey;
+    if (audio) {
+      nextPresetKey = audio.nextPreset();
+    } else {
+      const presets = Object.keys(globalThis.LCT.AUDIO_PRESETS || { cafe: 1, water: 1, fish: 1, night: 1 });
+      let current = presets.indexOf(state.settings.audio.preset);
+      if (current === -1) current = 0;
+      nextPresetKey = presets[(current + 1) % presets.length];
     }
-    updateAudioWidget();
+    if (state.settings.audio) {
+      state.settings.audio.preset = nextPresetKey;
+    }
+    globalThis.LCT.setSettings({ audio: { preset: nextPresetKey } });
+    updateAudioWidget({ preset: nextPresetKey });
   }
 
   let volumeSaveTimer = null;

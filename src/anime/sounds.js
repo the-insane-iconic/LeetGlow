@@ -501,13 +501,15 @@
   function mayStart() {
     if (ctx && ctx.state === 'running') return true;
     const ua = navigator.userActivation;
-    return !ua || ua.hasBeenActive;
+    if (ua) return Boolean(ua.hasBeenActive);
+    return false;
   }
   /* offscreen page: open the audio device now and keep it running for `ms`,
      so the next sound starts at once */
   let holdUntil = 0;
   function wake(ms) {
     try {
+      if (!mayStart()) return;
       ensureContext(0.6);
       holdUntil = Math.max(holdUntil, performance.now() + ms);
       running().then(sleepSoon);
@@ -520,17 +522,25 @@
   }
 
   function ensureContext(volume) {
-    if (!ctx) { ctx = new AudioContext({ latencyHint: 'interactive' }); bus = chain(ctx, volume); }
+    if (!ctx) {
+      if (!mayStart() && typeof location !== 'undefined' && /^https?:/.test(location.protocol)) {
+        return null;
+      }
+      ctx = new AudioContext({ latencyHint: 'interactive' });
+      bus = chain(ctx, volume);
+    }
     return ctx;
   }
 
   /* resolves true when the context is running, false if the browser blocks it */
   function running() {
+    if (!ctx) return Promise.resolve(false);
     if (ctx.state === 'running') return Promise.resolve(true);
+    if (!mayStart()) return Promise.resolve(false);
     return Promise.race([
       ctx.resume().then(() => ctx.state === 'running', () => false),
       new Promise((r) => setTimeout(() => r(ctx.state === 'running'), 250))
-    ]);
+    ]).catch(() => false);
   }
 
   function sleepSoon() {
@@ -572,7 +582,12 @@
   /* the first real interaction unlocks audio for the rest of the page's life */
   function unlock() {
     if (currentTheme() === 'game') return;
-    try { ensureContext(0.6); running().then(sleepSoon); } catch (e) {}
+    try {
+      if (mayStart()) {
+        ensureContext(0.6);
+        running().then(sleepSoon);
+      }
+    } catch (e) {}
     removeEventListener('pointerdown', unlock, true);
     removeEventListener('keydown', unlock, true);
   }

@@ -72,6 +72,7 @@
       this.hidden = document.hidden;
       this.stopTimer = null;
       this.trackElement = null;
+      this.trackAdvanceTimer = null;
       this.stateListeners = new Set();
       this._onVisibility = this._onVisibility.bind(this);
       document.addEventListener('visibilitychange', this._onVisibility);
@@ -399,13 +400,23 @@
 
       this.bellTimer = setInterval(this._scheduleBell.bind(this), 8000);
       setTimeout(this._scheduleBell.bind(this), 2400);
+
+      // Auto-advance synthetic tracks after ~2.5 minutes to loop through full playlist
+      if (this.trackAdvanceTimer) clearTimeout(this.trackAdvanceTimer);
+      this.trackAdvanceTimer = setTimeout(function () {
+        if (this.playing && PRESETS[this.preset] && PRESETS[this.preset].type === 'synth') {
+          this.nextPreset();
+        }
+      }.bind(this), 150000);
     }
 
     _stopScheduling() {
       if (this.schedulerTimer) clearInterval(this.schedulerTimer);
       if (this.bellTimer) clearInterval(this.bellTimer);
+      if (this.trackAdvanceTimer) clearTimeout(this.trackAdvanceTimer);
       this.schedulerTimer = null;
       this.bellTimer = null;
+      this.trackAdvanceTimer = null;
     }
 
     _stopSources() {
@@ -448,8 +459,10 @@
         try {
           if (!this.trackElement) {
             this.trackElement = new Audio();
-            this.trackElement.loop = true;
             this.trackElement.preload = 'auto';
+            this.trackElement.addEventListener('ended', function () {
+              this.nextPreset();
+            }.bind(this));
           }
           const fileUrl = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
             ? chrome.runtime.getURL(spec.file)
@@ -545,14 +558,27 @@
       return this.start(this.preset);
     }
 
-    setPreset(preset) {
+    async setPreset(preset) {
       if (!PRESETS[preset]) return;
       const wasPlaying = this.playing;
       this.preset = preset;
+
+      if (this.stopTimer) {
+        clearTimeout(this.stopTimer);
+        this.stopTimer = null;
+      }
+      if (this.trackAdvanceTimer) {
+        clearTimeout(this.trackAdvanceTimer);
+        this.trackAdvanceTimer = null;
+      }
+
       if (wasPlaying) {
-        this.stop();
-        const self = this;
-        setTimeout(function () { self.start(preset); }, 300);
+        this._stopScheduling();
+        this._stopSources();
+        if (this.trackElement) {
+          this.trackElement.pause();
+        }
+        await this.start(preset);
       } else {
         this._emit();
       }
@@ -560,9 +586,11 @@
 
     nextPreset() {
       const keys = Object.keys(PRESETS);
-      const index = keys.indexOf(this.preset);
-      this.setPreset(keys[(index + 1) % keys.length]);
-      return this.preset;
+      let index = keys.indexOf(this.preset);
+      if (index === -1) index = 0;
+      const nextKey = keys[(index + 1) % keys.length];
+      this.setPreset(nextKey);
+      return nextKey;
     }
 
     setVolume(volume) {
