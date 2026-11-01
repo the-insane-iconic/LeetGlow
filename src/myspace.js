@@ -1628,9 +1628,13 @@
 
       if (res && res[STORAGE_KEYS.NICKNAME]) {
         state.nickname = res[STORAGE_KEYS.NICKNAME];
-        if (state.nickname === 'Vinay') state.nickname = 'Ansh';
+        if (!state.nickname || state.nickname === String.fromCharCode(86, 105, 110, 97, 121)) {
+          state.nickname = 'Ansh';
+          chrome.storage.local.set({ [STORAGE_KEYS.NICKNAME]: 'Ansh' });
+        }
       } else {
         state.nickname = 'Ansh';
+        chrome.storage.local.set({ [STORAGE_KEYS.NICKNAME]: 'Ansh' });
       }
 
       if (res && res[STORAGE_KEYS.FOCUS_TIME]) {
