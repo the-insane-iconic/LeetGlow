@@ -38,6 +38,7 @@
 }
 
 html {
+  height: 100%;
   min-height: 100%;
   background: var(--pop-bg);
   scrollbar-gutter: stable;
@@ -47,8 +48,11 @@ html {
 body {
   width: 100%;
   min-height: 100vh;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
   margin: 0;
-  padding: 16px 14px 20px;
+  padding: 16px 14px 12px;
   background: radial-gradient(circle at 50% -12%, #181d2e 0%, #0d0f17 48%, #06070a 100%);
   background-attachment: fixed;
   color: var(--pop-text);
@@ -270,6 +274,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  flex: 1;
   animation: tab-fade-in .26s cubic-bezier(0.16, 1, 0.3, 1) both;
   will-change: transform, opacity;
 }
@@ -398,7 +403,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding-bottom: 6px;
+  flex: 1;
+  padding-bottom: 4px;
 }
 
 #view-customize .panel-card,
@@ -2890,8 +2896,8 @@ body {
 
 /* ---- Minimalist Modern Footer (Guaranteed Single Line) ---------------------------- */
 .foot {
-  margin-top: 14px;
-  padding-top: 9px;
+  margin-top: auto;
+  padding-top: 10px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   height: 24px;
   min-height: 24px;
