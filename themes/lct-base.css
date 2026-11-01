@@ -62,7 +62,7 @@ html[data-lct-enabled='true'][data-lct-mode='light'] { color-scheme: light !impo
 html[data-lct-enabled='true'] {
   background: var(--lct-bg) !important;
   scroll-behavior: smooth;
-  transition: background-color 0.18s ease;
+  transition: none !important;
 }
 
 html[data-lct-enabled='true'] body {
@@ -70,7 +70,7 @@ html[data-lct-enabled='true'] body {
   color: var(--lct-text) !important;
   -webkit-font-smoothing: antialiased;
   scroll-behavior: smooth;
-  transition: color 0.18s ease;
+  transition: none !important;
 }
 
 html[data-lct-enabled='true'][data-lct-fonts='on'] body,
@@ -111,7 +111,6 @@ html[data-lct-enabled='true'] ::-webkit-scrollbar-thumb {
   border: 2px solid transparent;
   border-radius: 999px;
   background-clip: padding-box;
-  transition: background-color 0.2s ease;
 }
 html[data-lct-enabled='true'] ::-webkit-scrollbar-thumb:hover {
   background: color-mix(in srgb, var(--lct-accent) 68%, transparent);
@@ -127,7 +126,7 @@ html[data-lct-enabled='true'] main {
   background: transparent !important;
 }
 
-/* Surface and navigation seamless cross-fades */
+/* Surface and navigation unified instant lockstep */
 html[data-lct-enabled='true'] nav,
 html[data-lct-enabled='true'] header,
 html[data-lct-enabled='true'] footer,
@@ -138,9 +137,7 @@ html[data-lct-enabled='true'] [class*='bg-bg-primary'],
 html[data-lct-enabled='true'] [class*='bg-bg-secondary'],
 html[data-lct-enabled='true'] [class*='border-divider'],
 html[data-lct-enabled='true'] .border-sd-border {
-  transition: background-color 0.18s ease,
-              border-color 0.18s ease,
-              color 0.18s ease;
+  transition: none !important;
 }
 
 /* Smooth scrolling on all LeetCode inner scroll areas */

@@ -120,27 +120,44 @@
     }).join('');
   }
 
+  const accentTextCache = new Map();
   // Light themes need a darker variant for accent-coloured text/links than for accent-filled buttons.
   function accessibleAccentText(accent, surface, background, mode) {
     if (mode !== 'light') return accent;
+    const key = accent + ':' + surface + ':' + background;
+    if (accentTextCache.has(key)) return accentTextCache.get(key);
     if (!hexToRgb(accent) || !hexToRgb(surface)) return accent;
     const targets = [surface, background].filter(function (color) { return hexToRgb(color); });
     const passes = function (color) {
       return targets.every(function (target) { return contrastRatio(color, target) >= 4.5; });
     };
-    if (passes(accent)) return accent;
+    if (passes(accent)) {
+      accentTextCache.set(key, accent);
+      return accent;
+    }
     const hsl = hexToHslTuple(accent);
-    if (!hsl) return accent;
+    if (!hsl) {
+      accentTextCache.set(key, accent);
+      return accent;
+    }
     for (let lightness = hsl[2]; lightness >= 0; lightness -= 0.01) {
       const candidate = hslToHex(hsl[0], hsl[1], lightness);
-      if (passes(candidate)) return candidate;
+      if (passes(candidate)) {
+        accentTextCache.set(key, candidate);
+        return candidate;
+      }
     }
+    accentTextCache.set(key, '#000000');
     return '#000000';
   }
 
+  const onAccentCache = new Map();
   function readableOnAccent(accent) {
     if (!hexToRgb(accent)) return '#0b0b10';
-    return contrastRatio(accent, '#0b0b10') >= contrastRatio(accent, '#ffffff') ? '#0b0b10' : '#ffffff';
+    if (onAccentCache.has(accent)) return onAccentCache.get(accent);
+    const res = contrastRatio(accent, '#0b0b10') >= contrastRatio(accent, '#ffffff') ? '#0b0b10' : '#ffffff';
+    onAccentCache.set(accent, res);
+    return res;
   }
 
   function applyHslVars(root, palette) {
@@ -163,15 +180,20 @@
   function enforceModeClass() {
     if (!activeSettings || activeSettings.enabled === false) return;
     const root = document.documentElement;
-    const wanted = root.dataset.lctMode === 'light' ? 'light' : 'dark';
-    if (root.classList.contains(wanted)) {
-      if (root.classList.contains(wanted === 'dark' ? 'light' : 'dark')) {
-        root.classList.remove(wanted === 'dark' ? 'light' : 'dark');
-      }
+    const isLight = root.dataset.lctMode === 'light';
+    const wanted = isLight ? 'light' : 'dark';
+    const unwanted = isLight ? 'dark' : 'light';
+    if (root.classList.contains(wanted) && !root.classList.contains(unwanted) && root.getAttribute('data-theme') === wanted) {
       return;
     }
-    root.classList.remove(wanted === 'dark' ? 'light' : 'dark');
+    root.classList.remove(unwanted);
     root.classList.add(wanted);
+    root.setAttribute('data-theme', wanted);
+    root.style.colorScheme = wanted;
+    if (document.body) {
+      document.body.classList.remove(unwanted);
+      document.body.classList.add(wanted);
+    }
   }
 
   function syncLeetCodeMode(mode) {
@@ -179,14 +201,23 @@
     if (!originalThemeClasses) {
       originalThemeClasses = {
         dark: root.classList.contains('dark'),
-        light: root.classList.contains('light')
+        light: root.classList.contains('light'),
+        dataTheme: root.getAttribute('data-theme'),
+        colorScheme: root.style.colorScheme
       };
     }
-    root.classList.toggle('dark', mode === 'dark');
-    root.classList.toggle('light', mode === 'light');
+    const isLight = mode === 'light';
+    root.classList.toggle('dark', !isLight);
+    root.classList.toggle('light', isLight);
+    root.setAttribute('data-theme', isLight ? 'light' : 'dark');
+    root.style.colorScheme = isLight ? 'light' : 'dark';
+    if (document.body) {
+      document.body.classList.toggle('dark', !isLight);
+      document.body.classList.toggle('light', isLight);
+    }
     if (!modeObserver) {
       modeObserver = new MutationObserver(function () { enforceModeClass(); });
-      modeObserver.observe(root, { attributes: true, attributeFilter: ['class'] });
+      modeObserver.observe(root, { attributes: true, attributeFilter: ['class', 'data-theme'] });
     }
   }
 
@@ -199,6 +230,17 @@
     const root = document.documentElement;
     root.classList.toggle('dark', originalThemeClasses.dark);
     root.classList.toggle('light', originalThemeClasses.light);
+    if (originalThemeClasses.dataTheme !== undefined) {
+      if (originalThemeClasses.dataTheme) root.setAttribute('data-theme', originalThemeClasses.dataTheme);
+      else root.removeAttribute('data-theme');
+    }
+    if (originalThemeClasses.colorScheme) {
+      root.style.colorScheme = originalThemeClasses.colorScheme;
+    }
+    if (document.body) {
+      document.body.classList.toggle('dark', originalThemeClasses.dark);
+      document.body.classList.toggle('light', originalThemeClasses.light);
+    }
     originalThemeClasses = null;
   }
 
@@ -351,13 +393,21 @@
       layer.appendChild(fragment);
     };
 
-    clearTimeout(particleSpawnTimer);
-    if (layer.children.length > 0) {
-      layer.style.opacity = '0';
-      particleSpawnTimer = setTimeout(() => {
+    if (particleSpawnTimer) {
+      if (typeof cancelAnimationFrame === 'function') cancelAnimationFrame(particleSpawnTimer);
+      clearTimeout(particleSpawnTimer);
+      particleSpawnTimer = null;
+    }
+    layer.innerHTML = '';
+    layer.style.opacity = '1';
+    if (type === 'none' || reduced) return;
+
+    if (typeof requestAnimationFrame === 'function') {
+      particleSpawnTimer = requestAnimationFrame(() => {
+        particleSpawnTimer = null;
+        if (signature !== lastParticleSignature) return;
         spawn();
-        layer.style.opacity = '1';
-      }, 80);
+      });
     } else {
       spawn();
     }

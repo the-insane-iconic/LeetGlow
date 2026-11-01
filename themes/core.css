@@ -431,7 +431,7 @@ html[data-lc-theme] .flexlayout__splitter_extra {
   outline: 0 !important;
 }
 
-html[data-lc-theme] .flexlayout__splitter::after {
+html[data-lc-theme] .flexlayout__splitter:hover::after {
   transition: background-color .12s ease;
 }
 
@@ -652,11 +652,10 @@ html[data-lc-theme] ::-webkit-scrollbar-thumb:hover {
    would also switch those rules off in Chrome 121+). */
 
 /* =============================================================================
-   Theme Switch Cross-Fade & Transition Machinery
-   Synchronized 0.35s GPU-friendly transitions for seamless 60fps switching.
-   Applies during active themes and during switching (data-lc-transitioning).
+   Instant, Synchronized, Zero-Lag Theme Application
+   All surfaces, borders, navigation, tabsets, and code editor update simultaneously
+   in exact lockstep with zero staggered transitions or intermediate clashing states.
 ============================================================================= */
-/* Minimal, snappy, lightweight surface transitions */
 html[data-lc-theme] body,
 html[data-lct-enabled='true'] body,
 html[data-lc-theme] #__next,
@@ -670,11 +669,7 @@ html[data-lct-enabled='true'] .flexlayout__tab,
 html[data-lc-theme] .flexlayout__tabset_header,
 html[data-lct-enabled='true'] .flexlayout__tabset_header,
 html[data-lc-theme] .flexlayout__tabset_tabbar_outer,
-html[data-lct-enabled='true'] .flexlayout__tabset_tabbar_outer {
-  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
-}
-
-/* Direct, instantaneous, zero-lag code editor theme switching */
+html[data-lct-enabled='true'] .flexlayout__tabset_tabbar_outer,
 .monaco-editor,
 .monaco-editor-background,
 .monaco-editor .view-line,

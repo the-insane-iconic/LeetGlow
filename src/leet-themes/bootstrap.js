@@ -281,7 +281,11 @@
     chrome.storage.onChanged.addListener((changes, area) => {
       if (area !== 'local') return;
       if (changes.lcThemeStudio) {
-        syncActiveTheme(changes.lcThemeStudio.newValue);
+        if (typeof globalThis.__lctsApplyTheme === 'function') {
+          globalThis.__lctsApplyTheme(changes.lcThemeStudio.newValue);
+        } else {
+          syncActiveTheme(changes.lcThemeStudio.newValue);
+        }
       }
       if (changes.lctSettings && changes.lctSettings.newValue) {
         state.settings = changes.lctSettings.newValue;
@@ -303,7 +307,11 @@
     chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       if (!msg) return;
       if (msg.type === 'lct:set-theme') {
-        syncActiveTheme(msg.theme);
+        if (typeof globalThis.__lctsApplyTheme === 'function') {
+          globalThis.__lctsApplyTheme(msg.theme);
+        } else {
+          syncActiveTheme(msg.theme);
+        }
         sendResponse({ ok: true });
       } else if (msg.type === 'lct:toggle-audio') {
         const on = toggleAudio();

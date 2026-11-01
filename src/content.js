@@ -87,14 +87,6 @@
     }
   }
 
-  let resizeTimer = null;
-  function triggerResize() {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => {
-      try { window.dispatchEvent(new Event('resize')); } catch (e) {}
-    }, 200);
-  }
-
   function apply(theme) {
     if (!VALID.has(theme)) theme = DEFAULT;
     if (theme === current) return;
@@ -110,7 +102,6 @@
         queueMicrotask(() => { applying = false; });
       }
       try { sessionStorage.setItem('__lcts_active_theme', theme); } catch (e) {}
-      triggerResize();
       return;
     }
 
@@ -126,7 +117,6 @@
       } finally {
         queueMicrotask(() => { applying = false; });
       }
-      triggerResize();
       return;
     }
     applying = true;
@@ -137,10 +127,10 @@
       queueMicrotask(() => { applying = false; });
     }
     try { sessionStorage.setItem('__lcts_active_theme', theme); } catch (e) {}
-    triggerResize();
   }
 
   globalThis.__lctsReassertMode = () => { if (current && current !== 'off') setBaseMode(current); };
+  globalThis.__lctsApplyTheme = (theme) => apply(theme);
 
   /* Sync container and editor transparency variables across all themes */
   let currentCt = 30;

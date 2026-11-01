@@ -18,7 +18,7 @@ html[data-lct-enabled='true'] #lct-backdrop {
 .lct-bg-base {
   background: var(--lct-bg);
   transform: scale(1.001);
-  transition: background-color 0.18s ease;
+  transition: none !important;
 }
 
 .lct-bg-prev {
@@ -28,7 +28,7 @@ html[data-lct-enabled='true'] #lct-backdrop {
 .lct-bg-media {
   opacity: 0;
   overflow: hidden;
-  transition: opacity 0.5s ease;
+  transition: none !important;
   inset: -3% !important;
 }
 #lct-backdrop.has-media .lct-bg-media { opacity: 1; }
@@ -132,7 +132,7 @@ html[data-lct-mode='light'] .lct-bg-aurora i { mix-blend-mode: normal; opacity: 
 .lct-bg-particles {
   overflow: hidden;
   contain: strict;
-  transition: opacity 0.35s ease;
+  transition: none !important;
 }
 .lct-p {
   position: absolute;
@@ -310,7 +310,7 @@ html[data-lct-mode='light'] .lct-bg-vignette {
 .lct-bg-shade {
   opacity: 0;
   background: rgba(0, 0, 0, var(--lct-media-dim, 0.35));
-  transition: opacity 0.4s ease;
+  transition: none !important;
 }
 #lct-backdrop.has-media .lct-bg-shade { opacity: 1; }
 
