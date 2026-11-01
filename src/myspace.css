@@ -445,3 +445,659 @@
   color: #f87171;
   margin-top: 2px;
 }
+
+/* =============================================================================
+   3. ACTIVE GROUP WORKSPACE (INSIDE A ROOM)
+============================================================================= */
+
+.ms-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  padding-bottom: 6px;
+  animation: ms-fade-in 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Group Info Header Card */
+.ms-group-info-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 16px;
+  background: var(--pop-panel, #131722);
+  border: 1px solid var(--pop-border, rgba(255, 255, 255, 0.08));
+  box-shadow: 0 4px 16px -6px rgba(0, 0, 0, 0.4);
+}
+
+.ms-group-info-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ms-group-thumb {
+  width: 48px;
+  height: 36px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid rgba(244, 114, 182, 0.3);
+  box-shadow: 0 4px 12px -2px rgba(236, 72, 153, 0.25);
+}
+
+.ms-group-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.ms-group-name {
+  font-family: 'Space Grotesk', var(--font-ui), sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+.ms-group-sub {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 3px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ms-group-sub .dot {
+  font-size: 9px;
+  color: #64748b;
+}
+
+.ms-group-settings-btn {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--pop-border, rgba(255, 255, 255, 0.08));
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ms-group-settings-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  transform: rotate(25deg);
+}
+
+/* Two Columns Section: Focus Timer (Left) & Members List (Right) */
+.ms-group-columns {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 10px;
+  align-items: stretch;
+}
+
+/* Left Column: Timer Widget */
+.ms-col-timer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 10px 14px;
+  border-radius: 18px;
+  background: var(--pop-panel, #131722);
+  border: 1px solid var(--pop-border, rgba(255, 255, 255, 0.08));
+  box-shadow: 0 4px 18px -6px rgba(0, 0, 0, 0.4);
+  position: relative;
+}
+
+.ms-timer-gauge {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  display: grid;
+  place-items: center;
+}
+
+.ms-timer-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.ms-timer-bg-arc {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.07);
+  stroke-width: 8;
+  stroke-linecap: round;
+}
+
+.ms-timer-progress-arc {
+  fill: none;
+  stroke: url(#msTimerGrad);
+  stroke-width: 8.5;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.4s ease;
+  filter: drop-shadow(0 0 6px rgba(236, 72, 153, 0.5));
+}
+
+.ms-timer-center {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.ms-timer-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ms-timer-digits {
+  font-family: 'Space Grotesk', var(--font-mono), sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.03em;
+  margin: 2px 0;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.ms-timer-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: #10b981;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.ms-timer-status-pill.status-break {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.25);
+  color: #f59e0b;
+}
+
+.ms-timer-status-pill.status-idle {
+  background: rgba(148, 163, 184, 0.12);
+  border-color: rgba(148, 163, 184, 0.25);
+  color: #94a3b8;
+}
+
+/* Timer Control Buttons */
+.ms-timer-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.ms-btn-timer-play {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ec4899, #f43f5e);
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px -2px rgba(236, 72, 153, 0.5);
+  transition: transform 0.14s ease, filter 0.14s ease;
+}
+
+.ms-btn-timer-play:hover {
+  transform: scale(1.08);
+  filter: brightness(1.1);
+}
+
+.ms-btn-timer-play:active {
+  transform: scale(0.94);
+}
+
+.ms-btn-timer-stop {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: transform 0.14s ease, background 0.14s ease;
+}
+
+.ms-btn-timer-stop:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  transform: scale(1.05);
+}
+
+.ms-btn-timer-stop:active {
+  transform: scale(0.94);
+}
+
+/* Right Column: Members List */
+.ms-col-members {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  border-radius: 18px;
+  background: var(--pop-panel, #131722);
+  border: 1px solid var(--pop-border, rgba(255, 255, 255, 0.08));
+  box-shadow: 0 4px 18px -6px rgba(0, 0, 0, 0.4);
+  max-height: 228px;
+}
+
+.ms-members-header {
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ms-members-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.ms-member-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 7px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid transparent;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.ms-member-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.ms-member-avatar-wrap {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(236, 72, 153, 0.18);
+  border: 1px solid rgba(236, 72, 153, 0.35);
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.ms-member-dot {
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  border: 1.5px solid var(--pop-panel, #131722);
+}
+
+.ms-member-dot.dot-break {
+  background: #f59e0b;
+}
+
+.ms-member-dot.dot-offline {
+  background: #64748b;
+}
+
+.ms-member-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex: 1;
+}
+
+.ms-member-name-line {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #f1f5f9;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ms-member-crown {
+  font-size: 11px;
+}
+
+.ms-member-status-text {
+  font-size: 10px;
+  font-weight: 500;
+  color: #10b981;
+  white-space: nowrap;
+}
+
+.ms-member-status-text.status-break {
+  color: #f59e0b;
+}
+
+.ms-member-status-text.status-offline {
+  color: #94a3b8;
+}
+
+/* Bottom Card: Group Status / Daily Progress Bar */
+.ms-group-stats-card {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1.3fr;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: var(--pop-panel, #131722);
+  border: 1px solid var(--pop-border, rgba(255, 255, 255, 0.08));
+  box-shadow: 0 4px 16px -6px rgba(0, 0, 0, 0.4);
+}
+
+.ms-stat-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.ms-stat-label {
+  font-size: 10.5px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.ms-stat-val {
+  font-family: 'Space Grotesk', var(--font-ui), sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-top: 2px;
+}
+
+.ms-stat-progress-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.ms-stat-donut {
+  width: 32px;
+  height: 32px;
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.ms-stat-donut svg {
+  transform: rotate(-90deg);
+  width: 100%;
+  height: 100%;
+}
+
+.ms-stat-progress-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.ms-stat-progress-title {
+  font-size: 10px;
+  color: #94a3b8;
+}
+
+.ms-stat-progress-pct {
+  font-family: 'Space Grotesk', var(--font-ui), sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #10b981;
+}
+
+/* =============================================================================
+   4. GLOBAL LEADERBOARD VIEW
+============================================================================= */
+
+.ms-leaderboard-view {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  animation: ms-fade-in 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.ms-leaderboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 2px;
+}
+
+.ms-lb-title {
+  font-family: 'Space Grotesk', var(--font-ui), sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ms-lb-badge {
+  font-size: 10.5px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(236, 72, 153, 0.15);
+  border: 1px solid rgba(236, 72, 153, 0.3);
+  color: #f472b6;
+  font-weight: 600;
+}
+
+.ms-leaderboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.ms-lb-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 14px;
+  background: var(--pop-panel, #131722);
+  border: 1px solid var(--pop-border, rgba(255, 255, 255, 0.08));
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.ms-lb-item:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.ms-lb-item.is-you {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.14) 0%, rgba(244, 63, 94, 0.1) 100%), var(--pop-panel, #131722);
+  border-color: rgba(236, 72, 153, 0.45);
+}
+
+.ms-lb-rank-badge {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+.ms-lb-rank-1 { color: #f59e0b; background: rgba(245, 158, 11, 0.15); }
+.ms-lb-rank-2 { color: #cbd5e1; background: rgba(203, 213, 225, 0.15); }
+.ms-lb-rank-3 { color: #d97706; background: rgba(217, 119, 6, 0.15); }
+
+.ms-lb-user-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.ms-lb-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ms-lb-stats {
+  font-size: 10.5px;
+  color: #94a3b8;
+  margin-top: 1px;
+}
+
+.ms-lb-hours {
+  font-family: 'Space Grotesk', monospace;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #38bdf8;
+  white-space: nowrap;
+}
+
+/* =============================================================================
+   5. STICKY BOTTOM NAVIGATION BAR (Group / Leaderboard / Arena)
+============================================================================= */
+
+.ms-bottom-nav {
+  position: sticky;
+  bottom: 0;
+  z-index: 50;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding: 6px 8px;
+  background: rgba(13, 15, 23, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  box-shadow: 0 10px 28px -6px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(244, 114, 182, 0.12) inset;
+  margin-top: 8px;
+}
+
+.ms-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  user-select: none;
+}
+
+.ms-nav-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.ms-nav-btn.active {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.22) 0%, rgba(244, 63, 94, 0.2) 100%);
+  color: #f472b6;
+  border: 1px solid rgba(236, 72, 153, 0.4);
+  box-shadow: 0 2px 10px -2px rgba(236, 72, 153, 0.35);
+}
+
+.ms-nav-btn.disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.ms-nav-soon {
+  font-size: 9px;
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+}
+
+/* Settings Modal / Menu */
+.ms-settings-menu {
+  position: absolute;
+  top: 50px;
+  right: 14px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px;
+  background: #191e2b;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7);
+  min-width: 150px;
+}
+
+.ms-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #cbd5e1;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.14s ease, color 0.14s ease;
+}
+
+.ms-menu-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.ms-menu-item.danger {
+  color: #f87171;
+}
+
+.ms-menu-item.danger:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+}
+
