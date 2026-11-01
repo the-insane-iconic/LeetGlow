@@ -159,6 +159,56 @@
     { id: 'usr_david', nickname: 'David Kim', focusSeconds: 4800, todayDisplay: '1h 20m', streak: 1, solvedCount: 1, rank: 20, avatar: '🎧', roomName: 'Solo Focus' }
   ];
 
+  // Default Community Public Focus Groups
+  const COMMUNITY_ROOMS = {
+    'GLOW-LEET': {
+      info: {
+        code: 'GLOW-LEET',
+        name: 'LeetCode Grind Squad',
+        goal: '3 hours',
+        type: 'open',
+        creator: 'Community',
+        avatar: '🚀',
+        createdAt: Date.now() - 3600000
+      },
+      members: {
+        'usr_sarah': { id: 'usr_sarah', nickname: 'Sarah C.', status: 'Focusing', timerFormatted: '22:15', isHost: true, avatar: '👩‍💻', lastActive: Date.now() },
+        'usr_kenji': { id: 'usr_kenji', nickname: 'Kenji S.', status: 'Focusing', timerFormatted: '18:40', isHost: false, avatar: '🧑‍💻', lastActive: Date.now() - 60000 },
+        'usr_elena': { id: 'usr_elena', nickname: 'Elena Rostova', status: 'Break', timerFormatted: '04:10', isHost: false, avatar: '⚡', lastActive: Date.now() - 120000 }
+      }
+    },
+    'GLOW-CODE': {
+      info: {
+        code: 'GLOW-CODE',
+        name: 'Daily DSA Focus Hub',
+        goal: '2 hours',
+        type: 'open',
+        creator: 'Community',
+        avatar: '💻',
+        createdAt: Date.now() - 7200000
+      },
+      members: {
+        'usr_devan': { id: 'usr_devan', nickname: 'Devan Patel', status: 'Focusing', timerFormatted: '24:50', isHost: true, avatar: '🎯', lastActive: Date.now() },
+        'usr_alex': { id: 'usr_alex', nickname: 'Alex Rivera', status: 'Focusing', timerFormatted: '15:20', isHost: false, avatar: '🚀', lastActive: Date.now() - 30000 }
+      }
+    },
+    'GLOW-CAMP': {
+      info: {
+        code: 'GLOW-CAMP',
+        name: 'Study Squad & Chill',
+        goal: '4 hours',
+        type: 'open',
+        creator: 'Community',
+        avatar: '☕',
+        createdAt: Date.now() - 10800000
+      },
+      members: {
+        'usr_ryan': { id: 'usr_ryan', nickname: 'Ryan Chen', status: 'Focusing', timerFormatted: '25:00', isHost: true, avatar: '☕', lastActive: Date.now() },
+        'usr_priya': { id: 'usr_priya', nickname: 'Priya S.', status: 'Focusing', timerFormatted: '19:30', isHost: false, avatar: '🌸', lastActive: Date.now() - 90000 }
+      }
+    }
+  };
+
   window.MySpaceAPI = {
     normalizeRoomCode,
     getWeeklyCycleId,
@@ -168,7 +218,30 @@
     async getRoom(code) {
       if (!code) return null;
       const cleanCode = encodeURIComponent(normalizeRoomCode(code));
-      const data = await apiFetch(`/rooms/${cleanCode}`);
+      let data = await apiFetch(`/rooms/${cleanCode}`);
+      if (!data || !data.info) {
+        const norm = normalizeRoomCode(code);
+        if (COMMUNITY_ROOMS[norm]) {
+          data = JSON.parse(JSON.stringify(COMMUNITY_ROOMS[norm]));
+          // Seed to Firebase in background so presence syncs seamlessly
+          apiFetch(`/rooms/${cleanCode}`, {
+            method: 'PUT',
+            body: JSON.stringify(data)
+          }).catch(() => {});
+          apiFetch(`/public_rooms/${cleanCode}`, {
+            method: 'PUT',
+            body: JSON.stringify({
+              code: data.info.code,
+              name: data.info.name,
+              goal: data.info.goal,
+              creator: data.info.creator,
+              avatar: data.info.avatar || '🌐',
+              memberCount: Object.keys(data.members || {}).length,
+              createdAt: data.info.createdAt
+            })
+          }).catch(() => {});
+        }
+      }
       return data;
     },
 
@@ -198,12 +271,45 @@
             code: payload.code,
             name: payload.name,
             goal: payload.goal,
+            creator: payload.creator || 'Host',
+            avatar: '🌐',
+            memberCount: (room.members && room.members.length) || 1,
             createdAt: payload.createdAt
           })
         });
       }
 
       return true;
+    },
+
+    // Query All Public Available Groups from Server
+    async getPublicRooms() {
+      const res = await apiFetch(`/public_rooms`);
+      let list = [];
+      if (res && typeof res === 'object') {
+        list = Object.values(res).filter(r => r && r.code);
+      }
+      // Sort newest first
+      list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+      // Merge active community hubs
+      const existingCodes = new Set(list.map(r => normalizeRoomCode(r.code)));
+      Object.values(COMMUNITY_ROOMS).forEach(cr => {
+        if (!existingCodes.has(normalizeRoomCode(cr.info.code))) {
+          list.push({
+            code: cr.info.code,
+            name: cr.info.name,
+            goal: cr.info.goal,
+            creator: cr.info.creator,
+            avatar: cr.info.avatar,
+            memberCount: Object.keys(cr.members || {}).length,
+            createdAt: cr.info.createdAt,
+            isCommunity: true
+          });
+        }
+      });
+
+      return list;
     },
 
     // 2. Member Presence & Live Heartbeat

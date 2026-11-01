@@ -339,11 +339,11 @@
   }
 
   // ===========================================================================
-  // 3. JOIN ROOM VIEW (Fixed Sleek Layout & Classes)
+  // 3. JOIN ROOM VIEW (Container 1: Enter Code | Container 2: Public Available Groups)
   // ===========================================================================
   function renderJoinView() {
     return `
-      <div id="msViewJoin" class="ms-view">
+      <div id="msViewJoin" class="ms-view ms-view-join">
         <div class="ms-view-header">
           <button class="ms-back-btn ms-btn-back-lobby" type="button" aria-label="Back to Lobby">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -354,7 +354,21 @@
           <h2 class="ms-view-title">Join a Focus Room</h2>
         </div>
 
-        <div class="ms-form-card">
+        <!-- Container 1: Enter Room Code -->
+        <div class="ms-form-card ms-join-code-card">
+          <div class="ms-card-section-head">
+            <div class="ms-section-badge-icon">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="ms-card-section-title">Enter Room Code</h3>
+              <p class="ms-card-section-sub">Have an invite code from a friend? Enter it below.</p>
+            </div>
+          </div>
+
           <div class="ms-form-group">
             <label class="ms-form-label" for="msJoinCodeInput">
               <span>Room Code</span>
@@ -378,7 +392,7 @@
               class="ms-form-input"
               type="text"
               placeholder="e.g. Aryan"
-              value="${escapeHtml(state.nickname || '')}"
+              value="${escapeHtml(state.nickname || 'Vinay')}"
               maxlength="20"
             />
           </div>
@@ -388,6 +402,41 @@
           <button id="msSubmitJoinBtn" class="ms-btn ms-btn-primary ms-btn-block" type="button">
             Join Room
           </button>
+        </div>
+
+        <!-- Container 2: Public Available Groups on Server -->
+        <div class="ms-form-card ms-public-groups-card">
+          <div class="ms-card-section-head ms-public-head">
+            <div class="ms-section-badge-icon icon-globe">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="2" y1="12" x2="22" y2="12" />
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+              </svg>
+            </div>
+            <div class="ms-public-title-area">
+              <div class="ms-public-title-row">
+                <h3 class="ms-card-section-title">Public Available Groups</h3>
+                <span class="ms-live-indicator">
+                  <span class="ms-live-dot"></span>
+                  <span>Online</span>
+                </span>
+              </div>
+              <p class="ms-card-section-sub">Browse and join open study squads on the server.</p>
+            </div>
+            <button id="msRefreshPublicBtn" class="ms-btn-refresh" type="button" title="Refresh public groups" aria-label="Refresh">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+              </svg>
+            </button>
+          </div>
+
+          <div id="msPublicRoomsList" class="ms-public-rooms-list">
+            <div class="ms-public-loading">
+              <span class="ms-spinner"></span>
+              <span>Loading public groups...</span>
+            </div>
+          </div>
         </div>
       </div>
     `;
@@ -849,6 +898,8 @@
     const nicknameInput = container.querySelector('#msJoinNicknameInput');
     const submitBtn = container.querySelector('#msSubmitJoinBtn');
     const errorEl = container.querySelector('#msJoinError');
+    const publicListEl = container.querySelector('#msPublicRoomsList');
+    const refreshBtn = container.querySelector('#msRefreshPublicBtn');
 
     if (codeInput) {
       codeInput.addEventListener('input', () => {
@@ -857,25 +908,27 @@
       });
     }
 
-    if (submitBtn) {
-      submitBtn.addEventListener('click', async () => {
-        const rawCode = (codeInput && codeInput.value.trim().toUpperCase()) || '';
-        const nickname = (nicknameInput && nicknameInput.value.trim()) || state.nickname || 'Coder';
-
-        if (!rawCode || rawCode.length < 3) {
-          if (errorEl) {
-            errorEl.textContent = 'Please enter a valid room code';
-            errorEl.hidden = false;
-          }
-          if (codeInput) codeInput.focus();
-          return;
+    // Shared execution logic for joining with direct code or public group
+    async function executeJoin(rawCode, targetBtn, feedbackEl) {
+      if (!rawCode || rawCode.length < 3) {
+        if (feedbackEl) {
+          feedbackEl.textContent = 'Please enter a valid room code';
+          feedbackEl.hidden = false;
         }
+        if (codeInput) codeInput.focus();
+        return;
+      }
 
-        const code = window.MySpaceAPI ? window.MySpaceAPI.normalizeRoomCode(rawCode) : rawCode;
+      const nickname = (nicknameInput && nicknameInput.value.trim()) || state.nickname || 'Coder';
+      const code = window.MySpaceAPI ? window.MySpaceAPI.normalizeRoomCode(rawCode) : rawCode;
 
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Connecting...';
+      const prevText = targetBtn ? targetBtn.textContent : '';
+      if (targetBtn) {
+        targetBtn.disabled = true;
+        targetBtn.textContent = 'Connecting...';
+      }
 
+      try {
         let onlineRoom = null;
         if (window.MySpaceAPI) {
           onlineRoom = await window.MySpaceAPI.getRoom(code);
@@ -883,11 +936,13 @@
 
         // Validate if room was found in database
         if (!onlineRoom || !onlineRoom.info) {
-          submitBtn.disabled = false;
-          submitBtn.textContent = 'Join Room';
-          if (errorEl) {
-            errorEl.innerHTML = `Room <strong>${escapeHtml(code)}</strong> not found.<br><span style="font-size: 10px; opacity: 0.85;">Check the code with your room host. (Make sure they clicked "Create Room")</span>`;
-            errorEl.hidden = false;
+          if (targetBtn) {
+            targetBtn.disabled = false;
+            targetBtn.textContent = prevText || 'Join Room';
+          }
+          if (feedbackEl) {
+            feedbackEl.innerHTML = `Room <strong>${escapeHtml(code)}</strong> not found.<br><span style="font-size: 10px; opacity: 0.85;">Check the code with your room host. (Make sure they clicked "Create Room")</span>`;
+            feedbackEl.hidden = false;
           }
           if (codeInput) codeInput.focus();
           return;
@@ -939,8 +994,129 @@
 
         startMemberPolling();
         render();
+      } catch (err) {
+        console.error('Failed to join room:', err);
+        if (targetBtn) {
+          targetBtn.disabled = false;
+          targetBtn.textContent = prevText || 'Join Room';
+        }
+        if (feedbackEl) {
+          feedbackEl.textContent = 'Failed to connect. Please check network.';
+          feedbackEl.hidden = false;
+        }
+      }
+    }
+
+    if (submitBtn) {
+      submitBtn.addEventListener('click', () => {
+        const rawCode = (codeInput && codeInput.value.trim().toUpperCase()) || '';
+        executeJoin(rawCode, submitBtn, errorEl);
       });
     }
+
+    // Load and render Container 2: Public Available Groups from Server
+    async function loadPublicRooms() {
+      if (!publicListEl) return;
+      publicListEl.innerHTML = `
+        <div class="ms-public-loading">
+          <span class="ms-spinner"></span>
+          <span>Loading public groups...</span>
+        </div>
+      `;
+
+      try {
+        const rooms = window.MySpaceAPI ? await window.MySpaceAPI.getPublicRooms() : [];
+        if (!rooms || rooms.length === 0) {
+          publicListEl.innerHTML = `
+            <div class="ms-public-empty">
+              <p>No open rooms active right now.</p>
+              <button id="msQuickCreateFromJoinBtn" class="ms-link-btn" type="button">+ Create an Open Room</button>
+            </div>
+          `;
+          const quickCreate = publicListEl.querySelector('#msQuickCreateFromJoinBtn');
+          if (quickCreate) {
+            quickCreate.addEventListener('click', () => {
+              state.currentView = 'create';
+              render();
+            });
+          }
+          return;
+        }
+
+        publicListEl.innerHTML = rooms.map(room => {
+          const count = room.memberCount || 1;
+          const avatar = room.avatar || '🌐';
+          return `
+            <div class="ms-public-room-item" data-code="${escapeHtml(room.code)}">
+              <div class="ms-public-room-left">
+                <div class="ms-public-room-badge">
+                  <span>${avatar}</span>
+                </div>
+                <div class="ms-public-room-meta">
+                  <div class="ms-public-room-name-row">
+                    <span class="ms-public-room-name" title="${escapeHtml(room.name)}">${escapeHtml(room.name)}</span>
+                    <span class="ms-public-room-code-tag">${escapeHtml(room.code)}</span>
+                  </div>
+                  <div class="ms-public-room-sub">
+                    <span>👥 ${count} online</span>
+                    <span class="dot">•</span>
+                    <span>🎯 ${escapeHtml(room.goal || '3 hours')}</span>
+                  </div>
+                </div>
+              </div>
+              <button class="ms-btn-join-public" data-code="${escapeHtml(room.code)}" type="button">
+                <span>Join</span>
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </button>
+            </div>
+          `;
+        }).join('');
+
+        // Attach Join button events for public groups
+        publicListEl.querySelectorAll('.ms-btn-join-public').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const code = btn.dataset.code;
+            if (code) {
+              executeJoin(code, btn, errorEl);
+            }
+          });
+        });
+
+        // Clicking a room row auto-populates Container 1 input
+        publicListEl.querySelectorAll('.ms-public-room-item').forEach(item => {
+          item.addEventListener('click', () => {
+            const code = item.dataset.code;
+            if (codeInput && code) {
+              codeInput.value = code;
+              codeInput.focus();
+            }
+          });
+        });
+      } catch (err) {
+        console.error('Error fetching public rooms:', err);
+        if (publicListEl) {
+          publicListEl.innerHTML = `
+            <div class="ms-public-empty">
+              <span>Could not load rooms. Click refresh to retry.</span>
+            </div>
+          `;
+        }
+      }
+    }
+
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', () => {
+        refreshBtn.classList.add('rotating');
+        setTimeout(() => refreshBtn.classList.remove('rotating'), 600);
+        loadPublicRooms();
+      });
+    }
+
+    // Initial load
+    loadPublicRooms();
   }
 
   function bindWorkspaceEvents(container) {
