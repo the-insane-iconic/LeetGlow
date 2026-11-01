@@ -56,6 +56,6 @@
    "version": "3.8.0",
    "web_accessible_resources": [ {
       "matches": [ "https://leetcode.com/*", "https://leetcode.cn/*" ],
-      "resources": [ "fonts/*.woff2", "audio/anime/*", "audio/crawler/*", "textures/*", "textures/anime/*", "textures/game/*", "textures/game/icon/*", "sounds/game/*" ]
+      "resources": [ "fonts/*.woff2", "audio/anime/*", "audio/crawler/*", "audio/lofi/*", "textures/*", "textures/anime/*", "textures/game/*", "textures/game/icon/*", "sounds/game/*" ]
    } ]
 }

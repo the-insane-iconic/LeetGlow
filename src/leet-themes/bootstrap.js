@@ -17,7 +17,8 @@
 
   const PRESET_TITLES = {
     cafe: 'Lofi Café',
-    rain: 'Rainy Window',
+    water: 'Lofi Water',
+    fish: 'Lofi Fish',
     night: 'Night Drive'
   };
 
@@ -35,11 +36,14 @@
       globalThis.LCT.widgets.updateAudio({ visible: false });
       return;
     }
+    const activePreset = (state.settings.audio && state.settings.audio.preset === 'rain')
+      ? 'water'
+      : (state.settings.audio ? state.settings.audio.preset : 'cafe');
     globalThis.LCT.widgets.updateAudio({
       visible: true,
       playing: audio.playing,
       pending: audio.pending,
-      title: PRESET_TITLES[state.settings.audio.preset] || 'Lofi',
+      title: PRESET_TITLES[activePreset] || 'Lofi',
       volume: state.settings.audio.volume
     });
   }
@@ -135,8 +139,9 @@
 
   function nextPresetFromWidget() {
     if (!state.settings || !globalThis.LCT) return;
-    const presets = Object.keys(globalThis.LCT.AUDIO_PRESETS || { cafe: 1, rain: 1, night: 1 });
-    const current = presets.indexOf(state.settings.audio.preset);
+    const presets = Object.keys(globalThis.LCT.AUDIO_PRESETS || { cafe: 1, water: 1, fish: 1, night: 1 });
+    let current = presets.indexOf(state.settings.audio.preset);
+    if (current === -1) current = 0;
     const preset = presets[(current + 1) % presets.length];
     globalThis.LCT.setSettings({ audio: { preset: preset } });
     if (globalThis.LCT.audio && globalThis.LCT.audio.playing) {
@@ -219,6 +224,10 @@
 
     // 2. Load settings
     const settings = await globalThis.LCT.getSettings();
+    if (settings && settings.audio && settings.audio.preset === 'rain') {
+      settings.audio.preset = 'water';
+      globalThis.LCT.setSettings({ audio: { preset: 'water' } });
+    }
     state.settings = settings;
 
     // 3. Audio setup

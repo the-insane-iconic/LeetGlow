@@ -5,11 +5,11 @@
   const PRESETS = {
     cafe: {
       name: 'Café',
+      type: 'synth',
       bar: 7.2,
       cutoff: 1500,
       padGain: 0.9,
       bell: true,
-      rain: 0.02,
       vinyl: 0.55,
       chords: [
         [53, 57, 60, 64],
@@ -18,28 +18,23 @@
         [48, 52, 55, 59]
       ]
     },
-    rain: {
-      name: 'Rain',
-      bar: 9,
-      cutoff: 1150,
-      padGain: 0.85,
-      bell: false,
-      rain: 1,
-      vinyl: 0.28,
-      chords: [
-        [45, 48, 52, 55],
-        [41, 45, 48, 52],
-        [48, 52, 55, 59],
-        [43, 47, 50, 55]
-      ]
+    water: {
+      name: 'Water',
+      type: 'track',
+      file: 'audio/lofi/water.mp3'
+    },
+    fish: {
+      name: 'Fish',
+      type: 'track',
+      file: 'audio/lofi/fish.mp3'
     },
     night: {
       name: 'Night',
+      type: 'synth',
       bar: 10,
       cutoff: 900,
       padGain: 1,
       bell: true,
-      rain: 0.1,
       vinyl: 0.38,
       chords: [
         [48, 52, 55, 59],
@@ -76,6 +71,7 @@
       this.pauseOnHide = true;
       this.hidden = document.hidden;
       this.stopTimer = null;
+      this.trackElement = null;
       this.stateListeners = new Set();
       this._onVisibility = this._onVisibility.bind(this);
       document.addEventListener('visibilitychange', this._onVisibility);
@@ -131,19 +127,32 @@
 
     _onVisibility() {
       this.hidden = document.hidden;
-      if (!this.pauseOnHide || !this.playing || !this.ctx) return;
+      if (!this.pauseOnHide || !this.playing) return;
+      const spec = PRESETS[this.preset] || {};
       if (this.hidden) {
-        this._stopScheduling();
-        this.ctx.suspend().catch(function () {});
+        if (spec.type === 'track') {
+          if (this.trackElement) this.trackElement.pause();
+        } else {
+          this._stopScheduling();
+          if (this.ctx) this.ctx.suspend().catch(function () {});
+        }
       } else {
         if (!this._canAutoplay()) {
           this._armUserGesture();
           return;
         }
-        this.ctx.resume().then(function () {
-          this.nextChordAt = this.ctx.currentTime + 0.1;
-          this._startScheduling();
-        }.bind(this)).catch(function () {});
+        if (spec.type === 'track') {
+          if (this.trackElement) {
+            this.trackElement.play().catch(function () {});
+          }
+        } else {
+          if (this.ctx) {
+            this.ctx.resume().then(function () {
+              this.nextChordAt = this.ctx.currentTime + 0.1;
+              this._startScheduling();
+            }.bind(this)).catch(function () {});
+          }
+        }
       }
     }
 
@@ -247,6 +256,7 @@
 
     _buildAmbience(preset) {
       const spec = PRESETS[preset];
+      if (!spec || spec.type === 'track') return;
       const ctx = this.ctx;
       const vinyl = this._makeVinylBuffer(3.4);
       this._loopNoise(vinyl, [
@@ -294,6 +304,7 @@
 
     _scheduleChord(time, preset) {
       const spec = PRESETS[preset];
+      if (!spec || spec.type === 'track' || !spec.chords) return;
       const chord = spec.chords[this.chordIndex % spec.chords.length];
       this.chordIndex += 1;
       const ctx = this.ctx;
@@ -410,6 +421,8 @@
 
     async start(preset) {
       if (preset && PRESETS[preset]) this.preset = preset;
+      const spec = PRESETS[this.preset] || PRESETS.cafe;
+
       // Never start in a background tab; the visible tab owns playback.
       if (document.hidden) return false;
 
@@ -420,6 +433,53 @@
         this._emit();
         this._armUserGesture();
         return false;
+      }
+
+      if (this.stopTimer) {
+        clearTimeout(this.stopTimer);
+        this.stopTimer = null;
+      }
+
+      // 1. Recorded audio tracks (water.mp3, fish.mp3)
+      if (spec.type === 'track') {
+        this._stopScheduling();
+        this._stopSources();
+
+        try {
+          if (!this.trackElement) {
+            this.trackElement = new Audio();
+            this.trackElement.loop = true;
+            this.trackElement.preload = 'auto';
+          }
+          const fileUrl = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
+            ? chrome.runtime.getURL(spec.file)
+            : spec.file;
+
+          if (this.trackElement.src !== fileUrl) {
+            this.trackElement.src = fileUrl;
+          }
+          this.trackElement.volume = this.volume;
+          await this.trackElement.play();
+        } catch (err) {
+          this.pending = true;
+          this._emit();
+          this._armUserGesture();
+          return false;
+        }
+
+        this.playing = true;
+        this.pending = false;
+        this.claimedAt = Date.now();
+        if (this.channel) {
+          try { this.channel.postMessage({ type: 'claim', id: this.instanceId, at: this.claimedAt }); } catch (error) { /* ignore */ }
+        }
+        this._emit();
+        return true;
+      }
+
+      // 2. Generative synthetic lofi (cafe, night)
+      if (this.trackElement) {
+        this.trackElement.pause();
       }
 
       if (!this._ensureContext()) return false;
@@ -433,10 +493,6 @@
         return false;
       }
       this.pending = false;
-      if (this.stopTimer) {
-        clearTimeout(this.stopTimer);
-        this.stopTimer = null;
-      }
       this._stopScheduling();
       this._stopSources();
       this.playing = true;
@@ -457,6 +513,9 @@
 
     stop() {
       this.pending = false;
+      if (this.trackElement) {
+        this.trackElement.pause();
+      }
       if (!this.ctx || !this.playing) {
         this.playing = false;
         this._emit();
@@ -509,6 +568,9 @@
     setVolume(volume) {
       this.volume = Math.max(0, Math.min(1, Number(volume) || 0));
       this.pauseOnHide = this.pauseOnHide !== false;
+      if (this.trackElement) {
+        this.trackElement.volume = this.volume;
+      }
       if (this.ctx && this.master) {
         const now = this.ctx.currentTime;
         this.master.gain.cancelScheduledValues(now);
