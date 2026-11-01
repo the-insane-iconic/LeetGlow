@@ -288,7 +288,7 @@
       const payload = {
         id: member.id,
         nickname: member.nickname || 'Coder',
-        status: member.status || 'Focusing',
+        status: member.status || 'Active',
         timerFormatted: member.timerFormatted || '24:58',
         isHost: Boolean(member.isHost),
         avatar: member.avatar || '👨‍💻',

@@ -1176,12 +1176,19 @@
   border: 1.5px solid var(--pop-panel, #131722);
 }
 
+.ms-member-dot.dot-active {
+  background: #10b981;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.65);
+}
+
 .ms-member-dot.dot-break {
   background: #f59e0b;
+  box-shadow: none;
 }
 
 .ms-member-dot.dot-offline {
   background: #64748b;
+  box-shadow: none;
 }
 
 .ms-member-info {
@@ -1214,12 +1221,19 @@
   white-space: nowrap;
 }
 
+.ms-member-status-text.status-active {
+  color: #10b981;
+  font-weight: 600;
+}
+
 .ms-member-status-text.status-break {
   color: #f59e0b;
+  font-weight: 500;
 }
 
 .ms-member-status-text.status-offline {
   color: #94a3b8;
+  font-weight: 400;
 }
 
 /* Single Member Live Invite Hint Box */

@@ -80,13 +80,7 @@
   // Format member status based on presence and active time
   function formatMemberStatus(member, isYou) {
     if (isYou) {
-      if (state.timer.status === 'Focusing') {
-        return {
-          text: `Focusing • ${formatTime(state.timer.secondsLeft)}`,
-          dotClass: '',
-          textClass: ''
-        };
-      } else if (state.timer.status === 'Break') {
+      if (state.timer.status === 'Break') {
         return {
           text: `Break • ${formatTime(state.timer.secondsLeft)}`,
           dotClass: 'dot-break',
@@ -94,9 +88,9 @@
         };
       } else {
         return {
-          text: `Paused • ${formatTime(state.timer.secondsLeft)}`,
-          dotClass: 'dot-offline',
-          textClass: 'status-offline'
+          text: `Active • ${formatTime(state.timer.secondsLeft)}`,
+          dotClass: 'dot-active',
+          textClass: 'status-active'
         };
       }
     }
@@ -131,17 +125,12 @@
         dotClass: 'dot-break',
         textClass: 'status-break'
       };
-    } else if (member.status === 'Idle' || member.status === 'Paused') {
-      return {
-        text: `Paused • ${member.timerFormatted || '25:00'}`,
-        dotClass: 'dot-offline',
-        textClass: 'status-offline'
-      };
     } else {
+      const timeStr = member.timerFormatted ? ` • ${member.timerFormatted}` : '';
       return {
-        text: `Focusing • ${member.timerFormatted || '24:58'}`,
-        dotClass: '',
-        textClass: ''
+        text: `Active${timeStr}`,
+        dotClass: 'dot-active',
+        textClass: 'status-active'
       };
     }
   }
@@ -843,7 +832,7 @@
           {
             id: state.userId,
             nickname: nickname,
-            status: 'Focusing',
+            status: 'Active',
             timerFormatted: '25:00',
             isHost: true,
             avatar: '👑',
@@ -955,7 +944,7 @@
         const me = {
           id: state.userId,
           nickname: nickname,
-          status: 'Focusing',
+          status: 'Active',
           timerFormatted: '25:00',
           isHost: false,
           avatar: '👨‍💻',
@@ -1425,11 +1414,14 @@
 
     // 4. Update your row in members list
     const yourRow = container.querySelector('.ms-member-row.is-you .ms-member-status-text');
+    const yourDot = container.querySelector('.ms-member-row.is-you .ms-member-dot');
     if (yourRow) {
       const isBreak = state.timer.status === 'Break';
-      const isFocusing = state.timer.status === 'Focusing';
-      yourRow.className = `ms-member-status-text ${isBreak ? 'status-break' : isFocusing ? '' : 'status-offline'}`;
-      yourRow.textContent = `${state.timer.status} • ${formatTime(state.timer.secondsLeft)}`;
+      yourRow.className = `ms-member-status-text ${isBreak ? 'status-break' : 'status-active'}`;
+      yourRow.textContent = isBreak ? `Break • ${formatTime(state.timer.secondsLeft)}` : `Active • ${formatTime(state.timer.secondsLeft)}`;
+      if (yourDot) {
+        yourDot.className = `ms-member-dot ${isBreak ? 'dot-break' : 'dot-active'}`;
+      }
     }
 
     // 5. Update play button icon
@@ -1583,10 +1575,11 @@
     // 1. If in active room, sync presence
     if (state.activeRoom) {
       const isHost = Boolean(state.activeRoom.creator === state.nickname || state.activeRoom.isHost);
+      const isBreak = state.timer.status === 'Break';
       const me = {
         id: state.userId,
         nickname: state.nickname || 'You',
-        status: state.timer.status,
+        status: isBreak ? 'Break' : 'Active',
         timerFormatted: formatTime(state.timer.secondsLeft),
         isHost: isHost,
         avatar: isHost ? '👑' : '👨‍💻'
