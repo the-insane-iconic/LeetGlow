@@ -1,7 +1,8 @@
 /* =============================================================================
    My Space — Collaborative Focus & Competitive Arena
    Handles view routing, focus room lobby, two-column group dashboard,
-   global leaderboard, and Firebase Realtime Database sync.
+   global leaderboard, live member polling, LeetCode in-page widget sync,
+   and Firebase Realtime Database sync.
 ============================================================================= */
 
 (() => {
@@ -11,7 +12,9 @@
     ROOM: 'msActiveRoom',
     NICKNAME: 'msUserNickname',
     USER_ID: 'msUserId',
-    FOCUS_TIME: 'msTodayFocusSeconds'
+    FOCUS_TIME: 'msTodayFocusSeconds',
+    POMODORO: 'lctPomodoro',
+    SETTINGS: 'lctSettings'
   };
 
   const DEFAULT_TIMER_SECONDS = 25 * 60; // 25 minutes default Pomodoro
@@ -37,7 +40,8 @@
     todayFocusSeconds: 135 * 60, // 2h 15m default progress
     members: [],
     globalLeaders: [],
-    settingsMenuOpen: false
+    settingsMenuOpen: false,
+    memberPollInterval: null
   };
 
   // Sample peer members for immediate vibrant atmosphere when entering room
@@ -48,14 +52,16 @@
   ];
 
   function formatTime(totalSec) {
-    const m = Math.floor(totalSec / 60);
-    const s = totalSec % 60;
+    const sec = Math.max(0, Math.floor(totalSec));
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
     return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
   }
 
   function formatHoursMinutes(totalSec) {
-    const h = Math.floor(totalSec / 3600);
-    const m = Math.floor((totalSec % 3600) / 60);
+    const sec = Math.max(0, Math.floor(totalSec));
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
     if (h === 0) return `${m}m`;
     return `${h}h ${m > 0 ? m + 'm' : ''}`.trim();
   }
@@ -78,6 +84,75 @@
       .replace(/'/g, '&#39;');
   }
 
+  // Format member status based on presence and active time
+  function formatMemberStatus(member, isYou) {
+    if (isYou) {
+      if (state.timer.status === 'Focusing') {
+        return {
+          text: `Focusing • ${formatTime(state.timer.secondsLeft)}`,
+          dotClass: '',
+          textClass: ''
+        };
+      } else if (state.timer.status === 'Break') {
+        return {
+          text: `Break • ${formatTime(state.timer.secondsLeft)}`,
+          dotClass: 'dot-break',
+          textClass: 'status-break'
+        };
+      } else {
+        return {
+          text: `Paused • ${formatTime(state.timer.secondsLeft)}`,
+          dotClass: 'dot-offline',
+          textClass: 'status-offline'
+        };
+      }
+    }
+
+    const now = Date.now();
+    const lastActive = Number(member.lastActive) || (now - 60000);
+    const diffSec = Math.max(0, Math.floor((now - lastActive) / 1000));
+    const isOnline = diffSec < 180; // active in last 3 minutes
+
+    if (!isOnline) {
+      let timeAgo = '';
+      if (diffSec < 3600) {
+        const m = Math.max(1, Math.floor(diffSec / 60));
+        timeAgo = `${m}m ago`;
+      } else if (diffSec < 86400) {
+        const h = Math.floor(diffSec / 3600);
+        timeAgo = `${h}h ago`;
+      } else {
+        const d = Math.floor(diffSec / 86400);
+        timeAgo = `${d}d ago`;
+      }
+      return {
+        text: `Active ${timeAgo}`,
+        dotClass: 'dot-offline',
+        textClass: 'status-offline'
+      };
+    }
+
+    if (member.status === 'Break') {
+      return {
+        text: `Break • ${member.timerFormatted || '04:32'}`,
+        dotClass: 'dot-break',
+        textClass: 'status-break'
+      };
+    } else if (member.status === 'Idle' || member.status === 'Paused') {
+      return {
+        text: `Paused • ${member.timerFormatted || '25:00'}`,
+        dotClass: 'dot-offline',
+        textClass: 'status-offline'
+      };
+    } else {
+      return {
+        text: `Focusing • ${member.timerFormatted || '24:58'}`,
+        dotClass: '',
+        textClass: ''
+      };
+    }
+  }
+
   // ===========================================================================
   // 1. LOBBY VIEW
   // ===========================================================================
@@ -98,8 +173,7 @@
             <div class="ms-feature-icon-wrap icon-focus">
               <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10" />
-                <circle cx="12" cy="12" r="6" />
-                <circle cx="12" cy="12" r="2" />
+                <polyline points="12 6 12 12 16 14" />
               </svg>
             </div>
             <span class="ms-feature-label">Stay Focused</span>
@@ -131,8 +205,8 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="ms-actions">
-          <button id="msOpenCreateBtn" class="ms-btn-primary" type="button">
+        <div class="ms-lobby-actions">
+          <button id="msOpenCreateBtn" class="ms-btn ms-btn-primary" type="button">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="12" y1="5" x2="12" y2="19" />
               <line x1="5" y1="12" x2="19" y2="12" />
@@ -140,8 +214,8 @@
             <span>Create a Room</span>
           </button>
 
-          <button id="msOpenJoinBtn" class="ms-btn-secondary" type="button">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <button id="msOpenJoinBtn" class="ms-btn ms-btn-secondary" type="button">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
               <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
             </svg>
@@ -153,70 +227,51 @@
   }
 
   // ===========================================================================
-  // 2. CREATE VIEW
+  // 2. CREATE ROOM VIEW
   // ===========================================================================
   function renderCreateView() {
     return `
-      <div id="msViewCreate" class="ms-view ms-view-create">
-        <!-- Header -->
-        <div class="ms-view-header">
-          <button class="ms-back-btn ms-btn-back-lobby" type="button" title="Back to Lobby" aria-label="Back">
+      <div id="msViewCreate" class="ms-view ms-view-form">
+        <div class="ms-form-header">
+          <button class="ms-btn-icon ms-btn-back-lobby" type="button" aria-label="Back">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="19" y1="12" x2="5" y2="12" />
               <polyline points="12 19 5 12 12 5" />
             </svg>
           </button>
-          <h3 class="ms-view-title">Create a Focus Room</h3>
+          <h2 class="ms-form-title">Create a Focus Room</h2>
         </div>
 
-        <!-- Form Card -->
-        <div class="ms-form-card">
+        <div class="ms-form-body">
           <div class="ms-form-group">
-            <label class="ms-form-label" for="msRoomNameInput">
-              <span>Room Name</span>
-            </label>
+            <label class="ms-form-label" for="msRoomNameInput">Room Name</label>
             <input
               id="msRoomNameInput"
-              class="ms-form-input"
+              class="ms-input"
               type="text"
-              maxlength="32"
-              placeholder="e.g. Study Squad"
+              placeholder="e.g. Study Squad, LeetCode Grind"
               value="Study Squad"
+              maxlength="32"
             />
           </div>
 
           <div class="ms-form-group">
-            <label class="ms-form-label" for="msRoomGoalSelect">
-              <span>Goal (Daily)</span>
-            </label>
-            <div class="ms-select-container">
-              <span class="ms-select-lead-icon">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10" />
-                  <circle cx="12" cy="12" r="6" />
-                  <circle cx="12" cy="12" r="2" />
-                </svg>
-              </span>
-              <select id="msRoomGoalSelect">
+            <label class="ms-form-label" for="msRoomGoalSelect">Goal (Daily)</label>
+            <div class="ms-select-wrapper">
+              <span class="ms-select-icon">🎯</span>
+              <select id="msRoomGoalSelect" class="ms-select">
                 <option value="1 hour">1 hour</option>
                 <option value="2 hours">2 hours</option>
                 <option value="3 hours" selected>3 hours</option>
                 <option value="4 hours">4 hours</option>
-                <option value="5+ hours">5+ hours</option>
+                <option value="5 hours">5 hours</option>
               </select>
-              <span class="ms-select-arrow-icon">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="6 9 12 15 18 9" />
-                </svg>
-              </span>
             </div>
           </div>
 
           <div class="ms-form-group">
-            <label class="ms-form-label">
-              <span>Room Type</span>
-            </label>
-            <div class="ms-room-types" role="radiogroup">
+            <label class="ms-form-label">Room Type</label>
+            <div class="ms-room-type-grid" role="radiogroup" aria-label="Room Type">
               <button
                 type="button"
                 class="ms-room-type-btn ${state.selectedRoomType === 'private' ? 'active' : ''}"
@@ -224,15 +279,15 @@
                 role="radio"
                 aria-checked="${state.selectedRoomType === 'private'}"
               >
-                <span class="type-icon">
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <div class="ms-type-icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                     <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                   </svg>
-                </span>
-                <div class="ms-room-type-info">
-                  <span class="ms-room-type-title">Private</span>
-                  <span class="ms-room-type-desc">Invite only</span>
+                </div>
+                <div class="ms-type-info">
+                  <span class="ms-type-title">Private</span>
+                  <span class="ms-type-desc">Invite only</span>
                 </div>
               </button>
 
@@ -243,40 +298,35 @@
                 role="radio"
                 aria-checked="${state.selectedRoomType === 'open'}"
               >
-                <span class="type-icon">
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <div class="ms-type-icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="10" />
                     <line x1="2" y1="12" x2="22" y2="12" />
                     <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
                   </svg>
-                </span>
-                <div class="ms-room-type-info">
-                  <span class="ms-room-type-title">Open</span>
-                  <span class="ms-room-type-desc">Anyone with code</span>
+                </div>
+                <div class="ms-type-info">
+                  <span class="ms-type-title">Open</span>
+                  <span class="ms-type-desc">Anyone with code</span>
                 </div>
               </button>
             </div>
           </div>
 
           <div class="ms-form-group">
-            <label class="ms-form-label" for="msCreatorNicknameInput">
-              <span>Your Nickname</span>
-              <span class="ms-hint">(optional)</span>
-            </label>
+            <label class="ms-form-label" for="msCreatorNicknameInput">Your Nickname</label>
             <input
               id="msCreatorNicknameInput"
-              class="ms-form-input"
+              class="ms-input"
               type="text"
+              placeholder="e.g. Vinay"
+              value="${escapeHtml(state.nickname || 'Vinay')}"
               maxlength="20"
-              placeholder="e.g. Alex"
-              value="${escapeHtml(state.nickname || '')}"
             />
           </div>
 
-          <span id="msCreateError" class="ms-error-text" hidden></span>
-
-          <button id="msSubmitCreateBtn" class="ms-btn-primary" type="button" style="margin-top: 4px;">
-            <span>Create Room</span>
+          <button id="msSubmitCreateBtn" class="ms-btn ms-btn-primary ms-btn-full" type="button">
+            Create Room
           </button>
         </div>
       </div>
@@ -284,62 +334,52 @@
   }
 
   // ===========================================================================
-  // 3. JOIN VIEW
+  // 3. JOIN ROOM VIEW
   // ===========================================================================
   function renderJoinView() {
     return `
-      <div id="msViewJoin" class="ms-view ms-view-join">
-        <!-- Header -->
-        <div class="ms-view-header">
-          <button class="ms-back-btn ms-btn-back-lobby" type="button" title="Back to Lobby" aria-label="Back">
+      <div id="msViewJoin" class="ms-view ms-view-form">
+        <div class="ms-form-header">
+          <button class="ms-btn-icon ms-btn-back-lobby" type="button" aria-label="Back">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="19" y1="12" x2="5" y2="12" />
               <polyline points="12 19 5 12 12 5" />
             </svg>
           </button>
-          <h3 class="ms-view-title">Join a Focus Room</h3>
+          <h2 class="ms-form-title">Join a Focus Room</h2>
         </div>
 
-        <!-- Form Card -->
-        <div class="ms-form-card">
+        <div class="ms-form-body">
           <div class="ms-form-group">
-            <label class="ms-form-label" for="msJoinCodeInput">
-              <span>Room Code</span>
-            </label>
+            <label class="ms-form-label" for="msJoinCodeInput">Room Code</label>
             <input
               id="msJoinCodeInput"
-              class="ms-form-input ms-code-input"
+              class="ms-input ms-code-input"
               type="text"
-              maxlength="10"
-              placeholder="GLOW-..."
-              spellcheck="false"
+              placeholder="e.g. GLOW-9X42"
+              maxlength="16"
               autocomplete="off"
+              spellcheck="false"
             />
+            <span class="ms-input-hint">Ask your study partner for their 4-digit code</span>
           </div>
 
           <div class="ms-form-group">
-            <label class="ms-form-label" for="msJoinNicknameInput">
-              <span>Your Nickname</span>
-            </label>
+            <label class="ms-form-label" for="msJoinNicknameInput">Your Nickname</label>
             <input
               id="msJoinNicknameInput"
-              class="ms-form-input"
+              class="ms-input"
               type="text"
-              maxlength="20"
-              placeholder="e.g. Alex"
+              placeholder="e.g. Aryan"
               value="${escapeHtml(state.nickname || '')}"
+              maxlength="20"
             />
           </div>
 
-          <span id="msJoinError" class="ms-error-text" hidden></span>
+          <div id="msJoinError" class="ms-form-error" hidden></div>
 
-          <button id="msSubmitJoinBtn" class="ms-btn-primary" type="button" style="margin-top: 4px;">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-              <polyline points="10 17 15 12 10 7" />
-              <line x1="15" y1="12" x2="3" y2="12" />
-            </svg>
-            <span>Join Room</span>
+          <button id="msSubmitJoinBtn" class="ms-btn ms-btn-primary ms-btn-full" type="button">
+            Join Room
           </button>
         </div>
       </div>
@@ -474,117 +514,114 @@
       <div class="ms-group-dashboard">
         <!-- Two Columns Section -->
         <div class="ms-group-columns">
-        <!-- Left Column: Circular Focus Timer -->
-        <div class="ms-col-timer">
-          <div class="ms-timer-gauge">
-            <svg class="ms-timer-svg" viewBox="0 0 120 120">
-              <defs>
-                <linearGradient id="msTimerGrad" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stop-color="#ec4899" />
-                  <stop offset="100%" stop-color="#f43f5e" />
-                </linearGradient>
-              </defs>
-              <circle class="ms-timer-bg-arc" cx="60" cy="60" r="52" />
-              <circle
-                class="ms-timer-progress-arc"
-                cx="60" cy="60" r="52"
-                stroke-dasharray="${CIRCLE_CIRCUMFERENCE}"
-                stroke-dashoffset="${strokeOffset}"
-              />
-            </svg>
+          <!-- Left Column: Circular Focus Timer -->
+          <div class="ms-col-timer">
+            <div class="ms-timer-gauge">
+              <svg class="ms-timer-svg" viewBox="0 0 120 120">
+                <defs>
+                  <linearGradient id="msTimerGrad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#ec4899" />
+                    <stop offset="100%" stop-color="#f43f5e" />
+                  </linearGradient>
+                </defs>
+                <circle class="ms-timer-bg-arc" cx="60" cy="60" r="52" />
+                <circle
+                  class="ms-timer-progress-arc"
+                  cx="60" cy="60" r="52"
+                  stroke-dasharray="${CIRCLE_CIRCUMFERENCE}"
+                  stroke-dashoffset="${strokeOffset}"
+                />
+              </svg>
 
-            <div class="ms-timer-center">
-              <span class="ms-timer-label">${isBreak ? 'Break' : 'Focus'}</span>
-              <span class="ms-timer-digits">${timeFormatted}</span>
-              <span class="ms-timer-status-pill ${isBreak ? 'status-break' : isFocusing ? 'status-focus' : 'status-idle'}">
-                ${isBreak ? '☕ Break' : isFocusing ? '🍃 Focusing' : '⏸ Paused'}
-              </span>
+              <div class="ms-timer-center">
+                <span class="ms-timer-label">${isBreak ? 'Break' : 'Focus'}</span>
+                <span class="ms-timer-digits">${timeFormatted}</span>
+                <span class="ms-timer-status-pill ${isBreak ? 'status-break' : isFocusing ? 'status-focus' : 'status-idle'}">
+                  ${isBreak ? '☕ Break' : isFocusing ? '🍃 Focusing' : '⏸ Paused'}
+                </span>
+              </div>
+            </div>
+
+            <!-- Timer Actions -->
+            <div class="ms-timer-actions">
+              <button id="msTimerPlayBtn" class="ms-btn-timer-play" type="button" title="${state.timer.isRunning ? 'Pause' : 'Start'}">
+                ${state.timer.isRunning ? `
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                    <rect x="6" y="4" width="4" height="16" rx="1.5" />
+                    <rect x="14" y="4" width="4" height="16" rx="1.5" />
+                  </svg>
+                ` : `
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                    <polygon points="5 3 19 12 5 21 5 3" />
+                  </svg>
+                `}
+              </button>
+
+              <button id="msTimerStopBtn" class="ms-btn-timer-stop" type="button" title="Reset Session">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                  <rect x="6" y="6" width="12" height="12" rx="2" />
+                </svg>
+              </button>
             </div>
           </div>
 
-          <!-- Timer Actions -->
-          <div class="ms-timer-actions">
-            <button id="msTimerPlayBtn" class="ms-btn-timer-play" type="button" title="${state.timer.isRunning ? 'Pause' : 'Start'}">
-              ${state.timer.isRunning ? `
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                  <rect x="6" y="4" width="4" height="16" rx="1.5" />
-                  <rect x="14" y="4" width="4" height="16" rx="1.5" />
-                </svg>
-              ` : `
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                  <polygon points="5 3 19 12 5 21 5 3" />
-                </svg>
-              `}
-            </button>
+          <!-- Right Column: Members and Status -->
+          <div class="ms-col-members">
+            <div class="ms-members-header">
+              <span>Members (${state.members.length})</span>
+            </div>
 
-            <button id="msTimerStopBtn" class="ms-btn-timer-stop" type="button" title="Reset Session">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
-                <rect x="6" y="6" width="12" height="12" rx="2" />
+            <div class="ms-members-scroll">
+              ${state.members.map((m) => {
+                const isYou = m.id === state.userId;
+                const { text, dotClass, textClass } = formatMemberStatus(m, isYou);
+
+                return `
+                  <div class="ms-member-row ${isYou ? 'is-you' : ''}">
+                    <div class="ms-member-avatar-wrap">
+                      <span>${m.avatar || '🧑‍💻'}</span>
+                      <span class="ms-member-dot ${dotClass}"></span>
+                    </div>
+                    <div class="ms-member-info">
+                      <span class="ms-member-name-line">
+                        <span>${escapeHtml(m.nickname || 'Coder')}${isYou ? ' (You)' : ''}</span>
+                        ${m.isHost ? '<span class="ms-member-crown">👑</span>' : ''}
+                      </span>
+                      <span class="ms-member-status-text ${textClass}">
+                        ${escapeHtml(text)}
+                      </span>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Card: Group Status / Daily Progress Bar -->
+        <div class="ms-group-stats-card">
+          <div class="ms-stat-box">
+            <span class="ms-stat-label">Today (Room)</span>
+            <span class="ms-stat-val">${formatHoursMinutes(state.todayFocusSeconds)}</span>
+          </div>
+
+          <div class="ms-stat-box">
+            <span class="ms-stat-label">Goal</span>
+            <span class="ms-stat-val">${escapeHtml(room.goal || '3h')}</span>
+          </div>
+
+          <div class="ms-stat-progress-wrap">
+            <div class="ms-stat-donut">
+              <svg viewBox="0 0 32 32">
+                <circle cx="16" cy="16" r="13" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="3" />
+                <circle
+                  cx="16" cy="16" r="13"
+                  fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round"
+                  stroke-dasharray="${donutCirc}"
+                  stroke-dashoffset="${donutOffset}"
+                />
               </svg>
-            </button>
-          </div>
-        </div>
-
-        <!-- Right Column: Members and Status -->
-        <div class="ms-col-members">
-          <div class="ms-members-header">
-            <span>Members (${state.members.length})</span>
-          </div>
-
-          <div class="ms-members-scroll">
-            ${state.members.map((m) => {
-              const isYou = m.id === state.userId;
-              const isMemberFocus = m.status === 'Focusing';
-              const isMemberBreak = m.status === 'Break';
-              const dotClass = isMemberFocus ? '' : isMemberBreak ? 'dot-break' : 'dot-offline';
-              const textClass = isMemberFocus ? '' : isMemberBreak ? 'status-break' : 'status-offline';
-
-              return `
-                <div class="ms-member-row">
-                  <div class="ms-member-avatar-wrap">
-                    <span>${m.avatar || '🧑‍💻'}</span>
-                    <span class="ms-member-dot ${dotClass}"></span>
-                  </div>
-                  <div class="ms-member-info">
-                    <span class="ms-member-name-line">
-                      <span>${escapeHtml(m.nickname || 'Coder')}${isYou ? ' (You)' : ''}</span>
-                      ${m.isHost ? '<span class="ms-member-crown">👑</span>' : ''}
-                    </span>
-                    <span class="ms-member-status-text ${textClass}">
-                      ${isMemberFocus ? `Focusing • ${m.timerFormatted || '24:58'}` : isMemberBreak ? `Break • ${m.timerFormatted || '05:00'}` : 'Active 1h ago'}
-                    </span>
-                  </div>
-                </div>
-              `;
-            }).join('')}
-          </div>
-        </div>
-      </div>
-
-      <!-- Bottom Card: Group Status / Daily Progress Bar -->
-      <div class="ms-group-stats-card">
-        <div class="ms-stat-box">
-          <span class="ms-stat-label">Today (Room)</span>
-          <span class="ms-stat-val">${formatHoursMinutes(state.todayFocusSeconds)}</span>
-        </div>
-
-        <div class="ms-stat-box">
-          <span class="ms-stat-label">Goal</span>
-          <span class="ms-stat-val">${escapeHtml(room.goal || '3h')}</span>
-        </div>
-
-        <div class="ms-stat-progress-wrap">
-          <div class="ms-stat-donut">
-            <svg viewBox="0 0 32 32">
-              <circle cx="16" cy="16" r="13" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="3" />
-              <circle
-                cx="16" cy="16" r="13"
-                fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round"
-                stroke-dasharray="${donutCirc}"
-                stroke-dashoffset="${donutOffset}"
-              />
-            </svg>
-          </div>
+            </div>
             <div class="ms-stat-progress-text">
               <span class="ms-stat-progress-title">Progress</span>
               <span class="ms-stat-progress-pct">${progressPct}%</span>
@@ -597,15 +634,6 @@
 
   function renderLeaderboardContent() {
     const leaders = (state.globalLeaders && state.globalLeaders.length) ? state.globalLeaders : [];
-    const you = leaders.find(l => l.id === state.userId) || {
-      rank: 4,
-      nickname: `${state.nickname || 'You'} (You)`,
-      todayDisplay: formatHoursMinutes(state.todayFocusSeconds),
-      streak: 3,
-      solvedCount: 5,
-      avatar: '⚡'
-    };
-
     return `
       <div class="ms-leaderboard-view">
         <div class="ms-leaderboard-header">
@@ -760,6 +788,7 @@
           window.MySpaceAPI.syncMember(roomCode, initialMembers[0]);
         }
 
+        startMemberPolling();
         render();
       });
     }
@@ -845,6 +874,7 @@
           window.MySpaceAPI.syncMember(code, me);
         }
 
+        startMemberPolling();
         render();
       });
     }
@@ -875,9 +905,10 @@
     if (copyBtn && state.activeRoom) {
       copyBtn.addEventListener('click', () => {
         navigator.clipboard.writeText(state.activeRoom.code || '');
-        copyBtn.querySelector('span').textContent = 'Copied! ✓';
+        const span = copyBtn.querySelector('span');
+        if (span) span.textContent = 'Copied! ✓';
         setTimeout(() => {
-          if (copyBtn) copyBtn.querySelector('span').textContent = 'Copy Room Code';
+          if (span) span.textContent = 'Copy Room Code';
         }, 1800);
       });
     }
@@ -889,6 +920,7 @@
         if (state.activeRoom && window.MySpaceAPI) {
           window.MySpaceAPI.removeMember(state.activeRoom.code, state.userId);
         }
+        stopMemberPolling();
         stopTimer();
         state.activeRoom = null;
         state.currentView = 'lobby';
@@ -935,17 +967,23 @@
       navLbBtn.addEventListener('click', async () => {
         if (state.activeWorkspaceTab !== 'leaderboard') {
           state.activeWorkspaceTab = 'leaderboard';
+          render();
           if (window.MySpaceAPI) {
             state.globalLeaders = await window.MySpaceAPI.getGlobalLeaderboard();
+            if (state.activeWorkspaceTab === 'leaderboard') {
+              const bodyEl = container.querySelector('.ms-workspace-body');
+              if (bodyEl) {
+                bodyEl.innerHTML = renderLeaderboardContent();
+              }
+            }
           }
-          render();
         }
       });
     }
   }
 
   // ===========================================================================
-  // 7. TIMER ENGINE & HEARTBEAT
+  // 7. TIMER ENGINE, SYNC & HEARTBEAT
   // ===========================================================================
   function startTimer() {
     if (state.timer.isRunning) return;
@@ -956,33 +994,45 @@
     state.timer.interval = setInterval(() => {
       if (state.timer.secondsLeft > 0) {
         state.timer.secondsLeft -= 1;
-        state.todayFocusSeconds += 1;
+        if (state.timer.status === 'Focusing') {
+          state.todayFocusSeconds += 1;
+        }
 
         // Sync every 30 seconds
         if (state.timer.secondsLeft % 30 === 0) {
           syncHeartbeat();
+          persistTodayFocus();
         }
 
         updateTimerUI();
       } else {
-        // Session complete
+        // Session complete -> Switch to Break
         state.timer.status = 'Break';
         state.timer.secondsLeft = 5 * 60; // 5 min break
         state.timer.totalSeconds = 5 * 60;
         syncHeartbeat();
+        syncToPomodoroWidget();
+        persistTodayFocus();
         updateTimerUI();
       }
     }, 1000);
 
     syncHeartbeat();
+    syncToPomodoroWidget();
+    persistTodayFocus();
     updateTimerUI();
   }
 
   function pauseTimer() {
     state.timer.isRunning = false;
     state.timer.status = 'Paused';
-    if (state.timer.interval) clearInterval(state.timer.interval);
+    if (state.timer.interval) {
+      clearInterval(state.timer.interval);
+      state.timer.interval = null;
+    }
     syncHeartbeat();
+    syncToPomodoroWidget();
+    persistTodayFocus();
     updateTimerUI();
   }
 
@@ -991,8 +1041,13 @@
     state.timer.status = 'Idle';
     state.timer.secondsLeft = DEFAULT_TIMER_SECONDS;
     state.timer.totalSeconds = DEFAULT_TIMER_SECONDS;
-    if (state.timer.interval) clearInterval(state.timer.interval);
+    if (state.timer.interval) {
+      clearInterval(state.timer.interval);
+      state.timer.interval = null;
+    }
     syncHeartbeat();
+    syncToPomodoroWidget();
+    persistTodayFocus();
     updateTimerUI();
   }
 
@@ -1002,21 +1057,127 @@
       clearInterval(state.timer.interval);
       state.timer.interval = null;
     }
+    syncToPomodoroWidget();
+  }
+
+  // Bi-directional sync with LeetCode page's on-page Pomodoro dock pill
+  function syncToPomodoroWidget() {
+    try {
+      const isBreak = state.timer.status === 'Break';
+      const endAt = state.timer.isRunning ? Date.now() + (state.timer.secondsLeft * 1000) : 0;
+
+      chrome.storage.local.set({
+        [STORAGE_KEYS.POMODORO]: {
+          mode: isBreak ? 'break' : 'work',
+          cycles: 0,
+          remaining: state.timer.secondsLeft * 1000,
+          running: state.timer.isRunning,
+          endAt: endAt,
+          updatedAt: Date.now(),
+          source: 'myspace'
+        }
+      });
+
+      // Ensure Pomodoro widget is enabled in settings so the dock pill is visible
+      if (state.timer.isRunning) {
+        chrome.storage.local.get([STORAGE_KEYS.SETTINGS], (res) => {
+          const cfg = res[STORAGE_KEYS.SETTINGS] || {};
+          if (!cfg.pomodoro || !cfg.pomodoro.enabled) {
+            cfg.pomodoro = cfg.pomodoro || {};
+            cfg.pomodoro.enabled = true;
+            chrome.storage.local.set({ [STORAGE_KEYS.SETTINGS]: cfg });
+          }
+        });
+      }
+    } catch (err) {
+      // Extension context invalidated
+    }
+  }
+
+  // Adopt Pomodoro state updates triggered by the on-page widget
+  function adoptPomodoroState(saved) {
+    if (!saved) return;
+    const mode = saved.mode || 'work';
+    const running = Boolean(saved.running && saved.endAt);
+    const endAt = running ? Number(saved.endAt) : 0;
+    const remainingMs = running ? Math.max(0, endAt - Date.now()) : (Number(saved.remaining) || DEFAULT_TIMER_SECONDS * 1000);
+    const remainingSec = Math.max(0, Math.round(remainingMs / 1000));
+
+    state.timer.isRunning = running;
+    state.timer.status = mode === 'work' ? (running ? 'Focusing' : 'Paused') : 'Break';
+    state.timer.secondsLeft = remainingSec;
+    state.timer.totalSeconds = (mode === 'break' ? 5 : 25) * 60;
+
+    if (running) {
+      if (!state.timer.interval) {
+        state.timer.interval = setInterval(() => {
+          if (state.timer.secondsLeft > 0) {
+            state.timer.secondsLeft -= 1;
+            if (state.timer.status === 'Focusing') {
+              state.todayFocusSeconds += 1;
+            }
+            if (state.timer.secondsLeft % 30 === 0) {
+              syncHeartbeat();
+              persistTodayFocus();
+            }
+            updateTimerUI();
+          } else {
+            state.timer.status = 'Break';
+            state.timer.secondsLeft = 5 * 60;
+            state.timer.totalSeconds = 5 * 60;
+            syncHeartbeat();
+            updateTimerUI();
+          }
+        }, 1000);
+      }
+    } else {
+      if (state.timer.interval) {
+        clearInterval(state.timer.interval);
+        state.timer.interval = null;
+      }
+    }
+    updateTimerUI();
+  }
+
+  function watchPomodoroStorage() {
+    try {
+      chrome.storage.onChanged.addListener((changes, area) => {
+        if (area !== 'local' || !changes[STORAGE_KEYS.POMODORO]) return;
+        const saved = changes[STORAGE_KEYS.POMODORO].newValue;
+        if (!saved || saved.source === 'myspace') return;
+        adoptPomodoroState(saved);
+      });
+    } catch (err) {
+      // Extension context invalidated
+    }
+  }
+
+  let saveFocusDebounce = null;
+  function persistTodayFocus() {
+    clearTimeout(saveFocusDebounce);
+    saveFocusDebounce = setTimeout(() => {
+      chrome.storage.local.set({
+        [STORAGE_KEYS.FOCUS_TIME]: state.todayFocusSeconds
+      });
+    }, 400);
   }
 
   function updateTimerUI() {
     const container = document.getElementById('view-myspace');
     if (!container || state.activeWorkspaceTab !== 'group') return;
 
+    // 1. Digits
     const digitsEl = container.querySelector('.ms-timer-digits');
     if (digitsEl) digitsEl.textContent = formatTime(state.timer.secondsLeft);
 
+    // 2. Arc Gauge
     const arcEl = container.querySelector('.ms-timer-progress-arc');
     if (arcEl) {
       const pct = Math.max(0, Math.min(1, state.timer.secondsLeft / state.timer.totalSeconds));
       arcEl.style.strokeDashoffset = (CIRCLE_CIRCUMFERENCE * (1 - pct)).toFixed(2);
     }
 
+    // 3. Status Pill
     const pillEl = container.querySelector('.ms-timer-status-pill');
     if (pillEl) {
       const isBreak = state.timer.status === 'Break';
@@ -1025,13 +1186,16 @@
       pillEl.textContent = isBreak ? '☕ Break' : isFocusing ? '🍃 Focusing' : '⏸ Paused';
     }
 
-    // Update your row in members list
-    const yourRow = container.querySelector('.ms-member-row:first-child .ms-member-status-text');
+    // 4. Update your row in members list
+    const yourRow = container.querySelector('.ms-member-row.is-you .ms-member-status-text');
     if (yourRow) {
+      const isBreak = state.timer.status === 'Break';
+      const isFocusing = state.timer.status === 'Focusing';
+      yourRow.className = `ms-member-status-text ${isBreak ? 'status-break' : isFocusing ? '' : 'status-offline'}`;
       yourRow.textContent = `${state.timer.status} • ${formatTime(state.timer.secondsLeft)}`;
     }
 
-    // Update play button icon
+    // 5. Update play button icon
     const playBtn = container.querySelector('#msTimerPlayBtn');
     if (playBtn) {
       playBtn.innerHTML = state.timer.isRunning ? `
@@ -1045,18 +1209,137 @@
         </svg>
       `;
     }
+
+    // 6. Update bottom progress card
+    const todayValEl = container.querySelector('.ms-stat-box:first-child .ms-stat-val');
+    if (todayValEl) {
+      todayValEl.textContent = formatHoursMinutes(state.todayFocusSeconds);
+    }
+
+    const room = state.activeRoom || {};
+    const goalHours = parseInt(room.goal || '3h', 10) || 3;
+    const todayGoalSec = goalHours * 3600;
+    const progressPct = Math.min(100, Math.round((state.todayFocusSeconds / todayGoalSec) * 100));
+
+    const donutCirc = 2 * Math.PI * 13;
+    const donutOffset = donutCirc * (1 - (progressPct / 100));
+    const donutCircle = container.querySelector('.ms-stat-donut circle:nth-child(2)');
+    if (donutCircle) {
+      donutCircle.style.strokeDashoffset = donutOffset.toFixed(2);
+    }
+
+    const pctEl = container.querySelector('.ms-stat-progress-pct');
+    if (pctEl) {
+      pctEl.textContent = `${progressPct}%`;
+    }
+  }
+
+  function updateMembersListUI() {
+    const container = document.getElementById('view-myspace');
+    if (!container || state.activeWorkspaceTab !== 'group') return;
+
+    // 1. Header Count
+    const headerCount = container.querySelector('.ms-members-header span');
+    if (headerCount) {
+      headerCount.textContent = `Members (${state.members.length})`;
+    }
+
+    // 2. Group Subtitle
+    const groupSub = container.querySelector('.ms-group-sub');
+    if (groupSub && state.activeRoom) {
+      groupSub.innerHTML = `
+        <span>${state.members.length} members</span>
+        <span class="dot">•</span>
+        <span>Daily goal: ${escapeHtml(state.activeRoom.goal || '3h')}</span>
+      `;
+    }
+
+    // 3. Members Scroll Container
+    const scrollEl = container.querySelector('.ms-members-scroll');
+    if (scrollEl) {
+      scrollEl.innerHTML = state.members.map((m) => {
+        const isYou = m.id === state.userId;
+        const { text, dotClass, textClass } = formatMemberStatus(m, isYou);
+
+        return `
+          <div class="ms-member-row ${isYou ? 'is-you' : ''}">
+            <div class="ms-member-avatar-wrap">
+              <span>${m.avatar || '🧑‍💻'}</span>
+              <span class="ms-member-dot ${dotClass}"></span>
+            </div>
+            <div class="ms-member-info">
+              <span class="ms-member-name-line">
+                <span>${escapeHtml(m.nickname || 'Coder')}${isYou ? ' (You)' : ''}</span>
+                ${m.isHost ? '<span class="ms-member-crown">👑</span>' : ''}
+              </span>
+              <span class="ms-member-status-text ${textClass}">
+                ${escapeHtml(text)}
+              </span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+
+  // Real-time polling for room member presence
+  function startMemberPolling() {
+    stopMemberPolling();
+    if (!state.activeRoom) return;
+
+    // Poll immediately, then every 5 seconds
+    pollRoomMembers();
+    state.memberPollInterval = setInterval(pollRoomMembers, 5000);
+  }
+
+  function stopMemberPolling() {
+    if (state.memberPollInterval) {
+      clearInterval(state.memberPollInterval);
+      state.memberPollInterval = null;
+    }
+  }
+
+  async function pollRoomMembers() {
+    if (!state.activeRoom || !window.MySpaceAPI) return;
+
+    try {
+      const remoteMembers = await window.MySpaceAPI.getRoomMembers(state.activeRoom.code);
+      const isHost = Boolean(state.activeRoom.creator === state.nickname || state.activeRoom.isHost);
+      const you = {
+        id: state.userId,
+        nickname: state.nickname || 'You',
+        status: state.timer.status,
+        timerFormatted: formatTime(state.timer.secondsLeft),
+        isHost: isHost,
+        avatar: isHost ? '👑' : '👨‍💻',
+        lastActive: Date.now()
+      };
+
+      // Exclude current user from remote array to prevent duplicate rows
+      const peers = (remoteMembers || []).filter(m => m && m.id && m.id !== state.userId);
+
+      // Fill with vibrant sample peers if total active members are fewer than 4
+      const neededSampleCount = Math.max(0, 3 - peers.length);
+      const fallbackPeers = SAMPLE_PEERS.slice(0, neededSampleCount);
+
+      state.members = [you, ...peers, ...fallbackPeers];
+      updateMembersListUI();
+    } catch (err) {
+      // Keep existing members if network fetch fails
+    }
   }
 
   function syncHeartbeat() {
     if (!state.activeRoom || !window.MySpaceAPI) return;
 
+    const isHost = Boolean(state.activeRoom.creator === state.nickname || state.activeRoom.isHost);
     const me = {
       id: state.userId,
       nickname: state.nickname || 'You',
       status: state.timer.status,
       timerFormatted: formatTime(state.timer.secondsLeft),
-      isHost: Boolean(state.activeRoom.creator === state.nickname),
-      avatar: '👨‍💻'
+      isHost: isHost,
+      avatar: isHost ? '👑' : '👨‍💻'
     };
 
     window.MySpaceAPI.syncMember(state.activeRoom.code, me);
@@ -1081,7 +1364,8 @@
       STORAGE_KEYS.ROOM,
       STORAGE_KEYS.NICKNAME,
       STORAGE_KEYS.USER_ID,
-      STORAGE_KEYS.FOCUS_TIME
+      STORAGE_KEYS.FOCUS_TIME,
+      STORAGE_KEYS.POMODORO
     ], (res) => {
       if (res && res[STORAGE_KEYS.USER_ID]) {
         state.userId = res[STORAGE_KEYS.USER_ID];
@@ -1102,17 +1386,25 @@
 
       if (res && res[STORAGE_KEYS.ROOM]) {
         state.activeRoom = res[STORAGE_KEYS.ROOM];
+        const isHost = Boolean(state.activeRoom.creator === state.nickname || state.activeRoom.isHost);
         state.members = [
           {
             id: state.userId,
             nickname: state.nickname,
             status: 'Focusing',
             timerFormatted: '24:58',
-            isHost: true,
-            avatar: '👑'
+            isHost: isHost,
+            avatar: isHost ? '👑' : '👨‍💻',
+            lastActive: Date.now()
           },
           ...SAMPLE_PEERS
         ];
+        startMemberPolling();
+      }
+
+      // Check for active Pomodoro runtime state
+      if (res && res[STORAGE_KEYS.POMODORO]) {
+        adoptPomodoroState(res[STORAGE_KEYS.POMODORO]);
       }
 
       // Preload global leaderboard
@@ -1122,6 +1414,7 @@
         });
       }
 
+      watchPomodoroStorage();
       render();
     });
   }

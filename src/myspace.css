@@ -769,6 +769,12 @@
   border-color: rgba(255, 255, 255, 0.08);
 }
 
+.ms-member-row.is-you {
+  background: rgba(244, 114, 182, 0.08);
+  border-color: rgba(244, 114, 182, 0.22);
+}
+
+
 .ms-member-avatar-wrap {
   position: relative;
   width: 28px;
