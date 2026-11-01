@@ -24,8 +24,8 @@
     currentView: 'lobby', // 'lobby' | 'create' | 'join' | 'workspace'
     activeWorkspaceTab: 'group', // 'group' | 'leaderboard'
     activeRoom: null,
-    nickname: '',
-    userId: '',
+    nickname: 'Ansh',
+    userId: 'usr_ansh',
     selectedRoomType: 'private', // 'private' | 'open'
     
     // Focus Timer State
@@ -43,13 +43,6 @@
     settingsMenuOpen: false,
     memberPollInterval: null
   };
-
-  // Sample peer members for immediate vibrant atmosphere when entering room
-  const SAMPLE_PEERS = [
-    { id: 'usr_aryan', nickname: 'Aryan', status: 'Focusing', timerFormatted: '18:12', isHost: false, avatar: '🧑‍💻', lastActive: Date.now() },
-    { id: 'usr_riya', nickname: 'Riya', status: 'Break', timerFormatted: '04:32', isHost: false, avatar: '👩‍💻', lastActive: Date.now() },
-    { id: 'usr_neha', nickname: 'Neha', status: 'Focusing', timerFormatted: '20:10', isHost: false, avatar: '🌸', lastActive: Date.now() }
-  ];
 
   function formatTime(totalSec) {
     const sec = Math.max(0, Math.floor(totalSec));
@@ -324,8 +317,8 @@
               id="msCreatorNicknameInput"
               class="ms-form-input"
               type="text"
-              placeholder="e.g. Vinay"
-              value="${escapeHtml(state.nickname || 'Vinay')}"
+              placeholder="e.g. Ansh"
+              value="${escapeHtml(state.nickname || 'Ansh')}"
               maxlength="20"
             />
           </div>
@@ -391,8 +384,8 @@
               id="msJoinNicknameInput"
               class="ms-form-input"
               type="text"
-              placeholder="e.g. Aryan"
-              value="${escapeHtml(state.nickname || 'Vinay')}"
+              placeholder="e.g. Ansh"
+              value="${escapeHtml(state.nickname || 'Ansh')}"
               maxlength="20"
             />
           </div>
@@ -650,6 +643,12 @@
                   </div>
                 `;
               }).join('')}
+
+              ${state.members.length === 1 ? `
+                <div class="ms-member-invite-hint">
+                  <span>Share code <strong>${escapeHtml(room.code || '')}</strong> to study together live!</span>
+                </div>
+              ` : ''}
             </div>
           </div>
         </div>
@@ -737,14 +736,14 @@
             <div class="ms-lb-pinned-user">
               <div class="ms-lb-item is-you">
                 <div class="ms-lb-rank-badge">
-                  <span>#24</span>
+                  <span>#${leaders.length + 1}</span>
                 </div>
                 <div class="ms-member-avatar-wrap" style="width: 32px; height: 32px; font-size: 15px;">
-                  <span>👨‍💻</span>
+                  <span>👑</span>
                 </div>
                 <div class="ms-lb-user-info">
-                  <span class="ms-lb-name">${escapeHtml(state.nickname || 'You')} (You)</span>
-                  <span class="ms-lb-stats">🔥 3d streak • 🏷️ ${escapeHtml(currentRoomName)}</span>
+                  <span class="ms-lb-name">${escapeHtml(state.nickname || 'Ansh')} (You)</span>
+                  <span class="ms-lb-stats">🔥 1d streak • 🏷️ ${escapeHtml(currentRoomName)}</span>
                 </div>
                 <span class="ms-lb-hours">${formatHoursMinutes(state.todayFocusSeconds)}</span>
               </div>
@@ -849,8 +848,7 @@
             isHost: true,
             avatar: '👑',
             joinedAt: Date.now()
-          },
-          ...SAMPLE_PEERS
+          }
         ];
 
         const room = {
@@ -1496,7 +1494,8 @@
     // 3. Members Scroll Container
     const scrollEl = container.querySelector('.ms-members-scroll');
     if (scrollEl) {
-      scrollEl.innerHTML = state.members.map((m) => {
+      const roomCode = (state.activeRoom && state.activeRoom.code) || '';
+      const rowsHtml = state.members.map((m) => {
         const isYou = m.id === state.userId;
         const { text, dotClass, textClass } = formatMemberStatus(m, isYou);
 
@@ -1518,6 +1517,14 @@
           </div>
         `;
       }).join('');
+
+      const inviteHintHtml = state.members.length === 1 ? `
+        <div class="ms-member-invite-hint">
+          <span>Share code <strong>${escapeHtml(roomCode)}</strong> to study together live!</span>
+        </div>
+      ` : '';
+
+      scrollEl.innerHTML = rowsHtml + inviteHintHtml;
     }
   }
 
@@ -1557,11 +1564,8 @@
       // Exclude current user from remote array to prevent duplicate rows
       const peers = (remoteMembers || []).filter(m => m && m.id && m.id !== state.userId);
 
-      // Fill with vibrant sample peers if total active members are fewer than 4
-      const neededSampleCount = Math.max(0, 3 - peers.length);
-      const fallbackPeers = SAMPLE_PEERS.slice(0, neededSampleCount);
-
-      state.members = [you, ...peers, ...fallbackPeers];
+      // Real users only (no mock peers)
+      state.members = [you, ...peers];
       updateMembersListUI();
     } catch (err) {
       // Keep existing members if network fetch fails
@@ -1624,8 +1628,9 @@
 
       if (res && res[STORAGE_KEYS.NICKNAME]) {
         state.nickname = res[STORAGE_KEYS.NICKNAME];
+        if (state.nickname === 'Vinay') state.nickname = 'Ansh';
       } else {
-        state.nickname = 'Vinay';
+        state.nickname = 'Ansh';
       }
 
       if (res && res[STORAGE_KEYS.FOCUS_TIME]) {
@@ -1640,12 +1645,11 @@
             id: state.userId,
             nickname: state.nickname,
             status: 'Focusing',
-            timerFormatted: '24:58',
+            timerFormatted: '25:00',
             isHost: isHost,
             avatar: isHost ? '👑' : '👨‍💻',
             lastActive: Date.now()
-          },
-          ...SAMPLE_PEERS
+          }
         ];
         startMemberPolling();
       }

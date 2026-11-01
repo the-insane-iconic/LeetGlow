@@ -135,76 +135,43 @@
     }
   }
 
-  // Curated 20 Top Global Leaders for weekly competitive benchmark
+  // Default Global Leaderboard Benchmark (Ansh as sole initial benchmark player)
   const DEFAULT_GLOBAL_LEADERS = [
-    { id: 'usr_sarah', nickname: 'Sarah C.', focusSeconds: 21600, todayDisplay: '6h 00m', streak: 28, solvedCount: 14, rank: 1, avatar: '👩‍💻', roomName: 'Algorithm Masters' },
-    { id: 'usr_kenji', nickname: 'Kenji S.', focusSeconds: 20700, todayDisplay: '5h 45m', streak: 19, solvedCount: 11, rank: 2, avatar: '🧑‍💻', roomName: 'Tokyo Techies' },
-    { id: 'usr_elena', nickname: 'Elena Rostova', focusSeconds: 18900, todayDisplay: '5h 15m', streak: 14, solvedCount: 9, rank: 3, avatar: '⚡', roomName: 'Competitive Solo' },
-    { id: 'usr_devan', nickname: 'Devan Patel', focusSeconds: 17400, todayDisplay: '4h 50m', streak: 12, solvedCount: 8, rank: 4, avatar: '🎯', roomName: 'Study Squad' },
-    { id: 'usr_chloe', nickname: 'Chloe Chen', focusSeconds: 16200, todayDisplay: '4h 30m', streak: 10, solvedCount: 7, rank: 5, avatar: '🌸', roomName: 'Silicon Valley Crew' },
-    { id: 'usr_marcus', nickname: 'Marcus Vance', focusSeconds: 15000, todayDisplay: '4h 10m', streak: 8, solvedCount: 6, rank: 6, avatar: '🚀', roomName: 'Hardcore Grind' },
-    { id: 'usr_aarav', nickname: 'Aarav Sharma', focusSeconds: 14100, todayDisplay: '3h 55m', streak: 7, solvedCount: 6, rank: 7, avatar: '👑', roomName: 'IITians Grind' },
-    { id: 'usr_emily', nickname: 'Emily Watson', focusSeconds: 13200, todayDisplay: '3h 40m', streak: 6, solvedCount: 5, rank: 8, avatar: '💻', roomName: 'Private Squad 🔒' },
-    { id: 'usr_lucas', nickname: 'Lucas Dubois', focusSeconds: 12300, todayDisplay: '3h 25m', streak: 6, solvedCount: 5, rank: 9, avatar: '☕', roomName: 'Paris Coders' },
-    { id: 'usr_priya', nickname: 'Priya Nair', focusSeconds: 11400, todayDisplay: '3h 10m', streak: 5, solvedCount: 4, rank: 10, avatar: '✨', roomName: 'Study Squad' },
-    { id: 'usr_jinwoo', nickname: 'Jin-Woo Park', focusSeconds: 10500, todayDisplay: '2h 55m', streak: 5, solvedCount: 4, rank: 11, avatar: '🎮', roomName: 'Seoul Solvers' },
-    { id: 'usr_sofia', nickname: 'Sofia Rossi', focusSeconds: 9900, todayDisplay: '2h 45m', streak: 4, solvedCount: 4, rank: 12, avatar: '🎨', roomName: 'Rome Devs' },
-    { id: 'usr_alex', nickname: 'Alex Rivera', focusSeconds: 9000, todayDisplay: '2h 30m', streak: 4, solvedCount: 3, rank: 13, avatar: '🦊', roomName: 'Algo Beasts' },
-    { id: 'usr_nina', nickname: 'Nina Ivanova', focusSeconds: 8400, todayDisplay: '2h 20m', streak: 3, solvedCount: 3, rank: 14, avatar: '🌺', roomName: 'Private Squad 🔒' },
-    { id: 'usr_tatsuya', nickname: 'Tatsuya Mori', focusSeconds: 7800, todayDisplay: '2h 10m', streak: 3, solvedCount: 3, rank: 15, avatar: '🍙', roomName: 'LeetCode 75' },
-    { id: 'usr_liam', nickname: 'Liam O\'Connor', focusSeconds: 7200, todayDisplay: '2h 00m', streak: 3, solvedCount: 2, rank: 16, avatar: '🍀', roomName: 'Dublin Hackers' },
-    { id: 'usr_fatima', nickname: 'Fatima Al-Mansoor', focusSeconds: 6600, todayDisplay: '1h 50m', streak: 2, solvedCount: 2, rank: 17, avatar: '🌙', roomName: 'Oasis Coders' },
-    { id: 'usr_carlos', nickname: 'Carlos Mendez', focusSeconds: 6000, todayDisplay: '1h 40m', streak: 2, solvedCount: 2, rank: 18, avatar: '🥑', roomName: 'Madrid Tech' },
-    { id: 'usr_hannah', nickname: 'Hannah Schmidt', focusSeconds: 5400, todayDisplay: '1h 30m', streak: 2, solvedCount: 1, rank: 19, avatar: '🥨', roomName: 'Berlin Bitwise' },
-    { id: 'usr_david', nickname: 'David Kim', focusSeconds: 4800, todayDisplay: '1h 20m', streak: 1, solvedCount: 1, rank: 20, avatar: '🎧', roomName: 'Solo Focus' }
+    {
+      id: 'usr_ansh',
+      nickname: 'Ansh',
+      focusSeconds: 21600,
+      todayDisplay: '6h 00m',
+      streak: 28,
+      solvedCount: 14,
+      rank: 1,
+      avatar: '👑',
+      roomName: 'LeetGlow Squad'
+    }
   ];
 
-  // Default Community Public Focus Groups
+  // Single Default Public Community Focus Room (Created by Ansh)
   const COMMUNITY_ROOMS = {
     'GLOW-LEET': {
       info: {
         code: 'GLOW-LEET',
-        name: 'LeetCode Grind Squad',
+        name: 'LeetGlow Squad',
         goal: '3 hours',
         type: 'open',
-        creator: 'Community',
+        creator: 'Ansh',
         avatar: '🚀',
         createdAt: Date.now() - 3600000
       },
       members: {
-        'usr_sarah': { id: 'usr_sarah', nickname: 'Sarah C.', status: 'Focusing', timerFormatted: '22:15', isHost: true, avatar: '👩‍💻', lastActive: Date.now() },
-        'usr_kenji': { id: 'usr_kenji', nickname: 'Kenji S.', status: 'Focusing', timerFormatted: '18:40', isHost: false, avatar: '🧑‍💻', lastActive: Date.now() - 60000 },
-        'usr_elena': { id: 'usr_elena', nickname: 'Elena Rostova', status: 'Break', timerFormatted: '04:10', isHost: false, avatar: '⚡', lastActive: Date.now() - 120000 }
-      }
-    },
-    'GLOW-CODE': {
-      info: {
-        code: 'GLOW-CODE',
-        name: 'Daily DSA Focus Hub',
-        goal: '2 hours',
-        type: 'open',
-        creator: 'Community',
-        avatar: '💻',
-        createdAt: Date.now() - 7200000
-      },
-      members: {
-        'usr_devan': { id: 'usr_devan', nickname: 'Devan Patel', status: 'Focusing', timerFormatted: '24:50', isHost: true, avatar: '🎯', lastActive: Date.now() },
-        'usr_alex': { id: 'usr_alex', nickname: 'Alex Rivera', status: 'Focusing', timerFormatted: '15:20', isHost: false, avatar: '🚀', lastActive: Date.now() - 30000 }
-      }
-    },
-    'GLOW-CAMP': {
-      info: {
-        code: 'GLOW-CAMP',
-        name: 'Study Squad & Chill',
-        goal: '4 hours',
-        type: 'open',
-        creator: 'Community',
-        avatar: '☕',
-        createdAt: Date.now() - 10800000
-      },
-      members: {
-        'usr_ryan': { id: 'usr_ryan', nickname: 'Ryan Chen', status: 'Focusing', timerFormatted: '25:00', isHost: true, avatar: '☕', lastActive: Date.now() },
-        'usr_priya': { id: 'usr_priya', nickname: 'Priya S.', status: 'Focusing', timerFormatted: '19:30', isHost: false, avatar: '🌸', lastActive: Date.now() - 90000 }
+        'usr_ansh': {
+          id: 'usr_ansh',
+          nickname: 'Ansh',
+          status: 'Focusing',
+          timerFormatted: '25:00',
+          isHost: true,
+          avatar: '👑',
+          lastActive: Date.now()
+        }
       }
     }
   };
@@ -363,12 +330,13 @@
         list = Object.values(res);
       }
 
-      // If online cycle is fresh or empty, merge with defaults to populate top 20
-      if (list.length < 20) {
-        const existingIds = new Set(list.map(u => u.id));
-        const fallbacksNeeded = DEFAULT_GLOBAL_LEADERS.filter(u => !existingIds.has(u.id));
-        list = [...list, ...fallbacksNeeded];
-      }
+      // Merge initial benchmark player (Ansh) if not yet in active cycle
+      const existingIds = new Set(list.map(u => u.id));
+      DEFAULT_GLOBAL_LEADERS.forEach(u => {
+        if (!existingIds.has(u.id)) {
+          list.push(u);
+        }
+      });
 
       // Sort by focusSeconds descending
       list.sort((a, b) => (Number(b.focusSeconds) || 0) - (Number(a.focusSeconds) || 0));

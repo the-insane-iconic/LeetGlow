@@ -1222,6 +1222,29 @@
   color: #94a3b8;
 }
 
+/* Single Member Live Invite Hint Box */
+.ms-member-invite-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 12px 10px;
+  margin-top: 6px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  color: #94a3b8;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.ms-member-invite-hint strong {
+  color: #38bdf8;
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
 /* Bottom Card: Group Status / Daily Progress Bar */
 .ms-group-stats-card {
   display: grid;
