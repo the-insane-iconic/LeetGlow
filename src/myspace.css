@@ -219,14 +219,16 @@
 ============================================================================= */
 
 /* Top View Header with Back Navigation */
-.ms-view-header {
+.ms-view-header,
+.ms-form-header {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 4px 2px 8px;
 }
 
-.ms-back-btn {
+.ms-back-btn,
+.ms-btn-back-lobby {
   display: grid;
   place-items: center;
   width: 32px;
@@ -239,13 +241,15 @@
   transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
 }
 
-.ms-back-btn:hover {
+.ms-back-btn:hover,
+.ms-btn-back-lobby:hover {
   background: rgba(255, 255, 255, 0.12);
   color: #ffffff;
   transform: translateX(-1px);
 }
 
-.ms-view-title {
+.ms-view-title,
+.ms-form-title {
   font-family: 'Space Grotesk', var(--font-ui), sans-serif;
   font-size: 16px;
   font-weight: 700;
@@ -254,7 +258,8 @@
 }
 
 /* Form Container Card */
-.ms-form-card {
+.ms-form-card,
+.ms-form-body {
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -280,13 +285,15 @@
   justify-content: space-between;
 }
 
-.ms-form-label .ms-hint {
+.ms-form-label .ms-hint,
+.ms-input-hint {
   font-size: 10.5px;
   font-weight: 400;
   color: #64748b;
 }
 
-.ms-form-input {
+.ms-form-input,
+.ms-input {
   width: 100%;
   height: 42px;
   padding: 0 12px;
@@ -297,15 +304,18 @@
   font-family: var(--font-ui);
   font-size: 13px;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  box-sizing: border-box;
 }
 
-.ms-form-input:focus {
+.ms-form-input:focus,
+.ms-input:focus {
   outline: none;
   border-color: #ec4899;
   box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.2);
 }
 
-.ms-form-input::placeholder {
+.ms-form-input::placeholder,
+.ms-input::placeholder {
   color: #64748b;
 }
 
@@ -321,12 +331,15 @@
 }
 
 /* Goal Selector Dropdown */
-.ms-select-container {
+.ms-select-container,
+.ms-select-wrapper {
   position: relative;
   width: 100%;
 }
 
-.ms-select-container select {
+.ms-select-container select,
+.ms-select-wrapper select,
+.ms-select {
   width: 100%;
   height: 42px;
   padding: 0 36px 0 38px;
@@ -340,21 +353,26 @@
   appearance: none;
   -webkit-appearance: none;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  box-sizing: border-box;
 }
 
-.ms-select-container select:focus {
+.ms-select-container select:focus,
+.ms-select-wrapper select:focus,
+.ms-select:focus {
   outline: none;
   border-color: #ec4899;
   box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.2);
 }
 
-.ms-select-lead-icon {
+.ms-select-lead-icon,
+.ms-select-icon {
   position: absolute;
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
   color: #f43f5e;
   pointer-events: none;
+  font-size: 14px;
 }
 
 .ms-select-arrow-icon {
@@ -364,10 +382,13 @@
   transform: translateY(-50%);
   color: var(--pop-muted, #94a3b8);
   pointer-events: none;
+  display: grid;
+  place-items: center;
 }
 
 /* Room Type Segmented Cards (Private vs Open) */
-.ms-room-types {
+.ms-room-types,
+.ms-room-type-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
@@ -401,7 +422,8 @@
   box-shadow: 0 0 16px -4px rgba(236, 72, 153, 0.3) inset;
 }
 
-.ms-room-type-btn .type-icon {
+.ms-room-type-btn .type-icon,
+.ms-room-type-btn .ms-type-icon {
   display: grid;
   place-items: center;
   width: 28px;
@@ -412,40 +434,56 @@
   flex-shrink: 0;
 }
 
-.ms-room-type-btn.active .type-icon {
+.ms-room-type-btn.active .type-icon,
+.ms-room-type-btn.active .ms-type-icon {
   background: rgba(236, 72, 153, 0.25);
   color: #f472b6;
 }
 
-.ms-room-type-info {
+.ms-room-type-info,
+.ms-type-info {
   display: flex;
   flex-direction: column;
 }
 
-.ms-room-type-title {
+.ms-room-type-title,
+.ms-type-title {
   font-size: 12.5px;
   font-weight: 600;
   color: inherit;
   line-height: 1.2;
 }
 
-.ms-room-type-desc {
+.ms-room-type-desc,
+.ms-type-desc {
   font-size: 10.5px;
   color: #64748b;
   margin-top: 2px;
   line-height: 1.2;
 }
 
-.ms-room-type-btn.active .ms-room-type-desc {
+.ms-room-type-btn.active .ms-room-type-desc,
+.ms-room-type-btn.active .ms-type-desc {
   color: #cbd5e1;
 }
 
 /* Feedback / Error text */
-.ms-error-text {
+.ms-error-text,
+.ms-form-error {
   font-size: 11.5px;
   color: #f87171;
-  margin-top: 2px;
+  background: rgba(248, 113, 113, 0.1);
+  border: 1px solid rgba(248, 113, 113, 0.25);
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-top: 4px;
 }
+
+.ms-btn-full,
+.ms-btn-block {
+  width: 100%;
+}
+
 
 /* =============================================================================
    3. ACTIVE GROUP WORKSPACE (INSIDE A ROOM)
@@ -949,6 +987,23 @@
   gap: 6px;
 }
 
+.ms-lb-badge-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ms-lb-badge-reset {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  color: #38bdf8;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 .ms-lb-badge {
   font-size: 10.5px;
   padding: 2px 7px;
@@ -957,6 +1012,12 @@
   border: 1px solid rgba(236, 72, 153, 0.3);
   color: #f472b6;
   font-weight: 600;
+}
+
+.ms-lb-pinned-user {
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px dashed rgba(244, 114, 182, 0.3);
 }
 
 .ms-leaderboard-list {

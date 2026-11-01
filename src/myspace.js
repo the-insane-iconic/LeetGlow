@@ -1,8 +1,8 @@
 /* =============================================================================
    My Space — Collaborative Focus & Competitive Arena
    Handles view routing, focus room lobby, two-column group dashboard,
-   global leaderboard, live member polling, LeetCode in-page widget sync,
-   and Firebase Realtime Database sync.
+   weekly global leaderboard with Monday 5:30 PM reset, live member presence,
+   in-page LeetCode timer sync, and secure Firebase Realtime Database integration.
 ============================================================================= */
 
 (() => {
@@ -33,7 +33,7 @@
       secondsLeft: DEFAULT_TIMER_SECONDS,
       totalSeconds: DEFAULT_TIMER_SECONDS,
       isRunning: false,
-      status: 'Focusing', // 'Focusing' | 'Break' | 'Paused'
+      status: 'Focusing', // 'Focusing' | 'Break' | 'Paused' | 'Idle'
       interval: null
     },
 
@@ -227,27 +227,27 @@
   }
 
   // ===========================================================================
-  // 2. CREATE ROOM VIEW
+  // 2. CREATE ROOM VIEW (Fixed Sleek Layout & Classes)
   // ===========================================================================
   function renderCreateView() {
     return `
-      <div id="msViewCreate" class="ms-view ms-view-form">
-        <div class="ms-form-header">
-          <button class="ms-btn-icon ms-btn-back-lobby" type="button" aria-label="Back">
+      <div id="msViewCreate" class="ms-view">
+        <div class="ms-view-header">
+          <button class="ms-back-btn ms-btn-back-lobby" type="button" aria-label="Back to Lobby">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="19" y1="12" x2="5" y2="12" />
               <polyline points="12 19 5 12 12 5" />
             </svg>
           </button>
-          <h2 class="ms-form-title">Create a Focus Room</h2>
+          <h2 class="ms-view-title">Create a Focus Room</h2>
         </div>
 
-        <div class="ms-form-body">
+        <div class="ms-form-card">
           <div class="ms-form-group">
             <label class="ms-form-label" for="msRoomNameInput">Room Name</label>
             <input
               id="msRoomNameInput"
-              class="ms-input"
+              class="ms-form-input"
               type="text"
               placeholder="e.g. Study Squad, LeetCode Grind"
               value="Study Squad"
@@ -257,21 +257,26 @@
 
           <div class="ms-form-group">
             <label class="ms-form-label" for="msRoomGoalSelect">Goal (Daily)</label>
-            <div class="ms-select-wrapper">
-              <span class="ms-select-icon">🎯</span>
-              <select id="msRoomGoalSelect" class="ms-select">
+            <div class="ms-select-container">
+              <span class="ms-select-lead-icon">🎯</span>
+              <select id="msRoomGoalSelect">
                 <option value="1 hour">1 hour</option>
                 <option value="2 hours">2 hours</option>
                 <option value="3 hours" selected>3 hours</option>
                 <option value="4 hours">4 hours</option>
                 <option value="5 hours">5 hours</option>
               </select>
+              <span class="ms-select-arrow-icon">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </span>
             </div>
           </div>
 
           <div class="ms-form-group">
             <label class="ms-form-label">Room Type</label>
-            <div class="ms-room-type-grid" role="radiogroup" aria-label="Room Type">
+            <div class="ms-room-types" role="radiogroup" aria-label="Room Type">
               <button
                 type="button"
                 class="ms-room-type-btn ${state.selectedRoomType === 'private' ? 'active' : ''}"
@@ -279,15 +284,15 @@
                 role="radio"
                 aria-checked="${state.selectedRoomType === 'private'}"
               >
-                <div class="ms-type-icon">
+                <div class="type-icon">
                   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                     <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                   </svg>
                 </div>
-                <div class="ms-type-info">
-                  <span class="ms-type-title">Private</span>
-                  <span class="ms-type-desc">Invite only</span>
+                <div class="ms-room-type-info">
+                  <span class="ms-room-type-title">Private</span>
+                  <span class="ms-room-type-desc">Invite only</span>
                 </div>
               </button>
 
@@ -298,16 +303,16 @@
                 role="radio"
                 aria-checked="${state.selectedRoomType === 'open'}"
               >
-                <div class="ms-type-icon">
+                <div class="type-icon">
                   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="10" />
                     <line x1="2" y1="12" x2="22" y2="12" />
                     <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
                   </svg>
                 </div>
-                <div class="ms-type-info">
-                  <span class="ms-type-title">Open</span>
-                  <span class="ms-type-desc">Anyone with code</span>
+                <div class="ms-room-type-info">
+                  <span class="ms-room-type-title">Open</span>
+                  <span class="ms-room-type-desc">Anyone with code</span>
                 </div>
               </button>
             </div>
@@ -317,7 +322,7 @@
             <label class="ms-form-label" for="msCreatorNicknameInput">Your Nickname</label>
             <input
               id="msCreatorNicknameInput"
-              class="ms-input"
+              class="ms-form-input"
               type="text"
               placeholder="e.g. Vinay"
               value="${escapeHtml(state.nickname || 'Vinay')}"
@@ -325,7 +330,7 @@
             />
           </div>
 
-          <button id="msSubmitCreateBtn" class="ms-btn ms-btn-primary ms-btn-full" type="button">
+          <button id="msSubmitCreateBtn" class="ms-btn ms-btn-primary ms-btn-block" type="button">
             Create Room
           </button>
         </div>
@@ -334,41 +339,43 @@
   }
 
   // ===========================================================================
-  // 3. JOIN ROOM VIEW
+  // 3. JOIN ROOM VIEW (Fixed Sleek Layout & Classes)
   // ===========================================================================
   function renderJoinView() {
     return `
-      <div id="msViewJoin" class="ms-view ms-view-form">
-        <div class="ms-form-header">
-          <button class="ms-btn-icon ms-btn-back-lobby" type="button" aria-label="Back">
+      <div id="msViewJoin" class="ms-view">
+        <div class="ms-view-header">
+          <button class="ms-back-btn ms-btn-back-lobby" type="button" aria-label="Back to Lobby">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="19" y1="12" x2="5" y2="12" />
               <polyline points="12 19 5 12 12 5" />
             </svg>
           </button>
-          <h2 class="ms-form-title">Join a Focus Room</h2>
+          <h2 class="ms-view-title">Join a Focus Room</h2>
         </div>
 
-        <div class="ms-form-body">
+        <div class="ms-form-card">
           <div class="ms-form-group">
-            <label class="ms-form-label" for="msJoinCodeInput">Room Code</label>
+            <label class="ms-form-label" for="msJoinCodeInput">
+              <span>Room Code</span>
+              <span class="ms-hint">Ask your study partner</span>
+            </label>
             <input
               id="msJoinCodeInput"
-              class="ms-input ms-code-input"
+              class="ms-form-input ms-code-input"
               type="text"
-              placeholder="e.g. GLOW-9X42"
+              placeholder="GLOW-9X42"
               maxlength="16"
               autocomplete="off"
               spellcheck="false"
             />
-            <span class="ms-input-hint">Ask your study partner for their 4-digit code</span>
           </div>
 
           <div class="ms-form-group">
             <label class="ms-form-label" for="msJoinNicknameInput">Your Nickname</label>
             <input
               id="msJoinNicknameInput"
-              class="ms-input"
+              class="ms-form-input"
               type="text"
               placeholder="e.g. Aryan"
               value="${escapeHtml(state.nickname || '')}"
@@ -376,9 +383,9 @@
             />
           </div>
 
-          <div id="msJoinError" class="ms-form-error" hidden></div>
+          <div id="msJoinError" class="ms-error-text" hidden></div>
 
-          <button id="msSubmitJoinBtn" class="ms-btn ms-btn-primary ms-btn-full" type="button">
+          <button id="msSubmitJoinBtn" class="ms-btn ms-btn-primary ms-btn-block" type="button">
             Join Room
           </button>
         </div>
@@ -443,12 +450,12 @@
           </button>
         </div>
 
-        <!-- 2. Fixed Content Size Area (Invariant height across tabs) -->
+        <!-- 2. Flexible Content Size Area -->
         <div class="ms-workspace-body">
           ${state.activeWorkspaceTab === 'group' ? renderGroupContent(progressPct, strokeOffset) : renderLeaderboardContent()}
         </div>
 
-        <!-- 3. Sticky Bottom Navigation Bar (Sticks permanently above the footer) -->
+        <!-- 3. Sticky Bottom Navigation Bar (Anchored downward above footer) -->
         <nav class="ms-bottom-nav" role="tablist" aria-label="Group Navigation">
           <button
             id="msNavGroupBtn"
@@ -632,15 +639,26 @@
     `;
   }
 
+  // Weekly Leaderboard View (Top 20 + Reset countdown)
   function renderLeaderboardContent() {
     const leaders = (state.globalLeaders && state.globalLeaders.length) ? state.globalLeaders : [];
+    const countdown = window.MySpaceAPI ? window.MySpaceAPI.getTimeUntilReset() : 'Monday 5:30 PM';
+    const userRankIdx = leaders.findIndex(l => l.id === state.userId);
+    const isUserInTop20 = userRankIdx >= 0 && userRankIdx < 20;
+    const currentRoomName = state.activeRoom
+      ? (state.activeRoom.type === 'private' ? 'Private Squad 🔒' : (state.activeRoom.name || 'Study Squad'))
+      : 'Solo Coder';
+
     return `
       <div class="ms-leaderboard-view">
         <div class="ms-leaderboard-header">
           <div class="ms-lb-title">
             <span>🏆 Global Focus Arena</span>
           </div>
-          <span class="ms-lb-badge">Worldwide</span>
+          <div class="ms-lb-badge-group">
+            <span class="ms-lb-badge-reset" title="Resets weekly every Monday at 5:30 PM">⏳ Resets in ${escapeHtml(countdown)}</span>
+            <span class="ms-lb-badge">Top 20</span>
+          </div>
         </div>
 
         <div class="ms-leaderboard-list">
@@ -659,12 +677,30 @@
                 </div>
                 <div class="ms-lb-user-info">
                   <span class="ms-lb-name">${escapeHtml(item.nickname)}${isYou ? ' (You)' : ''}</span>
-                  <span class="ms-lb-stats">🔥 ${item.streak || 1} day streak • ${item.solvedCount || 1} solved</span>
+                  <span class="ms-lb-stats">🔥 ${item.streak || 1}d streak • 🏷️ ${escapeHtml(item.roomName || 'Solo Coder')}</span>
                 </div>
                 <span class="ms-lb-hours">${item.todayDisplay || '3h 15m'}</span>
               </div>
             `;
           }).join('')}
+
+          ${!isUserInTop20 ? `
+            <div class="ms-lb-pinned-user">
+              <div class="ms-lb-item is-you">
+                <div class="ms-lb-rank-badge">
+                  <span>#24</span>
+                </div>
+                <div class="ms-member-avatar-wrap" style="width: 32px; height: 32px; font-size: 15px;">
+                  <span>👨‍💻</span>
+                </div>
+                <div class="ms-lb-user-info">
+                  <span class="ms-lb-name">${escapeHtml(state.nickname || 'You')} (You)</span>
+                  <span class="ms-lb-stats">🔥 3d streak • 🏷️ ${escapeHtml(currentRoomName)}</span>
+                </div>
+                <span class="ms-lb-hours">${formatHoursMinutes(state.todayFocusSeconds)}</span>
+              </div>
+            </div>
+          ` : ''}
         </div>
       </div>
     `;
@@ -717,7 +753,7 @@
   }
 
   function bindCreateEvents(container) {
-    const backBtn = container.querySelector('.ms-btn-back-lobby');
+    const backBtn = container.querySelector('.ms-btn-back-lobby, .ms-back-btn');
     if (backBtn) {
       backBtn.addEventListener('click', () => {
         state.currentView = 'lobby';
@@ -795,7 +831,7 @@
   }
 
   function bindJoinEvents(container) {
-    const backBtn = container.querySelector('.ms-btn-back-lobby');
+    const backBtn = container.querySelector('.ms-btn-back-lobby, .ms-back-btn');
     if (backBtn) {
       backBtn.addEventListener('click', () => {
         state.currentView = 'lobby';
@@ -817,10 +853,10 @@
 
     if (submitBtn) {
       submitBtn.addEventListener('click', async () => {
-        const code = (codeInput && codeInput.value.trim().toUpperCase()) || '';
+        const rawCode = (codeInput && codeInput.value.trim().toUpperCase()) || '';
         const nickname = (nicknameInput && nicknameInput.value.trim()) || state.nickname || 'Coder';
 
-        if (!code || code.length < 3) {
+        if (!rawCode || rawCode.length < 3) {
           if (errorEl) {
             errorEl.textContent = 'Please enter a valid room code';
             errorEl.hidden = false;
@@ -829,15 +865,33 @@
           return;
         }
 
-        // Try fetching online room from Firebase
+        const code = window.MySpaceAPI ? window.MySpaceAPI.normalizeRoomCode(rawCode) : rawCode;
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Connecting...';
+
         let onlineRoom = null;
         if (window.MySpaceAPI) {
           onlineRoom = await window.MySpaceAPI.getRoom(code);
         }
 
-        const roomName = (onlineRoom && onlineRoom.info && onlineRoom.info.name) || 'Study Squad';
-        const roomGoal = (onlineRoom && onlineRoom.info && onlineRoom.info.goal) || '3 hours';
-        const roomType = (onlineRoom && onlineRoom.info && onlineRoom.info.type) || 'open';
+        // Validate if room was found in database
+        if (!onlineRoom || !onlineRoom.info) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Join Room';
+          if (errorEl) {
+            errorEl.innerHTML = `Room <strong>${escapeHtml(code)}</strong> not found.<br><span style="font-size: 10px; opacity: 0.85;">Check the code with your room host. (Make sure they clicked "Create Room")</span>`;
+            errorEl.hidden = false;
+          }
+          if (codeInput) codeInput.focus();
+          return;
+        }
+
+        const roomInfo = onlineRoom.info;
+        const roomName = roomInfo.name || 'Study Squad';
+        const roomGoal = roomInfo.goal || '3 hours';
+        const roomType = roomInfo.type || 'open';
+        const creator = roomInfo.creator || 'Host';
 
         const me = {
           id: state.userId,
@@ -849,14 +903,17 @@
           joinedAt: Date.now()
         };
 
-        const initialMembers = [me, ...SAMPLE_PEERS];
+        // Extract existing remote members or sample peers
+        const remoteMembersObj = onlineRoom.members || {};
+        const existingRemoteList = Object.values(remoteMembersObj).filter(m => m && m.id !== state.userId);
+        const initialMembers = [me, ...existingRemoteList];
 
         const room = {
           code: code,
           name: roomName,
           goal: roomGoal,
           type: roomType,
-          creator: (onlineRoom && onlineRoom.info && onlineRoom.info.creator) || 'Host',
+          creator: creator,
           joinedAt: Date.now(),
           members: initialMembers
         };
@@ -1330,21 +1387,28 @@
   }
 
   function syncHeartbeat() {
-    if (!state.activeRoom || !window.MySpaceAPI) return;
+    if (!window.MySpaceAPI) return;
 
-    const isHost = Boolean(state.activeRoom.creator === state.nickname || state.activeRoom.isHost);
-    const me = {
-      id: state.userId,
-      nickname: state.nickname || 'You',
-      status: state.timer.status,
-      timerFormatted: formatTime(state.timer.secondsLeft),
-      isHost: isHost,
-      avatar: isHost ? '👑' : '👨‍💻'
-    };
+    const isPrivate = Boolean(state.activeRoom && state.activeRoom.type === 'private');
+    const roomName = state.activeRoom
+      ? (isPrivate ? 'Private Squad 🔒' : (state.activeRoom.name || 'Study Squad'))
+      : 'Solo Focus';
 
-    window.MySpaceAPI.syncMember(state.activeRoom.code, me);
+    // 1. If in active room, sync presence
+    if (state.activeRoom) {
+      const isHost = Boolean(state.activeRoom.creator === state.nickname || state.activeRoom.isHost);
+      const me = {
+        id: state.userId,
+        nickname: state.nickname || 'You',
+        status: state.timer.status,
+        timerFormatted: formatTime(state.timer.secondsLeft),
+        isHost: isHost,
+        avatar: isHost ? '👑' : '👨‍💻'
+      };
+      window.MySpaceAPI.syncMember(state.activeRoom.code, me);
+    }
 
-    // Also update global leaderboard entry
+    // 2. Sync to weekly global leaderboard (resets Monday 5:30 PM)
     window.MySpaceAPI.syncToGlobalLeaderboard({
       id: state.userId,
       nickname: state.nickname || 'You',
@@ -1352,6 +1416,8 @@
       todayDisplay: formatHoursMinutes(state.todayFocusSeconds),
       streak: 3,
       solvedCount: 6,
+      roomName: roomName,
+      isPrivateRoom: isPrivate,
       avatar: '👨‍💻'
     });
   }
