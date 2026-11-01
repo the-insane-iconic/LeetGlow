@@ -41,47 +41,54 @@
     .layer { position: fixed; inset: 0; pointer-events: none; }
     .hidden { display: none !important; }
 
-    /* Unified Dock Capsule at bottom-right */
-    .dock-widget {
+    /* Bottom-Right Dock Stack */
+    .dock-stack {
       position: fixed;
       right: 18px;
       bottom: 18px;
-      pointer-events: auto;
       display: flex;
-      align-items: center;
-      padding: 6px 8px;
-      border-radius: 999px;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+      pointer-events: none;
+      z-index: 20;
+    }
+    .pill {
+      pointer-events: auto;
       border: 1px solid var(--w-border);
       background: color-mix(in srgb, var(--w-surface) 88%, transparent);
       color: var(--w-text);
       box-shadow: 0 18px 48px -16px rgba(0,0,0,.65), 0 0 0 1px color-mix(in srgb, var(--w-accent) 10%, transparent) inset;
       backdrop-filter: blur(22px) saturate(140%);
       -webkit-backdrop-filter: blur(22px) saturate(140%);
-      animation: w-in .28s cubic-bezier(.2,.9,.3,1.2) both;
+      animation: w-in .24s cubic-bezier(.16, 1, 0.3, 1) both;
       transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
       user-select: none;
-      max-width: min(600px, calc(100vw - 24px));
     }
     @keyframes w-in {
-      from { opacity: 0; transform: translateY(10px) scale(.97); }
+      from { opacity: 0; transform: translateY(8px) scale(.97); }
       to { opacity: 1; transform: none; }
     }
 
-    /* Segments */
-    .dock-seg {
+    /* Timer Pill (compact, placed on top of the Lofi bar when both active) */
+    .timer-pill {
       display: flex;
       align-items: center;
       gap: 8px;
-      min-width: 0;
+      padding: 6px 8px 6px 6px;
+      border-radius: 999px;
+      width: auto;
+      max-width: min(250px, calc(100vw - 24px));
     }
 
-    /* Hairline Divider */
-    .dock-divider {
-      width: 1px;
-      height: 22px;
-      background: color-mix(in srgb, var(--w-text) 16%, transparent);
-      margin: 0 10px;
-      flex: none;
+    /* Audio Pill (the Lofi bar, kept intact as requested) */
+    .audio-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 9px 7px 7px;
+      border-radius: 999px;
+      width: min(300px, calc(100vw - 24px));
     }
 
     /* Play/Toggle button */
@@ -177,10 +184,10 @@
     /* Audio Equalizer */
     .eq { display: flex; align-items: flex-end; gap: 2px; height: 15px; width: 19px; flex: none; }
     .eq i { display: block; width: 2.5px; border-radius: 2px; background: currentColor; opacity: .35; height: 5px; }
-    .dock-seg.playing .eq i { opacity: 1; animation: eq .9s ease-in-out infinite alternate; }
-    .dock-seg.playing .eq i:nth-child(2) { animation-delay: -.25s; }
-    .dock-seg.playing .eq i:nth-child(3) { animation-delay: -.5s; }
-    .dock-seg.playing .eq i:nth-child(4) { animation-delay: -.15s; }
+    .audio-pill.playing .eq i { opacity: 1; animation: eq .9s ease-in-out infinite alternate; }
+    .audio-pill.playing .eq i:nth-child(2) { animation-delay: -.25s; }
+    .audio-pill.playing .eq i:nth-child(3) { animation-delay: -.5s; }
+    .audio-pill.playing .eq i:nth-child(4) { animation-delay: -.15s; }
     @keyframes eq { from { height: 3px; } to { height: 15px; } }
 
     /* Audio Readout */
@@ -301,16 +308,17 @@
     @keyframes toast-in { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: none; } }
     @keyframes toast-out { to { opacity: 0; transform: translateY(6px) scale(.98); } }
 
-    .timer-seg.warn .timer-toggle-btn {
+    .timer-pill.warn .timer-toggle-btn {
       background: var(--w-accent-2);
       box-shadow: 0 4px 14px -4px var(--w-accent-2);
     }
-    .timer-seg.warn .ring .progress {
+    .timer-pill.warn .ring .progress {
       stroke: var(--w-on-accent);
     }
 
     @media (max-width: 640px) {
-      .dock-widget { right: 10px; bottom: 10px; max-width: calc(100vw - 20px); }
+      .dock-stack { right: 10px; bottom: 10px; }
+      .audio-pill { width: calc(100vw - 20px); }
       .volume { width: 34px; }
       .focus-chip { left: 10px; bottom: 10px; }
     }
@@ -321,9 +329,10 @@
 
   const TEMPLATE = `
     <div class="layer">
-      <section class="dock-widget hidden" data-el="dockWidget" aria-label="LeetGlow dock">
-        <div class="dock-seg timer-seg hidden" data-el="timer" aria-label="Pomodoro timer">
-          <button class="play-btn timer-toggle-btn" data-el="timerToggle" title="Start/Pause timer" aria-label="Start timer">
+      <div class="dock-stack" data-el="dockStack">
+        <!-- Timer bar (placed on top of the lofi bar when both active) -->
+        <section class="pill timer-pill hidden" data-el="timer" aria-label="Pomodoro timer">
+          <button class="play-btn timer-toggle-btn" data-el="timerToggle" title="Start timer" aria-label="Start timer">
             <svg class="ring" viewBox="0 0 34 34" aria-hidden="true">
               <circle class="track" cx="17" cy="17" r="14.5"></circle>
               <circle class="progress" data-el="ringProgress" cx="17" cy="17" r="14.5" stroke-dasharray="91.1" stroke-dashoffset="0"></circle>
@@ -339,11 +348,10 @@
             <button class="icon-btn" data-el="timerReset" title="Reset timer" aria-label="Reset timer">${ICONS.reset}</button>
             <button class="icon-btn" data-el="timerClose" title="Hide timer" aria-label="Hide timer">${ICONS.close}</button>
           </div>
-        </div>
+        </section>
 
-        <div class="dock-divider hidden" data-el="dockDivider" aria-hidden="true"></div>
-
-        <div class="dock-seg audio-seg hidden" data-el="audio" aria-label="Lofi player">
+        <!-- Lofi bar (on bottom, kept intact) -->
+        <section class="pill audio-pill hidden" data-el="audio" aria-label="Lofi player">
           <button class="play-btn" data-el="audioToggle" aria-label="Play lofi">${ICONS.play}</button>
           <div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
           <div class="audio-info">
@@ -356,8 +364,8 @@
             <input class="volume" data-el="audioVolume" type="range" min="0" max="100" value="32" aria-label="Lofi volume">
           </div>
           <button class="icon-btn" data-el="audioClose" title="Turn off lofi" aria-label="Turn off lofi">${ICONS.close}</button>
-        </div>
-      </section>
+        </section>
+      </div>
 
       <section class="pill focus-chip hidden" data-el="focusChip" aria-label="Focus mode active">
         <div class="focus-badge" aria-hidden="true">${ICONS.focus}</div>
@@ -451,12 +459,7 @@
       const showAudio = Boolean(this.audioData && this.audioData.visible);
       const showTimer = Boolean(this.timerData && this.timerData.visible);
       const showFocus = Boolean(this.focusVisible);
-      const showDock = showAudio || showTimer;
 
-      if (this.refs.dockWidget) {
-        this.refs.dockWidget.style.display = showDock ? 'flex' : 'none';
-        this.refs.dockWidget.classList.toggle('hidden', !showDock);
-      }
       if (this.refs.timer) {
         this.refs.timer.style.display = showTimer ? 'flex' : 'none';
         this.refs.timer.classList.toggle('hidden', !showTimer);
@@ -464,11 +467,6 @@
       if (this.refs.audio) {
         this.refs.audio.style.display = showAudio ? 'flex' : 'none';
         this.refs.audio.classList.toggle('hidden', !showAudio);
-      }
-      if (this.refs.dockDivider) {
-        const showDivider = showAudio && showTimer;
-        this.refs.dockDivider.style.display = showDivider ? 'block' : 'none';
-        this.refs.dockDivider.classList.toggle('hidden', !showDivider);
       }
       if (this.refs.focusChip) {
         this.refs.focusChip.style.display = showFocus ? 'flex' : 'none';
