@@ -91,7 +91,7 @@
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   }
 
-  // Temporary floating toast notification
+  // Polished floating notification (clean, minimal, professional)
   function showMySpaceToast(message) {
     let toast = document.getElementById('msToast');
     if (!toast) {
@@ -100,12 +100,19 @@
       toast.className = 'ms-toast';
       document.body.appendChild(toast);
     }
-    toast.innerHTML = `<span>${escapeHtml(message)}</span>`;
+    toast.innerHTML = `
+      <svg class="ms-toast-icon" viewBox="0 0 16 16" width="13" height="13" fill="none" aria-hidden="true">
+        <path d="M13.25 4.75L6 12L2.75 8.75" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="ms-toast-text">${escapeHtml(message)}</span>
+    `;
+    toast.classList.remove('visible');
+    void toast.offsetWidth;
     toast.classList.add('visible');
     clearTimeout(toast._timeout);
     toast._timeout = setTimeout(() => {
       toast.classList.remove('visible');
-    }, 2400);
+    }, 2200);
   }
 
   // Get a member's 24h cumulative focus seconds (resets daily at 5:30 AM IST / 00:00:00 UTC)
@@ -548,7 +555,7 @@
             </div>
           </div>
           <div class="ms-group-actions">
-            <button id="msGroupShareBtn" class="ms-group-action-btn ms-group-share-btn" type="button" title="Invite Friends (Copy Code)" aria-label="Share">
+            <button id="msGroupShareBtn" class="ms-group-action-btn ms-group-share-btn" type="button" title="Share Extension Link" aria-label="Share Extension">
               <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="18" cy="5" r="3" />
                 <circle cx="6" cy="12" r="3" />
@@ -1235,17 +1242,17 @@
       });
     }
 
-    // 1b. Share / Invite button (One-click copy with instant feedback)
+    // 1b. Share Extension Link button (One-click copy with instant feedback)
     const shareBtn = container.querySelector('#msGroupShareBtn');
     if (shareBtn && state.activeRoom) {
       shareBtn.addEventListener('click', async (e) => {
         e.stopPropagation();
-        const code = state.activeRoom.code || '';
+        const extensionUrl = window.LCTS_STORE_URL || 'https://chromewebstore.google.com/detail/ecpfpadofaimilfpjedgoedhoaglpjdb';
         try {
-          await navigator.clipboard.writeText(code);
+          await navigator.clipboard.writeText(extensionUrl);
         } catch (err) {
           const ta = document.createElement('textarea');
-          ta.value = code;
+          ta.value = extensionUrl;
           document.body.appendChild(ta);
           ta.select();
           document.execCommand('copy');
@@ -1259,7 +1266,7 @@
           </svg>
         `;
         shareBtn.classList.add('copied');
-        showMySpaceToast(`✨ Room code ${code} copied! Share with friends.`);
+        showMySpaceToast('Extension link copied to clipboard');
 
         setTimeout(() => {
           shareBtn.innerHTML = origHtml;
