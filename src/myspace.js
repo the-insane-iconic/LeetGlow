@@ -403,7 +403,10 @@
           </button>
         </div>
 
-        ${state.activeWorkspaceTab === 'group' ? renderGroupContent(progressPct, strokeOffset) : renderLeaderboardContent()}
+        <!-- 2. Fixed Content Size Area (Invariant height across tabs) -->
+        <div class="ms-workspace-body">
+          ${state.activeWorkspaceTab === 'group' ? renderGroupContent(progressPct, strokeOffset) : renderLeaderboardContent()}
+        </div>
 
         <!-- 3. Sticky Bottom Navigation Bar (Sticks permanently above the footer) -->
         <nav class="ms-bottom-nav" role="tablist" aria-label="Group Navigation">
@@ -468,8 +471,9 @@
     const donutOffset = donutCirc * (1 - (progressPct / 100));
 
     return `
-      <!-- Two Columns Section -->
-      <div class="ms-group-columns">
+      <div class="ms-group-dashboard">
+        <!-- Two Columns Section -->
+        <div class="ms-group-columns">
         <!-- Left Column: Circular Focus Timer -->
         <div class="ms-col-timer">
           <div class="ms-timer-gauge">
@@ -581,9 +585,10 @@
               />
             </svg>
           </div>
-          <div class="ms-stat-progress-text">
-            <span class="ms-stat-progress-title">Progress</span>
-            <span class="ms-stat-progress-pct">${progressPct}%</span>
+            <div class="ms-stat-progress-text">
+              <span class="ms-stat-progress-title">Progress</span>
+              <span class="ms-stat-progress-pct">${progressPct}%</span>
+            </div>
           </div>
         </div>
       </div>
