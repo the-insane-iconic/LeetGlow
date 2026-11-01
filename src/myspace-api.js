@@ -140,7 +140,7 @@
       streak: 28,
       solvedCount: 14,
       rank: 1,
-      avatar: '👑',
+      avatar: 'AN',
       roomName: 'LeetGlow Squad'
     }
   ];
@@ -154,7 +154,7 @@
         goal: '3 hours',
         type: 'open',
         creator: 'Ansh',
-        avatar: '🚀',
+        avatar: 'LS',
         createdAt: Date.now() - 3600000
       },
       members: {
@@ -164,7 +164,7 @@
           status: 'Active',
           timerFormatted: '25:00',
           isHost: true,
-          avatar: '👑',
+          avatar: 'AN',
           lastActive: Date.now()
         }
       }
@@ -286,7 +286,7 @@
         status: member.status || 'Active',
         timerFormatted: member.timerFormatted || '24:58',
         isHost: Boolean(member.isHost),
-        avatar: member.avatar || '👨‍💻',
+        avatar: member.avatar || 'AN',
         lastActive: Date.now()
       };
 
@@ -358,7 +358,7 @@
         solvedCount: Number(user.solvedCount) || 1,
         roomName: user.roomName || 'Solo Coder',
         isPrivate: Boolean(user.isPrivateRoom),
-        avatar: user.avatar || '⚡',
+        avatar: user.avatar || 'AN',
         lastActive: Date.now()
       };
 

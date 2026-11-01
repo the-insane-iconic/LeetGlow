@@ -77,6 +77,18 @@
       .replace(/'/g, '&#39;');
   }
 
+  // Extract clean 1-2 character uppercase initials from any nickname/name
+  function getInitials(name) {
+    if (!name) return 'C';
+    const cleaned = String(name).replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, '').trim();
+    if (!cleaned) return 'C';
+    const parts = cleaned.split(/\s+/).filter(Boolean);
+    if (parts.length === 1) {
+      return parts[0].slice(0, 2).toUpperCase();
+    }
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+
   // Format member status based on presence and active time
   function formatMemberStatus(member, isYou) {
     if (isYou) {
@@ -616,14 +628,14 @@
 
                 return `
                   <div class="ms-member-row ${isYou ? 'is-you' : ''}">
-                    <div class="ms-member-avatar-wrap">
-                      <span>${m.avatar || '🧑‍💻'}</span>
+                    <div class="ms-member-avatar-wrap ${isYou ? 'is-you' : ''}">
+                      <span class="ms-avatar-text">${escapeHtml(getInitials(m.nickname || 'Coder'))}</span>
                       <span class="ms-member-dot ${dotClass}"></span>
                     </div>
                     <div class="ms-member-info">
                       <span class="ms-member-name-line">
                         <span>${escapeHtml(m.nickname || 'Coder')}${isYou ? ' (You)' : ''}</span>
-                        ${m.isHost ? '<span class="ms-member-crown">👑</span>' : ''}
+                        ${m.isHost ? '<span class="ms-member-crown" title="Host">👑</span>' : ''}
                       </span>
                       <span class="ms-member-status-text ${textClass}">
                         ${escapeHtml(text)}
@@ -657,7 +669,7 @@
           <div class="ms-stat-progress-wrap">
             <div class="ms-stat-donut">
               <svg viewBox="0 0 32 32">
-                <circle cx="16" cy="16" r="13" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="3" />
+                <circle cx="16" cy="16" r="13" fill="none" stroke="#f1f5f9" stroke-width="3" />
                 <circle
                   cx="16" cy="16" r="13"
                   fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round"
@@ -676,10 +688,9 @@
     `;
   }
 
-  // Weekly Leaderboard View (Top 20 + Reset countdown)
+  // Weekly Leaderboard View (Top 20 worldwide)
   function renderLeaderboardContent() {
     const leaders = (state.globalLeaders && state.globalLeaders.length) ? state.globalLeaders : [];
-    const countdown = window.MySpaceAPI ? window.MySpaceAPI.getTimeUntilReset() : 'Monday 5:30 AM IST';
     const userRankIdx = leaders.findIndex(l => l.id === state.userId);
     const isUserInTop20 = userRankIdx >= 0 && userRankIdx < 20;
     const currentRoomName = state.activeRoom
@@ -693,7 +704,6 @@
             <span>🏆 Global Focus Arena</span>
           </div>
           <div class="ms-lb-badge-group">
-            <span class="ms-lb-badge-reset" title="Resets weekly every Monday at 5:30 AM IST (00:00 UTC) worldwide">⏳ Resets in ${escapeHtml(countdown)}</span>
             <span class="ms-lb-badge">Top 20</span>
           </div>
         </div>
@@ -709,8 +719,8 @@
                 <div class="ms-lb-rank-badge ${rankClass}">
                   <span>${rankEmoji}</span>
                 </div>
-                <div class="ms-member-avatar-wrap" style="width: 32px; height: 32px; font-size: 15px;">
-                  <span>${item.avatar || '🧑‍💻'}</span>
+                <div class="ms-member-avatar-wrap ${isYou ? 'is-you' : ''}" style="width: 28px; height: 28px; font-size: 11px;">
+                  <span class="ms-avatar-text">${escapeHtml(getInitials(item.nickname || 'Coder'))}</span>
                 </div>
                 <div class="ms-lb-user-info">
                   <span class="ms-lb-name">${escapeHtml(item.nickname)}${isYou ? ' (You)' : ''}</span>
@@ -727,8 +737,8 @@
                 <div class="ms-lb-rank-badge">
                   <span>#${leaders.length + 1}</span>
                 </div>
-                <div class="ms-member-avatar-wrap" style="width: 32px; height: 32px; font-size: 15px;">
-                  <span>👑</span>
+                <div class="ms-member-avatar-wrap is-you" style="width: 28px; height: 28px; font-size: 11px;">
+                  <span class="ms-avatar-text">${escapeHtml(getInitials(state.nickname || 'Ansh'))}</span>
                 </div>
                 <div class="ms-lb-user-info">
                   <span class="ms-lb-name">${escapeHtml(state.nickname || 'Ansh')} (You)</span>
@@ -835,7 +845,7 @@
             status: 'Active',
             timerFormatted: '25:00',
             isHost: true,
-            avatar: '👑',
+            avatar: getInitials(nickname),
             joinedAt: Date.now()
           }
         ];
@@ -947,7 +957,7 @@
           status: 'Active',
           timerFormatted: '25:00',
           isHost: false,
-          avatar: '👨‍💻',
+          avatar: getInitials(nickname),
           joinedAt: Date.now()
         };
 
@@ -1032,12 +1042,12 @@
 
         publicListEl.innerHTML = rooms.map(room => {
           const count = room.memberCount || 1;
-          const avatar = room.avatar || '🌐';
+          const initials = getInitials(room.name || 'Room');
           return `
             <div class="ms-public-room-item" data-code="${escapeHtml(room.code)}">
               <div class="ms-public-room-left">
                 <div class="ms-public-room-badge">
-                  <span>${avatar}</span>
+                  <span class="ms-avatar-text">${escapeHtml(initials)}</span>
                 </div>
                 <div class="ms-public-room-meta">
                   <div class="ms-public-room-name-row">
@@ -1493,8 +1503,8 @@
 
         return `
           <div class="ms-member-row ${isYou ? 'is-you' : ''}">
-            <div class="ms-member-avatar-wrap">
-              <span>${m.avatar || '🧑‍💻'}</span>
+            <div class="ms-member-avatar-wrap ${isYou ? 'is-you' : ''}">
+              <span class="ms-avatar-text">${escapeHtml(getInitials(m.nickname || 'Coder'))}</span>
               <span class="ms-member-dot ${dotClass}"></span>
             </div>
             <div class="ms-member-info">
@@ -1550,7 +1560,7 @@
         status: isBreak ? 'Break' : 'Active',
         timerFormatted: formatTime(state.timer.secondsLeft),
         isHost: isHost,
-        avatar: isHost ? '👑' : '👨‍💻',
+        avatar: getInitials(state.nickname || 'You'),
         lastActive: Date.now()
       };
 
@@ -1583,7 +1593,7 @@
         status: isBreak ? 'Break' : 'Active',
         timerFormatted: formatTime(state.timer.secondsLeft),
         isHost: isHost,
-        avatar: isHost ? '👑' : '👨‍💻'
+        avatar: getInitials(state.nickname || 'You')
       };
       window.MySpaceAPI.syncMember(state.activeRoom.code, me);
     }
@@ -1598,7 +1608,7 @@
       solvedCount: 6,
       roomName: roomName,
       isPrivateRoom: isPrivate,
-      avatar: '👨‍💻'
+      avatar: getInitials(state.nickname || 'You')
     });
   }
 
@@ -1642,10 +1652,10 @@
           {
             id: state.userId,
             nickname: state.nickname,
-            status: 'Focusing',
+            status: 'Active',
             timerFormatted: '25:00',
             isHost: isHost,
-            avatar: isHost ? '👑' : '👨‍💻',
+            avatar: getInitials(state.nickname),
             lastActive: Date.now()
           }
         ];
