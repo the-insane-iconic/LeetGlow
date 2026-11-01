@@ -39,18 +39,18 @@
     * { box-sizing: border-box; }
     button, input { font: inherit; }
     .layer { position: fixed; inset: 0; pointer-events: none; }
-    .stack {
+    .hidden { display: none !important; }
+
+    /* Unified Dock Capsule at bottom-right */
+    .dock-widget {
       position: fixed;
       right: 18px;
       bottom: 18px;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 10px;
-      pointer-events: none;
-    }
-    .card, .pill, .focus-chip {
       pointer-events: auto;
+      display: flex;
+      align-items: center;
+      padding: 6px 8px;
+      border-radius: 999px;
       border: 1px solid var(--w-border);
       background: color-mix(in srgb, var(--w-surface) 88%, transparent);
       color: var(--w-text);
@@ -59,141 +59,135 @@
       -webkit-backdrop-filter: blur(22px) saturate(140%);
       animation: w-in .28s cubic-bezier(.2,.9,.3,1.2) both;
       transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+      user-select: none;
+      max-width: min(600px, calc(100vw - 24px));
     }
-    @keyframes w-in { from { opacity: 0; transform: translateY(10px) scale(.97); } to { opacity: 1; transform: none; } }
-    .hidden { display: none !important; }
+    @keyframes w-in {
+      from { opacity: 0; transform: translateY(10px) scale(.97); }
+      to { opacity: 1; transform: none; }
+    }
 
-    .timer {
-      width: 232px;
-      border-radius: 20px;
-      padding: 14px 14px 20px;
-      position: relative;
-      overflow: hidden;
+    /* Segments */
+    .dock-seg {
       display: flex;
-      flex-direction: column;
-      container-type: inline-size;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
     }
-    .timer::before {
-      content: '';
-      position: absolute;
-      inset: -40% -20% auto;
-      height: 80%;
-      background: radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--w-accent) 22%, transparent), transparent 70%);
-      pointer-events: none;
-    }
-    .timer-head { display: flex; align-items: center; justify-content: space-between; position: relative; cursor: grab; touch-action: none; user-select: none; }
-    .timer.dragging .timer-head { cursor: grabbing; }
-    .timer.dragging { transition: none; box-shadow: 0 24px 60px -16px rgba(0,0,0,.8), 0 0 0 1px color-mix(in srgb, var(--w-accent) 38%, transparent); }
-    .drag-grip {
-      width: 10px; height: 12px; flex: none; margin-right: 1px;
-      background-image: radial-gradient(currentColor 1px, transparent 1.3px);
-      background-size: 4px 4px; background-position: 0 0;
-      opacity: .45; border-radius: 2px;
-    }
-    .timer-label {
-      display: inline-flex; align-items: center; gap: 7px;
-      font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
-      color: var(--w-accent-text);
-    }
-    .timer-label svg { width: 13px; height: 13px; }
-    .timer-controls-top { display: flex; gap: 2px; }
-    .icon-btn {
-      display: inline-flex; align-items: center; justify-content: center;
-      width: 27px; height: 27px; padding: 0;
-      border: 0; border-radius: 9px; background: transparent; color: var(--w-muted);
-      cursor: pointer; transition: background .15s ease, color .15s ease, transform .14s ease;
-    }
-    .icon-btn:hover { background: color-mix(in srgb, var(--w-text) 8%, transparent); color: var(--w-text); transform: scale(1.08); }
-    .icon-btn:active { transform: scale(0.92); }
-    .icon-btn:focus-visible { outline: 2px solid var(--w-accent); outline-offset: 1px; }
-    .icon-btn svg { width: 15px; height: 15px; }
-    .timer-body { display: flex; align-items: center; gap: clamp(10px, 3.8cqw, 18px); margin-top: 10px; position: relative; flex: 1; }
-    .ring { width: clamp(62px, 22cqw, 92px); height: clamp(62px, 22cqw, 92px); transform: rotate(-90deg); flex: none; }
-    .ring circle { fill: none; stroke-width: 4; }
-    .ring .track { stroke: color-mix(in srgb, var(--w-text) 10%, transparent); }
-    .ring .progress { stroke: var(--w-accent); stroke-linecap: round; transition: stroke-dashoffset .35s linear; filter: drop-shadow(0 0 5px color-mix(in srgb, var(--w-accent) 50%, transparent)); }
-    .timer-readout { min-width: 0; flex: 1; }
-    .timer-time { font-family: var(--w-mono); font-size: clamp(27px, 11.5cqw, 44px); font-weight: 600; letter-spacing: -.04em; line-height: 1; }
-    .timer-sub { margin-top: 5px; font-size: clamp(11px, 3.1cqw, 13px); color: var(--w-muted); display: flex; align-items: center; gap: 5px; min-width: 0; }
-    .timer-sub .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--w-accent); flex: none; }
-    .timer-sub [data-el="timerSub"] { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .timer-actions { display: flex; align-items: center; gap: 6px; margin-top: auto; padding-top: 11px; position: relative; }
-    .timer-resize {
-      position: absolute; right: 2px; bottom: 2px; z-index: 4;
-      width: 22px; height: 22px; padding: 0; border: 0; background: transparent;
-      appearance: none; -webkit-appearance: none; font: inherit;
-      color: var(--w-muted); cursor: nwse-resize; touch-action: none;
-    }
-    .timer-resize::before {
-      content: ''; position: absolute; right: 5px; bottom: 5px;
-      width: 8px; height: 8px;
-      border-right: 2px solid currentColor; border-bottom: 2px solid currentColor;
-      border-bottom-right-radius: 2px; opacity: .55;
-    }
-    .timer-resize:hover::before, .timer-resize:focus-visible::before { opacity: 1; color: var(--w-text); }
-    .timer-resize:focus-visible { outline: 1px solid var(--w-accent); outline-offset: -2px; border-radius: 6px; }
-    .timer.resizing { transition: none; }
-    .timer.resizing .timer-resize::before { opacity: 1; color: var(--w-accent); }
-    .timer.compact { padding: 10px 10px 18px; border-radius: 16px; }
-    .timer.compact .timer-head .icon-btn { width: 22px; height: 22px; }
-    .timer.compact .timer-label { font-size: 9px; gap: 5px; letter-spacing: .1em; }
-    .timer.compact .timer-label svg { width: 11px; height: 11px; }
-    .timer.compact .drag-grip { display: none; }
-    .timer.compact .timer-sub, .timer.compact .timer-dots { display: none; }
-    .timer.compact .timer-body { margin-top: 6px; gap: 8px; }
-    .timer.compact .ring { width: 46px; height: 46px; }
-    .timer.compact .timer-time { font-size: 21px; }
-    .timer.compact .timer-actions { gap: 4px; padding-top: 6px; }
-    .timer.compact .primary-btn, .timer.compact .ghost-btn { height: 27px; font-size: 10px; border-radius: 8px; padding: 0 8px; }
-    .timer.compact .primary-btn svg { width: 12px; height: 12px; }
-    .timer.compact .timer-resize { width: 18px; height: 18px; }
-    .primary-btn {
-      flex: 1; height: 32px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-      border: 0; border-radius: 10px; cursor: pointer;
-      background: var(--w-accent);
-      color: var(--w-on-accent); font-size: 12px; font-weight: 750;
-      box-shadow: 0 4px 14px -4px var(--w-accent);
-      transition: transform .16s cubic-bezier(0.16, 1, 0.3, 1), filter .16s ease, box-shadow .16s ease;
-    }
-    .primary-btn:hover { filter: brightness(1.08); transform: translateY(-1px) scale(1.02); }
-    .primary-btn:active { transform: translateY(0) scale(0.97); }
-    .primary-btn svg { width: 14px; height: 14px; }
-    .ghost-btn {
-      height: 32px; padding: 0 10px; border-radius: 10px; cursor: pointer;
-      border: 1px solid var(--w-border); background: transparent; color: var(--w-muted);
-      font-size: 11px; transition: color .15s, background .15s, transform .14s ease;
-    }
-    .ghost-btn:hover { color: var(--w-text); background: color-mix(in srgb, var(--w-text) 6%, transparent); transform: translateY(-0.5px); }
-    .ghost-btn:active { transform: translateY(0) scale(0.97); }
-    .timer-dots { display: flex; gap: 4px; align-items: center; margin-left: 2px; }
-    .timer-dots i { width: 5px; height: 5px; border-radius: 50%; background: color-mix(in srgb, var(--w-text) 16%, transparent); }
-    .timer-dots i.on { background: var(--w-accent); box-shadow: 0 0 6px var(--w-accent); }
 
-    .audio {
-      display: flex; align-items: center; gap: 8px;
-      padding: 7px 9px 7px 7px; border-radius: 999px; width: min(300px, calc(100vw - 24px));
+    /* Hairline Divider */
+    .dock-divider {
+      width: 1px;
+      height: 22px;
+      background: color-mix(in srgb, var(--w-text) 16%, transparent);
+      margin: 0 10px;
+      flex: none;
     }
+
+    /* Play/Toggle button */
     .play-btn {
-      width: 34px; height: 34px; border-radius: 50%; flex: none; border: 0; cursor: pointer;
-      display: grid; place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      flex: none;
+      border: 0;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
       background: var(--w-accent);
-      color: var(--w-on-accent); box-shadow: 0 4px 14px -4px var(--w-accent);
+      color: var(--w-on-accent);
+      box-shadow: 0 4px 14px -4px var(--w-accent);
       transition: transform .16s cubic-bezier(0.16, 1, 0.3, 1), box-shadow .16s ease, filter .16s ease;
+      position: relative;
     }
     .play-btn:hover { transform: scale(1.06); filter: brightness(1.08); }
     .play-btn:active { transform: scale(0.95); }
-    .play-btn svg { width: 15px; height: 15px; }
+    .play-btn svg { width: 14px; height: 14px; }
     .play-btn:focus-visible { outline: 2px solid var(--w-text); outline-offset: 2px; }
+
+    /* Timer Toggle button with circular progress ring */
+    .timer-toggle-btn {
+      position: relative;
+    }
+    .timer-toggle-btn .ring {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+      pointer-events: none;
+    }
+    .timer-toggle-btn .ring circle {
+      fill: none;
+    }
+    .timer-toggle-btn .ring .track {
+      stroke: color-mix(in srgb, var(--w-on-accent) 22%, transparent);
+      stroke-width: 2.4;
+    }
+    .timer-toggle-btn .ring .progress {
+      stroke: var(--w-on-accent);
+      stroke-width: 2.4;
+      stroke-linecap: round;
+      transition: stroke-dashoffset .35s linear;
+    }
+    .timer-toggle-btn .timer-icon {
+      display: grid;
+      place-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Timer readout */
+    .timer-info {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 2px;
+    }
+    .timer-time {
+      font-family: var(--w-mono);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--w-text);
+      white-space: nowrap;
+    }
+    .timer-sub {
+      font-size: 9px;
+      color: var(--w-muted);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 110px;
+    }
+
+    /* Timer actions */
+    .timer-actions {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      margin-left: 2px;
+    }
+
+    /* Audio Equalizer */
     .eq { display: flex; align-items: flex-end; gap: 2px; height: 15px; width: 19px; flex: none; }
     .eq i { display: block; width: 2.5px; border-radius: 2px; background: currentColor; opacity: .35; height: 5px; }
-    .audio.playing .eq i { opacity: 1; animation: eq .9s ease-in-out infinite alternate; }
-    .audio.playing .eq i:nth-child(2) { animation-delay: -.25s; }
-    .audio.playing .eq i:nth-child(3) { animation-delay: -.5s; }
-    .audio.playing .eq i:nth-child(4) { animation-delay: -.15s; }
+    .dock-seg.playing .eq i { opacity: 1; animation: eq .9s ease-in-out infinite alternate; }
+    .dock-seg.playing .eq i:nth-child(2) { animation-delay: -.25s; }
+    .dock-seg.playing .eq i:nth-child(3) { animation-delay: -.5s; }
+    .dock-seg.playing .eq i:nth-child(4) { animation-delay: -.15s; }
     @keyframes eq { from { height: 3px; } to { height: 15px; } }
-    .audio-info { min-width: 0; flex: 1 1 auto; overflow: hidden; }
+
+    /* Audio Readout */
+    .audio-info { min-width: 0; max-width: 95px; overflow: hidden; }
     .audio-title { font-size: 11px; font-weight: 700; letter-spacing: .01em; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .audio-sub { font-size: 9px; color: var(--w-muted); letter-spacing: .08em; text-transform: uppercase; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
     .preset-btn {
       flex: none;
       border: 0; background: transparent; color: var(--w-muted); cursor: pointer;
@@ -202,10 +196,11 @@
     }
     .preset-btn:hover { background: color-mix(in srgb, var(--w-text) 8%, transparent); color: var(--w-text); transform: translateY(-0.5px); }
     .preset-btn:active { transform: scale(0.95); }
+
     .volume-wrap { display: flex; align-items: center; gap: 5px; color: var(--w-muted); flex: none; }
     .volume-wrap svg { width: 13px; height: 13px; flex: none; }
     .volume {
-      -webkit-appearance: none; appearance: none; width: 46px; height: 3px; border-radius: 99px;
+      -webkit-appearance: none; appearance: none; width: 44px; height: 3px; border-radius: 99px;
       background: color-mix(in srgb, var(--w-text) 18%, transparent); outline: none; cursor: pointer;
     }
     .volume::-webkit-slider-thumb {
@@ -213,11 +208,21 @@
       background: var(--w-accent); border: 2px solid var(--w-surface); box-shadow: 0 0 0 1px var(--w-accent);
       transition: transform .14s ease, box-shadow .14s ease;
     }
-    .volume::-webkit-slider-thumb:hover {
-      transform: scale(1.2);
-    }
+    .volume::-webkit-slider-thumb:hover { transform: scale(1.2); }
     .volume::-moz-range-thumb { width: 8px; height: 8px; border-radius: 50%; background: var(--w-accent); border: 0; }
-    .audio .icon-btn { width: 24px; height: 24px; }
+
+    /* Common Icon Button */
+    .icon-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 24px; height: 24px; padding: 0;
+      border: 0; border-radius: 8px; background: transparent; color: var(--w-muted);
+      cursor: pointer; transition: background .15s ease, color .15s ease, transform .14s ease;
+      flex: none;
+    }
+    .icon-btn:hover { background: color-mix(in srgb, var(--w-text) 8%, transparent); color: var(--w-text); transform: scale(1.08); }
+    .icon-btn:active { transform: scale(0.92); }
+    .icon-btn:focus-visible { outline: 2px solid var(--w-accent); outline-offset: 1px; }
+    .icon-btn svg { width: 14px; height: 14px; }
 
     .focus-chip {
       position: fixed; left: 18px; bottom: 18px; border-radius: 999px;
@@ -296,11 +301,17 @@
     @keyframes toast-in { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: none; } }
     @keyframes toast-out { to { opacity: 0; transform: translateY(6px) scale(.98); } }
 
-    .timer.warn .ring .progress { stroke: var(--w-accent-2); }
+    .timer-seg.warn .timer-toggle-btn {
+      background: var(--w-accent-2);
+      box-shadow: 0 4px 14px -4px var(--w-accent-2);
+    }
+    .timer-seg.warn .ring .progress {
+      stroke: var(--w-on-accent);
+    }
+
     @media (max-width: 640px) {
-      .stack { right: 10px; bottom: 10px; }
-      .timer { width: 205px; }
-      .volume { width: 38px; }
+      .dock-widget { right: 10px; bottom: 10px; max-width: calc(100vw - 20px); }
+      .volume { width: 34px; }
       .focus-chip { left: 10px; bottom: 10px; }
     }
     @media (prefers-reduced-motion: reduce) {
@@ -310,35 +321,29 @@
 
   const TEMPLATE = `
     <div class="layer">
-      <div class="stack">
-        <section class="card timer hidden" data-el="timer" aria-label="Pomodoro timer">
-          <div class="timer-head" data-el="timerHead" title="Drag to move · double-click to dock">
-            <div class="timer-label"><span class="drag-grip" aria-hidden="true"></span>${ICONS.timer}<span data-el="timerLabel">Focus</span></div>
-            <div class="timer-controls-top">
-              <button class="icon-btn" data-el="timerReset" title="Reset timer" aria-label="Reset timer">${ICONS.reset}</button>
-              <button class="icon-btn" data-el="timerSettings" title="Timer settings" aria-label="Timer settings">${ICONS.settings}</button>
-              <button class="icon-btn" data-el="timerClose" title="Hide timer" aria-label="Hide timer">${ICONS.close}</button>
-            </div>
-          </div>
-          <div class="timer-body">
-            <svg class="ring" viewBox="0 0 62 62" aria-hidden="true">
-              <circle class="track" cx="31" cy="31" r="26"></circle>
-              <circle class="progress" data-el="ringProgress" cx="31" cy="31" r="26" stroke-dasharray="163.36" stroke-dashoffset="0"></circle>
+      <section class="dock-widget hidden" data-el="dockWidget" aria-label="LeetGlow dock">
+        <div class="dock-seg timer-seg hidden" data-el="timer" aria-label="Pomodoro timer">
+          <button class="play-btn timer-toggle-btn" data-el="timerToggle" title="Start/Pause timer" aria-label="Start timer">
+            <svg class="ring" viewBox="0 0 34 34" aria-hidden="true">
+              <circle class="track" cx="17" cy="17" r="14.5"></circle>
+              <circle class="progress" data-el="ringProgress" cx="17" cy="17" r="14.5" stroke-dasharray="91.1" stroke-dashoffset="0"></circle>
             </svg>
-            <div class="timer-readout">
-              <div class="timer-time" data-el="timerTime">25:00</div>
-              <div class="timer-sub"><span class="dot"></span><span data-el="timerSub">Ready when you are</span></div>
-            </div>
+            <span class="timer-icon" data-el="timerIcon">${ICONS.play}</span>
+          </button>
+          <div class="timer-info">
+            <div class="timer-time" data-el="timerTime">25:00</div>
+            <div class="timer-sub" data-el="timerSub"><span data-el="timerLabel">Focus</span></div>
           </div>
           <div class="timer-actions">
-            <button class="primary-btn" data-el="timerToggle">${ICONS.play}<span data-el="timerToggleLabel">Start</span></button>
-            <button class="ghost-btn" data-el="timerSkip" title="Skip phase">Skip</button>
-            <div class="timer-dots" data-el="timerDots" title="Completed focus sessions"></div>
+            <button class="icon-btn" data-el="timerSkip" title="Skip phase" aria-label="Skip phase">${ICONS.skip}</button>
+            <button class="icon-btn" data-el="timerReset" title="Reset timer" aria-label="Reset timer">${ICONS.reset}</button>
+            <button class="icon-btn" data-el="timerClose" title="Hide timer" aria-label="Hide timer">${ICONS.close}</button>
           </div>
-          <button class="timer-resize" data-el="timerResize" type="button" title="Drag to resize · double-click to reset size" aria-label="Resize timer"></button>
-        </section>
+        </div>
 
-        <section class="pill audio hidden" data-el="audio" aria-label="Lofi player">
+        <div class="dock-divider hidden" data-el="dockDivider" aria-hidden="true"></div>
+
+        <div class="dock-seg audio-seg hidden" data-el="audio" aria-label="Lofi player">
           <button class="play-btn" data-el="audioToggle" aria-label="Play lofi">${ICONS.play}</button>
           <div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
           <div class="audio-info">
@@ -351,8 +356,8 @@
             <input class="volume" data-el="audioVolume" type="range" min="0" max="100" value="32" aria-label="Lofi volume">
           </div>
           <button class="icon-btn" data-el="audioClose" title="Turn off lofi" aria-label="Turn off lofi">${ICONS.close}</button>
-        </section>
-      </div>
+        </div>
+      </section>
 
       <section class="pill focus-chip hidden" data-el="focusChip" aria-label="Focus mode active">
         <div class="focus-badge" aria-hidden="true">${ICONS.focus}</div>
@@ -379,12 +384,8 @@
       this.mounted = false;
       this.timerData = null;
       this.audioData = null;
+      this.focusVisible = false;
       this._visible = true;
-      this.savedTimerPosition = null;
-      this.timerPositionApplied = false;
-      this.timerDrag = null;
-      this.timerResizeDrag = null;
-      this._onViewportResize = this._handleViewportResize.bind(this);
     }
 
     mount() {
@@ -421,359 +422,18 @@
 
     _bind() {
       const refs = this.refs;
-      refs.audioToggle.addEventListener('click', function () { this._call('audioToggle'); }.bind(this));
-      refs.audioPreset.addEventListener('click', function () { this._call('audioNext'); }.bind(this));
-      refs.audioClose.addEventListener('click', function () { this._call('audioClose'); }.bind(this));
-      refs.audioVolume.addEventListener('input', function (event) {
+      if (refs.audioToggle) refs.audioToggle.addEventListener('click', function () { this._call('audioToggle'); }.bind(this));
+      if (refs.audioPreset) refs.audioPreset.addEventListener('click', function () { this._call('audioNext'); }.bind(this));
+      if (refs.audioClose) refs.audioClose.addEventListener('click', function () { this._call('audioClose'); }.bind(this));
+      if (refs.audioVolume) refs.audioVolume.addEventListener('input', function (event) {
         this._call('audioVolume', Number(event.target.value) / 100);
       }.bind(this));
-      refs.timerToggle.addEventListener('click', function () { this._call('timerToggle'); }.bind(this));
-      refs.timerSkip.addEventListener('click', function () { this._call('timerSkip'); }.bind(this));
-      refs.timerReset.addEventListener('click', function () { this._call('timerReset'); }.bind(this));
-      refs.timerClose.addEventListener('click', function () { this._call('timerClose'); }.bind(this));
-      refs.timerSettings.addEventListener('click', function () { this._call('openSettings'); }.bind(this));
-      refs.focusExit.addEventListener('click', function () { this._call('focusExit'); }.bind(this));
-      this._bindTimerDrag();
-      this._bindTimerResize();
-      this._loadTimerPosition();
-      window.addEventListener('resize', this._onViewportResize);
-    }
-
-    _bindTimerDrag() {
-      const handle = this.refs.timerHead;
-      const timer = this.refs.timer;
-      if (!handle || !timer) return;
-
-      handle.addEventListener('pointerdown', function (event) {
-        if (event.button !== 0 || !event.isPrimary) return;
-        if (event.target.closest('button')) return;
-        const rect = timer.getBoundingClientRect();
-        this.timerDrag = {
-          pointerId: event.pointerId,
-          startX: event.clientX,
-          startY: event.clientY,
-          left: rect.left,
-          top: rect.top,
-          width: rect.width,
-          height: rect.height,
-          moved: false
-        };
-        try { handle.setPointerCapture(event.pointerId); } catch (error) { /* ignore */ }
-        event.preventDefault();
-      }.bind(this));
-
-      handle.addEventListener('pointermove', function (event) {
-        const drag = this.timerDrag;
-        if (!drag || event.pointerId !== drag.pointerId) return;
-        const dx = event.clientX - drag.startX;
-        const dy = event.clientY - drag.startY;
-        if (!drag.moved && Math.hypot(dx, dy) < 4) return;
-        drag.moved = true;
-        timer.classList.add('dragging');
-        if (!timer.classList.contains('detached')) this._detachTimer(drag.left, drag.top, drag.width);
-        const pos = this._clampTimerPosition(
-          drag.left + dx,
-          drag.top + dy,
-          timer.offsetWidth || drag.width,
-          timer.offsetHeight || drag.height
-        );
-        timer.style.left = pos.x + 'px';
-        timer.style.top = pos.y + 'px';
-        event.stopPropagation();
-        event.preventDefault();
-      }.bind(this));
-
-      const finishDrag = function (event) {
-        const drag = this.timerDrag;
-        if (!drag || (event && event.pointerId !== drag.pointerId)) return;
-        this.timerDrag = null;
-        timer.classList.remove('dragging');
-        if (drag.moved) {
-          const pos = this._clampTimerPosition(
-            parseFloat(timer.style.left) || drag.left,
-            parseFloat(timer.style.top) || drag.top,
-            timer.offsetWidth || drag.width,
-            timer.offsetHeight || drag.height
-          );
-          timer.style.left = pos.x + 'px';
-          timer.style.top = pos.y + 'px';
-          const saved = { x: pos.x, y: pos.y };
-          if (timer.classList.contains('resized')) {
-            saved.width = timer.offsetWidth;
-            saved.height = timer.offsetHeight;
-          }
-          this.savedTimerPosition = saved;
-          this.timerPositionApplied = true;
-          this._saveTimerPosition(this.savedTimerPosition);
-        }
-        try { handle.releasePointerCapture(drag.pointerId); } catch (error) { /* ignore */ }
-        if (drag.moved) event.stopPropagation();
-      }.bind(this);
-      handle.addEventListener('pointerup', finishDrag);
-      handle.addEventListener('pointercancel', finishDrag);
-
-      handle.addEventListener('dblclick', function (event) {
-        if (event.target.closest('button')) return;
-        this._dockTimer();
-        event.stopPropagation();
-      }.bind(this));
-    }
-
-    _bindTimerResize() {
-      const handle = this.refs.timerResize;
-      const timer = this.refs.timer;
-      if (!handle || !timer) return;
-
-      handle.addEventListener('pointerdown', function (event) {
-        if (event.button !== 0 || !event.isPrimary) return;
-        const rect = timer.getBoundingClientRect();
-        this.timerResizeDrag = {
-          pointerId: event.pointerId,
-          startX: event.clientX,
-          startY: event.clientY,
-          startWidth: rect.width,
-          startHeight: rect.height,
-          left: rect.left,
-          top: rect.top,
-          started: false
-        };
-        try { handle.setPointerCapture(event.pointerId); } catch (error) { /* ignore */ }
-        event.preventDefault();
-        event.stopPropagation();
-      }.bind(this));
-
-      handle.addEventListener('pointermove', function (event) {
-        const drag = this.timerResizeDrag;
-        if (!drag || event.pointerId !== drag.pointerId) return;
-        const dx = event.clientX - drag.startX;
-        const dy = event.clientY - drag.startY;
-        if (!drag.started && Math.hypot(dx, dy) < 3) return;
-        if (!drag.started) {
-          drag.started = true;
-          timer.classList.add('resizing');
-          if (!timer.classList.contains('detached')) this._detachTimer(drag.left, drag.top, drag.startWidth);
-        }
-        this._applyTimerSize(drag.startWidth + dx, drag.startHeight + dy);
-        const pos = this._clampTimerPosition(
-          parseFloat(timer.style.left) || drag.left,
-          parseFloat(timer.style.top) || drag.top,
-          timer.offsetWidth,
-          timer.offsetHeight
-        );
-        timer.style.left = pos.x + 'px';
-        timer.style.top = pos.y + 'px';
-        event.preventDefault();
-        event.stopPropagation();
-      }.bind(this));
-
-      const finishResize = function (event) {
-        const drag = this.timerResizeDrag;
-        if (!drag || (event && event.pointerId !== drag.pointerId)) return;
-        this.timerResizeDrag = null;
-        timer.classList.remove('resizing');
-        if (drag.started) {
-          const rect = timer.getBoundingClientRect();
-          const pos = this._clampTimerPosition(rect.left, rect.top, rect.width, rect.height);
-          timer.style.left = pos.x + 'px';
-          timer.style.top = pos.y + 'px';
-          this.savedTimerPosition = { x: pos.x, y: pos.y, width: rect.width, height: rect.height };
-          this.timerPositionApplied = true;
-          this._saveTimerPosition(this.savedTimerPosition);
-        }
-        try { handle.releasePointerCapture(drag.pointerId); } catch (error) { /* ignore */ }
-        if (drag.started) event.stopPropagation();
-      }.bind(this);
-      handle.addEventListener('pointerup', finishResize);
-      handle.addEventListener('pointercancel', finishResize);
-
-      handle.addEventListener('dblclick', function (event) {
-        this._resetTimerSize();
-        event.preventDefault();
-        event.stopPropagation();
-      }.bind(this));
-
-      handle.addEventListener('keydown', function (event) {
-        const directions = {
-          ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1]
-        };
-        const direction = directions[event.key];
-        if (!direction) return;
-        const rect = timer.getBoundingClientRect();
-        if (!timer.classList.contains('detached')) this._detachTimer(rect.left, rect.top, rect.width);
-        const step = event.shiftKey ? 32 : 12;
-        const size = this._applyTimerSize(
-          timer.offsetWidth + direction[0] * step,
-          timer.offsetHeight + direction[1] * step
-        );
-        const pos = this._clampTimerPosition(
-          parseFloat(timer.style.left) || rect.left,
-          parseFloat(timer.style.top) || rect.top,
-          size.width,
-          size.height
-        );
-        timer.style.left = pos.x + 'px';
-        timer.style.top = pos.y + 'px';
-        this.savedTimerPosition = { x: pos.x, y: pos.y, width: size.width, height: size.height };
-        this.timerPositionApplied = true;
-        this._saveTimerPosition(this.savedTimerPosition);
-        event.preventDefault();
-        event.stopPropagation();
-      }.bind(this));
-    }
-
-    _applyTimerSize(width, height) {
-      const timer = this.refs.timer;
-      const size = this._clampTimerSize(width, height);
-      timer.style.width = size.width + 'px';
-      timer.style.height = size.height + 'px';
-      timer.classList.add('resized');
-      timer.classList.toggle('compact', size.width < 220 || size.height < 168);
-      return size;
-    }
-
-    _clampTimerSize(width, height) {
-      const limitWidth = Math.max(160, Math.min(430, window.innerWidth - 16));
-      const limitHeight = Math.max(130, Math.min(430, window.innerHeight - 16));
-      const minWidth = Math.min(190, limitWidth);
-      const minHeight = Math.min(140, limitHeight);
-      return {
-        width: Math.round(Math.min(Math.max(width || 232, minWidth), limitWidth)),
-        height: Math.round(Math.min(Math.max(height || 170, minHeight), limitHeight))
-      };
-    }
-
-    _detachTimer(left, top, width, height) {
-      const timer = this.refs.timer;
-      if (!timer) return;
-      const measured = timer.offsetWidth || width || 232;
-      timer.classList.add('detached');
-      timer.style.position = 'fixed';
-      timer.style.left = left + 'px';
-      timer.style.top = top + 'px';
-      timer.style.right = 'auto';
-      timer.style.bottom = 'auto';
-      timer.style.width = measured + 'px';
-      if (height) {
-        timer.style.height = height + 'px';
-        timer.classList.add('resized');
-      }
-      timer.style.margin = '0';
-      timer.style.zIndex = '20';
-    }
-
-    _clampTimerPosition(x, y, width, height) {
-      const margin = 8;
-      const w = width || 232;
-      const h = height || 180;
-      const maxX = Math.max(margin, window.innerWidth - w - margin);
-      const maxY = Math.max(margin, window.innerHeight - h - margin);
-      return {
-        x: Math.min(Math.max(margin, x), maxX),
-        y: Math.min(Math.max(margin, y), maxY)
-      };
-    }
-
-    _applyStoredTimerPosition() {
-      if (!this.savedTimerPosition || this.timerPositionApplied || !this.refs.timer) return;
-      const timer = this.refs.timer;
-      if (timer.classList.contains('hidden')) return;
-      const saved = this.savedTimerPosition;
-      const storedWidth = Number(saved.width);
-      const storedHeight = Number(saved.height);
-      const hasSize = isFinite(storedWidth) && isFinite(storedHeight) && storedWidth > 0 && storedHeight > 0;
-      const width = hasSize ? storedWidth : (timer.offsetWidth || 232);
-      this._detachTimer(saved.x, saved.y, width, hasSize ? storedHeight : 0);
-      if (hasSize) {
-        const size = this._applyTimerSize(storedWidth, storedHeight);
-        const pos = this._clampTimerPosition(saved.x, saved.y, size.width, size.height);
-        timer.style.left = pos.x + 'px';
-        timer.style.top = pos.y + 'px';
-        this.savedTimerPosition = { x: pos.x, y: pos.y, width: size.width, height: size.height };
-      } else {
-        timer.classList.remove('resized', 'compact');
-        timer.style.removeProperty('height');
-        const pos = this._clampTimerPosition(saved.x, saved.y, timer.offsetWidth, timer.offsetHeight);
-        timer.style.left = pos.x + 'px';
-        timer.style.top = pos.y + 'px';
-        this.savedTimerPosition = { x: pos.x, y: pos.y };
-      }
-      this.timerPositionApplied = true;
-    }
-
-    _handleViewportResize() {
-      if (!this.refs || !this.refs.timer || !this.refs.timer.classList.contains('detached')) return;
-      const timer = this.refs.timer;
-      if (timer.classList.contains('hidden')) return;
-      let size = { width: timer.offsetWidth, height: timer.offsetHeight };
-      if (timer.classList.contains('resized')) size = this._applyTimerSize(size.width, size.height);
-      const pos = this._clampTimerPosition(
-        parseFloat(timer.style.left) || 0,
-        parseFloat(timer.style.top) || 0,
-        size.width,
-        size.height
-      );
-      timer.style.left = pos.x + 'px';
-      timer.style.top = pos.y + 'px';
-      this.savedTimerPosition = timer.classList.contains('resized')
-        ? { x: pos.x, y: pos.y, width: size.width, height: size.height }
-        : { x: pos.x, y: pos.y };
-      this._saveTimerPosition(this.savedTimerPosition);
-    }
-
-    _saveTimerPosition(pos) {
-      try {
-        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-          chrome.storage.local.set({ lctTimerPosition: pos });
-        }
-      } catch (error) { /* ignore */ }
-    }
-
-    _loadTimerPosition() {
-      try {
-        if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.local) return;
-        chrome.storage.local.get('lctTimerPosition', function (result) {
-          const pos = result && result.lctTimerPosition;
-          if (!pos || !isFinite(pos.x) || !isFinite(pos.y)) return;
-          this.savedTimerPosition = { x: Number(pos.x), y: Number(pos.y) };
-          if (isFinite(pos.width) && isFinite(pos.height) && pos.width > 0 && pos.height > 0) {
-            this.savedTimerPosition.width = Number(pos.width);
-            this.savedTimerPosition.height = Number(pos.height);
-          }
-          this._applyStoredTimerPosition();
-        }.bind(this));
-      } catch (error) { /* ignore */ }
-    }
-
-    _resetTimerSize() {
-      const timer = this.refs.timer;
-      if (!timer || !timer.classList.contains('detached')) return;
-      timer.style.width = '232px';
-      timer.style.removeProperty('height');
-      timer.classList.remove('resized', 'compact', 'resizing');
-      const rect = timer.getBoundingClientRect();
-      const pos = this._clampTimerPosition(rect.left, rect.top, rect.width, rect.height);
-      timer.style.left = pos.x + 'px';
-      timer.style.top = pos.y + 'px';
-      this.savedTimerPosition = { x: pos.x, y: pos.y };
-      this.timerPositionApplied = true;
-      this._saveTimerPosition(this.savedTimerPosition);
-    }
-
-    _dockTimer() {
-      const timer = this.refs.timer;
-      if (!timer) return;
-      timer.classList.remove('detached', 'dragging', 'resizing', 'resized', 'compact');
-      ['position', 'left', 'top', 'right', 'bottom', 'width', 'height', 'margin', 'zIndex'].forEach(function (property) {
-        timer.style.removeProperty(property.replace(/[A-Z]/g, function (letter) { return '-' + letter.toLowerCase(); }));
-      });
-      timer.style.removeProperty('z-index');
-      this.savedTimerPosition = null;
-      this.timerPositionApplied = false;
-      try {
-        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-          chrome.storage.local.remove('lctTimerPosition');
-        }
-      } catch (error) { /* ignore */ }
+      if (refs.timerToggle) refs.timerToggle.addEventListener('click', function () { this._call('timerToggle'); }.bind(this));
+      if (refs.timerSkip) refs.timerSkip.addEventListener('click', function () { this._call('timerSkip'); }.bind(this));
+      if (refs.timerReset) refs.timerReset.addEventListener('click', function () { this._call('timerReset'); }.bind(this));
+      if (refs.timerClose) refs.timerClose.addEventListener('click', function () { this._call('timerClose'); }.bind(this));
+      if (refs.timerSettings) refs.timerSettings.addEventListener('click', function () { this._call('openSettings'); }.bind(this));
+      if (refs.focusExit) refs.focusExit.addEventListener('click', function () { this._call('focusExit'); }.bind(this));
     }
 
     setVisible(visible) {
@@ -791,12 +451,29 @@
       const showAudio = Boolean(this.audioData && this.audioData.visible);
       const showTimer = Boolean(this.timerData && this.timerData.visible);
       const showFocus = Boolean(this.focusVisible);
-      this.refs.audio.style.display = showAudio ? '' : 'none';
-      this.refs.audio.classList.toggle('hidden', !showAudio);
-      this.refs.timer.style.display = showTimer ? '' : 'none';
-      this.refs.timer.classList.toggle('hidden', !showTimer);
-      this.refs.focusChip.style.display = showFocus ? '' : 'none';
-      this.refs.focusChip.classList.toggle('hidden', !showFocus);
+      const showDock = showAudio || showTimer;
+
+      if (this.refs.dockWidget) {
+        this.refs.dockWidget.style.display = showDock ? 'flex' : 'none';
+        this.refs.dockWidget.classList.toggle('hidden', !showDock);
+      }
+      if (this.refs.timer) {
+        this.refs.timer.style.display = showTimer ? 'flex' : 'none';
+        this.refs.timer.classList.toggle('hidden', !showTimer);
+      }
+      if (this.refs.audio) {
+        this.refs.audio.style.display = showAudio ? 'flex' : 'none';
+        this.refs.audio.classList.toggle('hidden', !showAudio);
+      }
+      if (this.refs.dockDivider) {
+        const showDivider = showAudio && showTimer;
+        this.refs.dockDivider.style.display = showDivider ? 'block' : 'none';
+        this.refs.dockDivider.classList.toggle('hidden', !showDivider);
+      }
+      if (this.refs.focusChip) {
+        this.refs.focusChip.style.display = showFocus ? 'flex' : 'none';
+        this.refs.focusChip.classList.toggle('hidden', !showFocus);
+      }
     }
 
     updateTimer(data) {
@@ -805,26 +482,31 @@
       this._refreshVisibility();
       if (!this.timerData.visible) return;
       const refs = this.refs;
-      refs.timerTime.textContent = this.timerData.time || '25:00';
-      refs.timerLabel.textContent = this.timerData.label || 'Focus';
-      refs.timerSub.textContent = this.timerData.sub || '';
-      refs.timerToggle.innerHTML = (this.timerData.running ? ICONS.pause : ICONS.play) + '<span data-el="timerToggleLabel">' + (this.timerData.running ? 'Pause' : 'Start') + '</span>';
-      refs.timerToggle.setAttribute('aria-label', this.timerData.running ? 'Pause timer' : 'Start timer');
-      const circle = refs.ringProgress;
-      const radius = 26;
-      const circumference = 2 * Math.PI * radius;
-      circle.setAttribute('stroke-dasharray', circumference.toFixed(2));
-      circle.setAttribute('stroke-dashoffset', (circumference * (1 - Math.max(0, Math.min(1, this.timerData.progress || 0)))).toFixed(2));
-      const dots = refs.timerDots;
-      dots.innerHTML = '';
-      const cycles = Math.max(0, Math.min(8, this.timerData.cycles || 0));
-      for (let i = 0; i < Math.max(4, cycles); i += 1) {
-        const dot = document.createElement('i');
-        if (i < cycles) dot.className = 'on';
-        dots.appendChild(dot);
+      if (refs.timerTime) refs.timerTime.textContent = this.timerData.time || '25:00';
+      if (refs.timerLabel) refs.timerLabel.textContent = this.timerData.label || 'Focus';
+      if (refs.timerSub) {
+        const label = this.timerData.label || 'Focus';
+        const sub = this.timerData.sub;
+        refs.timerSub.textContent = sub ? (label + ' · ' + sub) : label;
       }
-      refs.timer.classList.toggle('warn', Boolean(this.timerData.warn));
-      this._applyStoredTimerPosition();
+      if (refs.timerIcon) {
+        refs.timerIcon.innerHTML = this.timerData.running ? ICONS.pause : ICONS.play;
+      }
+      if (refs.timerToggle) {
+        const title = this.timerData.running ? 'Pause timer' : 'Start timer';
+        refs.timerToggle.setAttribute('aria-label', title);
+        refs.timerToggle.setAttribute('title', title);
+      }
+      const circle = refs.ringProgress;
+      if (circle) {
+        const radius = 14.5;
+        const circumference = 2 * Math.PI * radius; // ~91.11
+        circle.setAttribute('stroke-dasharray', circumference.toFixed(2));
+        circle.setAttribute('stroke-dashoffset', (circumference * (1 - Math.max(0, Math.min(1, this.timerData.progress || 0)))).toFixed(2));
+      }
+      if (refs.timer) {
+        refs.timer.classList.toggle('warn', Boolean(this.timerData.warn));
+      }
     }
 
     updateAudio(data) {
@@ -833,18 +515,21 @@
       this._refreshVisibility();
       if (!this.audioData.visible) return;
       const refs = this.refs;
-      refs.audio.classList.toggle('playing', Boolean(this.audioData.playing));
-      refs.audioToggle.innerHTML = this.audioData.playing ? ICONS.pause : ICONS.play;
-      refs.audioToggle.setAttribute('aria-label', this.audioData.playing ? 'Pause lofi' : 'Play lofi');
-      refs.audioTitle.textContent = this.audioData.title || 'Lofi Café';
-      refs.audioSub.textContent = this.audioData.playing ? 'playing' : (this.audioData.pending ? 'tap to start' : 'paused');
-      refs.audioVolume.value = Math.round((this.audioData.volume == null ? 0.32 : this.audioData.volume) * 100);
+      if (refs.audio) {
+        refs.audio.classList.toggle('playing', Boolean(this.audioData.playing));
+      }
+      if (refs.audioToggle) {
+        refs.audioToggle.innerHTML = this.audioData.playing ? ICONS.pause : ICONS.play;
+        refs.audioToggle.setAttribute('aria-label', this.audioData.playing ? 'Pause lofi' : 'Play lofi');
+      }
+      if (refs.audioTitle) refs.audioTitle.textContent = this.audioData.title || 'Lofi Café';
+      if (refs.audioSub) refs.audioSub.textContent = this.audioData.playing ? 'playing' : (this.audioData.pending ? 'tap to start' : 'paused');
+      if (refs.audioVolume) refs.audioVolume.value = Math.round((this.audioData.volume == null ? 0.32 : this.audioData.volume) * 100);
     }
 
     setFocus(visible) {
       if (!this.mounted) return;
       this.focusVisible = Boolean(visible);
-      this.refs.focusChip.classList.toggle('hidden', !visible);
       this._refreshVisibility();
     }
 
@@ -862,7 +547,6 @@
     }
 
     destroy() {
-      window.removeEventListener('resize', this._onViewportResize);
       if (this.host) this.host.remove();
       this.mounted = false;
     }
