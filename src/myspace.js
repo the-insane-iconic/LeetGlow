@@ -1060,12 +1060,34 @@
 
   // Weekly Leaderboard View (Top 20 worldwide)
   function renderLeaderboardContent() {
-    const leaders = (state.globalLeaders && state.globalLeaders.length) ? state.globalLeaders : [];
-    const userRankIdx = leaders.findIndex(l => l.id === state.userId || (state.nickname && l.nickname === state.nickname));
-    const isUserInTop20 = userRankIdx >= 0 && userRankIdx < 20;
+    const rawLeaders = (state.globalLeaders && state.globalLeaders.length) ? state.globalLeaders : [];
+    const userWeeklySec = Math.max(state.weeklyFocusSeconds || 0, state.todayFocusSeconds || 0);
     const currentRoomName = state.activeRoom
       ? (state.activeRoom.type === 'private' ? 'Private Squad 🔒' : (state.activeRoom.name || 'Study Squad'))
       : 'Solo Coder';
+
+    // Build genuine leaderboard: include user if they have focus time and server haven't synced yet
+    let leaders = [...rawLeaders];
+    if (userWeeklySec > 0 && !leaders.some(l => Boolean(state.userId && l.id === state.userId))) {
+      leaders.push({
+        id: state.userId,
+        nickname: state.nickname || 'You',
+        focusSeconds: userWeeklySec,
+        weeklyDisplay: formatHoursMinutes(userWeeklySec),
+        streak: state.streak,
+        solvedCount: state.solvedCount,
+        roomName: currentRoomName,
+        avatar: getInitials(state.nickname || 'You')
+      });
+      leaders.sort((a, b) => (Number(b.focusSeconds) || 0) - (Number(a.focusSeconds) || 0));
+      leaders = leaders.map((item, idx) => ({ ...item, rank: idx + 1 }));
+    }
+
+    const userRankIdx = leaders.findIndex(l => Boolean(state.userId && l.id === state.userId));
+    const isUserInTop20 = userRankIdx >= 0 && userRankIdx < 20;
+
+    // Show pinned card ONLY if user has focus time and is ranked outside the top 20
+    const showPinnedUser = !isUserInTop20 && userWeeklySec > 0 && leaders.length >= 20;
 
     return `
       <div class="ms-leaderboard-view">
@@ -1095,8 +1117,8 @@
               <span class="ms-lb-empty-title">Be the first on the board!</span>
               <p class="ms-lb-empty-sub">Focus with LeetGlow to climb this week's global ranking.</p>
             </div>
-          ` : leaders.map((item) => {
-            const isYou = item.id === state.userId || (state.nickname && item.nickname === state.nickname);
+          ` : leaders.slice(0, 20).map((item) => {
+            const isYou = Boolean(state.userId && item.id === state.userId);
             const rankClass = item.rank === 1 ? 'ms-lb-rank-1' : item.rank === 2 ? 'ms-lb-rank-2' : item.rank === 3 ? 'ms-lb-rank-3' : '';
             const rankEmoji = item.rank === 1 ? '🥇' : item.rank === 2 ? '🥈' : item.rank === 3 ? '🥉' : `#${item.rank}`;
 
@@ -1117,11 +1139,11 @@
             `;
           }).join('')}
 
-          ${(!isUserInTop20 && leaders.length > 0) ? `
+          ${showPinnedUser ? `
             <div class="ms-lb-pinned-user">
               <div class="ms-lb-item is-you">
                 <div class="ms-lb-rank-badge">
-                  <span>#${leaders.length + 1}</span>
+                  <span>#${userRankIdx >= 0 ? userRankIdx + 1 : leaders.length + 1}</span>
                 </div>
                 <div class="ms-member-avatar-wrap is-you" style="width: 28px; height: 28px; font-size: 11px;">
                   <span class="ms-avatar-text">${escapeHtml(getInitials(state.nickname || 'You'))}</span>
@@ -1130,7 +1152,7 @@
                   <span class="ms-lb-name">${escapeHtml(state.nickname || 'You')} (You)</span>
                   <span class="ms-lb-stats">${state.streak > 0 ? `🔥 ${state.streak}d streak • ` : ''}${state.solvedCount > 0 ? `✓ ${state.solvedCount} solved • ` : ''}🏷️ ${escapeHtml(currentRoomName)}</span>
                 </div>
-                <span class="ms-lb-hours">${formatHoursMinutes(Math.max(state.weeklyFocusSeconds || 0, state.todayFocusSeconds || 0))}</span>
+                <span class="ms-lb-hours">${formatHoursMinutes(userWeeklySec)}</span>
               </div>
             </div>
           ` : ''}
@@ -1982,8 +2004,11 @@
     }
 
     try {
+      // Force immediate sync of user's latest focus time before querying RTDB
+      syncHeartbeat(true);
+
       const freshLeaders = await window.MySpaceAPI.getGlobalLeaderboard();
-      if (Array.isArray(freshLeaders) && freshLeaders.length > 0) {
+      if (Array.isArray(freshLeaders)) {
         state.globalLeaders = freshLeaders;
         try {
           chrome.storage.local.set({
@@ -2017,8 +2042,9 @@
 
       try {
         if (window.MySpaceAPI) {
+          syncHeartbeat(true);
           const freshLeaders = await window.MySpaceAPI.getGlobalLeaderboard();
-          if (Array.isArray(freshLeaders) && freshLeaders.length > 0) {
+          if (Array.isArray(freshLeaders)) {
             state.globalLeaders = freshLeaders;
             try {
               chrome.storage.local.set({

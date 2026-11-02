@@ -98,28 +98,12 @@
     return `week_${y}_${m}_${dateStr}`;
   }
 
-  function getPrevWeeklyCycleId(now = new Date()) {
-    const prevDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    return getWeeklyCycleId(prevDate);
-  }
-
   function formatHoursMinutes(totalSec) {
     const h = Math.floor(totalSec / 3600);
     const m = Math.floor((totalSec % 3600) / 60);
     if (h === 0) return `${m}m`;
     return `${h}h ${m > 0 ? m + 'm' : ''}`.trim();
   }
-
-  const COMMUNITY_BENCHMARKS = [
-    { id: 'cm_alex', nickname: 'Alex', focusSeconds: 15420, streak: 7, solvedCount: 28, roomName: 'NeetCode 150', avatar: 'AL' },
-    { id: 'cm_sophia', nickname: 'Sophia', focusSeconds: 12600, streak: 5, solvedCount: 19, roomName: 'Daily Grind', avatar: 'SO' },
-    { id: 'cm_kenji', nickname: 'Kenji', focusSeconds: 9840, streak: 6, solvedCount: 22, roomName: 'Blind 75', avatar: 'KJ' },
-    { id: 'cm_priya', nickname: 'Priya', focusSeconds: 7920, streak: 4, solvedCount: 15, roomName: 'Dynamic Programming', avatar: 'PR' },
-    { id: 'cm_david', nickname: 'David', focusSeconds: 5880, streak: 3, solvedCount: 11, roomName: 'LeetGlow Lounge', avatar: 'DA' },
-    { id: 'cm_marcus', nickname: 'Marcus', focusSeconds: 4320, streak: 2, solvedCount: 8, roomName: 'General DSA', avatar: 'MA' },
-    { id: 'cm_elena', nickname: 'Elena', focusSeconds: 2700, streak: 3, solvedCount: 6, roomName: 'Solo Coder', avatar: 'EL' },
-    { id: 'cm_lucas', nickname: 'Lucas', focusSeconds: 1500, streak: 1, solvedCount: 4, roomName: 'Binary Search', avatar: 'LU' }
-  ];
 
   // Calculate deterministic daily 24h cycle ID: resets every day at 5:30 AM IST (00:00:00 UTC) worldwide.
   function getDailyCycleId(now = new Date()) {
@@ -480,10 +464,22 @@
       await apiFetch(`/rooms/${cleanCode}/members/${cleanId}`, {
         method: 'DELETE'
       });
+      // Synchronize public room member count upon member leaving
+      try {
+        const pubRoom = await apiFetch(`/public_rooms/${cleanCode}/code`);
+        if (pubRoom) {
+          const membersRes = await apiFetch(`/rooms/${cleanCode}/members`);
+          const count = membersRes && typeof membersRes === 'object' ? Object.keys(membersRes).length : 0;
+          await apiFetch(`/public_rooms/${cleanCode}/memberCount`, {
+            method: 'PUT',
+            body: JSON.stringify(count)
+          });
+        }
+      } catch (e) {}
       return true;
     },
 
-    // 3. Weekly Global Leaderboard (Top 20, resets Monday 5:30 AM IST / 00:00:00 UTC)
+    // 3. Weekly Global Leaderboard (Top 20 genuine players, resets Monday 5:30 AM IST / 00:00:00 UTC)
     async getGlobalLeaderboard() {
       const cycleId = getWeeklyCycleId();
       let res = null;
@@ -493,60 +489,20 @@
         console.warn('[MySpaceAPI] Failed to fetch leaderboard for cycle:', cycleId, e);
       }
       
-      const userMap = new Map();
-
-      // 1. Current week live players from Firebase
+      let list = [];
       if (res && typeof res === 'object') {
-        Object.values(res).forEach(u => {
-          if (u && u.id && (Number(u.focusSeconds) || 0) > 0) {
-            userMap.set(u.id, {
-              ...u,
-              focusSeconds: Number(u.focusSeconds) || 0
-            });
-          }
-        });
+        list = Object.values(res).filter(u => u && u.id && (Number(u.focusSeconds) || 0) > 0);
       }
-
-      // 2. If fresh week has few entries (< 10), pull previous week's leaders to keep arena competitive
-      if (userMap.size < 10) {
-        try {
-          const prevCycleId = getPrevWeeklyCycleId();
-          const prevRes = await apiFetch(`/leaderboard/${prevCycleId}`);
-          if (prevRes && typeof prevRes === 'object') {
-            Object.values(prevRes).forEach(p => {
-              if (p && p.id && (Number(p.focusSeconds) || 0) > 0 && !userMap.has(p.id)) {
-                userMap.set(p.id, {
-                  ...p,
-                  focusSeconds: Number(p.focusSeconds) || 0,
-                  roomName: p.roomName || 'Solo Coder'
-                });
-              }
-            });
-          }
-        } catch (e) {}
-      }
-
-      // 3. If still fewer than 8 entries, blend in community benchmark coders
-      if (userMap.size < 8) {
-        for (const b of COMMUNITY_BENCHMARKS) {
-          if (!userMap.has(b.id)) {
-            userMap.set(b.id, { ...b });
-            if (userMap.size >= 10) break;
-          }
-        }
-      }
-
-      const list = Array.from(userMap.values());
 
       // Sort by focusSeconds descending
       list.sort((a, b) => (Number(b.focusSeconds) || 0) - (Number(a.focusSeconds) || 0));
 
-      // Limit to top 20 players
+      // Limit to top 20 genuine players
       const top20 = list.slice(0, 20);
       return top20.map((item, index) => ({
         ...item,
         rank: index + 1,
-        weeklyDisplay: formatHoursMinutes(item.focusSeconds) || item.weeklyDisplay || item.todayDisplay || '0m'
+        weeklyDisplay: formatHoursMinutes(Number(item.focusSeconds) || 0) || item.weeklyDisplay || item.todayDisplay || '0m'
       }));
     },
 
