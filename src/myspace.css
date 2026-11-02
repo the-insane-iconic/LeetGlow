@@ -260,7 +260,7 @@
   color: #64748b;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .ms-back-btn:hover,
@@ -269,6 +269,13 @@
   border-color: #fbcfe8;
   color: #db2777;
   transform: translateX(-1px);
+}
+
+.ms-back-btn:focus-visible,
+.ms-btn-back-lobby:focus-visible {
+  outline: none;
+  border-color: #ec4899;
+  box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.2);
 }
 
 .ms-view-title,
@@ -328,6 +335,12 @@
   font-size: 13px;
   transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
   box-sizing: border-box;
+}
+
+.ms-form-input:hover,
+.ms-input:hover {
+  background: #ffffff;
+  border-color: #cbd5e1;
 }
 
 .ms-form-input:focus,
@@ -405,15 +418,18 @@
   letter-spacing: 1.5px;
 }
 
-/* Goal Selector Dropdown */
+/* Goal & Topic Selector Dropdowns */
 .ms-select-container,
-.ms-select-wrapper {
+.ms-select-wrapper,
+.ms-select-wrap {
   position: relative;
   width: 100%;
 }
 
 .ms-select-container select,
 .ms-select-wrapper select,
+.ms-select-wrap select,
+.ms-form-select,
 .ms-select {
   width: 100%;
   height: 42px;
@@ -431,13 +447,30 @@
   box-sizing: border-box;
 }
 
+.ms-select-container select:hover,
+.ms-select-wrapper select:hover,
+.ms-select-wrap select:hover,
+.ms-form-select:hover,
+.ms-select:hover {
+  background: #ffffff;
+  border-color: #cbd5e1;
+}
+
 .ms-select-container select:focus,
 .ms-select-wrapper select:focus,
+.ms-select-wrap select:focus,
+.ms-form-select:focus,
 .ms-select:focus {
   outline: none;
   background: #ffffff;
   border-color: #ec4899;
   box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.18);
+}
+
+.ms-select-container.no-icon select,
+.ms-select-wrapper.no-icon select,
+.ms-select-wrap.no-icon select {
+  padding-left: 12px;
 }
 
 .ms-select-lead-icon,
@@ -449,6 +482,10 @@
   color: #f43f5e;
   pointer-events: none;
   font-size: 14px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .ms-select-arrow-icon {
@@ -460,9 +497,22 @@
   pointer-events: none;
   display: grid;
   place-items: center;
+  transition: color 0.15s ease;
 }
 
-/* Room Type Segmented Cards (Private vs Open) */
+.ms-select-container:hover .ms-select-arrow-icon,
+.ms-select-wrapper:hover .ms-select-arrow-icon,
+.ms-select-wrap:hover .ms-select-arrow-icon {
+  color: #64748b;
+}
+
+.ms-select-container select:focus ~ .ms-select-arrow-icon,
+.ms-select-wrapper select:focus ~ .ms-select-arrow-icon,
+.ms-select-wrap select:focus ~ .ms-select-arrow-icon {
+  color: #db2777;
+}
+
+/* Room Type Segmented Cards (Private vs Public) */
 .ms-room-types,
 .ms-room-type-grid {
   display: grid;
@@ -491,6 +541,12 @@
   color: #0f172a;
 }
 
+.ms-room-type-btn:focus-visible {
+  outline: none;
+  border-color: #ec4899;
+  box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.18);
+}
+
 .ms-room-type-btn.active {
   background: #fdf2f8;
   border-color: #ec4899;
@@ -509,6 +565,7 @@
   border: 1px solid #e2e8f0;
   color: #64748b;
   flex-shrink: 0;
+  transition: all 0.16s ease;
 }
 
 .ms-room-type-btn.active .type-icon,
@@ -522,6 +579,7 @@
 .ms-type-info {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .ms-room-type-title,
@@ -532,12 +590,20 @@
   line-height: 1.2;
 }
 
+.ms-room-type-btn.active .ms-room-type-title,
+.ms-room-type-btn.active .ms-type-title {
+  color: #831843;
+}
+
 .ms-room-type-desc,
 .ms-type-desc {
   font-size: 10.5px;
   color: #64748b;
   margin-top: 2px;
   line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .ms-room-type-btn.active .ms-room-type-desc,
@@ -560,6 +626,23 @@
 .ms-btn-full,
 .ms-btn-block {
   width: 100%;
+}
+
+.ms-btn:disabled,
+.ms-btn-primary:disabled,
+.ms-btn-secondary:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  pointer-events: none;
+  filter: grayscale(0.2);
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.ms-view-create {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 /* =============================================================================
@@ -936,75 +1019,102 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 14px;
-  border-radius: 16px;
+  padding: 8px 12px;
+  border-radius: 14px;
   background: #ffffff;
   border: 1.5px solid rgba(255, 255, 255, 0.9);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12), 0 0 12px rgba(255, 255, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1), 0 0 12px rgba(255, 255, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 1);
   flex-shrink: 0;
+  gap: 8px;
 }
 
 .ms-group-info-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
 }
 
 .ms-group-thumb {
-  width: 48px;
-  height: 36px;
-  border-radius: 10px;
+  width: 36px;
+  height: 32px;
+  border-radius: 8px;
   object-fit: cover;
   flex-shrink: 0;
   border: 1px solid #fbcfe8;
-  box-shadow: 0 3px 10px rgba(236, 72, 153, 0.15);
+  box-shadow: 0 2px 8px rgba(236, 72, 153, 0.12);
 }
 
 .ms-group-meta {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
 }
 
 .ms-group-name {
   font-family: 'Space Grotesk', var(--font-ui), sans-serif;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   color: #0f172a;
   line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .ms-group-sub {
-  font-size: 11px;
+  font-size: 9.5px;
   color: #64748b;
-  margin-top: 3px;
+  margin-top: 2px;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.ms-group-sub .ms-meta-item {
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .ms-group-sub .dot {
-  font-size: 9px;
-  color: #94a3b8;
+  font-size: 7.5px;
+  color: #cbd5e1;
+  flex-shrink: 0;
 }
 
 .ms-group-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 5px;
+  flex-shrink: 0;
 }
 
 .ms-group-action-btn,
 .ms-group-settings-btn {
   display: grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
   background: #f8fafc;
   border: 1.5px solid #e2e8f0;
   color: #64748b;
   cursor: pointer;
   transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.ms-group-action-btn svg,
+.ms-group-settings-btn svg {
+  width: 13px;
+  height: 13px;
 }
 
 .ms-group-action-btn:hover,
@@ -1304,6 +1414,7 @@
   flex-direction: column;
   overflow: hidden;
   flex: 1;
+  min-width: 0;
 }
 
 .ms-member-name-line {
@@ -1686,6 +1797,38 @@
   padding-bottom: 6px;
   flex: 1;
   min-height: 0;
+}
+
+/* Loading Leaderboard State */
+.ms-lb-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 36px 16px;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1.5px solid rgba(255, 255, 255, 0.9);
+  color: #64748b;
+  font-size: 11.5px;
+  font-weight: 500;
+  margin: 6px 0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.ms-lb-spinner {
+  width: 22px;
+  height: 22px;
+  border: 2.5px solid #fce7f3;
+  border-top-color: #ec4899;
+  border-radius: 50%;
+  animation: ms-spin 0.75s linear infinite;
+}
+
+@keyframes ms-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* Empty Leaderboard State */
@@ -2164,25 +2307,38 @@
 .ms-topic-tag {
   display: inline-flex;
   align-items: center;
-  font-size: 10px;
+  font-size: 8.5px;
   font-weight: 600;
-  padding: 1px 7px;
+  line-height: 1.2;
+  padding: 1px 5.5px;
   border-radius: 9999px;
-  background: rgba(99, 102, 241, 0.1);
-  color: #6366f1;
-  border: 1px solid rgba(99, 102, 241, 0.2);
+  background: rgba(99, 102, 241, 0.08);
+  color: #4f46e5;
+  border: 1px solid rgba(99, 102, 241, 0.22);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 85px;
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .ms-topic-badge {
   display: inline-flex;
   align-items: center;
-  font-size: 9.5px;
+  font-size: 8.5px;
   font-weight: 600;
-  padding: 1px 6px;
+  line-height: 1.2;
+  padding: 1px 5.5px;
   border-radius: 9999px;
   background: rgba(99, 102, 241, 0.08);
-  color: #6366f1;
-  border: 1px solid rgba(99, 102, 241, 0.18);
+  color: #4f46e5;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 85px;
+  flex-shrink: 0;
 }
 
 /* Topic Filter Pills Bar */
@@ -2221,183 +2377,124 @@
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.18);
 }
 
-/* Problem Badges in Member List */
+/* Dynamic Problem Status Pill (Yellow = Solving, Green = Solved) */
 .ms-member-badges {
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
   gap: 4px;
-  margin-top: 4px;
+  margin-top: 3.5px;
+  min-width: 0;
 }
-.ms-member-problem-badge {
+
+.ms-member-pill {
   display: inline-flex;
   align-items: center;
-  gap: 3.5px;
-  font-size: 9.5px;
+  gap: 3px;
+  font-size: 8.5px;
   font-weight: 600;
+  line-height: 1.2;
   padding: 1.5px 6px;
-  border-radius: 6px;
-  background: rgba(241, 245, 249, 0.9);
-  color: #475569;
-  border: 1px solid rgba(203, 213, 225, 0.7);
-  max-width: 170px;
+  border-radius: 9999px;
+  max-width: 100%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-.ms-member-problem-badge .ms-prob-icon {
-  font-size: 9px;
-}
-.ms-member-problem-badge.diff-easy {
-  background: rgba(16, 185, 129, 0.08);
-  color: #059669;
-  border-color: rgba(16, 185, 129, 0.25);
-}
-.ms-member-problem-badge.diff-medium {
-  background: rgba(245, 158, 11, 0.08);
-  color: #d97706;
-  border-color: rgba(245, 158, 11, 0.25);
-}
-.ms-member-problem-badge.diff-hard {
-  background: rgba(239, 68, 68, 0.08);
-  color: #dc2626;
-  border-color: rgba(239, 68, 68, 0.25);
+  user-select: none;
+  box-sizing: border-box;
+  transition: background 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.ms-member-solve-badge {
-  display: inline-flex;
-  align-items: center;
-  font-size: 9.5px;
-  font-weight: 700;
-  padding: 1.5px 6px;
-  border-radius: 6px;
-  background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(245, 158, 11, 0.25));
+.ms-member-pill .ms-pill-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+/* Solving State: Warm Amber / Yellow */
+.ms-member-pill.pill-solving {
+  background: linear-gradient(135deg, rgba(254, 243, 199, 0.95) 0%, rgba(253, 230, 138, 0.45) 100%);
   color: #b45309;
-  border: 1px solid rgba(245, 158, 11, 0.35);
-  animation: ms-solve-pulse 1.8s ease-in-out infinite;
-}
-@keyframes ms-solve-pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.85; transform: scale(1.02); }
+  border: 1px solid rgba(245, 158, 11, 0.38);
+  box-shadow: 0 1px 2px rgba(245, 158, 11, 0.08);
 }
 
-/* Topic Badges & Tags */
-.ms-topic-tag {
+.ms-member-pill.pill-solving:hover {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-color: rgba(245, 158, 11, 0.55);
+}
+
+.ms-member-pill.pill-solving .ms-pill-target-icon {
+  font-size: 8.5px;
+  line-height: 1;
   display: inline-flex;
   align-items: center;
-  font-size: 10px;
-  font-weight: 600;
-  padding: 1px 7px;
-  border-radius: 9999px;
-  background: rgba(99, 102, 241, 0.1);
-  color: #6366f1;
-  border: 1px solid rgba(99, 102, 241, 0.2);
-}
-
-.ms-topic-badge {
-  display: inline-flex;
-  align-items: center;
-  font-size: 9.5px;
-  font-weight: 600;
-  padding: 1px 6px;
-  border-radius: 9999px;
-  background: rgba(99, 102, 241, 0.08);
-  color: #6366f1;
-  border: 1px solid rgba(99, 102, 241, 0.18);
-}
-
-/* Topic Filter Pills Bar */
-.ms-topic-pills-bar {
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  padding: 4px 2px 10px 2px;
-  margin-bottom: 6px;
-  scrollbar-width: none;
-}
-.ms-topic-pills-bar::-webkit-scrollbar {
-  display: none;
-}
-.ms-topic-pill {
   flex-shrink: 0;
-  padding: 4px 10px;
-  font-size: 10.5px;
-  font-weight: 600;
-  border-radius: 9999px;
-  background: rgba(241, 245, 249, 0.85);
-  color: #64748b;
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  cursor: pointer;
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-  font-family: var(--font-ui);
-}
-.ms-topic-pill:hover {
-  background: rgba(226, 232, 240, 0.9);
-  color: #334155;
-}
-.ms-topic-pill.active {
-  background: #0f172a;
-  color: #ffffff;
-  border-color: #0f172a;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.18);
 }
 
-/* Problem Badges in Member List */
-.ms-member-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin-top: 4px;
+/* Solved State: Fresh Mint / Emerald Green */
+.ms-member-pill.pill-solved {
+  background: linear-gradient(135deg, rgba(209, 250, 229, 0.95) 0%, rgba(167, 243, 208, 0.42) 100%);
+  color: #047857;
+  border: 1px solid rgba(16, 185, 129, 0.42);
+  box-shadow: 0 1px 3px rgba(16, 185, 129, 0.12);
+  animation: ms-pill-solve-in 0.26s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
+
+.ms-member-pill.pill-solved:hover {
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+  border-color: rgba(16, 185, 129, 0.6);
+}
+
+.ms-member-pill.pill-solved .ms-pill-check-icon {
+  color: #059669;
+  flex-shrink: 0;
+}
+
+@keyframes ms-pill-solve-in {
+  0% {
+    transform: scale(0.92);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Fallback Problem Badges */
 .ms-member-problem-badge {
   display: inline-flex;
   align-items: center;
   gap: 3.5px;
-  font-size: 9.5px;
+  font-size: 9px;
   font-weight: 600;
   padding: 1.5px 6px;
-  border-radius: 6px;
-  background: rgba(241, 245, 249, 0.9);
-  color: #475569;
-  border: 1px solid rgba(203, 213, 225, 0.7);
-  max-width: 170px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, rgba(254, 243, 199, 0.95) 0%, rgba(253, 230, 138, 0.45) 100%);
+  color: #b45309;
+  border: 1px solid rgba(245, 158, 11, 0.38);
+  max-width: 100%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .ms-member-problem-badge .ms-prob-icon {
-  font-size: 9px;
+  font-size: 8.5px;
 }
-.ms-member-problem-badge.diff-easy {
-  background: rgba(16, 185, 129, 0.08);
-  color: #059669;
-  border-color: rgba(16, 185, 129, 0.25);
-}
-.ms-member-problem-badge.diff-medium {
-  background: rgba(245, 158, 11, 0.08);
-  color: #d97706;
-  border-color: rgba(245, 158, 11, 0.25);
-}
-.ms-member-problem-badge.diff-hard {
-  background: rgba(239, 68, 68, 0.08);
-  color: #dc2626;
-  border-color: rgba(239, 68, 68, 0.25);
-}
-
 .ms-member-solve-badge {
   display: inline-flex;
   align-items: center;
-  font-size: 9.5px;
+  font-size: 9px;
   font-weight: 700;
   padding: 1.5px 6px;
-  border-radius: 6px;
-  background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(245, 158, 11, 0.25));
-  color: #b45309;
-  border: 1px solid rgba(245, 158, 11, 0.35);
-  animation: ms-solve-pulse 1.8s ease-in-out infinite;
-}
-@keyframes ms-solve-pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.85; transform: scale(1.02); }
+  border-radius: 9999px;
+  background: linear-gradient(135deg, rgba(209, 250, 229, 0.95) 0%, rgba(167, 243, 208, 0.42) 100%);
+  color: #047857;
+  border: 1px solid rgba(16, 185, 129, 0.42);
 }
 
 /* Inline Leave Confirmation Dialog */

@@ -58,6 +58,7 @@
     solvedCount: 0,
     members: [],
     globalLeaders: [],
+    leaderboardLoading: false,
     settingsMenuOpen: false,
     memberPollInterval: null
   };
@@ -124,33 +125,74 @@
     return Boolean(room.isHost || (state.nickname && room.creator === state.nickname));
   }
 
-  // Render DSA Problem & Solved badges for peer presence
+  // Render unified DSA problem status pill (Solving: Yellow | Solved: Green | Next question: Yellow)
   function renderMemberBadges(m, isYou) {
     const prob = isYou ? (state.currentProblem || m.currentProblem) : m.currentProblem;
     const solve = isYou ? (state.recentSolve || m.recentSolve) : m.recentSolve;
-    const badges = [];
 
-    if (prob && prob.title) {
-      const diff = (prob.difficulty || 'medium').toLowerCase();
-      const numStr = prob.number ? `#${prob.number} ` : '';
-      badges.push(`
-        <span class="ms-member-problem-badge diff-${diff}" title="Solving: ${escapeHtml(numStr + prob.title)}">
-          <span class="ms-prob-icon">🎯</span>
-          <span>${escapeHtml(numStr + prob.title)}</span>
-        </span>
-      `);
+    if (!prob && !solve) return '';
+
+    const probSlug = prob ? String(prob.slug || (prob.title || '')).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') : '';
+    const solveSlug = solve ? String(solve.slug || (solve.title || '')).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') : '';
+    const probNum = prob ? String(prob.number || '').trim() : '';
+    const solveNum = solve ? String(solve.number || '').trim() : '';
+
+    const solveTime = solve ? Number(solve.timestamp || 0) : 0;
+    const isFreshSolve = solve && (Date.now() - solveTime < 30 * 60 * 1000);
+
+    const isSameProblem = Boolean(
+      (probSlug && solveSlug && probSlug === solveSlug) ||
+      (probNum && solveNum && probNum === solveNum)
+    );
+
+    let isSolved = false;
+    let displayNum = '';
+    let displayTitle = '';
+
+    if (isFreshSolve && isSameProblem) {
+      // Solved this exact problem and hasn't navigated away to a different problem
+      isSolved = true;
+      displayNum = probNum || solveNum;
+      displayTitle = (prob && prob.title) || (solve && solve.title) || 'Problem';
+    } else if (prob && (prob.title || prob.slug)) {
+      // Actively on a problem (unsolved, or navigated to next question!)
+      isSolved = false;
+      displayNum = probNum;
+      displayTitle = prob.title || prob.slug;
+    } else if (isFreshSolve && solve && solve.title) {
+      // Solved recently and not currently on any problem page
+      isSolved = true;
+      displayNum = solveNum;
+      displayTitle = solve.title;
+    } else {
+      return '';
     }
 
-    if (solve && solve.title && (Date.now() - Number(solve.timestamp || 0) < 10 * 60 * 1000)) {
-      badges.push(`
-        <span class="ms-member-solve-badge" title="Solved ${escapeHtml(solve.title)}!">
-          <span>🎉 Solved ${escapeHtml(solve.title)}</span>
-        </span>
-      `);
+    const numPrefix = displayNum ? `#${displayNum} ` : '';
+    const fullLabel = `${numPrefix}${displayTitle}`;
+    const statusText = isSolved ? `Solved: ${fullLabel}` : `Solving: ${fullLabel}`;
+
+    if (isSolved) {
+      return `
+        <div class="ms-member-badges">
+          <span class="ms-member-pill pill-solved" title="${escapeHtml(statusText)}">
+            <svg class="ms-pill-check-icon" viewBox="0 0 24 24" width="9" height="9" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            <span class="ms-pill-text">${escapeHtml(fullLabel)}</span>
+          </span>
+        </div>
+      `;
     }
 
-    if (!badges.length) return '';
-    return `<div class="ms-member-badges">${badges.join('')}</div>`;
+    return `
+      <div class="ms-member-badges">
+        <span class="ms-member-pill pill-solving" title="${escapeHtml(statusText)}">
+          <span class="ms-pill-target-icon">🎯</span>
+          <span class="ms-pill-text">${escapeHtml(fullLabel)}</span>
+        </span>
+      </div>
+    `;
   }
 
   // Calculate real consecutive days streak and total solved clears from LeetCode data (lcStats)
@@ -425,7 +467,7 @@
   // ===========================================================================
   function renderCreateView() {
     return `
-      <div id="msViewCreate" class="ms-view">
+      <div id="msViewCreate" class="ms-view ms-view-create">
         <div class="ms-view-header">
           <button class="ms-back-btn ms-btn-back-lobby" type="button" aria-label="Back to Lobby">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -436,9 +478,25 @@
           <h2 class="ms-view-title">Create a Focus Room</h2>
         </div>
 
-        <div class="ms-form-card">
+        <div class="ms-form-card ms-create-room-card">
+          <div class="ms-card-section-head">
+            <div class="ms-section-badge-icon">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="ms-card-section-title">New Study Session</h3>
+              <p class="ms-card-section-sub">Configure your focus goals and invite peers to solve together.</p>
+            </div>
+          </div>
+
           <div class="ms-form-group">
-            <label class="ms-form-label" for="msRoomNameInput">Room Name</label>
+            <label class="ms-form-label" for="msRoomNameInput">
+              <span>Room Name</span>
+              <span class="ms-hint">Visible to members</span>
+            </label>
             <input
               id="msRoomNameInput"
               class="ms-form-input"
@@ -450,7 +508,10 @@
           </div>
 
           <div class="ms-form-group">
-            <label class="ms-form-label" for="msRoomGoalSelect">Goal (Daily)</label>
+            <label class="ms-form-label" for="msRoomGoalSelect">
+              <span>Goal (Daily)</span>
+              <span class="ms-hint">Target per member</span>
+            </label>
             <div class="ms-select-container">
               <span class="ms-select-lead-icon">🎯</span>
               <select id="msRoomGoalSelect">
@@ -469,7 +530,10 @@
           </div>
 
           <div class="ms-form-group">
-            <label class="ms-form-label">Room Type</label>
+            <label class="ms-form-label">
+              <span>Room Type</span>
+              <span class="ms-hint">Access control</span>
+            </label>
             <div class="ms-room-types" role="radiogroup" aria-label="Room Type">
               <button
                 type="button"
@@ -479,14 +543,14 @@
                 aria-checked="${state.selectedRoomType === 'private'}"
               >
                 <div class="type-icon">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                     <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                   </svg>
                 </div>
                 <div class="ms-room-type-info">
                   <span class="ms-room-type-title">Private</span>
-                  <span class="ms-room-type-desc">Invite only</span>
+                  <span class="ms-room-type-desc">Invite code only</span>
                 </div>
               </button>
 
@@ -498,24 +562,28 @@
                 aria-checked="${state.selectedRoomType === 'open'}"
               >
                 <div class="type-icon">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="10" />
                     <line x1="2" y1="12" x2="22" y2="12" />
                     <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
                   </svg>
                 </div>
                 <div class="ms-room-type-info">
-                  <span class="ms-room-type-title">Open</span>
-                  <span class="ms-room-type-desc">Anyone with code</span>
+                  <span class="ms-room-type-title">Public</span>
+                  <span class="ms-room-type-desc">Open to all</span>
                 </div>
               </button>
             </div>
           </div>
 
           <div class="ms-form-group">
-            <label class="ms-form-label" for="msRoomTopicSelect">DSA Focus Topic</label>
-            <div class="ms-select-wrap">
-              <select id="msRoomTopicSelect" class="ms-form-select">
+            <label class="ms-form-label" for="msRoomTopicSelect">
+              <span>DSA Focus Topic</span>
+              <span class="ms-hint">Practice theme</span>
+            </label>
+            <div class="ms-select-container">
+              <span class="ms-select-lead-icon">📚</span>
+              <select id="msRoomTopicSelect">
                 <option value="General DSA" selected>General DSA / Mixed Practice</option>
                 <option value="Blind 75 / Grind 75">Blind 75 / Grind 75</option>
                 <option value="Dynamic Programming">Dynamic Programming (DP)</option>
@@ -532,7 +600,10 @@
           </div>
 
           <div class="ms-form-group">
-            <label class="ms-form-label" for="msCreatorNicknameInput">Your Nickname</label>
+            <label class="ms-form-label" for="msCreatorNicknameInput">
+              <span>Your Nickname</span>
+              <span class="ms-hint">Shown in room</span>
+            </label>
             <input
               id="msCreatorNicknameInput"
               class="ms-form-input"
@@ -543,8 +614,14 @@
             />
           </div>
 
+          <div id="msCreateError" class="ms-error-text" hidden></div>
+
           <button id="msSubmitCreateBtn" class="ms-btn ms-btn-primary ms-btn-block" type="button">
-            Create Room
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            <span>Create Room</span>
           </button>
         </div>
       </div>
@@ -675,6 +752,7 @@
     const room = state.activeRoom || {};
     const memberCount = (state.members && state.members.length) || 1;
     const goalText = room.goal || '3h';
+    const shortGoal = goalText.replace(/\s*hours?/, 'h');
     const goalHours = parseInt(goalText, 10) || 3;
     const todayGoalSec = goalHours * 3600;
     const progressPct = Math.min(100, Math.round((state.todayFocusSeconds / todayGoalSec) * 100));
@@ -690,12 +768,12 @@
           <div class="ms-group-info-left">
             <img class="ms-group-thumb" src="../textures/myspace-banner.webp" alt="Room Banner" />
             <div class="ms-group-meta">
-              <h3 class="ms-group-name">${escapeHtml(room.name || 'Study Squad')}</h3>
+              <h3 class="ms-group-name" title="${escapeHtml(room.name || 'Study Squad')}">${escapeHtml(room.name || 'Study Squad')}</h3>
               <div class="ms-group-sub">
-                <span>${memberCount} members</span>
+                <span class="ms-meta-item">${memberCount} member${memberCount === 1 ? '' : 's'}</span>
                 <span class="dot">•</span>
-                <span>Daily goal: ${escapeHtml(goalText)}</span>
-                ${room.topic ? `<span class="dot">•</span><span class="ms-topic-tag">${escapeHtml(room.topic)}</span>` : ''}
+                <span class="ms-meta-item">Goal: ${escapeHtml(shortGoal)}</span>
+                ${room.topic ? `<span class="dot">•</span><span class="ms-topic-tag" title="${escapeHtml(room.topic)}">${escapeHtml(room.topic)}</span>` : ''}
               </div>
             </div>
           </div>
@@ -917,7 +995,14 @@
 
               ${state.members.length === 1 ? `
                 <div class="ms-member-invite-hint">
-                  <span>Share code <strong>${escapeHtml(room.code || '')}</strong> to study together live!</span>
+                  <span>Study squad active! Invite friends to code together live:</span>
+                  <button id="msCopyInviteHintBtn" class="ms-btn-hint-share" type="button">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                    </svg>
+                    <span>Copy Room Invite Link</span>
+                  </button>
                 </div>
               ` : ''}
             </div>
@@ -976,7 +1061,7 @@
   // Weekly Leaderboard View (Top 20 worldwide)
   function renderLeaderboardContent() {
     const leaders = (state.globalLeaders && state.globalLeaders.length) ? state.globalLeaders : [];
-    const userRankIdx = leaders.findIndex(l => l.id === state.userId);
+    const userRankIdx = leaders.findIndex(l => l.id === state.userId || (state.nickname && l.nickname === state.nickname));
     const isUserInTop20 = userRankIdx >= 0 && userRankIdx < 20;
     const currentRoomName = state.activeRoom
       ? (state.activeRoom.type === 'private' ? 'Private Squad 🔒' : (state.activeRoom.name || 'Study Squad'))
@@ -999,14 +1084,19 @@
         </div>
 
         <div class="ms-leaderboard-list">
-          ${leaders.length === 0 ? `
+          ${state.leaderboardLoading && leaders.length === 0 ? `
+            <div class="ms-lb-loading">
+              <div class="ms-lb-spinner"></div>
+              <span>Connecting to Global Arena...</span>
+            </div>
+          ` : leaders.length === 0 ? `
             <div class="ms-lb-empty">
               <span class="ms-lb-empty-icon">🏆</span>
               <span class="ms-lb-empty-title">Be the first on the board!</span>
               <p class="ms-lb-empty-sub">Focus with LeetGlow to climb this week's global ranking.</p>
             </div>
           ` : leaders.map((item) => {
-            const isYou = item.id === state.userId;
+            const isYou = item.id === state.userId || (state.nickname && item.nickname === state.nickname);
             const rankClass = item.rank === 1 ? 'ms-lb-rank-1' : item.rank === 2 ? 'ms-lb-rank-2' : item.rank === 3 ? 'ms-lb-rank-3' : '';
             const rankEmoji = item.rank === 1 ? '🥇' : item.rank === 2 ? '🥈' : item.rank === 3 ? '🥉' : `#${item.rank}`;
 
@@ -1016,7 +1106,7 @@
                   <span>${rankEmoji}</span>
                 </div>
                 <div class="ms-member-avatar-wrap ${isYou ? 'is-you' : ''}" style="width: 28px; height: 28px; font-size: 11px;">
-                  <span class="ms-avatar-text">${escapeHtml(getInitials(item.nickname || 'Coder'))}</span>
+                  <span class="ms-avatar-text">${escapeHtml(item.avatar || getInitials(item.nickname || 'Coder'))}</span>
                 </div>
                 <div class="ms-lb-user-info">
                   <span class="ms-lb-name">${escapeHtml(item.nickname)}${isYou ? ' (You)' : ''}</span>
@@ -1027,7 +1117,7 @@
             `;
           }).join('')}
 
-          ${!isUserInTop20 ? `
+          ${(!isUserInTop20 && leaders.length > 0) ? `
             <div class="ms-lb-pinned-user">
               <div class="ms-lb-item is-you">
                 <div class="ms-lb-rank-badge">
@@ -1268,72 +1358,103 @@
     const submitBtn = container.querySelector('#msSubmitCreateBtn');
     const nameInput = container.querySelector('#msRoomNameInput');
     const goalSelect = container.querySelector('#msRoomGoalSelect');
+    const topicSelect = container.querySelector('#msRoomTopicSelect');
     const nicknameInput = container.querySelector('#msCreatorNicknameInput');
+    const errorEl = container.querySelector('#msCreateError');
+
+    // Dismiss error on input and allow Enter submission
+    [nameInput, nicknameInput].forEach((inp) => {
+      if (!inp) return;
+      inp.addEventListener('input', () => {
+        if (errorEl) errorEl.hidden = true;
+      });
+      inp.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          if (submitBtn) submitBtn.click();
+        }
+      });
+    });
 
     if (submitBtn) {
       submitBtn.addEventListener('click', async () => {
         const roomName = (nameInput && nameInput.value.trim()) || 'Study Squad';
         const goal = (goalSelect && goalSelect.value) || '3 hours';
-        const topicSelect = container.querySelector('#msRoomTopicSelect');
         const topic = (topicSelect && topicSelect.value) || 'General DSA';
         const nickname = (nicknameInput && nicknameInput.value.trim()) || state.nickname;
 
         if (!nickname) {
-          if (nicknameInput) {
-            nicknameInput.focus();
-            nicknameInput.placeholder = 'Please enter your nickname';
+          if (errorEl) {
+            errorEl.textContent = 'Please enter your nickname before creating the room';
+            errorEl.hidden = false;
           }
+          if (nicknameInput) nicknameInput.focus();
           return;
         }
 
-        const roomCode = generateRoomCode();
-        const initialMembers = [
-          {
-            id: state.userId,
-            nickname: nickname,
-            status: 'Active',
-            timerFormatted: '25:00',
-            isHost: true,
-            avatar: getInitials(nickname),
-            currentProblem: state.currentProblem,
-            recentSolve: state.recentSolve,
-            joinedAt: Date.now()
-          }
-        ];
+        submitBtn.disabled = true;
+        const prevContent = submitBtn.innerHTML;
+        submitBtn.innerHTML = `<span>Creating Room...</span>`;
 
-        const room = {
-          code: roomCode,
-          name: roomName,
-          goal: goal,
-          topic: topic,
-          type: state.selectedRoomType,
-          creator: nickname,
-          creatorId: state.userId,
-          createdAt: Date.now(),
-          members: initialMembers
-        };
+        try {
+          const roomCode = generateRoomCode();
+          const timerFormatted = formatTime(state.timer.secondsLeft || DEFAULT_TIMER_SECONDS);
+          const initialMembers = [
+            {
+              id: state.userId,
+              nickname: nickname,
+              status: state.timer.status || 'Active',
+              timerFormatted: timerFormatted,
+              isHost: true,
+              avatar: getInitials(nickname),
+              currentProblem: state.currentProblem,
+              recentSolve: state.recentSolve,
+              joinedAt: Date.now()
+            }
+          ];
 
-        state.activeRoom = room;
-        state.nickname = nickname;
-        state.members = initialMembers;
+          const room = {
+            code: roomCode,
+            name: roomName,
+            goal: goal,
+            topic: topic,
+            type: state.selectedRoomType,
+            creator: nickname,
+            creatorId: state.userId,
+            createdAt: Date.now(),
+            members: initialMembers
+          };
 
-        // Persist locally
-        chrome.storage.local.set({
-          [STORAGE_KEYS.ROOM]: room,
-          [STORAGE_KEYS.NICKNAME]: nickname
-        });
+          state.activeRoom = room;
+          state.nickname = nickname;
+          state.members = initialMembers;
 
-        // Sync with Firebase in background
-        if (window.MySpaceAPI) {
-          window.MySpaceAPI.saveRoom(room);
-          window.MySpaceAPI.syncMember(roomCode, initialMembers[0], {
-            memberCount: 1,
-            isPublic: room.type === 'open'
+          // Persist locally
+          await chrome.storage.local.set({
+            [STORAGE_KEYS.ROOM]: room,
+            [STORAGE_KEYS.NICKNAME]: nickname
           });
-        }
 
-        startMemberPolling();
-        render();
+          // Sync with Firebase in background
+          if (window.MySpaceAPI) {
+            await window.MySpaceAPI.saveRoom(room);
+            await window.MySpaceAPI.syncMember(roomCode, initialMembers[0], {
+              memberCount: 1,
+              isPublic: room.type === 'open'
+            });
+          }
+
+          startMemberPolling();
+          render();
+        } catch (err) {
+          console.error('[MySpace] Failed to create room:', err);
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = prevContent;
+          if (errorEl) {
+            errorEl.textContent = 'Failed to create room. Please try again.';
+            errorEl.hidden = false;
+          }
+        }
       });
     }
   }
@@ -1701,6 +1822,30 @@
       });
     }
 
+    // 1c. Invite Hint Copy Button in members list
+    const hintCopyBtn = container.querySelector('#msCopyInviteHintBtn');
+    if (hintCopyBtn && state.activeRoom) {
+      hintCopyBtn.addEventListener('click', async () => {
+        const shareUrl = getShareableRoomUrl(state.activeRoom.code);
+        try {
+          await navigator.clipboard.writeText(shareUrl);
+        } catch (e) {
+          const ta = document.createElement('textarea');
+          ta.value = shareUrl;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+        }
+        const span = hintCopyBtn.querySelector('span');
+        if (span) span.textContent = 'Copied Link! ✓';
+        showMySpaceToast('Room invite link copied! 🔗');
+        setTimeout(() => {
+          if (span) span.textContent = 'Copy Room Invite Link';
+        }, 2000);
+      });
+    }
+
     // Change Nickname
     const changeNickBtn = container.querySelector('#msChangeNicknameBtn');
     if (changeNickBtn) {
@@ -1814,6 +1959,7 @@
         if (state.activeWorkspaceTab !== 'leaderboard') {
           state.activeWorkspaceTab = 'leaderboard';
           render();
+          fetchAndRenderLeaderboard(container);
         }
       });
     }
@@ -1822,7 +1968,44 @@
     attachLeaderboardRefresh(container);
   }
 
-  // Attach on-demand refresh for Global Leaderboard (avoids automatic polling & DB load)
+  // Fetch and smoothly render Global Leaderboard
+  async function fetchAndRenderLeaderboard(container) {
+    if (!window.MySpaceAPI || !window.MySpaceAPI.getGlobalLeaderboard) return;
+
+    if (!state.globalLeaders || state.globalLeaders.length === 0) {
+      state.leaderboardLoading = true;
+      const bodyEl = (container && container.querySelector('.ms-workspace-body')) || document.querySelector('.ms-workspace-body');
+      if (bodyEl && state.activeWorkspaceTab === 'leaderboard') {
+        bodyEl.innerHTML = renderLeaderboardContent();
+        attachLeaderboardRefresh(bodyEl);
+      }
+    }
+
+    try {
+      const freshLeaders = await window.MySpaceAPI.getGlobalLeaderboard();
+      if (Array.isArray(freshLeaders) && freshLeaders.length > 0) {
+        state.globalLeaders = freshLeaders;
+        try {
+          chrome.storage.local.set({
+            ms_leaderboard_cache: { leaders: freshLeaders, updatedAt: Date.now() }
+          });
+        } catch (e) {}
+      }
+    } catch (err) {
+      console.warn('[MySpace] Failed to fetch leaderboard:', err);
+    } finally {
+      state.leaderboardLoading = false;
+      if (state.activeWorkspaceTab === 'leaderboard') {
+        const bodyEl = (container && container.querySelector('.ms-workspace-body')) || document.querySelector('.ms-workspace-body');
+        if (bodyEl) {
+          bodyEl.innerHTML = renderLeaderboardContent();
+          attachLeaderboardRefresh(bodyEl);
+        }
+      }
+    }
+  }
+
+  // Attach on-demand refresh for Global Leaderboard
   function attachLeaderboardRefresh(container) {
     const refreshLbBtn = container.querySelector('#msRefreshLeaderboardBtn');
     if (!refreshLbBtn) return;
@@ -1835,12 +2018,14 @@
       try {
         if (window.MySpaceAPI) {
           const freshLeaders = await window.MySpaceAPI.getGlobalLeaderboard();
-          state.globalLeaders = freshLeaders;
-          try {
-            chrome.storage.local.set({
-              ms_leaderboard_cache: { leaders: freshLeaders, updatedAt: Date.now() }
-            });
-          } catch (e) {}
+          if (Array.isArray(freshLeaders) && freshLeaders.length > 0) {
+            state.globalLeaders = freshLeaders;
+            try {
+              chrome.storage.local.set({
+                ms_leaderboard_cache: { leaders: freshLeaders, updatedAt: Date.now() }
+              });
+            } catch (e) {}
+          }
         }
       } catch (err) {
         console.error('Failed to refresh leaderboard:', err);
@@ -1848,7 +2033,7 @@
         setTimeout(() => {
           refreshLbBtn.classList.remove('rotating');
           if (state.activeWorkspaceTab === 'leaderboard') {
-            const bodyEl = container.querySelector('.ms-workspace-body') || container;
+            const bodyEl = container.querySelector('.ms-workspace-body') || (container.classList && container.classList.contains('ms-workspace-body') ? container : document.querySelector('.ms-workspace-body'));
             if (bodyEl) {
               bodyEl.innerHTML = renderLeaderboardContent();
               attachLeaderboardRefresh(bodyEl);
@@ -2167,11 +2352,14 @@
     // 2. Group Subtitle
     const groupSub = container.querySelector('.ms-group-sub');
     if (groupSub && state.activeRoom) {
+      const memberCount = (state.members && state.members.length) || 1;
+      const rawGoal = state.activeRoom.goal || '3h';
+      const shortGoal = rawGoal.replace(/\s*hours?/, 'h');
       groupSub.innerHTML = `
-        <span>${state.members.length} members</span>
+        <span class="ms-meta-item">${memberCount} member${memberCount === 1 ? '' : 's'}</span>
         <span class="dot">•</span>
-        <span>Daily goal: ${escapeHtml(state.activeRoom.goal || '3h')}</span>
-        ${state.activeRoom.topic ? `<span class="dot">•</span><span class="ms-topic-tag">${escapeHtml(state.activeRoom.topic)}</span>` : ''}
+        <span class="ms-meta-item">Goal: ${escapeHtml(shortGoal)}</span>
+        ${state.activeRoom.topic ? `<span class="dot">•</span><span class="ms-topic-tag" title="${escapeHtml(state.activeRoom.topic)}">${escapeHtml(state.activeRoom.topic)}</span>` : ''}
       `;
     }
 
@@ -2490,10 +2678,27 @@
         adoptPomodoroState(res[STORAGE_KEYS.POMODORO]);
       }
 
-      // Load cached global leaderboard if available (on-demand refresh avoids initial DB hit)
+      // Load cached global leaderboard immediately, then prefetch fresh in background
       chrome.storage.local.get(['ms_leaderboard_cache'], (cacheRes) => {
         if (cacheRes && cacheRes.ms_leaderboard_cache && Array.isArray(cacheRes.ms_leaderboard_cache.leaders)) {
           state.globalLeaders = cacheRes.ms_leaderboard_cache.leaders;
+        }
+        if (window.MySpaceAPI && window.MySpaceAPI.getGlobalLeaderboard) {
+          window.MySpaceAPI.getGlobalLeaderboard().then((leaders) => {
+            if (Array.isArray(leaders) && leaders.length > 0) {
+              state.globalLeaders = leaders;
+              chrome.storage.local.set({
+                ms_leaderboard_cache: { leaders, updatedAt: Date.now() }
+              });
+              if (state.activeWorkspaceTab === 'leaderboard') {
+                const bodyEl = document.querySelector('.ms-workspace-body');
+                if (bodyEl) {
+                  bodyEl.innerHTML = renderLeaderboardContent();
+                  attachLeaderboardRefresh(bodyEl);
+                }
+              }
+            }
+          }).catch(() => {});
         }
       });
 
